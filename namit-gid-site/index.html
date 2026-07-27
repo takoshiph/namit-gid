@@ -333,6 +333,34 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .modal.done form{display:none}
 .modal.done .m-success{display:flex}
 
+/* ---------- mobile pass ---------- */
+@media (max-width: 720px){
+  /* hero: fit 100svh without cramming */
+  header.hero{padding:5rem 1rem 3.2rem}
+  .hero-inner{gap:.75rem}
+  .logo-stage{width:min(52vw,230px);margin:.3rem 0 0}
+  .wordmark{font-size:clamp(2.1rem,9vw,2.6rem)}
+  .hero p.lede{font-size:.92rem;max-width:30ch}
+  .scroll-cue{display:none}
+
+  /* backdrop type: wrap instead of clipping at screen edges */
+  .back-type{white-space:normal;text-align:center;width:118%;
+    font-size:clamp(2.4rem,12.5vw,4rem);line-height:.95}
+  .back-type.two{width:130%;font-size:clamp(2rem,10vw,3.2rem)}
+
+  /* badge scales down with the dishes */
+  .badge{width:62px;height:62px;right:-2%;bottom:0}
+
+  /* tighter menu rhythm, lighter shadows for scroll perf */
+  .menu-item{padding:2rem 1.2rem;gap:1.1rem}
+  .menu-item .dish-stage{width:min(70vw,300px)}
+  .menu-item h3{font-size:1.55rem}
+  .menu-item .desc{font-size:.92rem}
+  .dish-btn.natural img{filter:drop-shadow(0 10px 12px rgba(38,52,47,.26))}
+  .section-head{padding-top:3rem}
+  .story .wrap,.how{padding-top:3rem;padding-bottom:3rem}
+}
+
 /* ---------- motion safety ---------- */
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important;transition:none !important}
@@ -556,8 +584,8 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches){
   }, {passive:true});
 }
 
-/* ---------------- back-type parallax ---------------- */
-if (!matchMedia('(prefers-reduced-motion: reduce)').matches){
+/* ---------------- back-type parallax (desktop only) ---------------- */
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(min-width: 721px)').matches){
   const pEls = () => document.querySelectorAll('[data-parallax]');
   let ticking = false;
   addEventListener('scroll', () => {
@@ -662,11 +690,12 @@ document.getElementById('orderForm').addEventListener('submit', async e=>{
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || typeof THREE==='undefined') return;
   const canvas=document.getElementById('fx');
   const renderer=new THREE.WebGLRenderer({canvas, alpha:true, antialias:false});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth<721 ? 1.5 : 2));
   const scene=new THREE.Scene();
   const cam=new THREE.PerspectiveCamera(60,1,0.1,100); cam.position.z=8;
 
-  const N=140, pos=new Float32Array(N*3), spd=new Float32Array(N), ph=new Float32Array(N);
+  const MOBILE = innerWidth < 721;
+  const N=MOBILE?70:140, pos=new Float32Array(N*3), spd=new Float32Array(N), ph=new Float32Array(N);
   for(let i=0;i<N;i++){
     pos[i*3]=(Math.random()-0.5)*16;
     pos[i*3+1]=(Math.random()-0.5)*10;
@@ -685,7 +714,7 @@ document.getElementById('orderForm').addEventListener('submit', async e=>{
   const pts=new THREE.Points(geo,mat); scene.add(pts);
 
   // drifting leaves (province layer)
-  const LN=22, lpos=new Float32Array(LN*3), lspd=new Float32Array(LN), lph=new Float32Array(LN);
+  const LN=MOBILE?10:22, lpos=new Float32Array(LN*3), lspd=new Float32Array(LN), lph=new Float32Array(LN);
   for(let i=0;i<LN;i++){
     lpos[i*3]=(Math.random()-0.5)*16; lpos[i*3+1]=(Math.random()-0.5)*10; lpos[i*3+2]=(Math.random()-0.5)*5;
     lspd[i]=0.22+Math.random()*0.3; lph[i]=Math.random()*Math.PI*2;
