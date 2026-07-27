@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -i \"565s/reveal-r'}\\\\\"/reveal-r'}\" style=\\\\\"--peek:\\\\${peek}\\\\\"/\" \"C:\\\\Users\\\\elvin\\\\Claude Cowork\\\\Claude Projects\\\\namit-gid\\\\namit-gid-site\\\\index.html\")",
+      "Bash(grep -n \"peekTier\\\\|--peek:\\\\${peek}\" \"C:\\\\Users\\\\elvin\\\\Claude Cowork\\\\Claude Projects\\\\namit-gid\\\\namit-gid-site\\\\index.html\")",
+      "Bash(sed \"565 s/reveal-r'}\\\\\"/reveal-r'\\\\\" style=\\\\\"--peek:\\\\${peek}\\\\\"/\")",
+      "Bash(mv /tmp/temp.html \"C:\\\\Users\\\\elvin\\\\Claude Cowork\\\\Claude Projects\\\\namit-gid\\\\namit-gid-site\\\\index.html\")",
+      "Bash(git commit *)",
+      "Bash(bash \"/c/Users/elvin/.claude/plugins/cache/claude-plugins-official/superpowers/6.1.1/skills/subagent-driven-development/scripts/review-package\" 64aae89484bf93b744b64c714a582e4e5c1bee32 HEAD)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\elvin\\Claude Cowork\\Claude Projects\\namit-gid\\style=\"--peek:${peek}\""
+    ]
+  }
+}
