@@ -171,7 +171,10 @@ header.hero{
   font-size:.8rem;letter-spacing:.3em;text-transform:uppercase;color:var(--cream);
   background:rgba(53,40,31,.45);opacity:0;transition:opacity .3s;
 }
-.dish-btn:hover::after,.dish-btn:focus-visible::after{opacity:1}
+.dish-btn:focus-visible::after{opacity:1}
+@media (hover:hover) and (pointer:fine){
+  .dish-btn:hover::after{opacity:1}
+}
 .dish-btn:hover{transform:scale(1.03)}
 @keyframes bob{0%,100%{translate:0 0}50%{translate:0 -12px}}
 .dish-shadow{
