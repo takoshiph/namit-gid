@@ -72,6 +72,18 @@ img{-webkit-user-drag:none;user-select:none}
 .splash-bar{width:min(220px,50vw);height:2px;background:rgba(53,40,31,.15);border-radius:2px;overflow:hidden;opacity:0;animation:riseIn .5s 1.45s forwards}
 .splash-bar i{display:block;height:100%;width:0;background:var(--terracotta);animation:fill 2.1s 1.45s ease forwards}
 @keyframes fill{to{width:100%}}
+.splash-cook{display:flex;flex-direction:column;align-items:center;gap:.4rem;opacity:0;animation:riseIn .5s 1.55s forwards}
+.cook-icon{overflow:visible}
+.cook-icon .steam{fill:none;stroke:var(--sage-dark);stroke-width:2;stroke-linecap:round;opacity:0;animation:steamRise 1.8s ease-in-out infinite}
+.cook-icon .steam:nth-child(2){animation-delay:.3s}
+.cook-icon .steam:nth-child(3){animation-delay:.6s}
+@keyframes steamRise{
+  0%{opacity:0;transform:translateY(2px)}
+  35%{opacity:.7}
+  100%{opacity:0;transform:translateY(-6px)}
+}
+.cook-caption{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sage-dark);opacity:.85;transition:opacity .3s ease}
+.cook-caption.fade{opacity:0}
 .splash-skip{
   position:absolute;bottom:2rem;font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;
   color:var(--sage-dark);padding:.6rem 1.2rem;border:1px solid rgba(53,40,31,.2);border-radius:99px;
@@ -403,6 +415,16 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   <div class="splash-word">Namit <em>Gid</em></div>
   <div class="splash-sub">so delicious · filipino home cooking</div>
   <div class="splash-bar" aria-hidden="true"><i></i></div>
+  <div class="splash-cook" aria-hidden="true">
+    <svg class="cook-icon" viewBox="0 0 48 40" width="40" height="34">
+      <path class="steam" d="M14 17c-3 3-3 6 0 9"/>
+      <path class="steam" d="M24 15c-3 3-3 8 0 11"/>
+      <path class="steam" d="M34 17c-3 3-3 6 0 9"/>
+      <rect x="8" y="20" width="32" height="13" rx="5" fill="var(--terracotta)" opacity=".9"/>
+      <ellipse cx="24" cy="20" rx="16" ry="3" fill="var(--cream)"/>
+    </svg>
+    <span class="cook-caption" id="cookCaption">Preparing menu&hellip;</span>
+  </div>
   <button class="splash-skip" id="skipSplash">Skip intro</button>
 </div>
 
@@ -427,7 +449,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <img class="logo-girl" id="logoGirl" src="images/logo-girl.webp" alt="The cook behind Namit Gid" width="251" height="560">
     </div>
     <h1 class="wordmark">Namit <em>Gid</em></h1>
-    <p class="lede">"So delicious" — the only review that matters back in the province. Filipino home cooking, made the long way, from our kitchen to your table.</p>
+    <p class="lede">At my husband's family table in Romblon, everyone kept saying it — "Namit gid!" — until I picked it up too. It's stuck ever since: still the only review that matters, every time a dish turns out right.</p>
     <a class="order-btn" href="#menu">See this week's menu</a>
   </div>
   <div class="scroll-cue"><span>Scroll to eat</span><i></i></div>
@@ -613,6 +635,19 @@ const splash = document.getElementById('splash');
 const killSplash = ()=> splash.classList.add('gone');
 document.getElementById('skipSplash').addEventListener('click', killSplash);
 setTimeout(killSplash, 3800);
+
+/* ---------------- splash cooking captions ---------------- */
+const cookCaption = document.getElementById('cookCaption');
+if (cookCaption && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const captions = ['Preparing menu…','Cutting ingredients…','Simmering slowly…','Plating with love…'];
+  let ci = 0;
+  const rotateCaption = setInterval(()=>{
+    ci = (ci+1) % captions.length;
+    cookCaption.classList.add('fade');
+    setTimeout(()=>{ cookCaption.textContent = captions[ci]; cookCaption.classList.remove('fade'); }, 250);
+  }, 850);
+  setTimeout(()=>clearInterval(rotateCaption), 3800);
+}
 
 /* ---------------- logo layer parallax ---------------- */
 if (!matchMedia('(prefers-reduced-motion: reduce)').matches){
