@@ -448,6 +448,19 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   .story .wrap,.how{padding-top:3rem;padding-bottom:3rem}
 }
 
+/* ---------- menu: typewriter, hover, connecting vine ---------- */
+.menu-item{position:relative;z-index:1}
+.menu-item h3{min-height:1em}
+.menu-item h3.typing::after{content:'';display:inline-block;width:2px;height:.9em;background:var(--terracotta);
+  margin-left:3px;vertical-align:-.05em;animation:caretBlink .7s steps(1) infinite}
+@keyframes caretBlink{50%{opacity:0}}
+.dish-btn img{transition:transform .55s cubic-bezier(.2,.7,.2,1)}
+.dish-btn:hover img{transform:scale(1.045)}
+#menuVine{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:0;pointer-events:none}
+#menuVine .vine{fill:none;stroke:var(--sage-dark);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:.5}
+#menuVine .leaf-node{fill:var(--sage-dark);opacity:0;transition:opacity .5s ease}
+@media (max-width:760px){#menuVine{display:none}}
+
 /* ---------- scroll reveals (sections) ---------- */
 .js .rise{opacity:0;transform:translateY(30px);
   transition:opacity 1.15s cubic-bezier(.2,.7,.2,1), transform 1.15s cubic-bezier(.2,.7,.2,1);will-change:opacity,transform}
@@ -736,6 +749,92 @@ DISHES.forEach((d,i)=>{
   list.appendChild(sec);
 });
 
+/* ---------------- reveal engine: float-in + typewriter ---------------- */
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+list.querySelectorAll('.menu-item h3').forEach(h=>{
+  h.dataset.full = h.textContent;
+  if(!REDUCE){ h.style.minHeight = h.offsetHeight + 'px'; h.textContent=''; }
+});
+function typeText(h){
+  if(h.dataset.typed) return;
+  h.dataset.typed='1';
+  const full = h.dataset.full || h.textContent;
+  if(REDUCE){ h.textContent = full; return; }
+  h.classList.add('typing');
+  let i=0;
+  (function step(){
+    h.textContent = full.slice(0, i);
+    i++;
+    if(i<=full.length){ setTimeout(step, 40); }
+    else { h.classList.remove('typing'); }
+  })();
+}
+const io = new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting) revealItem(e.target); });
+}, {threshold:.22});
+function revealItem(el){
+  if(el.dataset.shown) return;
+  el.dataset.shown='1';
+  el.classList.add('in');
+  io.unobserve(el);
+  const h=el.querySelector('h3');
+  if(h) setTimeout(()=>typeText(h), 240);
+}
+list.querySelectorAll('.menu-item').forEach(el=>io.observe(el));
+
+/* ---------------- connecting root vine ---------------- */
+function buildVine(){
+  let svg=document.getElementById('menuVine');
+  if(innerWidth < 760){ if(svg) svg.style.display='none'; return; }
+  if(!svg){
+    svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.id='menuVine'; svg.setAttribute('aria-hidden','true');
+    list.style.position='relative';
+    list.prepend(svg);
+  }
+  svg.style.display='block';
+  const all=[...list.querySelectorAll('.menu-item')];
+  const items=all.filter(el=>!el.classList.contains('hidden'));
+  const w=list.clientWidth, h=list.clientHeight;
+  if(!items.length || !h){ svg.innerHTML=''; return; }
+  svg.setAttribute('viewBox','0 0 '+w+' '+h);
+  svg.setAttribute('preserveAspectRatio','none');
+  const cx=w/2, amp=Math.min(w*0.12, 120);
+  let d='M '+cx+',0', prevX=cx, prevY=0, leaves='';
+  items.forEach(el=>{
+    const y=el.offsetTop + el.offsetHeight/2;
+    const side=(all.indexOf(el)%2===1)?1:-1;   // even nth-child => dish on right
+    const nx=cx + side*amp, midY=(prevY+y)/2;
+    d+=' C '+prevX+','+midY+' '+nx+','+midY+' '+nx+','+y;
+    prevX=nx; prevY=y;
+    const dir=side;
+    leaves+='<path class="leaf-node" data-y="'+y+'" d="M '+nx+','+y+' q '+(16*dir)+',-11 '+(30*dir)+',0 q '+(-14*dir)+',11 '+(-30*dir)+',0 z"/>';
+  });
+  d+=' C '+prevX+','+((prevY+h)/2)+' '+cx+','+((prevY+h)/2)+' '+cx+','+h;
+  svg.innerHTML='<path class="vine" d="'+d+'"/>'+leaves;
+  const path=svg.querySelector('.vine'), L=path.getTotalLength();
+  svg.dataset.len=L;
+  path.style.strokeDasharray=L;
+  path.style.strokeDashoffset= REDUCE ? 0 : L;
+  if(REDUCE) svg.querySelectorAll('.leaf-node').forEach(n=>n.style.opacity=.85);
+  drawVine();
+}
+function drawVine(){
+  const svg=document.getElementById('menuVine');
+  if(!svg || svg.style.display==='none' || REDUCE) return;
+  const path=svg.querySelector('.vine'); if(!path) return;
+  const L=+svg.dataset.len || path.getTotalLength();
+  const rect=list.getBoundingClientRect();
+  const prog=Math.min(1, Math.max(0, ((innerHeight*0.82) - rect.top) / (rect.height||1)));
+  path.style.strokeDashoffset = L*(1-prog);
+  const drawnY=prog*list.clientHeight;
+  svg.querySelectorAll('.leaf-node').forEach(n=>{ n.style.opacity = (+n.dataset.y <= drawnY) ? '0.85' : '0'; });
+}
+let vTick=false;
+addEventListener('scroll', ()=>{ if(!vTick){ vTick=true; requestAnimationFrame(()=>{ drawVine(); vTick=false; }); } }, {passive:true});
+addEventListener('resize', ()=>buildVine(), {passive:true});
+addEventListener('load', ()=>buildVine());
+
 /* ---------------- category tabs ---------------- */
 const menuTabs = document.querySelectorAll('.menu-tabs button');
 function setMenuCat(cat){
@@ -745,9 +844,14 @@ function setMenuCat(cat){
     t.setAttribute('aria-selected', on ? 'true' : 'false');
   });
   document.querySelectorAll('.menu-item').forEach(el=>{
-    const show = el.dataset.cat===cat;
-    el.classList.toggle('hidden', !show);
-    if(show) el.classList.add('in');
+    el.classList.toggle('hidden', el.dataset.cat!==cat);
+  });
+  requestAnimationFrame(()=>{
+    list.querySelectorAll('.menu-item:not(.hidden)').forEach(el=>{
+      const r=el.getBoundingClientRect();
+      if(r.top < innerHeight*0.92 && r.bottom > 0) revealItem(el);
+    });
+    buildVine();
   });
 }
 menuTabs.forEach(t=>{
@@ -808,11 +912,7 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(min-
 const nav = document.getElementById('nav');
 addEventListener('scroll', ()=> nav.classList.toggle('scrolled', scrollY > 40), {passive:true});
 
-/* ---------------- reveals ---------------- */
-const io = new IntersectionObserver(es=>{
-  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
-},{threshold:.25});
-document.querySelectorAll('.menu-item').forEach(el=>io.observe(el));
+/* ---------------- reveals: handled by the reveal engine above ---------------- */
 
 /* ---------------- order modal ---------------- */
 const veil = document.getElementById('veil'), modal = document.getElementById('modal');
