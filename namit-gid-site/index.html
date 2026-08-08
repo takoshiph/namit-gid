@@ -154,17 +154,18 @@ header.hero{
 /* giant editorial type behind the dish */
 .back-type{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);
-  font-family:var(--ff-display);font-weight:400;line-height:.92;
-  font-size:clamp(3.6rem,15vw,8.5rem);
-  color:transparent;-webkit-text-stroke:1.5px rgba(247,240,227,.92);
-  paint-order:stroke;white-space:nowrap;
+  font-family:var(--ff-display);font-weight:400;line-height:.9;
+  font-size:clamp(2.4rem,7vw,4rem);
+  color:transparent;-webkit-text-stroke:1.2px rgba(247,240,227,.34);
+  paint-order:stroke;white-space:normal;text-align:center;
+  width:100%;max-width:100%;
   letter-spacing:.01em;pointer-events:none;user-select:none;
   z-index:0;will-change:transform;
 }
 @supports not (-webkit-text-stroke: 1px #000){
-  .back-type{color:var(--cream);opacity:.4}
+  .back-type{color:var(--cream);opacity:.16}
 }
-.back-type.two{white-space:normal;text-align:center;width:158%;font-size:clamp(2.8rem,11vw,6rem)}
+.back-type.two{font-size:clamp(2rem,5.5vw,3.2rem);width:100%}
 /* small rotating corner badge keeps the kinetic charm */
 .badge{
   position:absolute;right:-4%;bottom:2%;width:88px;height:88px;z-index:3;
