@@ -7,6 +7,18 @@
 <meta name="description" content="Namit gid — so delicious. Filipino home cooking in Toronto: palabok, baked sushi, lumpia, shawarma rice and desserts, cooked from scratch and ordered with a tap.">
 <link rel="icon" type="image/png" href="images/favicon.png">
 <meta name="theme-color" content="#9bb9af">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="canonical" href="https://namitgid.takoshi.ca/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Namit Gid">
+<meta property="og:title" content="Namit Gid — Filipino home cooking · Toronto">
+<meta property="og:description" content="Namit gid — so delicious. Filipino home cooking in Toronto: shawarma rice, lumpia, baked sushi, palabok and desserts, cooked from scratch and ordered with a tap.">
+<meta property="og:url" content="https://namitgid.takoshi.ca/">
+<meta property="og:image" content="https://namitgid.takoshi.ca/images/logo-badge.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Namit Gid — Filipino home cooking · Toronto">
+<meta name="twitter:description" content="So delicious. Filipino home cooking in Toronto, ordered with a tap.">
+<meta name="twitter:image" content="https://namitgid.takoshi.ca/images/logo-badge.webp">
 <link rel="preload" as="image" href="images/logo-badge.webp">
 <link rel="preload" as="image" href="images/logo-girl.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -234,6 +246,34 @@ header.hero{
 .menu-item .desc{opacity:.85}
 .menu-item .row{display:flex;align-items:center;gap:1.2rem;margin-top:.3rem}
 .menu-item .price{font-family:var(--ff-display);font-size:1.5rem}
+/* clickable price (replaces the old Order button) */
+.menu-item .price-btn{
+  font-family:var(--ff-display);font-size:1.5rem;color:var(--espresso);
+  display:inline-flex;align-items:center;gap:.7rem;line-height:1;min-height:44px;
+  padding:.35rem 1.15rem;border:1px solid rgba(53,40,31,.22);border-radius:99px;
+  transition:color .2s, border-color .2s, background .2s;
+}
+.menu-item .price-btn:hover{border-color:var(--terracotta);background:rgba(196,99,60,.06)}
+.menu-item .price-btn .arr{
+  font-size:1rem;width:1.9rem;height:1.9rem;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:50%;background:var(--espresso);color:var(--cream);
+  transition:background .2s, transform .2s;
+}
+.menu-item .price-btn:hover{color:var(--terracotta)}
+.menu-item .price-btn:hover .arr{background:var(--terracotta);transform:translateX(3px)}
+.menu-item:nth-child(even) .price-btn{flex-direction:row-reverse}
+.menu-item:nth-child(even) .price-btn:hover .arr{transform:translateX(-3px)}
+/* category tabs */
+.menu-tabs{
+  display:flex;justify-content:center;gap:.3rem;width:max-content;max-width:92%;
+  margin:0 auto 2.6rem;padding:.34rem;background:rgba(53,40,31,.07);border-radius:99px;
+}
+.menu-tabs button{
+  min-height:44px;padding:.55rem 1.6rem;border-radius:99px;font-size:.76rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--espresso);opacity:.72;font-weight:500;transition:opacity .25s, background .25s, color .25s, box-shadow .25s;
+}
+.menu-tabs button.active{background:var(--cream);opacity:1;color:var(--terracotta);font-weight:700;box-shadow:0 3px 10px -4px var(--shadow)}
+.menu-item.hidden{display:none}
 .order-btn{
   background:var(--espresso);color:var(--cream);padding:.75rem 1.6rem;border-radius:99px;
   font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;
@@ -346,6 +386,17 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 }
 .qty button:hover{background:var(--terracotta)}
 .qty output{font-family:var(--ff-display);font-size:1.4rem;min-width:2ch;text-align:center}
+.m-size{display:flex;gap:.6rem;flex-wrap:wrap}
+.m-size button{
+  flex:1;min-width:calc(50% - .3rem);padding:.6rem .5rem;border-radius:12px;
+  border:1px solid rgba(53,40,31,.2);background:#fff;color:var(--espresso);
+  font-family:inherit;font-size:.95rem;line-height:1.2;transition:background .2s,color .2s,border-color .2s;
+}
+.m-size button .s-price{display:block;font-family:var(--ff-display);color:var(--terracotta);font-size:1.05rem;margin-top:.15rem}
+.m-size button.active{background:var(--espresso);color:var(--cream);border-color:transparent}
+.m-size button.active .s-price{color:var(--gold)}
+.m-note{font-size:.78rem;color:var(--terracotta);opacity:.95;margin-top:.1rem}
+.field.hidden{display:none}
 .field{display:flex;flex-direction:column;gap:.35rem}
 .field label{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;opacity:.7}
 .field input,.field textarea{
@@ -396,15 +447,52 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   .story .wrap,.how{padding-top:3rem;padding-bottom:3rem}
 }
 
+/* ---------- scroll reveals (sections) ---------- */
+.js .rise{opacity:0;transform:translateY(30px);
+  transition:opacity 1.15s cubic-bezier(.2,.7,.2,1), transform 1.15s cubic-bezier(.2,.7,.2,1);will-change:opacity,transform}
+.js .rise.in-view{opacity:1;transform:none}
+.js .rise.d1{transition-delay:.10s}
+.js .rise.d2{transition-delay:.20s}
+.js .rise.d3{transition-delay:.30s}
+.js .rise.d4{transition-delay:.40s}
+
+/* ---------- earthy: growing roots (wide screens) ---------- */
+.roots{position:fixed;top:0;height:100vh;width:130px;z-index:-1;pointer-events:none;opacity:.45;display:none;
+  left:calc((100vw - 1120px)/2 - 120px)}
+.roots path{fill:none;stroke:var(--sage-dark);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@media(min-width:1180px){.roots{display:block}}
+
+/* ---------- earthy: drifting leaves ---------- */
+.leaf{position:absolute;width:40px;height:40px;opacity:.15;pointer-events:none;z-index:-1;
+  transform-origin:top center;animation:leafSway 9s ease-in-out infinite}
+.leaf svg{width:100%;height:100%;display:block}
+.leaf svg path{fill:var(--sage-dark)}
+@keyframes leafSway{0%,100%{transform:rotate(-9deg) translateY(0)}50%{transform:rotate(10deg) translateY(7px)}}
+
+/* ---------- earthy: soil deepening on scroll ---------- */
+.soil{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg, rgba(53,40,31,0) 40%, rgba(53,40,31,.5) 100%)}
+
 /* ---------- motion safety ---------- */
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important;transition:none !important}
   .reveal-l,.reveal-r{opacity:1;transform:none}
+  .js .rise{opacity:1;transform:none}
+  .leaf,.soil{display:none}
   #fx{display:none}
 }
 </style>
 </head>
 <body>
+
+<!-- EARTHY DECOR -->
+<div class="soil" id="soil" aria-hidden="true"></div>
+<svg class="roots" id="roots" viewBox="0 0 140 1000" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
+  <path d="M70,0 C60,84 90,150 76,242 C64,322 40,384 60,472 C76,548 98,620 80,720 C66,802 54,862 68,1000"/>
+  <path d="M76,242 C106,260 126,300 132,352"/>
+  <path d="M60,472 C32,488 16,522 11,568"/>
+  <path d="M80,720 C110,738 124,772 128,814"/>
+</svg>
 
 <!-- SPLASH -->
 <div id="splash" role="dialog" aria-label="Namit Gid intro">
@@ -460,8 +548,13 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 <main>
   <div class="section-head" id="menu">
     <span class="eyebrow"><span class="rom">Busug</span>&#8202;— full &amp; satisfied</span>
-    <h2>This week's kitchen</h2>
+    <h2>The menu</h2>
     <p>Everything is made to order — please place your order in advance. Pickup is at 180 Fairview Mall Dr.</p>
+  </div>
+
+  <div class="menu-tabs" role="tablist" aria-label="Menu categories">
+    <button type="button" class="active" data-cat="main" role="tab" aria-selected="true">Mains</button>
+    <button type="button" data-cat="dessert" role="tab" aria-selected="false">Desserts</button>
   </div>
 
   <!-- items injected by JS -->
@@ -491,7 +584,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <h2 id="howH">Order today, eat this weekend</h2>
   </div>
   <div class="steps">
-    <div class="step"><span class="dot">1</span><span class="k">Tap a dish</span><p>Choose from this week's menu and send your order — it takes under a minute.</p></div>
+    <div class="step"><span class="dot">1</span><span class="k">Tap a dish</span><p>Choose from the menu and send your order — it takes under a minute.</p></div>
     <div class="step"><span class="dot">2</span><span class="k">We cook fresh</span><p>Orders close Thursday night. Male cooks every batch Saturday morning, from scratch.</p></div>
     <div class="step"><span class="dot">3</span><span class="k">Pick up warm</span><p>Collect Saturday afternoon in Toronto — or ask us about delivery nearby.</p></div>
   </div>
@@ -505,7 +598,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     </div>
     <div class="cols">
       <div><b>Kitchen</b><a href="#menu">Menu</a><br><a href="#story">Our story</a></div>
-      <div><b>Say hi</b><a href="#">Instagram</a><br><a href="#">TikTok</a></div>
+      <div><b>Say hi</b><a href="https://takoshi.ca" target="_blank" rel="noopener">Takoshi</a><br><a href="#menu">Order now</a></div>
       <div><b>Orders</b><a href="#menu">Order now</a><br><span style="opacity:.75">Toronto, ON</span></div>
     </div>
     <div class="tiny"><span>© 2026 Namit Gid · <span class="rom" style="color:var(--gold)">kalīpay</span> in every batch</span><span>namit gid — so delicious</span></div>
@@ -524,6 +617,10 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <button class="m-close" id="mClose" aria-label="Close order form">&#10005;</button>
     </div>
     <form id="orderForm">
+      <div class="field hidden" id="sizeField" style="margin-bottom:1rem">
+        <label id="sizeLabel">Size</label>
+        <div class="m-size" id="mSize"></div>
+      </div>
       <div class="field" style="margin-bottom:1rem">
         <label>Quantity</label>
         <div class="qty">
@@ -531,6 +628,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
           <output id="qOut">1</output>
           <button type="button" id="qPlus" aria-label="Increase quantity">+</button>
         </div>
+        <span class="m-note hidden" id="mNote"></span>
       </div>
       <div class="field" style="margin-bottom:1rem">
         <label for="fName">Your name</label>
@@ -579,21 +677,29 @@ const IMGS = {
   banana:'images/banana.webp'
 };
 const DISHES = [
-  {name:'Palabok Tray', tag:'The signature · feeds 8\u201312', price:65, img:'palabok', shape:'natural',
-   desc:'A full family tray of rice noodles under rich shrimp gravy \u2014 loaded with prawns, boiled egg, crushed chicharron, and a whole lot of home.'},
-  {name:'Baked Sushi Tray', tag:'The crowd favourite', price:40, img:'sushi', shape:'natural',
-   desc:'California-roll flavours baked as a bubbling tray — sushi rice, kani, cream cheese, torched mayo, nori and scallions. Scoop, wrap, repeat.'},
-  {name:'Shawarma Rice Tray', tag:'Family size', price:55, img:'shawarma', shape:'natural',
+  {name:'Shawarma Rice', cat:'main', tag:'Best seller', img:'shawarma', shape:'natural',
+   variants:[{label:'Small', price:50},{label:'Medium', price:65}],
    desc:'Spiced ground beef shawarma over turmeric rice, ringed with cucumber and cherry tomatoes, finished with a heavy drizzle of garlic sauce.'},
-  {name:'Lumpiang Shanghai Tray', tag:'About 20 pieces', price:30, img:'lumpia', shape:'natural',
+  {name:'Lumpiang Shanghai', cat:'main', tag:'Hand-rolled crunch', img:'lumpia', shape:'natural',
+   variants:[{label:'30 pcs', price:35},{label:'50 pcs', price:45}],
    desc:'Hand-rolled pork spring rolls fried to a loud crunch, packed shoulder to shoulder. Sweet-chili dip included. They never survive the drive home.'},
-  {name:'Tiramisu', tag:'Made to order', price:35, img:'tiramisu', shape:'natural',
+  {name:'Baked Sushi', cat:'main', tag:'The crowd favourite', img:'sushi', shape:'natural',
+   variants:[{label:'Small', price:45},{label:'Large', price:60}],
+   desc:'California-roll flavours baked as a bubbling tray \u2014 sushi rice, kani, cream cheese, torched mayo, nori and scallions. Scoop, wrap, repeat.'},
+  {name:'Palabok', cat:'main', tag:'The signature', img:'palabok', shape:'natural',
+   variants:[{label:'Small', price:50},{label:'Medium', price:65}],
+   desc:'Rice noodles under rich shrimp gravy \u2014 loaded with prawns, boiled egg, crushed chicharron, and a whole lot of home.'},
+  {name:'Tiramisu', cat:'dessert', tag:'Made to order', price:25, img:'tiramisu', shape:'natural',
    desc:'Espresso-soaked layers under a thick, even blanket of cocoa, set overnight so every slice holds its shape. Coffee-shop quality, home-kitchen heart.'},
-  {name:'Basque Burnt Cheesecake', tag:'Deliberately burnt', price:40, img:'cheesecake', shape:'natural',
-   desc:'Deeply caramelized top, custardy middle, no crust needed — baked hot and fast in parchment the San Sebastián way.'},
-  {name:'Banana Bread Loaf', tag:'Chocolate chip', price:10, img:'banana', shape:'natural',
+  {name:'Cheesecake', cat:'dessert', tag:'Three flavours', axis:'Flavour', minQty:4, img:'cheesecake', shape:'natural',
+   variants:[{label:'Regular', price:15},{label:'Matcha', price:15},{label:'Pistachio', price:15}],
+   desc:'Creamy, slow-set cheesecake in three flavours \u2014 Regular, Matcha, and Pistachio. $15 each, minimum 4 per order.'},
+  {name:'Banana Bread Loaf', cat:'dessert', tag:'Chocolate chip', price:10, img:'banana', shape:'natural',
    desc:'Small-batch banana bread studded with chocolate chips, baked in individual foil loaves. Grab one for the road or three for the week.'}
 ];
+/* helpers for single/variant pricing */
+function dishPrices(d){ return d.variants ? d.variants.map(function(v){return v.price;}) : [d.price]; }
+function dishPriceLabel(d){ var p=dishPrices(d),lo=Math.min.apply(null,p),hi=Math.max.apply(null,p); return lo===hi?('$'+lo):('$'+lo+'\u2013$'+hi); }
 
 /* ---------------- build menu ---------------- */
 const list = document.getElementById('menuList');
@@ -605,31 +711,50 @@ function peekTier(desc){
 DISHES.forEach((d,i)=>{
   const sec = document.createElement('section');
   sec.className = 'menu-item';
+  sec.dataset.cat = d.cat;
   const fromL = i % 2 === 0;
   const peek = peekTier(d.desc);
+  const pl = dishPriceLabel(d);
   sec.innerHTML = `
     <div class="dish-stage ${fromL?'reveal-l':'reveal-r'}" style="--peek:${peek}">
       <span class="back-type ${d.name.split(' ').length>2?'two':''}" aria-hidden="true" data-parallax>${d.name}</span>
-      <svg class="badge" viewBox="0 0 100 100" aria-hidden="true">
-        <circle cx="50" cy="50" r="46"/>
-        <circle class="dotmark" cx="50" cy="50" r="5"/>
-        <text><textPath href="#badgePath">tap to order &#183; fresh batch &#183;&#160;</textPath></text>
-      </svg>
-      <button class="dish-btn ${d.shape==='natural'?'natural':''}" data-dish="${d.name}" data-price="${d.price}" data-img="${d.img||''}" aria-label="Order ${d.name}, ${d.price} dollars">
+      <button class="dish-btn ${d.shape==='natural'?'natural':''}" data-idx="${i}" data-img="${d.img||''}" aria-label="Order ${d.name}">
         <img src="${IMGS[d.img]}" alt="${d.name}" loading="lazy" width="640" height="640">
       </button>
       <span class="dish-shadow" aria-hidden="true"></span>
     </div>
     <div class="info ${fromL?'reveal-r':'reveal-l'}">
-      <span class="num">No. ${String(i+2).padStart(2,'0')} on this week's menu</span>
+      <span class="num">${d.cat==='dessert'?'Dessert':'Main dish'}</span>
       <h3>${d.name}</h3>
       <span class="tag">${d.tag}</span>
       <p class="desc">${d.desc}</p>
-      <div class="row"><span class="price">$${d.price}</span>
-        <button class="order-btn" data-dish="${d.name}" data-price="${d.price}" data-img="${d.img||''}">Order</button></div>
+      <div class="row">
+        <button class="price-btn" data-idx="${i}" data-img="${d.img||''}" aria-label="Order ${d.name}, ${pl}">${pl}<span class="arr" aria-hidden="true">&#8594;</span></button>
+      </div>
     </div>`;
   list.appendChild(sec);
 });
+
+/* ---------------- category tabs ---------------- */
+const menuTabs = document.querySelectorAll('.menu-tabs button');
+function setMenuCat(cat){
+  menuTabs.forEach(t=>{
+    const on = t.dataset.cat===cat;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  document.querySelectorAll('.menu-item').forEach(el=>{
+    const show = el.dataset.cat===cat;
+    el.classList.toggle('hidden', !show);
+    if(show) el.classList.add('in');
+  });
+}
+menuTabs.forEach(t=>{
+  const n=DISHES.filter(d=>d.cat===t.dataset.cat).length;
+  t.textContent=(t.dataset.cat==='dessert'?'Desserts':'Mains')+' \u00b7 '+n;
+  t.addEventListener('click', ()=>setMenuCat(t.dataset.cat));
+});
+setMenuCat('main');
 
 /* ---------------- splash ---------------- */
 const splash = document.getElementById('splash');
@@ -693,14 +818,49 @@ const veil = document.getElementById('veil'), modal = document.getElementById('m
 const mTitle=document.getElementById('mTitle'), mPrice=document.getElementById('mPrice'),
       mImg=document.getElementById('mImg'), mTotal=document.getElementById('mTotal'),
       qOut=document.getElementById('qOut');
-let qty=1, unit=16, lastFocus=null;
+let curIdx=null, curVar=0, qty=1, unit=0, minQty=1, lastFocus=null;
 function money(n){return '$'+n}
-function openModal(name, price, imgSrc){
+function currentDishName(){
+  const d=DISHES[curIdx];
+  return d.variants ? (d.name+' ('+d.variants[curVar].label+')') : d.name;
+}
+function updateTotals(){
+  mPrice.textContent=money(unit);
+  qOut.textContent=qty;
+  mTotal.textContent=money(unit*qty);
+}
+function selectVariant(i){
+  const d=DISHES[curIdx];
+  curVar=i; unit=d.variants[i].price;
+  document.querySelectorAll('#mSize button').forEach((b,bi)=>b.classList.toggle('active', bi===i));
+  updateTotals();
+}
+function openModal(idx, imgSrc){
   lastFocus=document.activeElement;
-  qty=1; unit=price;
-  mTitle.textContent=name; mPrice.textContent=money(price);
-  mImg.src=imgSrc; mImg.alt=name;
-  qOut.textContent=qty; mTotal.textContent=money(unit*qty);
+  curIdx=idx; curVar=0;
+  const d=DISHES[idx];
+  const sizeField=document.getElementById('sizeField'), mSize=document.getElementById('mSize'), note=document.getElementById('mNote');
+  mTitle.textContent=d.name;
+  mImg.src=imgSrc; mImg.alt=d.name;
+  minQty=d.minQty||1; qty=minQty;
+  if(d.variants){
+    document.getElementById('sizeLabel').textContent = d.axis || 'Size';
+    mSize.innerHTML='';
+    d.variants.forEach((v,vi)=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.innerHTML=v.label+'<span class="s-price">'+money(v.price)+'</span>';
+      b.addEventListener('click', ()=>selectVariant(vi));
+      mSize.appendChild(b);
+    });
+    sizeField.classList.remove('hidden');
+    selectVariant(0);
+  } else {
+    sizeField.classList.add('hidden'); mSize.innerHTML='';
+    unit=d.price; updateTotals();
+  }
+  if(minQty>1){ note.textContent='Minimum '+minQty+' per order'; note.classList.remove('hidden'); }
+  else { note.textContent=''; note.classList.add('hidden'); }
   modal.classList.remove('done');
   document.getElementById('orderForm').reset();
   veil.classList.add('open'); veil.setAttribute('aria-hidden','false');
@@ -713,19 +873,20 @@ function closeModal(){
   if(lastFocus) lastFocus.focus();
 }
 document.addEventListener('click', e=>{
-  const b=e.target.closest('[data-dish]');
+  const b=e.target.closest('[data-idx]');
   if(b){
-    const src = IMGS[b.dataset.img] || IMGS.palabok;
+    const idx=+b.dataset.idx;
+    const src = IMGS[DISHES[idx].img] || IMGS.palabok;
     mImg.classList.add('natural');
-    openModal(b.dataset.dish, +b.dataset.price, src);
+    openModal(idx, src);
   }
 });
 document.getElementById('mClose').addEventListener('click', closeModal);
 document.getElementById('mDone').addEventListener('click', closeModal);
 veil.addEventListener('click', e=>{ if(e.target===veil) closeModal(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && veil.classList.contains('open')) closeModal(); });
-document.getElementById('qMinus').addEventListener('click', ()=>{ qty=Math.max(1,qty-1); qOut.textContent=qty; mTotal.textContent=money(unit*qty); });
-document.getElementById('qPlus').addEventListener('click', ()=>{ qty=Math.min(20,qty+1); qOut.textContent=qty; mTotal.textContent=money(unit*qty); });
+document.getElementById('qMinus').addEventListener('click', ()=>{ qty=Math.max(minQty,qty-1); updateTotals(); });
+document.getElementById('qPlus').addEventListener('click', ()=>{ qty=Math.min(20,qty+1); updateTotals(); });
 /* ---- live order submission (Supabase edge function) ---- */
 const SB_URL = 'https://ktgclbvdkhvfvebajtao.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Z2NsYnZka2h2ZnZlYmFqdGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NDE3MjAsImV4cCI6MjA5OTIxNzcyMH0.m63CuAy7NjuyKXh_yXFy749QGEFxzoDvrORSdTHPbog';
@@ -743,7 +904,7 @@ document.getElementById('orderForm').addEventListener('submit', async e=>{
         'apikey': SB_KEY
       },
       body: JSON.stringify({ order:{
-        dish: mTitle.textContent,
+        dish: currentDishName(),
         qty,
         name: document.getElementById('fName').value,
         contact: document.getElementById('fPhone').value,
@@ -755,11 +916,64 @@ document.getElementById('orderForm').addEventListener('submit', async e=>{
     modal.classList.add('done');
     document.getElementById('mDone').focus();
   }catch(err){
-    alert("Couldn't send your order just now \u2014 please try again, or message us on Instagram.");
+    alert("Couldn't send your order just now \u2014 please try again in a moment, or reach us at takoshi.ca.");
   }finally{
     btn.textContent = prev; btn.disabled = false;
   }
 });
+
+/* ---------------- staged scroll reveals ---------------- */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.querySelectorAll('main > .section-head, .menu-tabs, .story .wrap > .eyebrow, .story .wrap > h2, .story .wrap > p, .how .section-head').forEach(el=>el.classList.add('rise'));
+  const stagger = nodes => nodes.forEach((el,i)=>el.classList.add('rise','d'+Math.min(i+1,4)));
+  stagger([...document.querySelectorAll('.word-card')]);
+  stagger([...document.querySelectorAll('.step')]);
+  stagger([...document.querySelectorAll('footer .cols > div')]);
+  const io2 = new IntersectionObserver(es=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in-view'); io2.unobserve(e.target); } });
+  }, {threshold:.16, rootMargin:'0px 0px -6% 0px'});
+  document.querySelectorAll('.rise').forEach(el=>io2.observe(el));
+})();
+
+/* ---------------- earthy: growing roots + soil deepening on scroll ---------------- */
+(function(){
+  const roots=document.getElementById('roots'), soil=document.getElementById('soil');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const paths= roots ? [...roots.querySelectorAll('path')] : [];
+  paths.forEach(p=>{ const L=p.getTotalLength(); p.style.strokeDasharray=L; p.style.strokeDashoffset= reduce?0:L; });
+  if(reduce) return;
+  let tick=false;
+  function draw(){
+    const max=(document.documentElement.scrollHeight - innerHeight) || 1;
+    const prog=Math.min(1, Math.max(0, scrollY / max));
+    paths.forEach(p=>{ const L=p.getTotalLength(); p.style.strokeDashoffset = L*(1-prog); });
+    if(soil) soil.style.opacity = (prog*0.7).toFixed(3);
+    tick=false;
+  }
+  addEventListener('scroll', ()=>{ if(!tick){ tick=true; requestAnimationFrame(draw); } }, {passive:true});
+  addEventListener('resize', draw, {passive:true});
+  draw();
+})();
+
+/* ---------------- earthy: drifting leaves ---------------- */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || innerWidth < 820) return;
+  const LEAF='<svg viewBox="0 0 24 24"><path d="M12 2C6 6 4 14 12 22C20 14 18 6 12 2Z"/></svg>';
+  const spots=[
+    {sel:'main',   css:{top:'14%', left:'5%'}},
+    {sel:'main',   css:{top:'64%', right:'6%'}},
+    {sel:'.story', css:{top:'18%', right:'7%'}},
+    {sel:'.how',   css:{top:'26%', left:'6%'}}
+  ];
+  spots.forEach((s,i)=>{
+    const host=document.querySelector(s.sel); if(!host) return;
+    if(getComputedStyle(host).position==='static') host.style.position='relative';
+    const el=document.createElement('span'); el.className='leaf'; el.innerHTML=LEAF;
+    Object.assign(el.style, s.css); el.style.animationDelay=(i*1.4)+'s';
+    host.appendChild(el);
+  });
+})();
 
 /* ---------------- three.js ambient particles ---------------- */
 (function(){
