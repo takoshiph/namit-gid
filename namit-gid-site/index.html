@@ -216,6 +216,14 @@ header.hero{
 .hero h1{font-family:var(--ff-display);font-size:clamp(2.1rem,6vw,3.4rem);font-weight:400;letter-spacing:.01em}
 .hero .price{font-family:var(--ff-display);color:var(--terracotta);font-size:1.35rem}
 .hero p.lede{max-width:34ch;font-size:1rem;opacity:.85}
+.hero p.lede + p.lede{margin-top:.7rem}
+.wordmark{cursor:pointer}
+.hero-hint{background:none;border:0;font-family:var(--ff-body);font-size:.9rem;color:var(--sage-dark);cursor:pointer;opacity:.85;letter-spacing:.02em;display:inline-flex;align-items:center;gap:.35rem;padding:.2rem}
+.hero-hint:hover{opacity:1;color:var(--terracotta)}
+.hero-hint span{transition:transform .35s ease}
+.hero.story-open .hero-hint{display:none}
+.hero-story{max-height:0;overflow:hidden;opacity:0;transition:opacity .9s ease,max-height .9s ease}
+.hero.story-open .hero-story{max-height:600px;opacity:1}
 .scroll-cue{
   position:absolute;bottom:max(1.6rem, env(safe-area-inset-bottom));left:50%;translate:-50% 0;z-index:2;
   font-size:.68rem;letter-spacing:.35em;text-transform:uppercase;opacity:.6;
@@ -371,7 +379,9 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   border-radius:26px 26px 0 0;padding:1.8rem 1.6rem 2rem;
   transform:translateY(40px);transition:transform .4s cubic-bezier(.2,.7,.2,1);
   display:flex;flex-direction:column;gap:1.1rem;
+  scrollbar-width:none;-ms-overflow-style:none;   /* hide scrollbar (still scrollable) */
 }
+.modal::-webkit-scrollbar{display:none}
 @media(min-width:640px){.modal{border-radius:26px}}
 .modal-veil.open .modal{transform:none}
 .modal .m-head{display:flex;gap:1rem;align-items:center}
@@ -615,9 +625,12 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <img class="logo-badge" id="logoBadge" src="images/logo-badge.webp" alt="" width="520" height="518">
       <img class="logo-girl" id="logoGirl" src="images/logo-girl.webp" alt="The cook behind Namit Gid" width="251" height="560">
     </div>
-    <h1 class="wordmark">Namit <em>Gid</em></h1>
-    <p class="lede">At my husband's family table in Romblon, Philippines, everyone kept saying it: "Namit gid!" — until I picked it up too. It's stuck ever since: still the only review that matters, every time a dish turns out right.</p>
-    <p class="lede">That's how I got this name — and hopefully, you'll say it too once you've tried my cooking.</p>
+    <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story">Namit <em>Gid</em></h1>
+    <button type="button" class="hero-hint" id="heroHint">the story behind the name <span aria-hidden="true">&#8964;</span></button>
+    <div class="hero-story" id="heroStory">
+      <p class="lede">At my husband's family table in Romblon, Philippines, everyone kept saying it: "Namit gid!" — until I picked it up too. It's stuck ever since: still the only review that matters, every time a dish turns out right.</p>
+      <p class="lede">That's how I got this name — and hopefully, you'll say it too once you've tried my cooking.</p>
+    </div>
     <a class="order-btn" href="#menu">Reasons you'll say Namit Gid</a>
   </div>
   <div class="scroll-cue"><span>Scroll to eat</span><i></i></div>
@@ -1352,17 +1365,38 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     });
   }
 
+  // ── Hero story reveal (tap the name) ──
+  var heroT=document.getElementById('heroTitle'), heroH=document.getElementById('heroHint'), heroSec=document.querySelector('header.hero');
+  function heroToggle(){
+    if(!heroSec) return;
+    var open=heroSec.classList.toggle('story-open');
+    if(heroT) heroT.setAttribute('aria-expanded', open?'true':'false');
+  }
+  if(heroT){
+    heroT.addEventListener('click', heroToggle);
+    heroT.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); heroToggle(); } });
+  }
+  if(heroH) heroH.addEventListener('click', heroToggle);
+
   // ── Story expander (tap to reveal) ──
   var stToggle=document.getElementById('storyToggle'), stSec=document.getElementById('story');
+  function openStory(){
+    if(!stSec) return;
+    stSec.classList.add('open');
+    if(stToggle) stToggle.setAttribute('aria-expanded','true');
+    document.querySelectorAll('#storyBody .rise').forEach(function(el){ el.classList.add('in-view'); });
+  }
   if(stToggle && stSec){
     stToggle.addEventListener('click', function(){
       var open = stSec.classList.toggle('open');
       stToggle.setAttribute('aria-expanded', open?'true':'false');
-      // Reveal any scroll-reveal (.rise) elements inside, since they never
-      // intersect while the panel is collapsed.
       if(open){ document.querySelectorAll('#storyBody .rise').forEach(function(el){ el.classList.add('in-view'); }); }
     });
   }
+  // Nav "Our story" link should open the expander, not just scroll to it.
+  document.querySelectorAll('a[href="#story"]').forEach(function(a){
+    a.addEventListener('click', function(){ setTimeout(openStory, 60); });
+  });
 })();
 </script>
 </body>
