@@ -447,6 +447,26 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .reviews .rev-text{font-size:.98rem;line-height:1.6;color:var(--espresso)}
 .reviews .rev-name{margin-top:.8rem;font-family:var(--ff-display);color:var(--sage-dark)}
 .reviews .rev-photo{width:100%;height:150px;object-fit:cover;border-radius:12px;margin-bottom:.8rem}
+/* ── Add-review form ── */
+.rev-add{padding:1.2rem 6vw 0;max-width:640px}
+.rev-add-btn{background:var(--cream);border:1px solid rgba(53,40,31,.18);color:var(--espresso);font:inherit;font-size:.95rem;padding:.7rem 1.2rem;border-radius:999px;cursor:pointer;transition:background .2s,border-color .2s}
+.rev-add-btn:hover{background:var(--cream-soft);border-color:var(--terracotta)}
+.rev-form{margin-top:1rem;display:flex;flex-direction:column;gap:.7rem}
+.rev-form[hidden]{display:none}
+.rev-form-row{display:flex;gap:.6rem}
+.rev-form input,.rev-form select,.rev-form textarea{font:inherit;padding:.7rem .9rem;border:1px solid rgba(53,40,31,.2);border-radius:12px;background:var(--cream);color:var(--espresso);width:100%}
+.rev-form select{flex:0 0 auto;width:auto;color:var(--gold)}
+.rev-form textarea{resize:vertical}
+.rev-form-send{background:var(--espresso);color:var(--cream);border:0;font:inherit;padding:.8rem;border-radius:12px;cursor:pointer;transition:background .2s,transform .2s}
+.rev-form-send:hover{background:var(--sage-dark);transform:translateY(-1px)}
+.rev-form-note{font-size:.82rem;color:var(--sage-dark);text-align:center}
+/* ── Story expander ── */
+.story-toggle{display:inline-flex;align-items:center;gap:.5rem;background:none;border:0;font-family:var(--ff-body);font-size:1rem;color:var(--sage-dark);cursor:pointer;padding:.3rem 0;letter-spacing:.02em}
+.story-toggle .rom{color:var(--terracotta)}
+.story-chev{display:inline-block;transition:transform .35s ease;font-size:1.1rem}
+.story.open .story-chev{transform:rotate(180deg)}
+.story-body{max-height:0;overflow:hidden;opacity:0;transition:max-height .55s ease,opacity .4s ease}
+.story.open .story-body{max-height:1400px;opacity:1;margin-top:1rem}
 .modal.done form{display:none}
 .modal.done .m-success{display:flex}
 
@@ -481,12 +501,12 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   .story .wrap,.how{padding-top:3rem;padding-bottom:3rem}
 }
 
-/* ---------- menu: typewriter, hover, connecting vine ---------- */
+/* ---------- menu: name dissolve-in, hover, connecting vine ---------- */
 .menu-item{position:relative;z-index:1}
 .menu-item h3{min-height:1em}
-.menu-item h3.typing::after{content:'';display:inline-block;width:2px;height:.9em;background:var(--terracotta);
-  margin-left:3px;vertical-align:-.05em;animation:caretBlink .7s steps(1) infinite}
-@keyframes caretBlink{50%{opacity:0}}
+.menu-item h3.pre-dissolve{opacity:0;filter:blur(10px)}
+.menu-item h3.dissolve-in{animation:nameDissolve .85s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes nameDissolve{from{opacity:0;filter:blur(10px);transform:translateY(6px)}to{opacity:1;filter:blur(0);transform:none}}
 .dish-btn img{transition:transform .55s cubic-bezier(.2,.7,.2,1)}
 .dish-btn:hover img{transform:scale(1.045)}
 #menuVine{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:0;pointer-events:none}
@@ -620,18 +640,48 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   <div id="menuList"></div>
 </main>
 
-<!-- STORY -->
+<!-- REVIEWS -->
+<section class="reviews" id="reviews" aria-labelledby="revH">
+  <div class="section-head" style="padding-top:0">
+    <span class="eyebrow"><span class="rom">Kalīpay</span>&#8202;— joy you gather for</span>
+    <h2 id="revH">What people say</h2>
+  </div>
+  <div class="rev-track" id="revTrack"><p style="padding:0 6vw;color:var(--sage-dark)">Loading&#8230;</p></div>
+  <div class="rev-add">
+    <button type="button" class="rev-add-btn" id="revAddToggle" aria-expanded="false" aria-controls="revForm">＋ Leave a review</button>
+    <form class="rev-form" id="revForm" hidden>
+      <div class="rev-form-row">
+        <input id="rvName" type="text" placeholder="Your name" maxlength="40" required>
+        <select id="rvStars" aria-label="Rating">
+          <option value="5">★★★★★</option>
+          <option value="4">★★★★</option>
+          <option value="3">★★★</option>
+        </select>
+      </div>
+      <textarea id="rvText" rows="3" placeholder="How was it? Namit gid?" maxlength="300" required></textarea>
+      <button type="submit" class="rev-form-send">Send review</button>
+      <p class="rev-form-note" id="revFormNote">Reviews are checked before they show up. Salamat gid!</p>
+    </form>
+  </div>
+</section>
+
+<!-- STORY (tap to expand) -->
 <section class="story" id="story">
   <div class="wrap">
-    <span class="eyebrow"><span class="rom">Nunut</span>&#8202;— to go along together</span>
-    <h2>The two best words a cook can hear</h2>
-    <p>"Namit gid!" is what slips out, mouth still half-full, when the food back in the province is so good it interrupts the conversation — <em>so delicious</em>. It's the only review this kitchen cooks for: recipes carried from Romblon to Toronto, made the long way every weekend.</p>
-    <p>No shortcuts, no premix sauces. Just the recipes we grew up with, cooked the long way.</p>
-    <div class="word-cards">
-      <div class="word-card"><b>hilway</b><span>a peaceful, settled mind</span></div>
-      <div class="word-card"><b>busug</b><span>full and satisfied from eating</span></div>
-      <div class="word-card"><b>nunut</b><span>going along, together</span></div>
-      <div class="word-card"><b>kalīpay</b><span>joy, the kind you gather for</span></div>
+    <button type="button" class="story-toggle" id="storyToggle" aria-expanded="false" aria-controls="storyBody">
+      <span class="rom">Nunut</span>&#8202;— read our story
+      <span class="story-chev" aria-hidden="true">&#8964;</span>
+    </button>
+    <div class="story-body" id="storyBody">
+      <h2>The two best words a cook can hear</h2>
+      <p>"Namit gid!" is what slips out, mouth still half-full, when the food back in the province is so good it interrupts the conversation — <em>so delicious</em>. It's the only review this kitchen cooks for: recipes carried from Romblon to Toronto, made the long way every weekend.</p>
+      <p>No shortcuts, no premix sauces. Just the recipes we grew up with, cooked the long way.</p>
+      <div class="word-cards">
+        <div class="word-card"><b>hilway</b><span>a peaceful, settled mind</span></div>
+        <div class="word-card"><b>busug</b><span>full and satisfied from eating</span></div>
+        <div class="word-card"><b>nunut</b><span>going along, together</span></div>
+        <div class="word-card"><b>kalīpay</b><span>joy, the kind you gather for</span></div>
+      </div>
     </div>
   </div>
 </section>
@@ -647,15 +697,6 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <div class="step"><span class="dot">2</span><span class="k">We cook fresh</span><p>Orders close Thursday night. Male cooks every batch Saturday morning, from scratch.</p></div>
     <div class="step"><span class="dot">3</span><span class="k">Pick up warm</span><p>Collect Saturday afternoon in Toronto — or ask us about delivery nearby.</p></div>
   </div>
-</section>
-
-<!-- REVIEWS -->
-<section class="reviews" id="reviews" aria-labelledby="revH">
-  <div class="section-head" style="padding-top:0">
-    <span class="eyebrow"><span class="rom">Kal&#299;pay</span>&#8202;— joy you gather for</span>
-    <h2 id="revH">What people say</h2>
-  </div>
-  <div class="rev-track" id="revTrack"><p style="padding:0 6vw;color:var(--sage-dark)">Loading&#8230;</p></div>
 </section>
 
 <!-- FOOTER -->
@@ -723,8 +764,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <button class="m-submit" type="button" id="placeOrderBtn" style="width:100%">Place my order</button>
     </div>
     <div class="m-success">
-      <h3>Busug na! 🥣</h3>
-      <p>Your order is in. We'll message you to confirm pickup — see you Saturday.</p>
+      <h3>Salamat gid! 😋❤️</h3>
+      <p>Kung namit, balik liwat! We'll message you to confirm pickup — see you Saturday.</p>
       <button class="order-btn" id="mDone" type="button">Back to menu</button>
     </div>
   </div>
@@ -816,21 +857,15 @@ DISHES.forEach((d,i)=>{
 const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
 list.querySelectorAll('.menu-item h3').forEach(h=>{
   h.dataset.full = h.textContent;
-  if(!REDUCE){ h.style.minHeight = h.offsetHeight + 'px'; h.textContent=''; }
+  if(!REDUCE){ h.classList.add('pre-dissolve'); }
 });
 function typeText(h){
   if(h.dataset.typed) return;
   h.dataset.typed='1';
-  const full = h.dataset.full || h.textContent;
-  if(REDUCE){ h.textContent = full; return; }
-  h.classList.add('typing');
-  let i=0;
-  (function step(){
-    h.textContent = full.slice(0, i);
-    i++;
-    if(i<=full.length){ setTimeout(step, 40); }
-    else { h.classList.remove('typing'); }
-  })();
+  if(REDUCE){ h.classList.remove('pre-dissolve'); return; }
+  // Dissolve-in: fade + de-blur the whole name (replaces the letter-by-letter typewriter).
+  h.classList.remove('pre-dissolve');
+  h.classList.add('dissolve-in');
 }
 const io = new IntersectionObserver(es=>{
   es.forEach(e=>{ if(e.isIntersecting) revealItem(e.target); });
@@ -1279,12 +1314,55 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   function stars(n){ var full=Math.floor(n), half=(n-full)>=0.5, empty=Math.max(0,5-full-(half?1:0)); return '★'.repeat(full)+(half?'½':'')+'☆'.repeat(empty); }
   fetch('/api/reviews').then(function(r){return r.json();}).then(function(rows){
     var t=document.getElementById('revTrack');
-    if(!Array.isArray(rows) || !rows.length){ document.getElementById('reviews').style.display='none'; return; }
+    if(!Array.isArray(rows) || !rows.length){ t.innerHTML='<p style="padding:0 6vw;color:var(--sage-dark)">Be the first to leave a review — namit gid?</p>'; return; }
     t.innerHTML = rows.map(function(rv){
       var photo = rv.photo_url ? '<img class="rev-photo" src="'+escR(rv.photo_url)+'" alt="" loading="lazy">' : '';
       return '<div class="rev-card">'+photo+'<div class="rev-stars">'+stars(Number(rv.stars)||5)+'</div><p class="rev-text">'+escR(rv.review_text)+'</p><div class="rev-name">— '+escR(rv.name)+'</div></div>';
     }).join('');
-  }).catch(function(){ var s=document.getElementById('reviews'); if(s) s.style.display='none'; });
+  }).catch(function(){ var t=document.getElementById('revTrack'); if(t) t.innerHTML=''; });
+
+  // ── Add a review (saved hidden until approved in the admin) ──
+  var raToggle=document.getElementById('revAddToggle'), raForm=document.getElementById('revForm');
+  if(raToggle && raForm){
+    raToggle.addEventListener('click', function(){
+      var open = raForm.hasAttribute('hidden');
+      if(open){ raForm.removeAttribute('hidden'); } else { raForm.setAttribute('hidden',''); }
+      raToggle.setAttribute('aria-expanded', open?'true':'false');
+    });
+    raForm.addEventListener('submit', async function(e){
+      e.preventDefault();
+      var send=raForm.querySelector('.rev-form-send'), note=document.getElementById('revFormNote');
+      var name=document.getElementById('rvName').value.trim();
+      var text=document.getElementById('rvText').value.trim();
+      var starsV=document.getElementById('rvStars').value;
+      if(!name || !text) return;
+      var prev=send.textContent; send.disabled=true; send.textContent='Sending…';
+      try{
+        var res=await fetch('/api/submit-review',{ method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ name:name, text:text, stars:starsV }) });
+        if(!res.ok) throw new Error('failed');
+        raForm.reset();
+        raForm.querySelectorAll('input,select,textarea,.rev-form-send').forEach(function(el){ el.style.display='none'; });
+        note.textContent='Salamat gid! Your review will show up once we’ve checked it. 💛';
+        note.style.color='var(--terracotta)';
+      }catch(_){
+        send.disabled=false; send.textContent=prev;
+        note.textContent='Couldn’t send just now — please try again in a moment.';
+      }
+    });
+  }
+
+  // ── Story expander (tap to reveal) ──
+  var stToggle=document.getElementById('storyToggle'), stSec=document.getElementById('story');
+  if(stToggle && stSec){
+    stToggle.addEventListener('click', function(){
+      var open = stSec.classList.toggle('open');
+      stToggle.setAttribute('aria-expanded', open?'true':'false');
+      // Reveal any scroll-reveal (.rise) elements inside, since they never
+      // intersect while the panel is collapsed.
+      if(open){ document.querySelectorAll('#storyBody .rise').forEach(function(el){ el.classList.add('in-view'); }); }
+    });
+  }
 })();
 </script>
 </body>

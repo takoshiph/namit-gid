@@ -375,6 +375,24 @@ export default {
       return jsonResponse(data, res.ok ? 200 : 500, request);
     }
 
+    // ── POST /api/submit-review (public) — saved hidden until admin approves ──
+    if (url.pathname === '/api/submit-review' && request.method === 'POST') {
+      let body;
+      try { body = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
+      if (!body.name || !body.text) return jsonResponse({ error: 'name and text required' }, 400, request);
+      const res = await fetch(`${SB}/rest/v1/reviews`, {
+        method: 'POST', headers: sbWrite,
+        body: JSON.stringify({
+          name: String(body.name).slice(0, 60),
+          review_text: String(body.text).slice(0, 400),
+          stars: Math.min(5, Math.max(1, parseInt(body.stars, 10) || 5)),
+          visible: false,
+        }),
+      });
+      if (!res.ok) return jsonResponse({ error: 'Failed to save review' }, 500, request);
+      return jsonResponse({ ok: true }, 201, request);
+    }
+
     // ── GET /api/reviews/all (admin) ──────────────────────────────────────────
     if (url.pathname === '/api/reviews/all' && request.method === 'GET') {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
