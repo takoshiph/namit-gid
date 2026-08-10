@@ -141,18 +141,20 @@ header.hero{
   animation:girlBob 6s ease-in-out infinite;
   filter:drop-shadow(0 10px 18px rgba(38,52,47,.35))}
 @keyframes girlBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-9px)}}
-.wordmark{font-family:var(--ff-display);font-size:clamp(2.2rem,7.5vw,3.6rem);font-weight:400;margin:0;line-height:1}
+.wordmark{font-family:var(--ff-display);font-size:clamp(2.2rem,7.5vw,3.6rem);font-weight:400;margin:0;line-height:.9}
 .wordmark em{font-style:normal;color:var(--terracotta)}
-/* wordmark rides the lower arc of the logo as the top 3D layer, tap to open the story */
-.logo-stage .wordmark{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);z-index:6;
-  white-space:nowrap;cursor:pointer;color:var(--espresso);
-  text-shadow:0 1px 0 rgba(247,240,227,.8),0 0 10px rgba(247,240,227,.55);
-  filter:drop-shadow(0 8px 12px rgba(38,52,47,.4));
-  transition:transform .3s cubic-bezier(.2,.7,.2,1),filter .3s;
-  animation:wordmarkPulse 3.8s ease-in-out infinite}
-@keyframes wordmarkPulse{0%,100%{filter:drop-shadow(0 8px 12px rgba(38,52,47,.4))}50%{filter:drop-shadow(0 12px 18px rgba(196,99,60,.4))}}
-@media (hover:hover){.logo-stage .wordmark:hover{transform:translateX(-50%) translateY(-3px) scale(1.03)}}
-.logo-stage .wordmark:focus-visible{outline:3px solid var(--terracotta);outline-offset:6px;border-radius:8px}
+/* stacked wordmark lockup: white Namit behind, terracotta gid in front on the shared i, tap to open the story */
+.logo-stage .wordmark{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);z-index:6;
+  display:inline-block;white-space:nowrap;cursor:pointer;line-height:.9;
+  transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+.logo-stage .wordmark::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:150%;height:230%;z-index:-1;pointer-events:none;filter:blur(7px);
+  background:radial-gradient(60% 58% at 50% 50%,rgba(53,40,31,.55),rgba(53,40,31,0) 72%)}
+.wm-namit{position:relative;z-index:1;display:flex;color:var(--cream);text-shadow:0 1px 2px rgba(38,52,47,.55)}
+.wm-gid{position:absolute;top:0;left:0;z-index:2;display:flex;color:var(--terracotta)}
+.wm-i{display:inline-block}
+@media (hover:hover){.logo-stage .wordmark:hover{transform:translateX(-50%) translateY(-3px) scale(1.02)}}
+.logo-stage .wordmark:focus-visible{outline:3px solid var(--terracotta);outline-offset:8px;border-radius:8px}
 .eyebrow{
   font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--espresso);
   opacity:.65;display:inline-flex;align-items:center;gap:.7rem;
@@ -678,7 +680,10 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <div class="logo-stage" aria-hidden="false">
       <img class="logo-badge" id="logoBadge" src="images/logo-badge.webp" alt="" width="520" height="518">
       <img class="logo-girl" id="logoGirl" src="images/logo-girl.webp" alt="The cook behind Namit Gid" width="251" height="560">
-      <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story">Namit <em>Gid</em></h1>
+      <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story" aria-label="Namit gid">
+        <span class="wm-namit" aria-hidden="true">Nam<span class="wm-i">i</span>t</span>
+        <span class="wm-gid" aria-hidden="true">g<span class="wm-i">i</span>d</span>
+      </h1>
     </div>
     <div class="hero-story" id="heroStory">
       <p class="lede">At my husband's family table in Romblon, Philippines, everyone kept saying it: "Namit gid!" Eventually I picked it up too. It's stuck ever since: still the only review that matters, every time a dish turns out right.</p>
@@ -1555,6 +1560,25 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     heroT.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); heroToggle(); } });
   }
   if(heroH) heroH.addEventListener('click', heroToggle);
+
+  // ── Wordmark lockup: align the two i-stems, then offset gid as the front layer ──
+  (function(){
+    if(!heroT) return;
+    var ni=heroT.querySelector('.wm-namit .wm-i'), gidEl=heroT.querySelector('.wm-gid');
+    var gi=gidEl && gidEl.querySelector('.wm-i');
+    if(!ni||!gidEl||!gi) return;
+    function place(){
+      gidEl.style.transform='none';
+      var a=ni.getBoundingClientRect(), b=gi.getBoundingClientRect(), h=a.height||1;
+      var dx=(a.left-b.left)+0.16*h;
+      var dy=(a.top-b.top)+0.36*h;
+      gidEl.style.transform='translate('+dx.toFixed(2)+'px,'+dy.toFixed(2)+'px)';
+    }
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(place); }
+    place();
+    addEventListener('load', place);
+    addEventListener('resize', place, {passive:true});
+  })();
 
   // ── Story expander (tap to reveal) ──
   var stToggle=document.getElementById('storyToggle'), stSec=document.getElementById('story');
