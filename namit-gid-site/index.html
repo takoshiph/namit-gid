@@ -147,10 +147,10 @@ header.hero{
 .logo-stage .wordmark{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);z-index:6;
   display:inline-block;white-space:nowrap;cursor:pointer;line-height:.9;
   transition:transform .3s cubic-bezier(.2,.7,.2,1)}
-.logo-stage .wordmark::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:150%;height:230%;z-index:-1;pointer-events:none;filter:blur(7px);
-  background:radial-gradient(60% 58% at 50% 50%,rgba(53,40,31,.55),rgba(53,40,31,0) 72%)}
-.wm-namit{position:relative;z-index:1;display:flex;color:var(--cream);text-shadow:0 1px 2px rgba(38,52,47,.55)}
+.wm-plate{position:absolute;z-index:0;pointer-events:none;background:var(--espresso);border-radius:22px;
+  border:1px solid rgba(217,164,65,.45);
+  box-shadow:0 16px 34px -16px rgba(38,52,47,.6),inset 0 1px 0 rgba(247,240,227,.14)}
+.wm-namit{position:relative;z-index:1;display:flex;color:var(--cream)}
 .wm-gid{position:absolute;top:0;left:0;z-index:2;display:flex;color:var(--terracotta)}
 .wm-i{display:inline-block}
 @media (hover:hover){.logo-stage .wordmark:hover{transform:translateX(-50%) translateY(-3px) scale(1.02)}}
@@ -633,7 +633,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <img class="s-badge" src="images/logo-badge.webp" alt="">
     <img class="s-girl" src="images/logo-girl.webp" alt="">
   </div>
-  <div class="splash-word">Namit <em>Gid</em></div>
+  <div class="splash-word">Namit <em>gid</em></div>
   <div class="splash-sub">so delicious · filipino home cooking</div>
   <div class="splash-bar" aria-hidden="true"><i></i></div>
   <div class="splash-cook" aria-hidden="true">
@@ -663,7 +663,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 </div>
 
 <nav id="nav" aria-label="Main">
-  <a class="nav-logo" href="#top">Namit <em>Gid</em></a>
+  <a class="nav-logo" href="#top">Namit <em>gid</em></a>
   <div class="nav-links">
     <a href="#menu" class="hide-m">Menu</a>
     <a href="#story" class="hide-m">Our story</a>
@@ -681,6 +681,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <img class="logo-badge" id="logoBadge" src="images/logo-badge.webp" alt="" width="520" height="518">
       <img class="logo-girl" id="logoGirl" src="images/logo-girl.webp" alt="The cook behind Namit Gid" width="251" height="560">
       <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story" aria-label="Namit gid">
+        <span class="wm-plate" aria-hidden="true"></span>
         <span class="wm-namit" aria-hidden="true">Nam<span class="wm-i">i</span>t</span>
         <span class="wm-gid" aria-hidden="true">g<span class="wm-i">i</span>d</span>
       </h1>
@@ -1564,15 +1565,23 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   // ── Wordmark lockup: align the two i-stems, then offset gid as the front layer ──
   (function(){
     if(!heroT) return;
-    var ni=heroT.querySelector('.wm-namit .wm-i'), gidEl=heroT.querySelector('.wm-gid');
-    var gi=gidEl && gidEl.querySelector('.wm-i');
-    if(!ni||!gidEl||!gi) return;
+    var namitEl=heroT.querySelector('.wm-namit'), gidEl=heroT.querySelector('.wm-gid');
+    var ni=namitEl && namitEl.querySelector('.wm-i'), gi=gidEl && gidEl.querySelector('.wm-i');
+    var plate=heroT.querySelector('.wm-plate');
+    if(!namitEl||!ni||!gidEl||!gi) return;
     function place(){
       gidEl.style.transform='none';
       var a=ni.getBoundingClientRect(), b=gi.getBoundingClientRect(), h=a.height||1;
-      var dx=(a.left-b.left)+0.16*h;
-      var dy=(a.top-b.top)+0.36*h;
+      var dx=(a.left-b.left)+0.16*h, dy=(a.top-b.top)+0.36*h;
       gidEl.style.transform='translate('+dx.toFixed(2)+'px,'+dy.toFixed(2)+'px)';
+      if(plate){
+        var wm=heroT.getBoundingClientRect(), na=namitEl.getBoundingClientRect(), ga=gidEl.getBoundingClientRect();
+        var padX=0.45*h, padY=0.30*h;
+        var L=Math.min(na.left,ga.left)-wm.left-padX, T=Math.min(na.top,ga.top)-wm.top-padY;
+        var R=Math.max(na.right,ga.right)-wm.left+padX, B=Math.max(na.bottom,ga.bottom)-wm.top+padY;
+        plate.style.left=L.toFixed(1)+'px'; plate.style.top=T.toFixed(1)+'px';
+        plate.style.width=(R-L).toFixed(1)+'px'; plate.style.height=(B-T).toFixed(1)+'px';
+      }
     }
     if(document.fonts && document.fonts.ready){ document.fonts.ready.then(place); }
     place();
