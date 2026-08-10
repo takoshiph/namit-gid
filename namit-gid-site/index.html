@@ -347,14 +347,26 @@ header.hero{
 /* ---------- how ---------- */
 .how{padding:clamp(4rem,9vw,6.5rem) clamp(1.4rem,5vw,3rem)}
 .how .steps{max-width:1000px;margin:2.2rem auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.2rem}
+.how .steps{position:relative}
 .step{
+  position:relative;z-index:1;
   background:rgba(247,240,227,.55);border:1px solid rgba(53,40,31,.1);border-radius:20px;
   padding:1.8rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;
   backdrop-filter:blur(4px);
 }
-.step .k{font-family:var(--ff-display);font-size:1.2rem}
+.step .step-head{display:flex;align-items:center;gap:.7rem}
+.step .k{font-family:var(--ff-display);font-size:1.2rem;line-height:1.15;min-width:0}
 .step p{font-size:.92rem;opacity:.8}
-.step .dot{width:34px;height:34px;border-radius:50%;background:var(--terracotta);color:var(--cream);display:grid;place-items:center;font-weight:700;font-size:.85rem}
+.step .dot{flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:var(--terracotta);color:var(--cream);display:grid;place-items:center;font-weight:700;font-size:.85rem}
+
+/* connecting root through the steps */
+#howRoot{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
+#howRoot .how-root-line{fill:none;stroke:var(--terracotta);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:.5}
+#howRoot .how-node{fill:var(--gold);opacity:0;transition:opacity .35s ease}
+/* flow/morph reveal for the step cards (JS-only, after the root draws) */
+.js .how .step{opacity:0;transform:translateY(26px) scale(.94);transform-origin:top center;
+  transition:opacity .7s cubic-bezier(.2,.7,.2,1), transform .75s cubic-bezier(.2,.9,.25,1)}
+.js .how .step.flow-in{opacity:1;transform:none}
 
 /* ---------- footer ---------- */
 footer{background:var(--sage-deep);color:var(--cream);margin-top:clamp(2rem,6vw,4rem)}
@@ -577,6 +589,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   *{animation:none !important;transition:none !important}
   .reveal-l,.reveal-r{opacity:1;transform:none}
   .js .rise{opacity:1;transform:none}
+  .js .how .step{opacity:1;transform:none}
+  #howRoot .how-node{opacity:.9}
   .leaf,.soil{display:none}
   #fx{display:none}
 }
@@ -683,10 +697,10 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <h2 id="howH">From order to pickup</h2>
   </div>
   <div class="steps">
-    <div class="step"><span class="dot">1</span><span class="k">Finish your order</span><p>Pick your dish and add your name and contact — it takes under a minute.</p></div>
-    <div class="step"><span class="dot">2</span><span class="k">Send your $10 deposit</span><p>A $10 Interac e-Transfer to orders@takoshi.ca holds your spot. Upload the screenshot to confirm.</p></div>
-    <div class="step"><span class="dot">3</span><span class="k">We start cooking</span><p>Every order is made fresh from scratch once your deposit is confirmed.</p></div>
-    <div class="step"><span class="dot">4</span><span class="k">Pick up warm</span><p>Collect at 180 Fairview Mall Drive and pay the balance — cash or Interac, whichever works.</p></div>
+    <div class="step"><div class="step-head"><span class="dot">1</span><span class="k">Finish your order</span></div><p>Pick your dish and add your name and contact — it takes under a minute.</p></div>
+    <div class="step"><div class="step-head"><span class="dot">2</span><span class="k">Send your $10 deposit</span></div><p>A $10 Interac e-Transfer to orders@takoshi.ca holds your spot. Upload the screenshot to confirm.</p></div>
+    <div class="step"><div class="step-head"><span class="dot">3</span><span class="k">We start cooking</span></div><p>Every order is made fresh from scratch once your deposit is confirmed.</p></div>
+    <div class="step"><div class="step-head"><span class="dot">4</span><span class="k">Pick up warm</span></div><p>Collect at 180 Fairview Mall Drive and pay the balance — cash or Interac, whichever works.</p></div>
   </div>
 </section>
 
@@ -1190,12 +1204,86 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   document.querySelectorAll('main > .section-head, .menu-tabs, .story .wrap > .eyebrow, .story .wrap > h2, .story .wrap > p, .how .section-head').forEach(el=>el.classList.add('rise'));
   const stagger = nodes => nodes.forEach((el,i)=>el.classList.add('rise','d'+Math.min(i+1,4)));
   stagger([...document.querySelectorAll('.word-card')]);
-  stagger([...document.querySelectorAll('.step')]);
+  /* .how .step cards are handled by the root-then-flow engine below */
   stagger([...document.querySelectorAll('footer .cols > div')]);
   const io2 = new IntersectionObserver(es=>{
     es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in-view'); io2.unobserve(e.target); } });
   }, {threshold:.16, rootMargin:'0px 0px -6% 0px'});
   document.querySelectorAll('.rise').forEach(el=>io2.observe(el));
+})();
+
+/* ---------------- How-it-works: root connects, then the steps flow in ---------------- */
+(function(){
+  const NS='http://www.w3.org/2000/svg';
+  const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const section=document.querySelector('.how');
+  const wrap=document.querySelector('.how .steps');
+  const steps=wrap ? [...wrap.querySelectorAll('.step')] : [];
+  if(!section || !wrap || steps.length<2) return;
+  let svg, path, nodes=[], played=false;
+
+  function build(){
+    const wr=wrap.getBoundingClientRect();
+    if(!wr.width || !wr.height) return;
+    const pts=steps.map(s=>{
+      const d=s.querySelector('.dot').getBoundingClientRect();
+      return { x:d.left-wr.left+d.width/2, y:d.top-wr.top+d.height/2 };
+    });
+    if(!svg){
+      svg=document.createElementNS(NS,'svg');
+      svg.id='howRoot'; svg.setAttribute('aria-hidden','true');
+      svg.setAttribute('preserveAspectRatio','none');
+      wrap.prepend(svg);
+    }
+    svg.setAttribute('viewBox','0 0 '+wr.width+' '+wr.height);
+    // smooth path threading each step's badge, in order
+    let d='M '+pts[0].x.toFixed(1)+','+pts[0].y.toFixed(1);
+    for(let i=1;i<pts.length;i++){
+      const a=pts[i-1], b=pts[i], mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+      // control points bend along whichever axis is dominant (row vs stacked)
+      d += Math.abs(b.x-a.x) >= Math.abs(b.y-a.y)
+        ? ' C '+mx.toFixed(1)+','+a.y.toFixed(1)+' '+mx.toFixed(1)+','+b.y.toFixed(1)+' '+b.x.toFixed(1)+','+b.y.toFixed(1)
+        : ' C '+a.x.toFixed(1)+','+my.toFixed(1)+' '+b.x.toFixed(1)+','+my.toFixed(1)+' '+b.x.toFixed(1)+','+b.y.toFixed(1);
+    }
+    svg.innerHTML='<path class="how-root-line" d="'+d+'"/>'+
+      pts.map(p=>'<circle class="how-node" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="5"/>').join('');
+    path=svg.querySelector('.how-root-line');
+    nodes=[...svg.querySelectorAll('.how-node')];
+    const L=path.getTotalLength();
+    svg.dataset.len=L;
+    path.style.strokeDasharray=L;
+    path.style.strokeDashoffset=(played||REDUCE)?0:L;
+    if(played||REDUCE) nodes.forEach(n=>n.style.opacity=.9);
+  }
+
+  function play(){
+    if(played) return;
+    played=true;
+    if(!path){ steps.forEach(s=>s.classList.add('flow-in')); return; }
+    if(REDUCE){
+      path.style.strokeDashoffset=0;
+      nodes.forEach(n=>n.style.opacity=.9);
+      steps.forEach(s=>s.classList.add('flow-in'));
+      return;
+    }
+    const L=+svg.dataset.len, DRAW=1000, last=nodes.length-1;
+    const start=performance.now();
+    (function frame(now){
+      const t=Math.min(1,(now-start)/DRAW);
+      path.style.strokeDashoffset=L*(1-t);
+      nodes.forEach((n,i)=>{ if(t>= (last? i/last : 1)) n.style.opacity=.9; });
+      if(t<1) requestAnimationFrame(frame);
+    })(start);
+    // steps flow/morph in only after the root has connected them
+    steps.forEach((s,i)=> setTimeout(()=>s.classList.add('flow-in'), DRAW+i*150));
+  }
+
+  build();
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{ if(e.isIntersecting){ build(); play(); io.unobserve(e.target); } });
+  }, {threshold:.28});
+  io.observe(section);
+  addEventListener('resize', ()=>{ if(played) build(); }, {passive:true});
 })();
 
 /* ---------------- earthy: growing roots + soil deepening on scroll ---------------- */
