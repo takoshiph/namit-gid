@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Namit Gid — Filipino home cooking · Toronto</title>
-<meta name="description" content="Namit gid — so delicious. Filipino home cooking in Toronto: palabok, baked sushi, lumpia, shawarma rice and desserts, cooked from scratch and ordered with a tap.">
+<title>Namit Gid · Filipino home cooking · Toronto</title>
+<meta name="description" content="Namit gid, so delicious. Filipino home cooking in Toronto: palabok, baked sushi, lumpia, shawarma rice and desserts, cooked from scratch and ordered with a tap.">
 <link rel="icon" type="image/png" href="images/favicon.png">
 <meta name="theme-color" content="#9bb9af">
 <script>document.documentElement.classList.add('js')</script>
 <link rel="canonical" href="https://namitgid.takoshi.ca/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Namit Gid">
-<meta property="og:title" content="Namit Gid — Filipino home cooking · Toronto">
-<meta property="og:description" content="Namit gid — so delicious. Filipino home cooking in Toronto: shawarma rice, lumpia, baked sushi, palabok and desserts, cooked from scratch and ordered with a tap.">
+<meta property="og:title" content="Namit Gid · Filipino home cooking · Toronto">
+<meta property="og:description" content="Namit gid, so delicious. Filipino home cooking in Toronto: shawarma rice, lumpia, baked sushi, palabok and desserts, cooked from scratch and ordered with a tap.">
 <meta property="og:url" content="https://namitgid.takoshi.ca/">
 <meta property="og:image" content="https://namitgid.takoshi.ca/images/logo-badge.webp">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Namit Gid — Filipino home cooking · Toronto">
+<meta name="twitter:title" content="Namit Gid · Filipino home cooking · Toronto">
 <meta name="twitter:description" content="So delicious. Filipino home cooking in Toronto, ordered with a tap.">
 <meta name="twitter:image" content="https://namitgid.takoshi.ca/images/logo-badge.webp">
 <link rel="preload" as="image" href="images/logo-badge.webp">
@@ -130,8 +130,8 @@ header.hero{
   padding:6rem 1rem 4rem;text-align:center;
 }
 #fx{position:absolute;inset:0;z-index:0;pointer-events:none}
-.hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:1.1rem}
-.logo-stage{position:relative;width:min(58vw,320px);aspect-ratio:1;margin:.6rem 0 .2rem}
+.hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.7rem}
+.logo-stage{position:relative;width:min(58vw,320px);aspect-ratio:1;margin:.4rem 0 .2rem}
 .logo-badge{position:absolute;inset:0;width:100%;height:100%;
   animation:slowSpin 85s linear infinite;
   filter:drop-shadow(0 16px 30px rgba(38,52,47,.3))}
@@ -141,8 +141,18 @@ header.hero{
   animation:girlBob 6s ease-in-out infinite;
   filter:drop-shadow(0 10px 18px rgba(38,52,47,.35))}
 @keyframes girlBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-9px)}}
-.wordmark{font-family:var(--ff-display);font-size:clamp(2.4rem,8vw,4rem);font-weight:400}
+.wordmark{font-family:var(--ff-display);font-size:clamp(2.2rem,7.5vw,3.6rem);font-weight:400;margin:0;line-height:1}
 .wordmark em{font-style:normal;color:var(--terracotta)}
+/* wordmark rides the lower arc of the logo as the top 3D layer, tap to open the story */
+.logo-stage .wordmark{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);z-index:6;
+  white-space:nowrap;cursor:pointer;color:var(--espresso);
+  text-shadow:0 1px 0 rgba(247,240,227,.8),0 0 10px rgba(247,240,227,.55);
+  filter:drop-shadow(0 8px 12px rgba(38,52,47,.4));
+  transition:transform .3s cubic-bezier(.2,.7,.2,1),filter .3s;
+  animation:wordmarkPulse 3.8s ease-in-out infinite}
+@keyframes wordmarkPulse{0%,100%{filter:drop-shadow(0 8px 12px rgba(38,52,47,.4))}50%{filter:drop-shadow(0 12px 18px rgba(196,99,60,.4))}}
+@media (hover:hover){.logo-stage .wordmark:hover{transform:translateX(-50%) translateY(-3px) scale(1.03)}}
+.logo-stage .wordmark:focus-visible{outline:3px solid var(--terracotta);outline-offset:6px;border-radius:8px}
 .eyebrow{
   font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--espresso);
   opacity:.65;display:inline-flex;align-items:center;gap:.7rem;
@@ -217,25 +227,13 @@ header.hero{
 .hero .price{font-family:var(--ff-display);color:var(--terracotta);font-size:1.35rem}
 .hero p.lede{max-width:34ch;font-size:1rem;opacity:.85}
 .hero p.lede + p.lede{margin-top:.7rem}
-.wordmark{cursor:pointer}
-.hero-hint{background:none;border:0;font-family:var(--ff-body);font-size:.9rem;color:var(--sage-dark);cursor:pointer;opacity:.85;letter-spacing:.02em;display:inline-flex;align-items:center;gap:.35rem;padding:.2rem}
-.hero-hint:hover{opacity:1;color:var(--terracotta)}
-.hero-hint span{transition:transform .35s ease}
-.hero.story-open .hero-hint{display:none}
 .hero-story{max-height:0;overflow:hidden;opacity:0;transition:opacity .9s ease,max-height .9s ease}
-.hero.story-open .hero-story{max-height:600px;opacity:1}
-.scroll-cue{
-  position:absolute;bottom:max(1.6rem, env(safe-area-inset-bottom));left:50%;translate:-50% 0;z-index:2;
-  font-size:.68rem;letter-spacing:.35em;text-transform:uppercase;opacity:.6;
-  display:flex;flex-direction:column;align-items:center;gap:.5rem;
-}
-.scroll-cue i{width:1px;height:34px;background:var(--espresso);display:block;animation:drip 1.8s ease-in-out infinite;transform-origin:top}
-@keyframes drip{0%{transform:scaleY(0)}55%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+.hero.story-open .hero-story{max-height:600px;opacity:1;margin-top:.2rem}
 
 /* ---------- menu ---------- */
 .section-head{
-  text-align:center;padding:clamp(4rem,9vw,6.5rem) 1.5rem 1rem;
-  display:flex;flex-direction:column;align-items:center;gap:.8rem;
+  text-align:center;padding:clamp(2.8rem,6vw,4.4rem) 1.5rem 1rem;
+  display:flex;flex-direction:column;align-items:center;gap:.7rem;
 }
 .section-head h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
 .section-head p{max-width:44ch;opacity:.8}
@@ -346,7 +344,7 @@ header.hero{
 .word-card span{font-size:.85rem;opacity:.75}
 
 /* ---------- how ---------- */
-.how{padding:clamp(4rem,9vw,6.5rem) clamp(1.4rem,5vw,3rem)}
+.how{padding:clamp(2.8rem,6vw,4.4rem) clamp(1.4rem,5vw,3rem)}
 .how .steps{max-width:1000px;margin:2.2rem auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.2rem}
 .how .steps{position:relative}
 .step{
@@ -541,9 +539,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   header.hero{padding:5rem 1rem 3.2rem}
   .hero-inner{gap:.75rem}
   .logo-stage{width:min(52vw,230px);margin:.3rem 0 0}
-  .wordmark{font-size:clamp(2.1rem,9vw,2.6rem)}
+  .wordmark{font-size:clamp(1.7rem,7.4vw,2.2rem)}
   .hero p.lede{font-size:.92rem;max-width:30ch}
-  .scroll-cue{display:none}
 
   /* backdrop type: wrap instead of clipping at screen edges */
   .back-type{white-space:normal;text-align:center;width:118%;
@@ -681,25 +678,23 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <div class="logo-stage" aria-hidden="false">
       <img class="logo-badge" id="logoBadge" src="images/logo-badge.webp" alt="" width="520" height="518">
       <img class="logo-girl" id="logoGirl" src="images/logo-girl.webp" alt="The cook behind Namit Gid" width="251" height="560">
+      <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story">Namit <em>Gid</em></h1>
     </div>
-    <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story">Namit <em>Gid</em></h1>
-    <button type="button" class="hero-hint" id="heroHint">the story behind the name <span aria-hidden="true">&#8964;</span></button>
     <div class="hero-story" id="heroStory">
-      <p class="lede">At my husband's family table in Romblon, Philippines, everyone kept saying it: "Namit gid!" — until I picked it up too. It's stuck ever since: still the only review that matters, every time a dish turns out right.</p>
-      <p class="lede">That's how I got this name — and hopefully, you'll say it too once you've tried my cooking.</p>
+      <p class="lede">At my husband's family table in Romblon, Philippines, everyone kept saying it: "Namit gid!" Eventually I picked it up too. It's stuck ever since: still the only review that matters, every time a dish turns out right.</p>
+      <p class="lede">That's how I got this name, and hopefully you'll say it too once you've tried my cooking.</p>
     </div>
     <a class="order-btn" href="#menu">Reasons you'll say Namit Gid</a>
     <button type="button" class="hero-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel">&#9432;&nbsp;Allergen &amp; kitchen info</button>
   </div>
-  <div class="scroll-cue"><span>Scroll to eat</span><i></i></div>
 </header>
 
 <!-- MENU -->
 <main>
   <div class="section-head" id="menu">
-    <span class="eyebrow"><span class="rom">Busug</span>&#8202;— full &amp; satisfied</span>
+    <span class="eyebrow"><span class="rom">Busug</span>&#8202;· full &amp; satisfied</span>
     <h2>The menu</h2>
-    <p>Everything is made to order — please place your order in advance. Pickup is at 180 Fairview Mall Dr.</p>
+    <p>Everything is made to order, so please place your order in advance. Pickup is at 180 Fairview Mall Dr.</p>
   </div>
 
   <div class="menu-tabs" role="tablist" aria-label="Menu categories">
@@ -718,17 +713,17 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <h2 id="howH">From order to pickup</h2>
   </div>
   <div class="steps">
-    <div class="step"><div class="step-head"><span class="num">1</span><span class="k">Finish your order</span></div><p>Pick your dish and add your name and contact — it takes under a minute.</p></div>
+    <div class="step"><div class="step-head"><span class="num">1</span><span class="k">Finish your order</span></div><p>Pick your dish and add your name and contact. It takes under a minute.</p></div>
     <div class="step"><div class="step-head"><span class="num">2</span><span class="k">Send your $10 deposit</span></div><p>A $10 Interac e-Transfer to orders@takoshi.ca holds your spot. Upload the screenshot to confirm.</p></div>
     <div class="step"><div class="step-head"><span class="num">3</span><span class="k">We start cooking</span></div><p>Every order is made fresh from scratch once your deposit is confirmed.</p></div>
-    <div class="step"><div class="step-head"><span class="num">4</span><span class="k">Pick up warm</span></div><p>Collect at 180 Fairview Mall Drive and pay the balance — cash or Interac, whichever works.</p></div>
+    <div class="step"><div class="step-head"><span class="num">4</span><span class="k">Pick up warm</span></div><p>Collect at 180 Fairview Mall Drive and pay the balance in cash or Interac, whichever works.</p></div>
   </div>
 </section>
 
 <!-- REVIEWS -->
 <section class="reviews" id="reviews" aria-labelledby="revH">
   <div class="section-head" style="padding-top:0">
-    <span class="eyebrow"><span class="rom">Kalīpay</span>&#8202;— noun · the shared joy of gathering to eat</span>
+    <span class="eyebrow"><span class="rom">Kalīpay</span>&#8202;· noun · the joy of gathering to share a meal</span>
     <h2 id="revH">Ano ang Aton <span class="rom">Kalīpay</span></h2>
     <span class="head-tr">What brings us joy</span>
   </div>
@@ -739,7 +734,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <div class="rev-dots" id="revDots" aria-hidden="true"></div>
   </div>
   <div class="rev-add">
-    <p class="rev-add-lead">Namit gid? Tell us — your kind words help this little kitchen grow.</p>
+    <p class="rev-add-lead">Namit gid? Tell us, your kind words help this little kitchen grow.</p>
     <button type="button" class="rev-add-btn" id="revAddToggle" aria-expanded="false" aria-controls="revForm">＋ Leave a review</button>
     <form class="rev-form" id="revForm" hidden>
       <div class="rev-form-row">
@@ -766,7 +761,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     </button>
     <div class="story-body" id="storyBody">
       <h2>The two best words a cook can hear</h2>
-      <p>"Namit gid!" is what slips out, mouth still half-full, when the food back in the province is so good it interrupts the conversation — <em>so delicious</em>. It's the only review this kitchen cooks for: recipes carried from Romblon to Toronto, made the long way every weekend.</p>
+      <p>"Namit gid!" is what slips out, mouth still half-full, when the food back in the province is so good it interrupts the conversation, <em>so delicious</em>. It's the only review this kitchen cooks for: recipes carried from Romblon to Toronto, made the long way every weekend.</p>
       <p>No shortcuts, no premix sauces. Just the recipes we grew up with, cooked the long way.</p>
       <div class="word-cards">
         <div class="word-card"><b>hilway</b><span>a peaceful, settled mind</span></div>
@@ -789,7 +784,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <div><b>Order</b><a href="#menu">Order now</a><br><span style="opacity:.75">Toronto, ON</span></div>
       <div><b>Say hi</b><a href="https://takoshi.ca" target="_blank" rel="noopener">Takoshi</a></div>
     </div>
-    <div class="tiny"><span>© 2026 Namit Gid · <span class="rom" style="color:var(--gold)">kalīpay</span> in every batch</span><span>namit gid — so delicious</span></div>
+    <div class="tiny"><span>© 2026 Namit Gid · <span class="rom" style="color:var(--gold)">kalīpay</span> in every batch</span><span>namit gid, so delicious</span></div>
   </div>
 </footer>
 
@@ -844,7 +839,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     </div>
     <div class="m-success">
       <h3>Salamat gid! 😋❤️</h3>
-      <p>Kung namit, balik liwat! We'll message you to confirm pickup — see you Saturday.</p>
+      <p>Kung namit, balik liwat! We'll message you to confirm pickup. See you Saturday!</p>
       <button class="order-btn" id="mDone" type="button">Back to menu</button>
     </div>
   </div>
@@ -1509,7 +1504,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   }
   fetch('/api/reviews').then(function(r){return r.json();}).then(function(rows){
     var t=document.getElementById('revTrack');
-    if(!Array.isArray(rows) || !rows.length){ t.innerHTML='<p style="padding:0 6vw;color:var(--sage-dark)">Be the first to leave a review — namit gid?</p>'; initRevCarousel(); return; }
+    if(!Array.isArray(rows) || !rows.length){ t.innerHTML='<p style="padding:0 6vw;color:var(--sage-dark)">Be the first to leave a review. Namit gid?</p>'; initRevCarousel(); return; }
     t.innerHTML = rows.map(function(rv){
       var photo = rv.photo_url ? '<img class="rev-photo" src="'+escR(rv.photo_url)+'" alt="" loading="lazy">' : '';
       return '<div class="rev-card">'+photo+'<div class="rev-stars">'+stars(Number(rv.stars)||5)+'</div><p class="rev-text">'+escR(rv.review_text)+'</p><div class="rev-name">— '+escR(rv.name)+'</div></div>';
@@ -1543,7 +1538,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
         note.style.color='var(--terracotta)';
       }catch(_){
         send.disabled=false; send.textContent=prev;
-        note.textContent='Couldn’t send just now — please try again in a moment.';
+        note.textContent='Couldn’t send just now. Please try again in a moment.';
       }
     });
   }
