@@ -354,10 +354,10 @@ header.hero{
   padding:1.8rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;
   backdrop-filter:blur(4px);
 }
-.step .step-head{display:flex;align-items:center;gap:.7rem}
-.step .k{font-family:var(--ff-display);font-size:1.2rem;line-height:1.15;min-width:0}
+.step .step-head{display:flex;flex-wrap:nowrap;align-items:center;gap:.7rem}
+.step .k{flex:1 1 auto;min-width:0;font-family:var(--ff-display);font-size:1.2rem;line-height:1.15}
 .step p{font-size:.92rem;opacity:.8}
-.step .dot{flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:var(--terracotta);color:var(--cream);display:grid;place-items:center;font-weight:700;font-size:.85rem}
+.step .num{flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:var(--terracotta);color:var(--cream);display:grid;place-items:center;font-weight:700;font-size:.85rem;line-height:1}
 
 /* connecting root through the steps */
 #howRoot{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
@@ -469,8 +469,29 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 #allergenPanel .aller-close{position:absolute;right:.6rem;top:.5rem;background:none;border:0;font-size:1.1rem;cursor:pointer;opacity:.6}
 /* ── Reviews ── */
 .reviews{padding:1rem 0 2.5rem}
-.reviews .rev-track{display:flex;gap:1rem;overflow-x:auto;padding:.5rem 6vw 1rem;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
-.reviews .rev-card{scroll-snap-align:start;flex:0 0 min(82%,340px);background:var(--cream);border:1px solid rgba(53,40,31,.1);border-radius:18px;padding:1.3rem 1.4rem;box-shadow:0 12px 30px -20px var(--shadow)}
+.reviews .rev-carousel{position:relative;max-width:820px;margin:0 auto}
+.reviews .rev-track{display:flex;gap:1.1rem;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;
+  padding:.5rem calc(50% - min(42%,220px)) 1rem;scrollbar-width:none}
+.reviews .rev-track::-webkit-scrollbar{display:none}
+.reviews .rev-card{scroll-snap-align:center;flex:0 0 min(84%,440px);background:var(--cream);border:1px solid rgba(53,40,31,.1);border-radius:18px;padding:1.4rem 1.5rem;box-shadow:0 14px 34px -22px var(--shadow);
+  transition:transform .35s ease, box-shadow .35s ease, opacity .35s ease}
+.reviews .rev-card.is-active{transform:translateY(-4px);box-shadow:0 22px 44px -24px var(--shadow)}
+/* nav arrows */
+.reviews .rev-arrow{position:absolute;top:calc(50% - .6rem);transform:translateY(-50%);z-index:3;
+  width:44px;height:44px;border-radius:50%;background:var(--cream);color:var(--espresso);
+  border:1px solid rgba(53,40,31,.14);box-shadow:0 10px 24px -16px var(--shadow);
+  font-size:1.5rem;line-height:1;display:grid;place-items:center;cursor:pointer;
+  transition:background .2s,transform .2s,opacity .2s}
+.reviews .rev-arrow.prev{left:.2rem}
+.reviews .rev-arrow.next{right:.2rem}
+.reviews .rev-arrow:hover{background:var(--cream-soft);border-color:var(--terracotta)}
+.reviews .rev-arrow:active{transform:translateY(-50%) scale(.94)}
+.reviews .rev-arrow[disabled]{opacity:.35;cursor:default;pointer-events:none}
+/* dots */
+.reviews .rev-dots{display:flex;justify-content:center;gap:.5rem;margin-top:1rem}
+.reviews .rev-dots button{width:8px;height:8px;border-radius:50%;background:rgba(53,40,31,.22);border:0;padding:0;cursor:pointer;transition:background .25s,transform .25s}
+.reviews .rev-dots button.on{background:var(--terracotta);transform:scale(1.35)}
+@media(max-width:560px){.reviews .rev-arrow{display:none}}
 .reviews .rev-stars{color:var(--gold);letter-spacing:.1em;margin-bottom:.5rem}
 .reviews .rev-text{font-size:.98rem;line-height:1.6;color:var(--espresso)}
 .reviews .rev-name{margin-top:.8rem;font-family:var(--ff-display);color:var(--sage-dark)}
@@ -498,17 +519,16 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .rev-form-send:hover{background:var(--sage-dark);transform:translateY(-1px)}
 .rev-form-note{font-size:.82rem;color:var(--sage-dark);text-align:center}
 /* ── Story expander ── */
-.story-toggle{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--ff-body);font-size:1rem;color:var(--sage-dark);cursor:pointer;letter-spacing:.02em;
-  padding:.7rem 1.35rem;border-radius:999px;
-  background:linear-gradient(135deg,rgba(255,255,255,.6),rgba(247,240,227,.35));
-  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  border:1px solid rgba(53,40,31,.12);
-  box-shadow:0 12px 28px -18px rgba(53,40,31,.5),inset 0 1px 0 rgba(255,255,255,.6);
-  transition:transform .2s,box-shadow .2s}
-.story-toggle:hover{transform:translateY(-1px);box-shadow:0 16px 32px -18px rgba(53,40,31,.55)}
-.story-toggle .rom{color:var(--terracotta)}
-.story-chev{display:inline-block;transition:transform .35s ease;font-size:1.1rem}
-.story.open .story-chev{transform:rotate(180deg)}
+.story-toggle{display:inline-flex;align-items:center;gap:.6rem;font-family:var(--ff-body);font-size:1rem;color:var(--espresso);cursor:pointer;letter-spacing:.01em;
+  padding:.32rem .95rem .32rem .4rem;border-radius:999px;
+  background:#fff;border:1px solid rgba(53,40,31,.1);
+  box-shadow:0 10px 24px -18px rgba(53,40,31,.5);
+  transition:transform .2s,box-shadow .2s,background .2s}
+.story-toggle:hover{transform:translateY(-1px);box-shadow:0 14px 28px -18px rgba(53,40,31,.55)}
+.story-logo{height:34px;width:34px;object-fit:contain;flex:0 0 auto}
+.story-label{white-space:nowrap;line-height:1.1}
+.story-label .rom{color:var(--terracotta);font-style:italic;margin-left:.4rem;opacity:.85;font-size:.92em}
+.story.open .story-toggle{background:var(--cream)}
 .story-body{max-height:0;overflow:hidden;opacity:0;transition:max-height .55s ease,opacity .4s ease}
 .story.open .story-body{max-height:1400px;opacity:1;margin-top:1rem}
 .modal.done form{display:none}
@@ -697,20 +717,25 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <h2 id="howH">From order to pickup</h2>
   </div>
   <div class="steps">
-    <div class="step"><div class="step-head"><span class="dot">1</span><span class="k">Finish your order</span></div><p>Pick your dish and add your name and contact — it takes under a minute.</p></div>
-    <div class="step"><div class="step-head"><span class="dot">2</span><span class="k">Send your $10 deposit</span></div><p>A $10 Interac e-Transfer to orders@takoshi.ca holds your spot. Upload the screenshot to confirm.</p></div>
-    <div class="step"><div class="step-head"><span class="dot">3</span><span class="k">We start cooking</span></div><p>Every order is made fresh from scratch once your deposit is confirmed.</p></div>
-    <div class="step"><div class="step-head"><span class="dot">4</span><span class="k">Pick up warm</span></div><p>Collect at 180 Fairview Mall Drive and pay the balance — cash or Interac, whichever works.</p></div>
+    <div class="step"><div class="step-head"><span class="num">1</span><span class="k">Finish your order</span></div><p>Pick your dish and add your name and contact — it takes under a minute.</p></div>
+    <div class="step"><div class="step-head"><span class="num">2</span><span class="k">Send your $10 deposit</span></div><p>A $10 Interac e-Transfer to orders@takoshi.ca holds your spot. Upload the screenshot to confirm.</p></div>
+    <div class="step"><div class="step-head"><span class="num">3</span><span class="k">We start cooking</span></div><p>Every order is made fresh from scratch once your deposit is confirmed.</p></div>
+    <div class="step"><div class="step-head"><span class="num">4</span><span class="k">Pick up warm</span></div><p>Collect at 180 Fairview Mall Drive and pay the balance — cash or Interac, whichever works.</p></div>
   </div>
 </section>
 
 <!-- REVIEWS -->
 <section class="reviews" id="reviews" aria-labelledby="revH">
   <div class="section-head" style="padding-top:0">
-    <span class="eyebrow"><span class="rom">Kalīpay</span>&#8202;— joy you gather for</span>
-    <h2 id="revH">What people say</h2>
+    <span class="eyebrow"><span class="rom">Kalīpay</span>&#8202;— noun · the shared joy of gathering to eat</span>
+    <h2 id="revH">What makes us feel Kalīpay</h2>
   </div>
-  <div class="rev-track" id="revTrack"><p style="padding:0 6vw;color:var(--sage-dark)">Loading&#8230;</p></div>
+  <div class="rev-carousel">
+    <button type="button" class="rev-arrow prev" id="revPrev" aria-label="Previous review">&#8249;</button>
+    <div class="rev-track" id="revTrack"><p style="padding:0 6vw;color:var(--sage-dark)">Loading&#8230;</p></div>
+    <button type="button" class="rev-arrow next" id="revNext" aria-label="Next review">&#8250;</button>
+    <div class="rev-dots" id="revDots" aria-hidden="true"></div>
+  </div>
   <div class="rev-add">
     <p class="rev-add-lead">Namit gid? Tell us — your kind words help this little kitchen grow.</p>
     <button type="button" class="rev-add-btn" id="revAddToggle" aria-expanded="false" aria-controls="revForm">＋ Leave a review</button>
@@ -734,8 +759,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 <section class="story" id="story">
   <div class="wrap">
     <button type="button" class="story-toggle" id="storyToggle" aria-expanded="false" aria-controls="storyBody">
-      <span class="rom">Nunut</span>&#8202;— read our story
-      <span class="story-chev" aria-hidden="true">&#8964;</span>
+      <img class="story-logo" src="images/logo-girl.webp" alt="" aria-hidden="true">
+      <span class="story-label">Here's our story <span class="rom">Ari ang aton istorya</span></span>
     </button>
     <div class="story-body" id="storyBody">
       <h2>The two best words a cook can hear</h2>
@@ -759,8 +784,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     </div>
     <div class="cols">
       <div><b>Kitchen</b><a href="#menu">Menu</a><br><a href="#story">Our story</a></div>
-      <div><b>Say hi</b><a href="https://takoshi.ca" target="_blank" rel="noopener">Takoshi</a><br><a href="#menu">Order now</a></div>
-      <div><b>Orders</b><a href="#menu">Order now</a><br><span style="opacity:.75">Toronto, ON</span></div>
+      <div><b>Order</b><a href="#menu">Order now</a><br><span style="opacity:.75">Toronto, ON</span></div>
+      <div><b>Say hi</b><a href="https://takoshi.ca" target="_blank" rel="noopener">Takoshi</a></div>
     </div>
     <div class="tiny"><span>© 2026 Namit Gid · <span class="rom" style="color:var(--gold)">kalīpay</span> in every batch</span><span>namit gid — so delicious</span></div>
   </div>
@@ -1226,7 +1251,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     const wr=wrap.getBoundingClientRect();
     if(!wr.width || !wr.height) return;
     const pts=steps.map(s=>{
-      const d=s.querySelector('.dot').getBoundingClientRect();
+      const d=s.querySelector('.num').getBoundingClientRect();
       return { x:d.left-wr.left+d.width/2, y:d.top-wr.top+d.height/2 };
     });
     if(!svg){
@@ -1266,7 +1291,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       steps.forEach(s=>s.classList.add('flow-in'));
       return;
     }
-    const L=+svg.dataset.len, DRAW=1000, last=nodes.length-1;
+    const L=+svg.dataset.len, DRAW=2200, last=nodes.length-1;
     const start=performance.now();
     (function frame(now){
       const t=Math.min(1,(now-start)/DRAW);
@@ -1275,7 +1300,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       if(t<1) requestAnimationFrame(frame);
     })(start);
     // steps flow/morph in only after the root has connected them
-    steps.forEach((s,i)=> setTimeout(()=>s.classList.add('flow-in'), DRAW+i*150));
+    steps.forEach((s,i)=> setTimeout(()=>s.classList.add('flow-in'), DRAW+i*180));
   }
 
   build();
@@ -1440,13 +1465,54 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   // ── Reviews ──
   function escR(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function stars(n){ var full=Math.floor(n), half=(n-full)>=0.5, empty=Math.max(0,5-full-(half?1:0)); return '★'.repeat(full)+(half?'½':'')+'☆'.repeat(empty); }
+  function initRevCarousel(){
+    var track=document.getElementById('revTrack');
+    var dotsWrap=document.getElementById('revDots');
+    var prev=document.getElementById('revPrev'), next=document.getElementById('revNext');
+    if(!track) return;
+    var cards=[].slice.call(track.querySelectorAll('.rev-card'));
+    var single = cards.length<2;
+    [prev,next].forEach(function(b){ if(b) b.style.display = single?'none':''; });
+    if(dotsWrap) dotsWrap.innerHTML='';
+    if(!cards.length){ return; }
+    // build dots
+    var dots=[];
+    if(dotsWrap && !single){
+      cards.forEach(function(c,i){
+        var d=document.createElement('button'); d.type='button'; d.setAttribute('aria-label','Go to review '+(i+1));
+        d.addEventListener('click', function(){ scrollToCard(i); });
+        dotsWrap.appendChild(d); dots.push(d);
+      });
+    }
+    function centerOf(el){ return el.offsetLeft + el.offsetWidth/2; }
+    function activeIndex(){
+      var mid=track.scrollLeft + track.clientWidth/2, best=0, bd=Infinity;
+      cards.forEach(function(c,i){ var dd=Math.abs(centerOf(c)-mid); if(dd<bd){ bd=dd; best=i; } });
+      return best;
+    }
+    function scrollToCard(i){ if(cards[i]) track.scrollTo({left:centerOf(cards[i])-track.clientWidth/2, behavior:'smooth'}); }
+    function sync(){
+      var a=activeIndex();
+      cards.forEach(function(c,i){ c.classList.toggle('is-active', i===a); });
+      dots.forEach(function(d,i){ d.classList.toggle('on', i===a); });
+      if(prev) prev.disabled = a<=0;
+      if(next) next.disabled = a>=cards.length-1;
+    }
+    if(prev) prev.addEventListener('click', function(){ scrollToCard(activeIndex()-1); });
+    if(next) next.addEventListener('click', function(){ scrollToCard(activeIndex()+1); });
+    var tk=false;
+    track.addEventListener('scroll', function(){ if(!tk){ tk=true; requestAnimationFrame(function(){ sync(); tk=false; }); } }, {passive:true});
+    addEventListener('resize', sync, {passive:true});
+    sync();
+  }
   fetch('/api/reviews').then(function(r){return r.json();}).then(function(rows){
     var t=document.getElementById('revTrack');
-    if(!Array.isArray(rows) || !rows.length){ t.innerHTML='<p style="padding:0 6vw;color:var(--sage-dark)">Be the first to leave a review — namit gid?</p>'; return; }
+    if(!Array.isArray(rows) || !rows.length){ t.innerHTML='<p style="padding:0 6vw;color:var(--sage-dark)">Be the first to leave a review — namit gid?</p>'; initRevCarousel(); return; }
     t.innerHTML = rows.map(function(rv){
       var photo = rv.photo_url ? '<img class="rev-photo" src="'+escR(rv.photo_url)+'" alt="" loading="lazy">' : '';
       return '<div class="rev-card">'+photo+'<div class="rev-stars">'+stars(Number(rv.stars)||5)+'</div><p class="rev-text">'+escR(rv.review_text)+'</p><div class="rev-name">— '+escR(rv.name)+'</div></div>';
     }).join('');
+    initRevCarousel();
   }).catch(function(){ var t=document.getElementById('revTrack'); if(t) t.innerHTML=''; });
 
   // ── Add a review (saved hidden until approved in the admin) ──
