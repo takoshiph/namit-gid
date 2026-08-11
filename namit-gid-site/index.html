@@ -158,7 +158,7 @@ header.hero{
 .emblem-leaf{position:absolute;left:72.3%;top:90.1%;width:7.3cqw;height:auto;z-index:3;pointer-events:none}
 .wordmark{position:absolute;left:50%;top:82%;transform:translate(-50%,-50%);z-index:2;
   font-family:var(--ff-display);font-weight:400;margin:0;line-height:.9;font-size:11cqw;
-  display:inline-flex;flex-direction:column;align-items:flex-start;cursor:pointer}
+  display:inline-flex;flex-direction:column;align-items:flex-start}
 .wordmark em{font-style:normal}
 .wm-namit{color:#f7f0e3;text-shadow:0 2px 3px rgba(38,20,8,.5)}
 /* gid aligned under Namit (g under N); island trails right as an overflow layer, tail over the d */
@@ -241,21 +241,17 @@ header.hero{
 .hero .price{font-family:var(--ff-display);color:var(--terracotta);font-size:1.35rem}
 .hero p.lede{max-width:34ch;font-size:1rem;opacity:.85}
 .hero p.lede + p.lede{margin-top:.7rem}
-.hero-story{max-height:0;overflow:hidden;transition:max-height .9s ease;
-  text-align:left;max-width:min(90vw,30rem);margin-inline:auto}
-.hero.story-open .hero-story{max-height:720px;margin-top:.4rem}
-.hero-story .lede{opacity:1;min-height:1em;max-width:none}
-.hero-story .lede + .lede{margin-top:.8rem}
-/* "Namit gid" stays plain while typing; it blooms terracotta + grows a root only after (.revealed) */
-.hero-story .hl{font-family:var(--ff-display);font-style:normal;color:inherit;transition:color .55s ease}
-.hero-story.revealed .hl{color:var(--terracotta)}
-.hero-story .root{position:relative;white-space:nowrap}
+/* story panel: left-aligned readable column; "Namit gid" blooms + root grows after typing */
+.story-body .lede{opacity:1;min-height:1em;max-width:min(90vw,32rem);margin:0 auto;text-align:left}
+.story-body .lede + .lede{margin-top:.85rem}
+.story-body .hl{font-family:var(--ff-display);font-style:normal;color:inherit;transition:color .55s ease}
+.story-body.revealed .hl{color:var(--terracotta)}
+.story-body .root{position:relative;white-space:nowrap}
 .root-uline{position:absolute;left:-2%;bottom:-.44em;width:104%;height:.55em;overflow:visible;pointer-events:none}
 .root-uline path{fill:none;stroke:var(--terracotta);stroke-linecap:round;stroke-linejoin:round}
 .root-uline path:first-child{stroke-width:2.4;stroke-dasharray:230;stroke-dashoffset:230;transition:stroke-dashoffset 1s ease .15s}
 .root-uline .tendril{stroke-width:1.7;opacity:.85;stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .5s ease .8s}
-.hero-story.revealed .root-uline path{stroke-dashoffset:0}
-/* typing caret */
+.story-body.revealed .root-uline path{stroke-dashoffset:0}
 .type-caret{display:inline-block;width:2px;height:1.05em;background:var(--terracotta);margin-left:2px;vertical-align:-.16em;animation:caretBlink .8s step-end infinite}
 @keyframes caretBlink{50%{opacity:0}}
 
@@ -362,8 +358,8 @@ header.hero{
   position:relative;overflow:hidden}
 .story .wrap{
   max-width:820px;margin:0 auto;
-  padding:clamp(2.4rem,6vw,4rem) clamp(1.4rem,5vw,3rem);
-  display:flex;flex-direction:column;gap:1.4rem;text-align:center;align-items:center;
+  padding:clamp(1rem,2.6vw,1.6rem) clamp(1.4rem,5vw,3rem);
+  display:flex;flex-direction:column;gap:1rem;text-align:center;align-items:center;
 }
 .story h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
 .story p{max-width:58ch;font-size:1.05rem;opacity:.88}
@@ -566,8 +562,9 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .story-toggle:hover{transform:rotate(-.6deg) translateY(-1px);box-shadow:0 16px 30px -18px rgba(53,40,31,.55)}
 .story-toggle,.story-toggle:hover{transition:transform .2s,box-shadow .2s,background .2s}
 .story-logo{height:34px;width:34px;object-fit:contain;flex:0 0 auto}
-.story-label{white-space:nowrap;line-height:1.1}
-.story-label .rom{color:var(--terracotta);font-style:italic;margin-left:.4rem;opacity:.85;font-size:.92em}
+.story-label{display:inline-flex;align-items:baseline;gap:.5rem;white-space:nowrap;line-height:1.1}
+.story-rom{font-family:var(--ff-display);color:var(--terracotta);font-size:1.05rem}
+.story-en{font-size:.72rem;letter-spacing:.04em;color:var(--sage-dark);opacity:.8}
 .story.open .story-toggle{background:transparent}
 .story-body{max-height:0;overflow:hidden;opacity:0;transition:max-height .55s ease,opacity .4s ease}
 .story.open .story-body{max-height:1400px;opacity:1;margin-top:1rem}
@@ -713,15 +710,11 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <div class="emblem">
       <img class="emblem-img" src="images/emblem.png" alt="Namit gid — the cook behind the sign" width="1040" height="1199">
       <img class="wm-island" src="images/biaringan_island_v4.png" alt="" aria-hidden="true">
-      <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story" aria-label="Namit gid">
+      <h1 class="wordmark" aria-label="Namit gid">
         <span class="wm-namit" aria-hidden="true">Namit</span>
         <span class="wm-row2" aria-hidden="true"><span class="wm-gid">gid</span></span>
       </h1>
       <img class="emblem-leaf" src="images/leaf.png" alt="" aria-hidden="true">
-    </div>
-    <div class="hero-story" id="heroStory">
-      <p class="lede">At my husband's family table in Romblon, a good dish started a chain: one bite, one "<span class="hl">Namit gid</span>," then everyone turning to each other, nodding, saying it again. So good you say it twice. One day I caught myself doing it too.</p>
-      <p class="lede">It stuck, and it's the only review I cook for. Every plate I send out is meant to remind you what good food feels like. So don't be shy, say it out loud, "<span class="hl root">Namit gid<svg class="root-uline" viewBox="0 0 200 22" preserveAspectRatio="none" aria-hidden="true"><path d="M3,9 C34,3 55,17 92,10 C120,5 150,16 197,8"/><path class="tendril" d="M64,12 C60,17 63,20 58,21"/><path class="tendril" d="M150,11 C154,16 151,19 156,20"/></svg></span>." You never know, the one beside you might know it too.</p>
     </div>
   </div>
 </header>
@@ -795,12 +788,11 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   <div class="wrap">
     <button type="button" class="story-toggle" id="storyToggle" aria-expanded="false" aria-controls="storyBody">
       <img class="story-logo" src="images/logo-girl.webp" alt="" aria-hidden="true">
-      <span class="story-label">Here's our story <span class="rom">Ari ang aton istorya</span></span>
+      <span class="story-label"><span class="story-rom">Ari ang aton istorya</span><span class="story-en">Here's our story</span></span>
     </button>
     <div class="story-body" id="storyBody">
-      <h2>The two best words a cook can hear</h2>
-      <p>"Namit gid!" is what slips out, mouth still half-full, when the food back in the province is so good it interrupts the conversation, <em>so delicious</em>. It's the only review this kitchen cooks for: recipes carried from Romblon to Toronto, made the long way every weekend.</p>
-      <p>No shortcuts, no premix sauces. Just the recipes we grew up with, cooked the long way.</p>
+      <p class="lede">At my husband's family table in Romblon, a good dish started a chain: one bite, one "<span class="hl">Namit gid</span>," then everyone turning to each other, nodding, saying it again. So good you say it twice. One day I caught myself doing it too.</p>
+      <p class="lede">It stuck, and it's the only review I cook for. Every plate I send out is meant to remind you what good food feels like. So don't be shy, say it out loud, "<span class="hl root">Namit gid<svg class="root-uline" viewBox="0 0 200 22" preserveAspectRatio="none" aria-hidden="true"><path d="M3,9 C34,3 55,17 92,10 C120,5 150,16 197,8"/><path class="tendril" d="M64,12 C60,17 63,20 58,21"/><path class="tendril" d="M150,11 C154,16 151,19 156,20"/></svg></span>." You never know, the one beside you might know it too.</p>
       <div class="word-cards">
         <div class="word-card"><b>hilway</b><span>a peaceful, settled mind</span></div>
         <div class="word-card"><b>busug</b><span>full and satisfied from eating</span></div>
@@ -1583,41 +1575,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     });
   }
 
-  // ── Hero story reveal (tap the name) ──
-  var heroT=document.getElementById('heroTitle'), heroH=document.getElementById('heroHint'), heroSec=document.querySelector('header.hero');
-  // Typewriter for the hero story: type it plain with a caret, then bloom the "Namit gid" colour + root underline
-  var storyEl=document.getElementById('heroStory');
-  var ledes=storyEl ? [].slice.call(storyEl.querySelectorAll('.lede')) : [];
-  var storyData=ledes.map(function(p){ return {styled:p.innerHTML, text:p.textContent}; });
-  var storyTyped=false, REDUCE_S=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function escH(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function typeStory(){
-    if(storyTyped || !ledes.length) return; storyTyped=true;
-    if(REDUCE_S){ ledes.forEach(function(p,i){ p.innerHTML=storyData[i].styled; }); storyEl.classList.add('revealed'); return; }
-    ledes.forEach(function(p){ p.innerHTML=''; });
-    var pi=0, ci=0;
-    (function step(){
-      if(pi>=ledes.length){
-        ledes.forEach(function(p,i){ p.innerHTML=storyData[i].styled; });
-        requestAnimationFrame(function(){ storyEl.classList.add('revealed'); });
-        return;
-      }
-      var p=ledes[pi], t=storyData[pi].text;
-      if(ci<t.length){ ci++; p.innerHTML=escH(t.slice(0,ci))+'<span class="type-caret"></span>'; setTimeout(step, 11+Math.random()*20); }
-      else { p.innerHTML=escH(t); pi++; ci=0; setTimeout(step, 240); }
-    })();
-  }
-  function heroToggle(){
-    if(!heroSec) return;
-    var open=heroSec.classList.toggle('story-open');
-    if(heroT) heroT.setAttribute('aria-expanded', open?'true':'false');
-    if(open) setTimeout(typeStory, 260);
-  }
-  if(heroT){
-    heroT.addEventListener('click', heroToggle);
-    heroT.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); heroToggle(); } });
-  }
-  if(heroH) heroH.addEventListener('click', heroToggle);
+  // (hero story removed — it now lives in the "Ari ang aton istorya" section below)
 
   // ── Anchor the Biaringan island to the real "gid": tail on the d, waterline on the baseline ──
   (function(){
@@ -1639,22 +1597,39 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     addEventListener('resize', all, {passive:true});
   })();
 
-  // ── Story expander (tap to reveal) ──
+  // ── Story: opens under the pill, types out, then blooms "Namit gid" + the root underline ──
   var stToggle=document.getElementById('storyToggle'), stSec=document.getElementById('story');
+  var stBody=document.getElementById('storyBody');
+  var stLedes=stBody ? [].slice.call(stBody.querySelectorAll('.lede')) : [];
+  var stData=stLedes.map(function(p){ return {styled:p.innerHTML, text:p.textContent}; });
+  var stTyped=false, REDUCE_S=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function escH(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function typeStory(){
+    if(stTyped || !stLedes.length) return; stTyped=true;
+    if(REDUCE_S){ stLedes.forEach(function(p,i){ p.innerHTML=stData[i].styled; }); stBody.classList.add('revealed'); return; }
+    stLedes.forEach(function(p){ p.innerHTML=''; });
+    var pi=0, ci=0;
+    (function step(){
+      if(pi>=stLedes.length){ stLedes.forEach(function(p,i){ p.innerHTML=stData[i].styled; }); requestAnimationFrame(function(){ stBody.classList.add('revealed'); }); return; }
+      var p=stLedes[pi], t=stData[pi].text;
+      if(ci<t.length){ ci++; p.innerHTML=escH(t.slice(0,ci))+'<span class="type-caret"></span>'; setTimeout(step, 11+Math.random()*20); }
+      else { p.innerHTML=escH(t); pi++; ci=0; setTimeout(step, 240); }
+    })();
+  }
   function openStory(){
     if(!stSec) return;
     stSec.classList.add('open');
     if(stToggle) stToggle.setAttribute('aria-expanded','true');
     document.querySelectorAll('#storyBody .rise').forEach(function(el){ el.classList.add('in-view'); });
+    setTimeout(typeStory, 380);
   }
   if(stToggle && stSec){
     stToggle.addEventListener('click', function(){
       var open = stSec.classList.toggle('open');
       stToggle.setAttribute('aria-expanded', open?'true':'false');
-      if(open){ document.querySelectorAll('#storyBody .rise').forEach(function(el){ el.classList.add('in-view'); }); }
+      if(open){ document.querySelectorAll('#storyBody .rise').forEach(function(el){ el.classList.add('in-view'); }); setTimeout(typeStory, 380); }
     });
   }
-  // Nav "Our story" link should open the expander, not just scroll to it.
   document.querySelectorAll('a[href="#story"]').forEach(function(a){
     a.addEventListener('click', function(){ setTimeout(openStory, 60); });
   });
