@@ -146,6 +146,8 @@ header.hero{
   animation:emblemFloat 6.5s ease-in-out infinite}
 @keyframes emblemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .emblem-img{display:block;width:100%;height:auto;filter:drop-shadow(0 18px 22px rgba(38,52,47,.24))}
+/* bottom-right leaf on top so the enlarged island runs behind it */
+.emblem-leaf{position:absolute;left:72.3%;top:90.1%;width:7.3cqw;height:auto;z-index:3;pointer-events:none}
 .wordmark{position:absolute;left:50%;top:82%;transform:translate(-50%,-50%);z-index:2;
   font-family:var(--ff-display);font-weight:400;margin:0;line-height:.9;font-size:11cqw;
   display:inline-flex;flex-direction:column;align-items:flex-start;cursor:pointer}
@@ -153,8 +155,8 @@ header.hero{
 .wm-namit{color:#f7f0e3;text-shadow:0 2px 3px rgba(38,20,8,.5)}
 /* gid aligned under Namit (g under N); island trails right as an overflow layer, tail over the d */
 .wm-row2{position:relative;display:inline-block;margin-top:.03em}
-.wm-gid{position:relative;z-index:1;color:#f6ac66;text-shadow:0 1px 1px rgba(30,16,6,.75),0 4px 9px rgba(30,16,6,.5)}
-.wm-island{position:absolute;left:64%;bottom:-.04em;width:27cqw;height:auto;z-index:2;
+.wm-gid{position:relative;z-index:2;color:#f6ac66;text-shadow:0 1px 1px rgba(30,16,6,.75),0 4px 9px rgba(30,16,6,.5)}
+.wm-island{position:absolute;left:60%;bottom:-.02em;width:36cqw;height:auto;z-index:1;
   pointer-events:none;filter:drop-shadow(0 3px 5px rgba(38,20,8,.42))}
 .wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
 .eyebrow{
@@ -696,6 +698,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
         <span class="wm-namit" aria-hidden="true">Namit</span>
         <span class="wm-row2" aria-hidden="true"><span class="wm-gid">gid</span><img class="wm-island" src="images/biaringan_island_v4.png" alt=""></span>
       </h1>
+      <img class="emblem-leaf" src="images/leaf.png" alt="" aria-hidden="true">
     </div>
     <div class="hero-story" id="heroStory">
       <p class="lede">At my husband's family table in Romblon, Philippines, everyone kept saying it: "Namit gid!" Eventually I picked it up too. It's stuck ever since: still the only review that matters, every time a dish turns out right.</p>
