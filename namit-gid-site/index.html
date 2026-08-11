@@ -146,15 +146,16 @@ header.hero{
   animation:emblemFloat 6.5s ease-in-out infinite}
 @keyframes emblemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .emblem-img{display:block;width:100%;height:auto;filter:drop-shadow(0 18px 22px rgba(38,52,47,.24))}
-.wordmark{position:absolute;left:52%;top:79.5%;transform:translate(-50%,-50%);z-index:2;
-  font-family:var(--ff-display);font-weight:400;margin:0;line-height:.86;font-size:13.5cqw;
-  display:inline-flex;flex-direction:column;align-items:center;cursor:pointer}
+.wordmark{position:absolute;left:52%;top:78%;transform:translate(-50%,-50%);z-index:2;
+  font-family:var(--ff-display);font-weight:400;margin:0;line-height:.9;font-size:11cqw;
+  display:inline-flex;flex-direction:column;align-items:flex-start;cursor:pointer}
 .wordmark em{font-style:normal}
 .wm-namit{color:#f7f0e3;text-shadow:0 2px 3px rgba(38,20,8,.45)}
-/* second line: Biaringan island + gid, centered as one unit under Namit */
-.wm-row2{display:inline-flex;align-items:center;gap:.14em;margin-top:.04em}
-.wm-island{height:1.12em;width:auto;pointer-events:none;filter:drop-shadow(0 3px 4px rgba(38,20,8,.32))}
-.wm-gid{color:#f2a765;text-shadow:0 2px 3px rgba(38,20,8,.45)}
+/* second line: gid lower-left, island to the right with its tail lapping over the d */
+.wm-row2{position:relative;display:inline-block;margin-top:.04em}
+.wm-gid{position:relative;z-index:1;color:#f2a765;text-shadow:0 2px 3px rgba(38,20,8,.45)}
+.wm-island{position:absolute;left:58%;bottom:0;height:1.3em;width:auto;z-index:2;
+  pointer-events:none;filter:drop-shadow(0 3px 4px rgba(38,20,8,.42))}
 .wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
 .eyebrow{
   font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--espresso);
@@ -693,7 +694,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <img class="emblem-img" src="images/emblem.png" alt="Namit gid — the cook behind the sign" width="1040" height="1199">
       <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story" aria-label="Namit gid">
         <span class="wm-namit" aria-hidden="true">Namit</span>
-        <span class="wm-row2" aria-hidden="true"><img class="wm-island" src="images/biaringan_island_logo.png" alt=""><span class="wm-gid">gid</span></span>
+        <span class="wm-row2" aria-hidden="true"><span class="wm-gid">gid</span><img class="wm-island" src="images/biaringan_island_logo.png" alt=""></span>
       </h1>
     </div>
     <div class="hero-story" id="heroStory">
