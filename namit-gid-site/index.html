@@ -61,6 +61,14 @@ img{-webkit-user-drag:none;user-select:none}
   transition:opacity .7s ease, visibility .7s;
 }
 #splash.gone{opacity:0;visibility:hidden;pointer-events:none}
+/* splash now shows the real emblem, dropping in and settling like a hanging sign */
+#splash .s-emblem{width:min(66vw,320px);margin:0;transform-origin:50% 16%;
+  animation:signDrop 1.2s cubic-bezier(.2,.85,.3,1) .1s both}
+@keyframes signDrop{
+  0%{opacity:0;transform:translateY(-54px) rotate(-6deg)}
+  50%{opacity:1;transform:translateY(0) rotate(4.5deg)}
+  70%{transform:rotate(-3deg)}85%{transform:rotate(1.6deg)}100%{transform:rotate(0)}
+}
 .s-logo{position:relative;width:min(52vw,250px);aspect-ratio:1}
 .s-badge{position:absolute;inset:0;width:100%;height:100%;opacity:0;transform:scale(.55);
   animation:badgePop .75s cubic-bezier(.2,1.4,.35,1) .15s forwards;
@@ -656,24 +664,19 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 </svg>
 
 <!-- SPLASH -->
-<div id="splash" role="dialog" aria-label="Namit Gid intro">
-  <div class="s-logo" aria-hidden="true">
-    <img class="s-badge" src="images/logo-badge.webp" alt="">
-    <img class="s-girl" src="images/logo-girl.webp" alt="">
+<div id="splash" role="dialog" aria-label="Namit gid intro">
+  <div class="s-emblem emblem" aria-hidden="true">
+    <img class="emblem-img" src="images/emblem.png" alt="">
+    <img class="wm-island" src="images/biaringan_island_v4.png" alt="">
+    <div class="wordmark">
+      <span class="wm-namit">Namit</span>
+      <span class="wm-row2"><span class="wm-gid">gid</span></span>
+    </div>
+    <img class="emblem-leaf" src="images/leaf.png" alt="">
   </div>
-  <div class="splash-word">Namit <em>gid</em></div>
   <div class="splash-sub">so delicious · filipino home cooking</div>
   <div class="splash-bar" aria-hidden="true"><i></i></div>
-  <div class="splash-cook" aria-hidden="true">
-    <svg class="cook-icon" viewBox="0 0 48 40" width="40" height="34">
-      <path class="steam" d="M14 17c-3 3-3 6 0 9"/>
-      <path class="steam" d="M24 15c-3 3-3 8 0 11"/>
-      <path class="steam" d="M34 17c-3 3-3 6 0 9"/>
-      <rect x="8" y="20" width="32" height="13" rx="5" fill="var(--terracotta)" opacity=".9"/>
-      <ellipse cx="24" cy="20" rx="16" ry="3" fill="var(--cream)"/>
-    </svg>
-    <span class="cook-caption" id="cookCaption">Preparing menu&hellip;</span>
-  </div>
+  <div class="splash-cook" aria-hidden="true"><span class="cook-caption" id="cookCaption">Preparing menu&hellip;</span></div>
   <button class="splash-skip" id="skipSplash">Skip intro</button>
 </div>
 
@@ -1087,10 +1090,10 @@ if (cookCaption && !matchMedia('(prefers-reduced-motion: reduce)').matches){
 
 /* ---------------- logo layer parallax ---------------- */
 if (!matchMedia('(prefers-reduced-motion: reduce)').matches){
-  const em=document.querySelector('.emblem');
-  if(em) addEventListener('pointermove', e=>{
+  const ems=document.querySelectorAll('.emblem');
+  if(ems.length) addEventListener('pointermove', e=>{
     const dx=e.clientX/innerWidth-.5, dy=e.clientY/innerHeight-.5;
-    em.style.translate = `${dx*8}px ${dy*6}px`;
+    ems.forEach(m=>{ m.style.translate = `${dx*8}px ${dy*6}px`; });
   }, {passive:true});
 }
 
@@ -1593,23 +1596,22 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 
   // ── Anchor the Biaringan island to the real "gid": tail on the d, waterline on the baseline ──
   (function(){
-    var em=document.querySelector('.emblem');
-    var namitEl=em && em.querySelector('.wm-namit');
-    var gidEl=em && em.querySelector('.wm-gid');
-    var island=em && em.querySelector('.wm-island');
-    if(!em||!namitEl||!gidEl||!island) return;
-    function place(){
-      var e=em.getBoundingClientRect(), g=gidEl.getBoundingClientRect(), nm=namitEl.getBoundingClientRect();
-      var ih=island.offsetHeight||1;
-      // anchored to Namit (fixed) so indenting gid only tucks it behind, never pushes the island out
-      island.style.left=((nm.left-e.left)+g.width*0.62).toFixed(1)+'px';
-      var baseline=(g.top-e.top)+g.height*0.80;                            // gid baseline
-      island.style.top=(baseline-ih*0.84).toFixed(1)+'px';                 // island waterline on baseline
-    }
-    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(place); }
-    place();
-    addEventListener('load', place);
-    addEventListener('resize', place, {passive:true});
+    var placers=[];
+    document.querySelectorAll('.emblem').forEach(function(em){
+      var namitEl=em.querySelector('.wm-namit'), gidEl=em.querySelector('.wm-gid'), island=em.querySelector('.wm-island');
+      if(!namitEl||!gidEl||!island) return;
+      function place(){
+        var e=em.getBoundingClientRect(), g=gidEl.getBoundingClientRect(), nm=namitEl.getBoundingClientRect();
+        var ih=island.offsetHeight||1;
+        island.style.left=((nm.left-e.left)+g.width*0.62).toFixed(1)+'px';   // anchored to Namit (fixed)
+        island.style.top=((g.top-e.top)+g.height*0.80-ih*0.84).toFixed(1)+'px'; // waterline on baseline
+      }
+      placers.push(place); place();
+    });
+    function all(){ placers.forEach(function(p){ p(); }); }
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(all); }
+    addEventListener('load', all);
+    addEventListener('resize', all, {passive:true});
   })();
 
   // ── Story expander (tap to reveal) ──
