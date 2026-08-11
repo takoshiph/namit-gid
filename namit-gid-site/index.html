@@ -793,12 +793,6 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <div class="story-body" id="storyBody">
       <p class="lede">At my husband's family table in Romblon, a good dish started a chain: one bite, one "<span class="hl">Namit gid</span>," then everyone turning to each other, nodding, saying it again. So good you say it twice. One day I caught myself doing it too.</p>
       <p class="lede">It stuck, and it's the only review I cook for. Every plate I send out is meant to remind you what good food feels like. So don't be shy, say it out loud, "<span class="hl root">Namit gid<svg class="root-uline" viewBox="0 0 200 22" preserveAspectRatio="none" aria-hidden="true"><path d="M3,9 C34,3 55,17 92,10 C120,5 150,16 197,8"/><path class="tendril" d="M64,12 C60,17 63,20 58,21"/><path class="tendril" d="M150,11 C154,16 151,19 156,20"/></svg></span>." You never know, the one beside you might know it too.</p>
-      <div class="word-cards">
-        <div class="word-card"><b>hilway</b><span>a peaceful, settled mind</span></div>
-        <div class="word-card"><b>busug</b><span>full and satisfied from eating</span></div>
-        <div class="word-card"><b>nunut</b><span>going along, together</span></div>
-        <div class="word-card"><b>kalīpay</b><span>joy, the kind you gather for</span></div>
-      </div>
     </div>
   </div>
 </section>
@@ -1038,7 +1032,7 @@ addEventListener('resize', ()=>buildVine(), {passive:true});
 addEventListener('load', ()=>buildVine());
 
 /* ---------------- category tabs ---------------- */
-const menuTabs = document.querySelectorAll('.menu-tabs button');
+const menuTabs = document.querySelectorAll('.menu-tabs button[data-cat]');
 function setMenuCat(cat){
   menuTabs.forEach(t=>{
     const on = t.dataset.cat===cat;
