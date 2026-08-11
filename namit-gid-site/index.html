@@ -1578,17 +1578,18 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   }
   if(heroH) heroH.addEventListener('click', heroToggle);
 
-  // ── Wordmark lockup: align the two i-stems, then offset gid as the front layer ──
+  // ── Anchor the Biaringan island to the real "gid": tail on the d, waterline on the baseline ──
   (function(){
-    if(!heroT) return;
-    var namitEl=heroT.querySelector('.wm-namit'), gidEl=heroT.querySelector('.wm-gid');
-    var ni=namitEl && namitEl.querySelector('.wm-i'), gi=gidEl && gidEl.querySelector('.wm-i');
-    if(!namitEl||!ni||!gidEl||!gi) return;
+    var em=document.querySelector('.emblem');
+    var gidEl=em && em.querySelector('.wm-gid');
+    var island=em && em.querySelector('.wm-island');
+    if(!em||!gidEl||!island) return;
     function place(){
-      gidEl.style.margin='0';
-      var a=ni.getBoundingClientRect(), b=gi.getBoundingClientRect();
-      gidEl.style.marginLeft=(a.left-b.left).toFixed(2)+'px';   // align the two i-stems
-      gidEl.style.marginTop=(a.bottom-b.top).toFixed(2)+'px';   // join i tip to i bottom, lifting g and d
+      var e=em.getBoundingClientRect(), g=gidEl.getBoundingClientRect();
+      var ih=island.offsetHeight||1;
+      island.style.left=((g.left-e.left)+g.width*0.62).toFixed(1)+'px';   // tail laps the d
+      var baseline=(g.top-e.top)+g.height*0.80;                            // gid baseline
+      island.style.top=(baseline-ih*0.84).toFixed(1)+'px';                 // island waterline on baseline
     }
     if(document.fonts && document.fonts.ready){ document.fonts.ready.then(place); }
     place();
