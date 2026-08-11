@@ -233,8 +233,21 @@ header.hero{
 .hero .price{font-family:var(--ff-display);color:var(--terracotta);font-size:1.35rem}
 .hero p.lede{max-width:34ch;font-size:1rem;opacity:.85}
 .hero p.lede + p.lede{margin-top:.7rem}
-.hero-story{max-height:0;overflow:hidden;opacity:0;transition:opacity .9s ease,max-height .9s ease}
-.hero.story-open .hero-story{max-height:600px;opacity:1;margin-top:.2rem}
+.hero-story{max-height:0;overflow:hidden;transition:max-height .9s ease}
+.hero.story-open .hero-story{max-height:680px;margin-top:.2rem}
+/* "Namit gid" mentions echo the logo */
+.hero-story .hl{font-family:var(--ff-display);font-style:normal;color:var(--terracotta)}
+/* root underline that draws itself in after the line arrives */
+.hero-story .root{position:relative;white-space:nowrap}
+.root-uline{position:absolute;left:-2%;bottom:-.44em;width:104%;height:.55em;overflow:visible;pointer-events:none}
+.root-uline path{fill:none;stroke:var(--terracotta);stroke-linecap:round;stroke-linejoin:round}
+.root-uline path:first-child{stroke-width:2.4;stroke-dasharray:230;stroke-dashoffset:230;transition:stroke-dashoffset 1s ease .55s}
+.root-uline .tendril{stroke-width:1.7;opacity:.85;stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .5s ease 1.25s}
+.hero.story-open .root-uline path{stroke-dashoffset:0}
+/* lines arrive like they're being written */
+.hero-story .lede{opacity:0;transform:translateY(10px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.hero.story-open .hero-story .lede{opacity:1;transform:none}
+.hero.story-open .hero-story .lede:nth-of-type(2){transition-delay:.3s}
 
 /* ---------- menu ---------- */
 .section-head{
@@ -702,8 +715,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <img class="emblem-leaf" src="images/leaf.png" alt="" aria-hidden="true">
     </div>
     <div class="hero-story" id="heroStory">
-      <p class="lede">At my husband's family table in Romblon, Philippines, everyone kept saying it: "Namit gid!" Eventually I picked it up too. It's stuck ever since: still the only review that matters, every time a dish turns out right.</p>
-      <p class="lede">That's how I got this name, and hopefully you'll say it too once you've tried my cooking.</p>
+      <p class="lede">At my husband's family table in Romblon, a good dish started a chain: one bite, one "<span class="hl">Namit gid</span>," then everyone turning to each other, nodding, saying it again. So good you say it twice. One day I caught myself doing it too.</p>
+      <p class="lede">It stuck, and it's the only review I cook for. Every plate I send out is meant to remind you what good food feels like. So don't be shy, say it out loud, "<span class="hl root">Namit gid<svg class="root-uline" viewBox="0 0 200 22" preserveAspectRatio="none" aria-hidden="true"><path d="M3,9 C34,3 55,17 92,10 C120,5 150,16 197,8"/><path class="tendril" d="M64,12 C60,17 63,20 58,21"/><path class="tendril" d="M150,11 C154,16 151,19 156,20"/></svg></span>." You never know, the one beside you might know it too.</p>
     </div>
   </div>
 </header>
