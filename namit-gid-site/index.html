@@ -125,9 +125,9 @@ nav.scrolled{background:rgba(155,185,175,.88);backdrop-filter:blur(10px);box-sha
 
 /* ---------- hero ---------- */
 header.hero{
-  position:relative;min-height:88svh;
+  position:relative;min-height:82svh;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:5rem 1rem 2.4rem;text-align:center;
+  padding:5rem 1rem 2rem;text-align:center;
 }
 #fx{position:absolute;inset:0;z-index:0;pointer-events:none}
 .hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.7rem}
@@ -240,6 +240,15 @@ header.hero{
 .section-head h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
 .section-head p{max-width:44ch;opacity:.8}
 .section-head .head-tr{font-size:.95rem;font-style:italic;letter-spacing:.02em;color:var(--sage-dark);opacity:.82;margin-top:-.35rem}
+/* compact allergen chip, tucked into the lower-right of the menu heading */
+.section-head#menu{position:relative}
+.menu-allergen{display:inline-flex;align-items:center;gap:.3rem;font:inherit;font-size:.76rem;
+  background:rgba(255,255,255,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  color:var(--espresso);border:1px solid rgba(53,40,31,.16);border-radius:999px;
+  padding:.32rem .8rem;cursor:pointer;opacity:.85;transition:background .2s,opacity .2s,transform .2s}
+.menu-allergen:hover{background:rgba(255,255,255,.7);opacity:1;transform:translateY(-1px)}
+.section-head#menu .menu-allergen{position:absolute;right:clamp(1rem,4vw,2.2rem);bottom:.7rem}
+@media(max-width:720px){.section-head#menu .menu-allergen{position:static;margin:.5rem auto 0}}
 .rom{font-family:var(--ff-display);color:var(--terracotta);letter-spacing:.06em}
 
 .menu-item{
@@ -690,8 +699,6 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <p class="lede">At my husband's family table in Romblon, Philippines, everyone kept saying it: "Namit gid!" Eventually I picked it up too. It's stuck ever since: still the only review that matters, every time a dish turns out right.</p>
       <p class="lede">That's how I got this name, and hopefully you'll say it too once you've tried my cooking.</p>
     </div>
-    <a class="order-btn" href="#menu">Reasons you'll say Namit Gid</a>
-    <button type="button" class="hero-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel">&#9432;&nbsp;Allergen &amp; kitchen info</button>
   </div>
 </header>
 
@@ -701,6 +708,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <span class="eyebrow"><span class="rom">Busug</span>&#8202;· full &amp; satisfied</span>
     <h2>The menu</h2>
     <p>Everything is made to order, so please place your order in advance. Pickup is at 180 Fairview Mall Dr.</p>
+    <button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel">&#9432;&nbsp;Allergen</button>
   </div>
 
   <div class="menu-tabs" role="tablist" aria-label="Menu categories">
