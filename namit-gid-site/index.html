@@ -142,16 +142,17 @@ header.hero{
   filter:drop-shadow(0 10px 18px rgba(38,52,47,.35))}
 @keyframes girlBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-9px)}}
 /* hanging wooden sign holding the wordmark; live text overlaid on the inner panel */
-.hero-sign{position:relative;width:min(90vw,440px);margin:-.3rem auto 0;z-index:1;container-type:inline-size}
-.sign-img{display:block;width:100%;height:auto;filter:drop-shadow(0 16px 22px rgba(38,52,47,.26))}
-.wordmark{position:absolute;left:51%;top:56.5%;transform:translate(-50%,-50%);
-  font-family:var(--ff-display);font-weight:400;margin:0;line-height:.82;font-size:13.5cqw;
+.emblem{position:relative;width:min(90vw,430px);margin:.1rem auto 0;container-type:inline-size;
+  animation:emblemFloat 6.5s ease-in-out infinite}
+@keyframes emblemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.emblem-img{display:block;width:100%;height:auto;filter:drop-shadow(0 18px 22px rgba(38,52,47,.24))}
+.wordmark{position:absolute;left:54%;top:82%;transform:translate(-50%,-50%);z-index:2;
+  font-family:var(--ff-display);font-weight:400;margin:0;line-height:.82;font-size:11cqw;
   display:inline-flex;flex-direction:column;align-items:flex-start;cursor:pointer}
 .wordmark em{font-style:normal}
-.wm-namit{display:flex;color:#f7f0e3;text-shadow:0 2px 3px rgba(38,20,8,.4)}
-.wm-gid{display:flex;color:#f2a765;text-shadow:0 2px 3px rgba(38,20,8,.4)}
+.wm-namit{display:flex;color:#f7f0e3;text-shadow:0 2px 3px rgba(38,20,8,.45)}
+.wm-gid{display:flex;color:#f2a765;text-shadow:0 2px 3px rgba(38,20,8,.45)}
 .wm-i{display:inline-block}
-@media (hover:hover){.hero-sign:hover .sign-img{filter:drop-shadow(0 20px 26px rgba(38,52,47,.32))}}
 .wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
 .eyebrow{
   font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--espresso);
@@ -686,12 +687,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   <div class="hero-inner">
     <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><path id="badgePath" d="M50,50 m-36,0 a36,36 0 1,1 72,0 a36,36 0 1,1 -72,0"/></defs></svg>
     <span class="eyebrow">Filipino home cooking · Toronto</span>
-    <div class="logo-stage" aria-hidden="false">
-      <img class="logo-badge" id="logoBadge" src="images/logo-badge.webp" alt="" width="520" height="518">
-      <img class="logo-girl" id="logoGirl" src="images/logo-girl.webp" alt="The cook behind Namit Gid" width="251" height="560">
-    </div>
-    <div class="hero-sign">
-      <img class="sign-img" src="images/namitgid_plank_logo.png" alt="" width="1264" height="848">
+    <div class="emblem">
+      <img class="emblem-img" src="images/emblem.png" alt="Namit gid — the cook behind the sign" width="1040" height="1270">
       <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story" aria-label="Namit gid">
         <span class="wm-namit" aria-hidden="true">Nam<span class="wm-i">i</span>t</span>
         <span class="wm-gid" aria-hidden="true">g<span class="wm-i">i</span>d</span>
@@ -1070,11 +1067,10 @@ if (cookCaption && !matchMedia('(prefers-reduced-motion: reduce)').matches){
 
 /* ---------------- logo layer parallax ---------------- */
 if (!matchMedia('(prefers-reduced-motion: reduce)').matches){
-  const lb=document.getElementById('logoBadge'), lg=document.getElementById('logoGirl');
-  if(lb&&lg) addEventListener('pointermove', e=>{
+  const em=document.querySelector('.emblem');
+  if(em) addEventListener('pointermove', e=>{
     const dx=e.clientX/innerWidth-.5, dy=e.clientY/innerHeight-.5;
-    lb.style.translate = `${dx*7}px ${dy*5}px`;
-    lg.style.translate = `${dx*16}px ${dy*11}px`;
+    em.style.translate = `${dx*8}px ${dy*6}px`;
   }, {passive:true});
 }
 
