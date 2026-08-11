@@ -241,9 +241,11 @@ header.hero{
 .hero .price{font-family:var(--ff-display);color:var(--terracotta);font-size:1.35rem}
 .hero p.lede{max-width:34ch;font-size:1rem;opacity:.85}
 .hero p.lede + p.lede{margin-top:.7rem}
-.hero-story{max-height:0;overflow:hidden;transition:max-height .9s ease}
-.hero.story-open .hero-story{max-height:720px;margin-top:.2rem}
-.hero-story .lede{opacity:1;min-height:1em}
+.hero-story{max-height:0;overflow:hidden;transition:max-height .9s ease;
+  text-align:left;max-width:min(90vw,30rem);margin-inline:auto}
+.hero.story-open .hero-story{max-height:720px;margin-top:.4rem}
+.hero-story .lede{opacity:1;min-height:1em;max-width:none}
+.hero-story .lede + .lede{margin-top:.8rem}
 /* "Namit gid" stays plain while typing; it blooms terracotta + grows a root only after (.revealed) */
 .hero-story .hl{font-family:var(--ff-display);font-style:normal;color:inherit;transition:color .55s ease}
 .hero-story.revealed .hl{color:var(--terracotta)}
