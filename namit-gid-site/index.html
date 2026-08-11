@@ -131,7 +131,7 @@ header.hero{
 }
 #fx{position:absolute;inset:0;z-index:0;pointer-events:none}
 .hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.7rem}
-.logo-stage{position:relative;width:min(58vw,320px);aspect-ratio:1;margin:.4rem 0 .2rem}
+.logo-stage{position:relative;z-index:2;width:min(58vw,320px);aspect-ratio:1;margin:.4rem 0 .2rem}
 .logo-badge{position:absolute;inset:0;width:100%;height:100%;
   animation:slowSpin 85s linear infinite;
   filter:drop-shadow(0 16px 30px rgba(38,52,47,.3))}
@@ -141,17 +141,18 @@ header.hero{
   animation:girlBob 6s ease-in-out infinite;
   filter:drop-shadow(0 10px 18px rgba(38,52,47,.35))}
 @keyframes girlBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-9px)}}
-/* wordmark lockup below the badge: stacked, shared i-axis, tap to open the story */
-.wordmark{font-family:var(--ff-display);font-weight:400;margin:.15rem 0 0;
-  font-size:clamp(2.4rem,7vw,3.7rem);line-height:.82;
-  display:inline-flex;flex-direction:column;align-items:flex-start;cursor:pointer;
-  transition:transform .3s cubic-bezier(.2,.7,.2,1)}
-.wordmark em{font-style:normal;color:var(--terracotta)}
-.wm-namit{display:flex;color:var(--espresso)}
-.wm-gid{display:flex;color:var(--terracotta);will-change:transform}
+/* hanging wooden sign holding the wordmark; live text overlaid on the inner panel */
+.hero-sign{position:relative;width:min(90vw,440px);margin:-.3rem auto 0;z-index:1;container-type:inline-size}
+.sign-img{display:block;width:100%;height:auto;filter:drop-shadow(0 16px 22px rgba(38,52,47,.26))}
+.wordmark{position:absolute;left:51%;top:56.5%;transform:translate(-50%,-50%);
+  font-family:var(--ff-display);font-weight:400;margin:0;line-height:.82;font-size:13.5cqw;
+  display:inline-flex;flex-direction:column;align-items:flex-start;cursor:pointer}
+.wordmark em{font-style:normal}
+.wm-namit{display:flex;color:#f7f0e3;text-shadow:0 2px 3px rgba(38,20,8,.4)}
+.wm-gid{display:flex;color:#f2a765;text-shadow:0 2px 3px rgba(38,20,8,.4)}
 .wm-i{display:inline-block}
-@media (hover:hover){.wordmark:hover{transform:translateY(-2px)}}
-.wordmark:focus-visible{outline:3px solid var(--terracotta);outline-offset:8px;border-radius:8px}
+@media (hover:hover){.hero-sign:hover .sign-img{filter:drop-shadow(0 20px 26px rgba(38,52,47,.32))}}
+.wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
 .eyebrow{
   font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--espresso);
   opacity:.65;display:inline-flex;align-items:center;gap:.7rem;
@@ -237,13 +238,11 @@ header.hero{
 .section-head h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
 .section-head p{max-width:44ch;opacity:.8}
 .section-head .head-tr{font-size:.95rem;font-style:italic;letter-spacing:.02em;color:var(--sage-dark);opacity:.82;margin-top:-.35rem}
-/* compact allergen chip, centered just under the menu toggle */
-.menu-allergen{display:inline-flex;align-items:center;gap:.3rem;font:inherit;font-size:.74rem;
-  background:rgba(255,255,255,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-  color:var(--espresso);border:1px solid rgba(53,40,31,.16);border-radius:999px;
-  padding:.3rem .8rem;cursor:pointer;opacity:.85;transition:background .2s,opacity .2s,transform .2s}
-.menu-allergen:hover{background:rgba(255,255,255,.7);opacity:1;transform:translateY(-1px)}
-.menu-allergen-row{display:flex;justify-content:center;margin:-1.7rem 0 1.6rem}
+/* allergen chip nestled in the middle of the menu toggle, brand colours */
+.menu-allergen{display:inline-flex;align-items:center;gap:.3rem;font:inherit;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
+  color:var(--terracotta);background:transparent;border:0;border-radius:99px;
+  padding:.5rem .85rem;cursor:pointer;opacity:.82;transition:opacity .2s,background .2s}
+.menu-allergen:hover{opacity:1;background:rgba(247,240,227,.55)}
 .rom{font-family:var(--ff-display);color:var(--terracotta);letter-spacing:.06em}
 
 .menu-item{
@@ -529,8 +528,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 /* ── Story expander ── */
 .story-toggle{position:relative;display:inline-flex;align-items:center;gap:.6rem;font-family:var(--ff-body);font-size:1rem;color:var(--espresso);cursor:pointer;letter-spacing:.01em;
   padding:.5rem 1.35rem .5rem .55rem;border-radius:999px;
-  background:#fdfcf8;border:0;transform:rotate(-.6deg);
-  box-shadow:0 12px 26px -18px rgba(53,40,31,.5)}
+  background:transparent;border:0;transform:rotate(-.6deg);
+  box-shadow:none}
 /* hand-sewn stitched edge: individual stitches drawn by JS with jitter, so it reads like real stitching */
 .story-toggle .stitch-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
 .story-toggle .stitch-svg line{stroke:rgba(53,40,31,.5);stroke-width:1.6;stroke-linecap:round}
@@ -540,7 +539,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .story-logo{height:34px;width:34px;object-fit:contain;flex:0 0 auto}
 .story-label{white-space:nowrap;line-height:1.1}
 .story-label .rom{color:var(--terracotta);font-style:italic;margin-left:.4rem;opacity:.85;font-size:.92em}
-.story.open .story-toggle{background:var(--cream)}
+.story.open .story-toggle{background:transparent}
 .story-body{max-height:0;overflow:hidden;opacity:0;transition:max-height .55s ease,opacity .4s ease}
 .story.open .story-body{max-height:1400px;opacity:1;margin-top:1rem}
 .modal.done form{display:none}
@@ -552,7 +551,6 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   header.hero{padding:5rem 1rem 3.2rem}
   .hero-inner{gap:.75rem}
   .logo-stage{width:min(52vw,230px);margin:.3rem 0 0}
-  .wordmark{font-size:clamp(1.7rem,7.4vw,2.2rem)}
   .hero p.lede{font-size:.92rem;max-width:30ch}
 
   /* backdrop type: wrap instead of clipping at screen edges */
@@ -692,10 +690,13 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <img class="logo-badge" id="logoBadge" src="images/logo-badge.webp" alt="" width="520" height="518">
       <img class="logo-girl" id="logoGirl" src="images/logo-girl.webp" alt="The cook behind Namit Gid" width="251" height="560">
     </div>
-    <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story" aria-label="Namit gid">
-      <span class="wm-namit" aria-hidden="true">Nam<span class="wm-i">i</span>t</span>
-      <span class="wm-gid" aria-hidden="true">g<span class="wm-i">i</span>d</span>
-    </h1>
+    <div class="hero-sign">
+      <img class="sign-img" src="images/namitgid_plank_logo.png" alt="" width="1264" height="848">
+      <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story" aria-label="Namit gid">
+        <span class="wm-namit" aria-hidden="true">Nam<span class="wm-i">i</span>t</span>
+        <span class="wm-gid" aria-hidden="true">g<span class="wm-i">i</span>d</span>
+      </h1>
+    </div>
     <div class="hero-story" id="heroStory">
       <p class="lede">At my husband's family table in Romblon, Philippines, everyone kept saying it: "Namit gid!" Eventually I picked it up too. It's stuck ever since: still the only review that matters, every time a dish turns out right.</p>
       <p class="lede">That's how I got this name, and hopefully you'll say it too once you've tried my cooking.</p>
@@ -713,10 +714,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 
   <div class="menu-tabs" role="tablist" aria-label="Menu categories">
     <button type="button" class="active" data-cat="main" role="tab" aria-selected="true">Mains</button>
+    <button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel" aria-label="Allergen and kitchen info">&#9432;&nbsp;Allergen</button>
     <button type="button" data-cat="dessert" role="tab" aria-selected="false">Desserts</button>
-  </div>
-  <div class="menu-allergen-row">
-    <button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel">&#9432;&nbsp;Allergen</button>
   </div>
 
   <!-- items injected by JS -->
@@ -1583,9 +1582,10 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     var ni=namitEl && namitEl.querySelector('.wm-i'), gi=gidEl && gidEl.querySelector('.wm-i');
     if(!namitEl||!ni||!gidEl||!gi) return;
     function place(){
-      gidEl.style.transform='none';
+      gidEl.style.margin='0';
       var a=ni.getBoundingClientRect(), b=gi.getBoundingClientRect();
-      gidEl.style.transform='translateX('+(a.left-b.left).toFixed(2)+'px)';
+      gidEl.style.marginLeft=(a.left-b.left).toFixed(2)+'px';   // align the two i-stems
+      gidEl.style.marginTop=(a.bottom-b.top).toFixed(2)+'px';   // join i tip to i bottom, lifting g and d
     }
     if(document.fonts && document.fonts.ready){ document.fonts.ready.then(place); }
     place();
