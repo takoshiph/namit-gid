@@ -154,6 +154,9 @@ header.hero{
 .wm-gid{display:flex;color:#f2a765;text-shadow:0 2px 3px rgba(38,20,8,.45)}
 .wm-i{display:inline-block}
 .wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
+/* Biaringan island tucked into the open lower-left of the board, beside gid */
+.wm-island{position:absolute;left:37%;top:85%;transform:translate(-50%,-50%);z-index:1;
+  width:30cqw;height:auto;pointer-events:none;filter:drop-shadow(0 4px 5px rgba(38,20,8,.32))}
 .eyebrow{
   font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--espresso);
   opacity:.65;display:inline-flex;align-items:center;gap:.7rem;
@@ -689,6 +692,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <span class="eyebrow">Filipino home cooking · Toronto</span>
     <div class="emblem">
       <img class="emblem-img" src="images/emblem.png" alt="Namit gid — the cook behind the sign" width="1040" height="1199">
+      <img class="wm-island" src="images/biaringan_island_logo.png" alt="" aria-hidden="true">
       <h1 class="wordmark" id="heroTitle" role="button" tabindex="0" aria-expanded="false" aria-controls="heroStory" title="Tap to read the story" aria-label="Namit gid">
         <span class="wm-namit" aria-hidden="true">Nam<span class="wm-i">i</span>t</span>
         <span class="wm-gid" aria-hidden="true">g<span class="wm-i">i</span>d</span>
