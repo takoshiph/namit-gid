@@ -146,15 +146,15 @@ header.hero{
   animation:emblemFloat 6.5s ease-in-out infinite}
 @keyframes emblemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .emblem-img{display:block;width:100%;height:auto;filter:drop-shadow(0 18px 22px rgba(38,52,47,.24))}
-.wordmark{position:absolute;left:50.5%;top:82%;transform:translate(-50%,-50%);z-index:2;
+.wordmark{position:absolute;left:50%;top:82%;transform:translate(-50%,-50%);z-index:2;
   font-family:var(--ff-display);font-weight:400;margin:0;line-height:.9;font-size:11cqw;
-  display:inline-flex;flex-direction:column;align-items:center;cursor:pointer}
+  display:inline-flex;flex-direction:column;align-items:flex-start;cursor:pointer}
 .wordmark em{font-style:normal}
 .wm-namit{color:#f7f0e3;text-shadow:0 2px 3px rgba(38,20,8,.5)}
-/* gid + Biaringan island, centered as one unit; island bigger, its tail lapping the d */
-.wm-row2{position:relative;display:inline-flex;align-items:flex-end;margin-top:.05em}
-.wm-gid{position:relative;z-index:1;bottom:.07em;color:#f6ac66;text-shadow:0 1px 1px rgba(30,16,6,.75),0 4px 9px rgba(30,16,6,.5)}
-.wm-island{width:28.5cqw;height:auto;margin-left:-6.5cqw;margin-bottom:-.02em;z-index:2;
+/* gid aligned under Namit (g under N); island trails right as an overflow layer, tail over the d */
+.wm-row2{position:relative;display:inline-block;margin-top:.03em}
+.wm-gid{position:relative;z-index:1;color:#f6ac66;text-shadow:0 1px 1px rgba(30,16,6,.75),0 4px 9px rgba(30,16,6,.5)}
+.wm-island{position:absolute;left:64%;bottom:-.04em;width:27cqw;height:auto;z-index:2;
   pointer-events:none;filter:drop-shadow(0 3px 5px rgba(38,20,8,.42))}
 .wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
 .eyebrow{
