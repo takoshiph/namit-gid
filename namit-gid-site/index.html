@@ -242,20 +242,20 @@ header.hero{
 .hero p.lede{max-width:34ch;font-size:1rem;opacity:.85}
 .hero p.lede + p.lede{margin-top:.7rem}
 .hero-story{max-height:0;overflow:hidden;transition:max-height .9s ease}
-.hero.story-open .hero-story{max-height:680px;margin-top:.2rem}
-/* "Namit gid" mentions echo the logo */
-.hero-story .hl{font-family:var(--ff-display);font-style:normal;color:var(--terracotta)}
-/* root underline that draws itself in after the line arrives */
+.hero.story-open .hero-story{max-height:720px;margin-top:.2rem}
+.hero-story .lede{opacity:1;min-height:1em}
+/* "Namit gid" stays plain while typing; it blooms terracotta + grows a root only after (.revealed) */
+.hero-story .hl{font-family:var(--ff-display);font-style:normal;color:inherit;transition:color .55s ease}
+.hero-story.revealed .hl{color:var(--terracotta)}
 .hero-story .root{position:relative;white-space:nowrap}
 .root-uline{position:absolute;left:-2%;bottom:-.44em;width:104%;height:.55em;overflow:visible;pointer-events:none}
 .root-uline path{fill:none;stroke:var(--terracotta);stroke-linecap:round;stroke-linejoin:round}
-.root-uline path:first-child{stroke-width:2.4;stroke-dasharray:230;stroke-dashoffset:230;transition:stroke-dashoffset 1s ease .55s}
-.root-uline .tendril{stroke-width:1.7;opacity:.85;stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .5s ease 1.25s}
-.hero.story-open .root-uline path{stroke-dashoffset:0}
-/* lines arrive like they're being written */
-.hero-story .lede{opacity:0;transform:translateY(10px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
-.hero.story-open .hero-story .lede{opacity:1;transform:none}
-.hero.story-open .hero-story .lede:nth-of-type(2){transition-delay:.3s}
+.root-uline path:first-child{stroke-width:2.4;stroke-dasharray:230;stroke-dashoffset:230;transition:stroke-dashoffset 1s ease .15s}
+.root-uline .tendril{stroke-width:1.7;opacity:.85;stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .5s ease .8s}
+.hero-story.revealed .root-uline path{stroke-dashoffset:0}
+/* typing caret */
+.type-caret{display:inline-block;width:2px;height:1.05em;background:var(--terracotta);margin-left:2px;vertical-align:-.16em;animation:caretBlink .8s step-end infinite}
+@keyframes caretBlink{50%{opacity:0}}
 
 /* ---------- menu ---------- */
 .section-head{
@@ -1583,10 +1583,33 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 
   // ── Hero story reveal (tap the name) ──
   var heroT=document.getElementById('heroTitle'), heroH=document.getElementById('heroHint'), heroSec=document.querySelector('header.hero');
+  // Typewriter for the hero story: type it plain with a caret, then bloom the "Namit gid" colour + root underline
+  var storyEl=document.getElementById('heroStory');
+  var ledes=storyEl ? [].slice.call(storyEl.querySelectorAll('.lede')) : [];
+  var storyData=ledes.map(function(p){ return {styled:p.innerHTML, text:p.textContent}; });
+  var storyTyped=false, REDUCE_S=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function escH(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function typeStory(){
+    if(storyTyped || !ledes.length) return; storyTyped=true;
+    if(REDUCE_S){ ledes.forEach(function(p,i){ p.innerHTML=storyData[i].styled; }); storyEl.classList.add('revealed'); return; }
+    ledes.forEach(function(p){ p.innerHTML=''; });
+    var pi=0, ci=0;
+    (function step(){
+      if(pi>=ledes.length){
+        ledes.forEach(function(p,i){ p.innerHTML=storyData[i].styled; });
+        requestAnimationFrame(function(){ storyEl.classList.add('revealed'); });
+        return;
+      }
+      var p=ledes[pi], t=storyData[pi].text;
+      if(ci<t.length){ ci++; p.innerHTML=escH(t.slice(0,ci))+'<span class="type-caret"></span>'; setTimeout(step, 11+Math.random()*20); }
+      else { p.innerHTML=escH(t); pi++; ci=0; setTimeout(step, 240); }
+    })();
+  }
   function heroToggle(){
     if(!heroSec) return;
     var open=heroSec.classList.toggle('story-open');
     if(heroT) heroT.setAttribute('aria-expanded', open?'true':'false');
+    if(open) setTimeout(typeStory, 260);
   }
   if(heroT){
     heroT.addEventListener('click', heroToggle);
