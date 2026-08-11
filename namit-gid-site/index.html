@@ -1594,13 +1594,15 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   // ── Anchor the Biaringan island to the real "gid": tail on the d, waterline on the baseline ──
   (function(){
     var em=document.querySelector('.emblem');
+    var namitEl=em && em.querySelector('.wm-namit');
     var gidEl=em && em.querySelector('.wm-gid');
     var island=em && em.querySelector('.wm-island');
-    if(!em||!gidEl||!island) return;
+    if(!em||!namitEl||!gidEl||!island) return;
     function place(){
-      var e=em.getBoundingClientRect(), g=gidEl.getBoundingClientRect();
+      var e=em.getBoundingClientRect(), g=gidEl.getBoundingClientRect(), nm=namitEl.getBoundingClientRect();
       var ih=island.offsetHeight||1;
-      island.style.left=((g.left-e.left)+g.width*0.62).toFixed(1)+'px';   // tail laps the d
+      // anchored to Namit (fixed) so indenting gid only tucks it behind, never pushes the island out
+      island.style.left=((nm.left-e.left)+g.width*0.62).toFixed(1)+'px';
       var baseline=(g.top-e.top)+g.height*0.80;                            // gid baseline
       island.style.top=(baseline-ih*0.84).toFixed(1)+'px';                 // island waterline on baseline
     }
