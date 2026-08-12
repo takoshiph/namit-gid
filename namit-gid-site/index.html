@@ -281,8 +281,7 @@ header.hero{
 /* vine embrace cradling "The menu" — the heading grows from it */
 #menu{position:relative}
 #menu h2{position:relative;z-index:1}
-.menu-embrace{position:absolute;left:50%;top:50%;transform:translate(-50%,-48%);width:min(82%,560px);height:auto;z-index:0;pointer-events:none;overflow:visible;opacity:0;transition:opacity .8s ease .1s}
-#menu.embraced .menu-embrace{opacity:1}
+.menu-embrace{position:absolute;transform:translate(-50%,-50%);height:auto;z-index:0;pointer-events:none;overflow:visible}
 .menu-embrace .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
 .rom{font-family:var(--ff-display);color:var(--terracotta);letter-spacing:.06em}
 
@@ -769,17 +768,20 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 <!-- MENU -->
 <main>
   <div class="section-head" id="menu">
-    <svg class="menu-embrace" viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-      <path class="stem" style="stroke-width:2.4" d="M100,116 C74,114 46,102 34,72 C27,53 31,33 45,20"/>
-      <path class="stem" style="stroke-width:2.4" d="M100,116 C126,114 154,102 166,72 C173,53 169,33 155,20"/>
-      <g transform="translate(44,100) rotate(205) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-      <g transform="translate(33,74) rotate(232) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-      <g transform="translate(37,48) rotate(256) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-      <g transform="translate(156,100) rotate(-25) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-      <g transform="translate(167,74) rotate(-52) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-      <g transform="translate(163,48) rotate(-76) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-      <g transform="translate(45,19) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
-      <g transform="translate(155,19) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+    <svg class="menu-embrace" viewBox="0 0 264 62" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+      <clipPath id="embraceClip"><rect id="embraceClipRect" x="-12" y="62" width="288" height="0"/></clipPath>
+      <g clip-path="url(#embraceClip)">
+        <path class="stem" style="stroke-width:2" d="M132,57 C88,57 46,51 26,35 C15,26 14,15 23,8"/>
+        <path class="stem" style="stroke-width:2" d="M132,57 C176,57 218,51 238,35 C249,26 250,15 241,8"/>
+        <g transform="translate(42,51) rotate(210) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(26,35) rotate(238) scale(.36)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(21,19) rotate(262) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(222,51) rotate(-30) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(238,35) rotate(-58) scale(.36)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(243,19) rotate(-82) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(23,7) scale(.34)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+        <g transform="translate(241,7) scale(.34)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+      </g>
     </svg>
     <span class="eyebrow">Cooked to order · pick up hot</span>
     <h2>The menu</h2>
@@ -1125,12 +1127,31 @@ let vTick=false;
 addEventListener('scroll', ()=>{ if(!vTick){ vTick=true; requestAnimationFrame(()=>{ drawVine(); vTick=false; }); } }, {passive:true});
 addEventListener('resize', ()=>buildVine(), {passive:true});
 addEventListener('load', ()=>buildVine());
-/* fade the "The menu" vine embrace in as the section arrives */
+/* "The menu" vine embrace: hug just the word, and grow (draw) bottom-up on scroll */
 (function(){
   const menu=document.getElementById('menu'); if(!menu) return;
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ menu.classList.add('embraced'); return; }
-  const io=new IntersectionObserver((es)=>{ es.forEach(e=>{ if(e.isIntersecting){ menu.classList.add('embraced'); io.disconnect(); } }); }, {threshold:.4});
-  io.observe(menu);
+  const emb=menu.querySelector('.menu-embrace'); const h2=menu.querySelector('h2');
+  if(!emb||!h2) return;
+  const clip=emb.querySelector('#embraceClipRect');
+  const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function place(){
+    const mr=menu.getBoundingClientRect(), hr=h2.getBoundingClientRect();
+    emb.style.height=(hr.height*1.7).toFixed(1)+'px';
+    emb.style.left=(((hr.left+hr.right)/2)-mr.left).toFixed(1)+'px';
+    emb.style.top=(((hr.top+hr.bottom)/2)-mr.top).toFixed(1)+'px';
+  }
+  function draw(){
+    if(!clip) return;
+    if(REDUCE){ clip.setAttribute('y',-14); clip.setAttribute('height',78); return; }
+    const hr=h2.getBoundingClientRect();
+    const p=Math.min(1,Math.max(0, ((innerHeight*0.86)-hr.top)/(innerHeight*0.32) ));
+    clip.setAttribute('y', (62 - p*78).toFixed(1));
+    clip.setAttribute('height', (p*78+4).toFixed(1));
+  }
+  place(); draw();
+  addEventListener('load', ()=>{ place(); draw(); });
+  addEventListener('resize', ()=>{ place(); draw(); }, {passive:true});
+  addEventListener('scroll', ()=>{ requestAnimationFrame(draw); }, {passive:true});
 })();
 
 /* ---------------- category tabs ---------------- */
