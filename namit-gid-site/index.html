@@ -164,8 +164,8 @@ header.hero{
 /* gid aligned under Namit (g under N); island trails right as an overflow layer, tail over the d */
 .wm-row2{position:relative;display:inline-block;margin-top:.03em;margin-left:.55em}
 .wm-gid{position:relative;z-index:2;color:#f6ac66;text-shadow:0 1px 1px rgba(30,16,6,.75),0 4px 9px rgba(30,16,6,.5)}
-.wm-island{position:absolute;left:44%;top:74%;width:36%;height:auto;z-index:1;
-  pointer-events:none;filter:drop-shadow(0 3px 5px rgba(38,20,8,.42))}
+.wm-island{position:absolute;left:44%;top:74%;width:36%;height:auto;z-index:3;
+  pointer-events:none;filter:drop-shadow(0 3px 6px rgba(38,20,8,.5))}
 .wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
 .eyebrow{
   font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--espresso);
@@ -266,12 +266,12 @@ header.hero{
 /* menu toggle + quiet practical caption (made-to-order, pickup, allergens) */
 .menu-toggle{display:flex;flex-direction:column;align-items:center;width:max-content;max-width:92%;margin:0 auto 2.6rem}
 .menu-note{margin:1.1rem auto 0;max-width:54ch;text-align:center;font-size:.9rem;line-height:1.6;color:var(--espresso);opacity:.78}
-.menu-note .place{color:var(--sage-dark);font-weight:600}
+.menu-note .place{color:var(--espresso);font-weight:700;opacity:.95}
 /* allergens: a small, calm, neutral badge — distinct from the terracotta category accent */
 .menu-allergen{margin-top:.7rem;display:inline-flex;align-items:center;gap:.32rem;font:inherit;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;font-weight:600;
   color:var(--sage-dark);background:transparent;border:1px solid rgba(95,129,119,.4);border-radius:999px;
   padding:.26rem .7rem;cursor:pointer;opacity:.85;transition:background .2s,opacity .2s,border-color .2s,color .2s}
-.menu-allergen .aller-i{font-size:.76rem;line-height:1;opacity:.9}
+.menu-allergen .aller-i{font-size:.6rem;line-height:1;opacity:.85}
 .menu-allergen:hover{opacity:1;background:rgba(95,129,119,.12);border-color:var(--sage-dark);color:var(--espresso)}
 .menu-badge-row{margin-top:.7rem;text-align:center}
 .menu-badge-row .menu-allergen{margin-top:0}
@@ -630,9 +630,9 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .js .rise.d4{transition-delay:.40s}
 
 /* ---------- earthy: growing roots (wide screens) ---------- */
-.roots{position:fixed;top:0;height:100vh;width:130px;z-index:-1;pointer-events:none;opacity:.45;display:none;
-  left:calc((100vw - 1120px)/2 - 120px)}
-.roots path{fill:none;stroke:var(--sage-dark);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.roots{position:fixed;top:0;height:100vh;width:150px;z-index:-1;pointer-events:none;opacity:.5;display:none;
+  left:calc((100vw - 1120px)/2 - 130px)}
+.roots path{fill:none;stroke:#6f4a2c;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 @media(min-width:1180px){.roots{display:block}}
 
 /* ---------- earthy: drifting leaves ---------- */
@@ -663,10 +663,16 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 <!-- EARTHY DECOR -->
 <div class="soil" id="soil" aria-hidden="true"></div>
 <svg class="roots" id="roots" viewBox="0 0 140 1000" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
-  <path d="M70,0 C60,84 90,150 76,242 C64,322 40,384 60,472 C76,548 98,620 80,720 C66,802 54,862 68,1000"/>
-  <path d="M76,242 C106,260 126,300 132,352"/>
-  <path d="M60,472 C32,488 16,522 11,568"/>
-  <path d="M80,720 C110,738 124,772 128,814"/>
+  <path style="stroke-width:3.2" d="M70,0 C58,72 92,142 78,232 C66,312 40,382 62,470 C80,548 100,620 82,716 C68,800 56,862 70,1000"/>
+  <path style="stroke-width:1.9" d="M78,232 C108,250 128,292 136,346"/>
+  <path style="stroke-width:1.3" d="M118,300 C126,292 131,298 137,286"/>
+  <path style="stroke-width:1.7" d="M52,150 C32,164 24,196 26,236"/>
+  <path style="stroke-width:1.9" d="M62,470 C34,486 18,520 12,566"/>
+  <path style="stroke-width:1.3" d="M24,516 C17,512 14,520 7,509"/>
+  <path style="stroke-width:1.9" d="M82,716 C112,734 126,768 130,810"/>
+  <path style="stroke-width:1.7" d="M70,858 C92,874 101,900 99,936"/>
+  <path style="stroke-width:1.3" d="M136,346 C147,341 150,352 141,357 C133,361 130,350 136,346 Z"/>
+  <path style="stroke-width:1.3" d="M12,566 C3,561 0,572 9,577 C17,581 20,570 12,566 Z"/>
 </svg>
 
 <!-- SPLASH -->
@@ -713,7 +719,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   <canvas id="fx" aria-hidden="true"></canvas>
   <div class="hero-inner">
     <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><path id="badgePath" d="M50,50 m-36,0 a36,36 0 1,1 72,0 a36,36 0 1,1 -72,0"/></defs></svg>
-    <span class="eyebrow">Filipino home cooking · Toronto</span>
+    <span class="eyebrow">Home-cooked Filipino · Made in Toronto</span>
     <div class="emblem">
       <img class="emblem-img" src="images/emblem.png" alt="Namit gid — the cook behind the sign" width="1040" height="1199">
       <img class="wm-island" src="images/biaringan_island_v4.png" alt="" aria-hidden="true">
