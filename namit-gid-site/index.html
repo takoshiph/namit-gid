@@ -367,6 +367,7 @@ header.hero{
 
 /* ---------- story ---------- */
 .story{background:
+    linear-gradient(180deg, var(--sage) 0, rgba(155,185,175,0) 16%, rgba(155,185,175,0) 84%, var(--sage) 100%),
     radial-gradient(90% 130% at 50% -20%, rgba(155,185,175,.22), transparent 55%),
     radial-gradient(70% 90% at 100% 120%, rgba(196,99,60,.08), transparent 60%),
     var(--cream);
@@ -566,21 +567,20 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .rev-form-send:hover{background:var(--sage-dark);transform:translateY(-1px)}
 .rev-form-note{font-size:.82rem;color:var(--sage-dark);text-align:center}
 /* ── Story expander ── */
-.story-toggle{position:relative;display:inline-flex;align-items:center;gap:.6rem;font-family:var(--ff-body);font-size:1rem;color:var(--espresso);cursor:pointer;letter-spacing:.01em;
-  padding:.5rem 1.35rem .5rem .55rem;border-radius:999px;
-  background:transparent;border:0;transform:rotate(-.6deg);
-  box-shadow:none}
-/* hand-sewn stitched edge: individual stitches drawn by JS with jitter, so it reads like real stitching */
-.story-toggle .stitch-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
-.story-toggle .stitch-svg line{stroke:rgba(53,40,31,.5);stroke-width:1.6;stroke-linecap:round}
-.story-toggle > .story-logo,.story-toggle > .story-label{position:relative;z-index:1}
-.story-toggle:hover{transform:rotate(-.6deg) translateY(-1px);box-shadow:0 16px 30px -18px rgba(53,40,31,.55)}
-.story-toggle,.story-toggle:hover{transition:transform .2s,box-shadow .2s,background .2s}
-.story-logo{height:34px;width:34px;object-fit:contain;flex:0 0 auto}
-.story-label{display:inline-flex;align-items:baseline;gap:.5rem;white-space:nowrap;line-height:1.1}
-.story-rom{font-family:var(--ff-display);color:var(--terracotta);font-size:1.05rem}
-.story-en{font-size:.72rem;letter-spacing:.04em;color:var(--sage-dark);opacity:.8}
-.story.open .story-toggle{background:transparent}
+/* story intro now uses the same eyebrow language as every other section */
+.story-toggle{display:inline-flex;align-items:center;gap:.55rem;background:transparent;border:0;cursor:pointer;padding:.25rem .4rem;transition:opacity .2s}
+.story-toggle .eyebrow{cursor:pointer}
+.story-toggle .rom{font-size:1.02em}
+.story-caret{font-size:.66rem;color:var(--sage-dark);opacity:.65;transition:transform .35s ease,opacity .2s}
+.story-toggle:hover .story-caret{opacity:1}
+.story-toggle:hover{opacity:.82}
+.story.open .story-caret{transform:rotate(180deg)}
+/* vine arriving into the story — the page vine continuing on */
+.story-vine{position:absolute;left:50%;top:-4px;transform:translateX(-50%);height:58px;z-index:0;pointer-events:none;overflow:visible}
+.story-vine .stem{fill:none;stroke:#6f4a2c;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.15s ease}
+.story.invine .story-vine .stem{stroke-dashoffset:0}
+.story-vine .foliage{opacity:0;transition:opacity .6s ease .55s}
+.story.invine .story-vine .foliage{opacity:1}
 .story-body{max-height:0;overflow:hidden;opacity:0;transition:max-height .55s ease,opacity .4s ease}
 .story.open .story-body{max-height:1400px;opacity:1;margin-top:1rem}
 .modal.done form{display:none}
@@ -853,10 +853,17 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 
 <!-- STORY (tap to expand) -->
 <section class="story" id="story">
+  <svg class="story-vine" viewBox="0 0 60 120" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
+    <path class="stem" pathLength="1" d="M30,0 C26,22 38,44 31,66 C27,84 33,101 30,118"/>
+    <g class="foliage" transform="translate(30,34) rotate(202) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g class="foliage" transform="translate(33,60) rotate(-22) scale(.32)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g class="foliage" transform="translate(28,87) rotate(206) scale(.28)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g class="foliage" transform="translate(30,114) scale(.32)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+  </svg>
   <div class="wrap">
     <button type="button" class="story-toggle" id="storyToggle" aria-expanded="false" aria-controls="storyBody">
-      <img class="story-logo" src="images/logo-girl.webp" alt="" aria-hidden="true">
-      <span class="story-label"><span class="story-rom">Ari ang aton istorya</span><span class="story-en">Here's our story</span></span>
+      <span class="eyebrow"><span class="rom">Ari ang aton istorya</span> · here's our story</span>
+      <span class="story-caret" aria-hidden="true">&#9662;</span>
     </button>
     <div class="story-body" id="storyBody">
       <p class="lede">At my husband's family table in Romblon, a good dish started a chain: one bite, one "<span class="hl">Namit gid</span>," then everyone turning to each other, nodding, saying it again. So good you say it twice. One day I caught myself doing it too.</p>
@@ -1772,41 +1779,12 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     a.addEventListener('click', function(){ setTimeout(openStory, 60); });
   });
 
-  // ── Hand-sewn stitched border around the story pill ──
+  // ── story vine grows in as the section arrives (continuation of the page vine) ──
   (function(){
-    if(!stToggle) return;
-    var NS='http://www.w3.org/2000/svg';
-    var svg=document.createElementNS(NS,'svg');
-    svg.setAttribute('class','stitch-svg'); svg.setAttribute('aria-hidden','true');
-    stToggle.appendChild(svg);
-    function rnd(a,b){ return a+Math.random()*(b-a); }
-    function draw(){
-      var w=stToggle.offsetWidth, h=stToggle.offsetHeight;
-      if(!w||!h) return;
-      svg.setAttribute('viewBox','0 0 '+w+' '+h);
-      var pad=4.5, iw=w-2*pad, ih=h-2*pad, r=ih/2;
-      var straight=Math.max(0, iw-2*r), cx1=pad+r, cx2=pad+iw-r, cy=pad+r, yTop=pad, yBot=pad+ih;
-      var perim=2*straight+2*Math.PI*r, arc=Math.PI*r;
-      function at(s){
-        if(s<=straight) return {x:cx1+s,y:yTop,a:0};
-        s-=straight; if(s<=arc){ var t=-Math.PI/2+s/r; return {x:cx2+r*Math.cos(t),y:cy+r*Math.sin(t),a:t+Math.PI/2}; }
-        s-=arc; if(s<=straight) return {x:cx2-s,y:yBot,a:Math.PI};
-        s-=straight; var t2=Math.PI/2+s/r; return {x:cx1+r*Math.cos(t2),y:cy+r*Math.sin(t2),a:t2+Math.PI/2};
-      }
-      var out='', spacing=9;
-      for(var s=0;s<perim;s+=spacing){
-        if(Math.random()<0.06) continue;           // occasional skipped stitch
-        var p=at(s), ang=p.a+rnd(-0.16,0.16), len=rnd(3.8,5.4);
-        var nx=-Math.sin(ang), ny=Math.cos(ang), off=rnd(-1.3,1.3);
-        var cxp=p.x+nx*off, cyp=p.y+ny*off, dx=Math.cos(ang)*len/2, dy=Math.sin(ang)*len/2;
-        out+='<line x1="'+(cxp-dx).toFixed(1)+'" y1="'+(cyp-dy).toFixed(1)+'" x2="'+(cxp+dx).toFixed(1)+'" y2="'+(cyp+dy).toFixed(1)+'"/>';
-      }
-      svg.innerHTML=out;
-    }
-    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(draw); }
-    draw();
-    addEventListener('load', draw);
-    var rt; addEventListener('resize', function(){ clearTimeout(rt); rt=setTimeout(draw,150); }, {passive:true});
+    if(!stSec) return;
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches){ stSec.classList.add('invine'); return; }
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ stSec.classList.add('invine'); io.disconnect(); } }); }, {threshold:.35});
+    io.observe(stSec);
   })();
 })();
 </script>
