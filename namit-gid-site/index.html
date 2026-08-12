@@ -393,6 +393,7 @@ header.hero{
 .how{padding:clamp(2.8rem,6vw,4.4rem) clamp(1.4rem,5vw,3rem)}
 .how .steps{max-width:1000px;margin:2.2rem auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.2rem}
 .how .steps{position:relative}
+@media(min-width:1000px){.how .steps{padding-top:76px}}  /* room for the hanging branch */
 .step{
   position:relative;z-index:1;
   background:rgba(247,240,227,.55);border:1px solid rgba(53,40,31,.1);border-radius:20px;
@@ -406,8 +407,12 @@ header.hero{
 
 /* connecting root through the steps */
 #howRoot{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
-#howRoot .how-root-line{fill:none;stroke:#6f4a2c;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
-#howRoot .how-node{fill:var(--terracotta);opacity:0;transition:opacity .35s ease}
+#howRoot .branch,#howRoot .branch-tail{fill:none;stroke:#6f4a2c;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:.72}
+#howRoot .hang{opacity:0;transition:opacity .45s ease}
+#howRoot .hang .hline,#howRoot .hang .stitch{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
+#howRoot .hang .hline{stroke-width:1.7}
+#howRoot .hang .stitch{stroke-width:1.6;opacity:.85}
+#howRoot .hang .bud{fill:var(--terracotta)}
 /* earthy grounding at the base of the lower sections */
 .how,.reviews{position:relative}
 .how::after,.reviews::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(180deg,transparent,rgba(53,40,31,.06));pointer-events:none;z-index:0}
@@ -418,8 +423,8 @@ header.hero{
 .earth-tuft .stem{fill:none;stroke:#6f4a2c;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:600px){.earth-tuft{display:none}}
 /* flow/morph reveal for the step cards (JS-only, after the root draws) */
-.js .how .step{opacity:0;transform:translateY(26px) scale(.94);transform-origin:top center;
-  transition:opacity .7s cubic-bezier(.2,.7,.2,1), transform .75s cubic-bezier(.2,.9,.25,1)}
+.js .how .step{opacity:0;transform:translateX(54px) scale(.97);transform-origin:top center;
+  transition:opacity .6s cubic-bezier(.2,.7,.2,1), transform .72s cubic-bezier(.2,.9,.25,1)}
 .js .how .step.flow-in{opacity:1;transform:none}
 
 /* ---------- footer ---------- */
@@ -1441,62 +1446,63 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const wrap=document.querySelector('.how .steps');
   const steps=wrap ? [...wrap.querySelectorAll('.step')] : [];
   if(!section || !wrap || steps.length<2) return;
-  let svg, path, nodes=[], played=false;
+  let svg, branchPath, tailPath, hangEls=[], played=false;
 
   function build(){
     const wr=wrap.getBoundingClientRect();
     if(!wr.width || !wr.height) return;
-    const pts=steps.map(s=>{
-      const d=s.querySelector('.num').getBoundingClientRect();
-      return { x:d.left-wr.left+d.width/2, y:d.top-wr.top+d.height/2 };
-    });
+    // measure with offset* so the transform on hidden cards doesn't skew the anchor points
+    const cards=steps.map(s=>({ cx:s.offsetLeft+s.offsetWidth/2, top:s.offsetTop, right:s.offsetLeft+s.offsetWidth, bottom:s.offsetTop+s.offsetHeight }));
     if(!svg){
       svg=document.createElementNS(NS,'svg');
       svg.id='howRoot'; svg.setAttribute('aria-hidden','true');
       svg.setAttribute('preserveAspectRatio','none');
       wrap.prepend(svg);
     }
-    svg.setAttribute('viewBox','0 0 '+wr.width+' '+wr.height);
-    // smooth path threading each step's badge, in order
-    let d='M '+pts[0].x.toFixed(1)+','+pts[0].y.toFixed(1);
-    for(let i=1;i<pts.length;i++){
-      const a=pts[i-1], b=pts[i], mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
-      // control points bend along whichever axis is dominant (row vs stacked)
-      d += Math.abs(b.x-a.x) >= Math.abs(b.y-a.y)
-        ? ' C '+mx.toFixed(1)+','+a.y.toFixed(1)+' '+mx.toFixed(1)+','+b.y.toFixed(1)+' '+b.x.toFixed(1)+','+b.y.toFixed(1)
-        : ' C '+a.x.toFixed(1)+','+my.toFixed(1)+' '+b.x.toFixed(1)+','+my.toFixed(1)+' '+b.x.toFixed(1)+','+b.y.toFixed(1);
-    }
-    svg.innerHTML='<path class="how-root-line" d="'+d+'"/>'+
-      pts.map(p=>'<circle class="how-node" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="5"/>').join('');
-    path=svg.querySelector('.how-root-line');
-    nodes=[...svg.querySelectorAll('.how-node')];
-    const L=path.getTotalLength();
-    svg.dataset.len=L;
-    path.style.strokeDasharray=L;
-    path.style.strokeDashoffset=(played||REDUCE)?0:L;
-    if(played||REDUCE) nodes.forEach(n=>n.style.opacity=.9);
+    svg.setAttribute('viewBox','0 0 '+wr.width.toFixed(1)+' '+wr.height.toFixed(1));
+    const topY=Math.min.apply(null, cards.map(c=>c.top));
+    const singleRow = innerWidth>=1000 && cards.every(c=>Math.abs(c.top-topY)<10);
+    if(!singleRow){ svg.innerHTML=''; branchPath=null; tailPath=null; hangEls=[]; return; }  // stacked: plain slide-in fallback
+    const W=wr.width, branchY=topY-42;
+    const leftX=cards[0].cx-42, rightX=cards[cards.length-1].right+22;
+    // main branch: enters upper-left, sweeps right across the columns with a gentle wave
+    let d='M '+(cards[0].cx-96).toFixed(1)+',-58 C '+(cards[0].cx-62).toFixed(1)+',-18 '+leftX.toFixed(1)+','+(branchY-24).toFixed(1)+' '+leftX.toFixed(1)+','+branchY.toFixed(1);
+    let px=leftX, py=branchY;
+    cards.forEach((c,i)=>{ const y=branchY+(i%2?5:-4), mx=(px+c.cx)/2; d+=' C '+mx.toFixed(1)+','+py.toFixed(1)+' '+mx.toFixed(1)+','+y.toFixed(1)+' '+c.cx.toFixed(1)+','+y.toFixed(1); px=c.cx; py=y; });
+    d+=' C '+((px+rightX)/2).toFixed(1)+','+py.toFixed(1)+' '+rightX.toFixed(1)+','+branchY.toFixed(1)+' '+rightX.toFixed(1)+','+(branchY+2).toFixed(1);
+    // tail: down the right gutter (clear of the cards), then curve to centre toward the next section (Kalīpay)
+    const tail='M '+rightX.toFixed(1)+','+(branchY+2).toFixed(1)
+      +' C '+(rightX+16).toFixed(1)+','+(branchY+50).toFixed(1)+' '+(rightX+2).toFixed(1)+','+(wr.height-24).toFixed(1)+' '+(rightX-8).toFixed(1)+','+(wr.height+18).toFixed(1)
+      +' C '+(rightX-34).toFixed(1)+','+(wr.height+52).toFixed(1)+' '+(W*0.6).toFixed(1)+','+(wr.height+62).toFixed(1)+' '+(W*0.52).toFixed(1)+','+(wr.height+96).toFixed(1);
+    // each card hangs from the branch on a short line, tied with a single stitch through its top
+    let hangs='';
+    cards.forEach(c=>{ const bx=c.cx, ct=c.top;
+      hangs+='<g class="hang">'
+           +'<path class="hline" d="M '+bx.toFixed(1)+','+(branchY+1).toFixed(1)+' L '+bx.toFixed(1)+','+(ct-10).toFixed(1)+'"/>'
+           +'<circle class="bud" cx="'+bx.toFixed(1)+'" cy="'+(branchY+1).toFixed(1)+'" r="2.4"/>'
+           +'<path class="stitch" d="M '+(bx-8).toFixed(1)+','+(ct-1).toFixed(1)+' Q '+bx.toFixed(1)+','+(ct+6).toFixed(1)+' '+(bx+8).toFixed(1)+','+(ct-1).toFixed(1)+'"/>'
+           +'</g>';
+    });
+    svg.innerHTML='<path class="branch" d="'+d+'"/>'+hangs+'<path class="branch-tail" d="'+tail+'"/>';
+    branchPath=svg.querySelector('.branch'); tailPath=svg.querySelector('.branch-tail');
+    hangEls=[...svg.querySelectorAll('.hang')];
+    [branchPath,tailPath].forEach(p=>{ const L=p.getTotalLength(); p.dataset.len=L; p.style.strokeDasharray=L; p.style.strokeDashoffset=(played||REDUCE)?0:L; });
+    if(played||REDUCE) hangEls.forEach(h=>h.style.opacity=1);
   }
 
   function play(){
     if(played) return;
     played=true;
-    if(!path){ steps.forEach(s=>s.classList.add('flow-in')); return; }
-    if(REDUCE){
-      path.style.strokeDashoffset=0;
-      nodes.forEach(n=>n.style.opacity=.9);
-      steps.forEach(s=>s.classList.add('flow-in'));
-      return;
-    }
-    const L=+svg.dataset.len, DRAW=2200, last=nodes.length-1;
-    const start=performance.now();
-    (function frame(now){
-      const t=Math.min(1,(now-start)/DRAW);
-      path.style.strokeDashoffset=L*(1-t);
-      nodes.forEach((n,i)=>{ if(t>= (last? i/last : 1)) n.style.opacity=.9; });
-      if(t<1) requestAnimationFrame(frame);
-    })(start);
-    // steps flow/morph in only after the root has connected them
-    steps.forEach((s,i)=> setTimeout(()=>s.classList.add('flow-in'), DRAW+i*180));
+    if(!branchPath){ steps.forEach(s=>s.classList.add('flow-in')); return; }   // fallback
+    if(REDUCE){ [branchPath,tailPath].forEach(p=>p.style.strokeDashoffset=0); hangEls.forEach(h=>h.style.opacity=1); steps.forEach(s=>s.classList.add('flow-in')); return; }
+    // 1) the branch draws in, left → right
+    const Lb=+branchPath.dataset.len, DRAW=1500, t0=performance.now();
+    (function frame(now){ const t=Math.min(1,(now-t0)/DRAW); branchPath.style.strokeDashoffset=Lb*(1-t); if(t<1) requestAnimationFrame(frame); })(t0);
+    // 2) the four steps slide in and hang, staggered, once the branch is across
+    steps.forEach((s,i)=> setTimeout(()=>{ if(hangEls[i]) hangEls[i].style.opacity=1; s.classList.add('flow-in'); }, DRAW+i*230));
+    // 3) after all four hang, the branch tails off toward the next section
+    const Lt=+tailPath.dataset.len, tailAt=DRAW+steps.length*230+150;
+    setTimeout(()=>{ const ts=performance.now(); (function tf(now){ const t=Math.min(1,(now-ts)/1000); tailPath.style.strokeDashoffset=Lt*(1-t); if(t<1) requestAnimationFrame(tf); })(ts); }, tailAt);
   }
 
   build();
