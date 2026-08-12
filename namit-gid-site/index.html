@@ -668,7 +668,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 <svg class="roots" id="roots" viewBox="0 0 140 1000" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
   <clipPath id="rootsClip"><rect id="rootsClipRect" x="-30" y="-10" width="200" height="0"/></clipPath>
   <g clip-path="url(#rootsClip)">
-    <path class="stem" style="stroke-width:3.2" d="M70,0 C58,120 92,240 78,380 C66,500 44,620 64,760 C80,880 66,940 74,1000"/>
+    <path class="stem" style="stroke-width:3.2" d="M70,92 C60,180 92,280 78,400 C66,500 44,620 64,760 C80,880 66,940 74,1000"/>
     <path class="stem" style="stroke-width:1.7" d="M78,380 C104,398 120,430 124,470"/>
     <path class="stem" style="stroke-width:1.7" d="M64,760 C40,776 30,806 27,846"/>
     <g transform="translate(80,150) rotate(-38) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
@@ -680,6 +680,12 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
     <g transform="translate(82,930) rotate(-32) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(88,232) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
     <g transform="translate(48,555) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+    <g transform="translate(70,98) rotate(-150) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(70,98) rotate(-118) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(70,98) rotate(-90) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(70,98) rotate(-62) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(70,98) rotate(-30) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(70,90) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
   </g>
 </svg>
 
@@ -1064,12 +1070,16 @@ function buildVine(){
   for(let i=1;i<lft.length;i++) ribbon+=' L '+lft[i][0].toFixed(1)+','+lft[i][1].toFixed(1);
   for(let i=rgt.length-1;i>=0;i--) ribbon+=' L '+rgt[i][0].toFixed(1)+','+rgt[i][1].toFixed(1);
   ribbon+=' Z';
+  // leafy origin crown — reads as the vine sprouting from the logo's foliage
+  let origin=''; const crown=[[-152,.85],[-118,1.0],[-90,1.12],[-62,1.0],[-28,.85]];
+  crown.forEach(function(c){ origin+='<g transform="translate('+cx.toFixed(1)+',5 ) rotate('+c[0]+') scale('+(1.7*c[1]).toFixed(2)+')">'+V_LEAF+'</g>'; });
+  origin+='<g transform="translate('+cx.toFixed(1)+',1) scale(.95)">'+V_BLOOM+'</g>';
   svg.innerHTML=
-    '<clipPath id="vineClip"><rect id="vineClipRect" x="-320" y="-24" width="'+(w+640)+'" height="0"/></clipPath>'+
+    '<clipPath id="vineClip"><rect id="vineClipRect" x="-320" y="-40" width="'+(w+640)+'" height="0"/></clipPath>'+
     '<g clip-path="url(#vineClip)">'+
       '<path class="vine-fill" d="'+ribbon+'"/>'+
       '<path class="vine-mid" d="'+d+'"/>'+
-      decor+
+      decor+ origin+
     '</g>';
   drawVine();
 }
@@ -1398,7 +1408,8 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   function draw(){
     const max=(document.documentElement.scrollHeight - innerHeight) || 1;
     const prog=Math.min(1, Math.max(0, scrollY / max));
-    if(clip) clip.setAttribute('height', (prog*1020).toFixed(1));
+    const lp=Math.min(1, Math.max(0, (prog-0.38)/0.62));   // side vine follows the menu vine
+    if(clip) clip.setAttribute('height', (lp*1020).toFixed(1));
     if(soil) soil.style.opacity = (prog*0.7).toFixed(3);
     tick=false;
   }
