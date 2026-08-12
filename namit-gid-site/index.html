@@ -632,10 +632,10 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .js .rise.d3{transition-delay:.30s}
 .js .rise.d4{transition-delay:.40s}
 
-/* ---------- earthy: growing roots (wide screens) ---------- */
-.roots{position:fixed;top:0;height:100vh;width:150px;z-index:-1;pointer-events:none;opacity:.5;display:none;
-  left:calc((100vw - 1120px)/2 - 130px)}
-.roots path{fill:none;stroke:#6f4a2c;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+/* ---------- earthy: growing leafy vine (wide screens) ---------- */
+.roots{position:fixed;top:0;height:100vh;width:160px;z-index:-1;pointer-events:none;opacity:.55;display:none;
+  left:calc((100vw - 1120px)/2 - 140px)}
+.roots .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
 @media(min-width:1180px){.roots{display:block}}
 
 /* ---------- earthy: drifting leaves ---------- */
@@ -666,16 +666,21 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 <!-- EARTHY DECOR -->
 <div class="soil" id="soil" aria-hidden="true"></div>
 <svg class="roots" id="roots" viewBox="0 0 140 1000" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
-  <path style="stroke-width:3.2" d="M70,0 C58,72 92,142 78,232 C66,312 40,382 62,470 C80,548 100,620 82,716 C68,800 56,862 70,1000"/>
-  <path style="stroke-width:1.9" d="M78,232 C108,250 128,292 136,346"/>
-  <path style="stroke-width:1.3" d="M118,300 C126,292 131,298 137,286"/>
-  <path style="stroke-width:1.7" d="M52,150 C32,164 24,196 26,236"/>
-  <path style="stroke-width:1.9" d="M62,470 C34,486 18,520 12,566"/>
-  <path style="stroke-width:1.3" d="M24,516 C17,512 14,520 7,509"/>
-  <path style="stroke-width:1.9" d="M82,716 C112,734 126,768 130,810"/>
-  <path style="stroke-width:1.7" d="M70,858 C92,874 101,900 99,936"/>
-  <path style="stroke-width:1.3" d="M136,346 C147,341 150,352 141,357 C133,361 130,350 136,346 Z"/>
-  <path style="stroke-width:1.3" d="M12,566 C3,561 0,572 9,577 C17,581 20,570 12,566 Z"/>
+  <clipPath id="rootsClip"><rect id="rootsClipRect" x="-30" y="-10" width="200" height="0"/></clipPath>
+  <g clip-path="url(#rootsClip)">
+    <path class="stem" style="stroke-width:3.2" d="M70,0 C58,120 92,240 78,380 C66,500 44,620 64,760 C80,880 66,940 74,1000"/>
+    <path class="stem" style="stroke-width:1.7" d="M78,380 C104,398 120,430 124,470"/>
+    <path class="stem" style="stroke-width:1.7" d="M64,760 C40,776 30,806 27,846"/>
+    <g transform="translate(80,150) rotate(-38) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(60,300) rotate(158) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(84,430) rotate(-30) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(52,560) rotate(160) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(90,690) rotate(-30) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(56,820) rotate(160) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(82,930) rotate(-32) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(88,232) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+    <g transform="translate(48,555) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+  </g>
 </svg>
 
 <!-- SPLASH -->
@@ -996,7 +1001,9 @@ function revealItem(el){
 }
 list.querySelectorAll('.menu-item').forEach(el=>io.observe(el));
 
-/* ---------------- connecting root vine ---------------- */
+/* ---------------- connecting leafy vine ---------------- */
+const V_LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
+const V_BLOOM='<circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/>';
 function buildVine(){
   let svg=document.getElementById('menuVine');
   if(innerWidth < 760){ if(svg) svg.style.display='none'; return; }
@@ -1014,15 +1021,13 @@ function buildVine(){
   svg.setAttribute('viewBox','0 0 '+w+' '+h);
   svg.setAttribute('preserveAspectRatio','none');
   const cx=w/2, amp=Math.min(w*0.12, 120);
-  let d='M '+cx+',0', prevX=cx, prevY=0, leaves='';
+  let d='M '+cx+',0', prevX=cx, prevY=0;
   items.forEach(el=>{
     const y=el.offsetTop + el.offsetHeight/2;
     const side=(all.indexOf(el)%2===1)?1:-1;   // even nth-child => dish on right
     const nx=cx + side*amp, midY=(prevY+y)/2;
     d+=' C '+prevX+','+midY+' '+nx+','+midY+' '+nx+','+y;
     prevX=nx; prevY=y;
-    const dir=side;
-    leaves+='<path class="leaf-node" data-y="'+y+'" d="M '+nx+','+y+' q '+(16*dir)+',-11 '+(30*dir)+',0 q '+(-14*dir)+',11 '+(-30*dir)+',0 z"/>';
   });
   d+=' C '+prevX+','+((prevY+h)/2)+' '+cx+','+((prevY+h)/2)+' '+cx+','+h;
   // ── build a tapered "root": sample the centreline, offset by a varying width ──
@@ -1032,7 +1037,7 @@ function buildVine(){
   const L=tmp.getTotalLength();
   const N=Math.max(30, Math.round(L/12));
   const eps=Math.max(0.5, L/1200);
-  const lft=[], rgt=[]; let rootlets='';
+  const lft=[], rgt=[]; let decor='';
   for(let i=0;i<=N;i++){
     const t=i/N, s=t*L;
     const p=tmp.getPointAtLength(s);
@@ -1040,17 +1045,18 @@ function buildVine(){
     const b=tmp.getPointAtLength(Math.min(L,s+eps));
     let tx=b.x-a.x, ty=b.y-a.y; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
     const nx=-ty, ny=tx;                                   // unit normal
-    const taper=11*(1-t)+2.4*t;                            // thick at base → thin at tip
-    const wob=1+0.15*Math.sin(t*Math.PI*6.3)+0.07*Math.sin(t*Math.PI*13.7);
+    const taper=8.5*(1-t)+2.2*t;                           // woody stem: thick base → thin tip
+    const wob=1+0.12*Math.sin(t*Math.PI*6.3)+0.06*Math.sin(t*Math.PI*13.7);
     const ribW=taper*wob;
     lft.push([p.x+nx*ribW/2, p.y+ny*ribW/2]);
     rgt.push([p.x-nx*ribW/2, p.y-ny*ribW/2]);
-    if(i>2 && i<N-2 && i%5===0){                            // rootlet hairs
-      const dir=(i%10===0)?1:-1, hl=11+9*(1-t);
-      const hx=p.x+nx*dir*ribW/2, hy=p.y+ny*dir*ribW/2;
-      const mx=hx+nx*dir*hl*0.6+tx*4, my=hy+ny*dir*hl*0.6+ty*4;
-      const ex=hx+nx*dir*hl+tx*8,     ey=hy+ny*dir*hl+ty*8;
-      rootlets+='<path class="rootlet" d="M '+hx.toFixed(1)+','+hy.toFixed(1)+' Q '+mx.toFixed(1)+','+my.toFixed(1)+' '+ex.toFixed(1)+','+ey.toFixed(1)+'"/>';
+    if(i>1 && i<N && i%4===0){                             // leaves & the odd blossom
+      const dir=(Math.floor(i/4)%2===0)?1:-1;
+      const bx=p.x+nx*dir*ribW/2, by=p.y+ny*dir*ribW/2;
+      const ang=(Math.atan2(ny*dir, nx*dir)*180/Math.PI).toFixed(1);
+      const sc=(0.95+0.55*(1-t)).toFixed(2);
+      const bloom=(i%16===0);
+      decor+='<g transform="translate('+bx.toFixed(1)+','+by.toFixed(1)+') rotate('+ang+') scale('+sc+')">'+(bloom?V_BLOOM:V_LEAF)+'</g>';
     }
   }
   svg.removeChild(tmp);
@@ -1063,7 +1069,7 @@ function buildVine(){
     '<g clip-path="url(#vineClip)">'+
       '<path class="vine-fill" d="'+ribbon+'"/>'+
       '<path class="vine-mid" d="'+d+'"/>'+
-      rootlets+ leaves+
+      decor+
     '</g>';
   drawVine();
 }
@@ -1386,14 +1392,13 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 (function(){
   const roots=document.getElementById('roots'), soil=document.getElementById('soil');
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const paths= roots ? [...roots.querySelectorAll('path')] : [];
-  paths.forEach(p=>{ const L=p.getTotalLength(); p.style.strokeDasharray=L; p.style.strokeDashoffset= reduce?0:L; });
-  if(reduce) return;
+  const clip= roots ? roots.querySelector('#rootsClipRect') : null;
+  if(reduce){ if(clip) clip.setAttribute('height', 1020); if(soil) soil.style.opacity=.5; return; }
   let tick=false;
   function draw(){
     const max=(document.documentElement.scrollHeight - innerHeight) || 1;
     const prog=Math.min(1, Math.max(0, scrollY / max));
-    paths.forEach(p=>{ const L=p.getTotalLength(); p.style.strokeDashoffset = L*(1-prog); });
+    if(clip) clip.setAttribute('height', (prog*1020).toFixed(1));
     if(soil) soil.style.opacity = (prog*0.7).toFixed(3);
     tick=false;
   }
