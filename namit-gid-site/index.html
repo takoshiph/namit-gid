@@ -278,6 +278,12 @@ header.hero{
 .menu-allergen:hover{opacity:1;background:rgba(95,129,119,.12);border-color:var(--sage-dark);color:var(--espresso)}
 .menu-badge-row{margin-top:.7rem;text-align:center}
 .menu-badge-row .menu-allergen{margin-top:0}
+/* vine embrace cradling "The menu" — the heading grows from it */
+#menu{position:relative}
+#menu h2{position:relative;z-index:1}
+.menu-embrace{position:absolute;left:50%;top:50%;transform:translate(-50%,-48%);width:min(82%,560px);height:auto;z-index:0;pointer-events:none;overflow:visible;opacity:0;transition:opacity .8s ease .1s}
+#menu.embraced .menu-embrace{opacity:1}
+.menu-embrace .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
 .rom{font-family:var(--ff-display);color:var(--terracotta);letter-spacing:.06em}
 
 .menu-item{
@@ -763,6 +769,18 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 <!-- MENU -->
 <main>
   <div class="section-head" id="menu">
+    <svg class="menu-embrace" viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+      <path class="stem" style="stroke-width:2.4" d="M100,116 C74,114 46,102 34,72 C27,53 31,33 45,20"/>
+      <path class="stem" style="stroke-width:2.4" d="M100,116 C126,114 154,102 166,72 C173,53 169,33 155,20"/>
+      <g transform="translate(44,100) rotate(205) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+      <g transform="translate(33,74) rotate(232) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+      <g transform="translate(37,48) rotate(256) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+      <g transform="translate(156,100) rotate(-25) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+      <g transform="translate(167,74) rotate(-52) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+      <g transform="translate(163,48) rotate(-76) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+      <g transform="translate(45,19) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+      <g transform="translate(155,19) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+    </svg>
     <span class="eyebrow">Cooked to order · pick up hot</span>
     <h2>The menu</h2>
     <div class="menu-badge-row"><button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel" aria-label="Allergen and kitchen info"><span class="aller-i" aria-hidden="true">&#9432;</span>Allergens</button></div>
@@ -1084,16 +1102,12 @@ function buildVine(){
   for(let i=1;i<lft.length;i++) ribbon+=' L '+lft[i][0].toFixed(1)+','+lft[i][1].toFixed(1);
   for(let i=rgt.length-1;i>=0;i--) ribbon+=' L '+rgt[i][0].toFixed(1)+','+rgt[i][1].toFixed(1);
   ribbon+=' Z';
-  // leafy origin crown — reads as the vine sprouting from the logo's foliage
-  let origin=''; const crown=[[-152,.85],[-118,1.0],[-90,1.12],[-62,1.0],[-28,.85]];
-  crown.forEach(function(c){ origin+='<g transform="translate('+cx.toFixed(1)+',5 ) rotate('+c[0]+') scale('+(1.7*c[1]).toFixed(2)+')">'+V_LEAF+'</g>'; });
-  origin+='<g transform="translate('+cx.toFixed(1)+',1) scale(.95)">'+V_BLOOM+'</g>';
   svg.innerHTML=
     '<clipPath id="vineClip"><rect id="vineClipRect" x="-320" y="-40" width="'+(w+640)+'" height="0"/></clipPath>'+
     '<g clip-path="url(#vineClip)">'+
       '<path class="vine-fill" d="'+ribbon+'"/>'+
       '<path class="vine-mid" d="'+d+'"/>'+
-      decor+ origin+
+      decor+
     '</g>';
   drawVine();
 }
@@ -1111,6 +1125,13 @@ let vTick=false;
 addEventListener('scroll', ()=>{ if(!vTick){ vTick=true; requestAnimationFrame(()=>{ drawVine(); vTick=false; }); } }, {passive:true});
 addEventListener('resize', ()=>buildVine(), {passive:true});
 addEventListener('load', ()=>buildVine());
+/* fade the "The menu" vine embrace in as the section arrives */
+(function(){
+  const menu=document.getElementById('menu'); if(!menu) return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ menu.classList.add('embraced'); return; }
+  const io=new IntersectionObserver((es)=>{ es.forEach(e=>{ if(e.isIntersecting){ menu.classList.add('embraced'); io.disconnect(); } }); }, {threshold:.4});
+  io.observe(menu);
+})();
 
 /* ---------------- category tabs ---------------- */
 const menuTabs = document.querySelectorAll('.menu-tabs button[data-cat]');
