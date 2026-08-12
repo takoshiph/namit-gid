@@ -263,15 +263,18 @@ header.hero{
 .section-head h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
 .section-head p{max-width:44ch;opacity:.8}
 .section-head .head-tr{font-size:.95rem;font-style:italic;letter-spacing:.02em;color:var(--sage-dark);opacity:.82;margin-top:-.35rem}
-/* allergen pill nestled half-under the menu toggle, brand colours */
+/* menu toggle + quiet practical caption (made-to-order, pickup, allergens) */
 .menu-toggle{display:flex;flex-direction:column;align-items:center;width:max-content;max-width:92%;margin:0 auto 2.6rem}
-.menu-allergen{position:relative;z-index:3;margin-top:-1.1rem;
-  display:inline-flex;align-items:center;gap:.4rem;font:inherit;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;
-  color:var(--terracotta);background:var(--cream);border:1px solid rgba(196,99,60,.3);border-radius:999px;
-  padding:.42rem 1rem .42rem .9rem;box-shadow:0 8px 18px -12px var(--shadow);
-  cursor:pointer;opacity:1;transition:transform .2s,box-shadow .2s,background .2s,color .2s}
-.menu-allergen .aller-i{font-size:.9rem;line-height:1;opacity:.9}
-.menu-allergen:hover{transform:translateY(-1px);background:var(--terracotta);color:var(--cream);box-shadow:0 12px 24px -12px var(--shadow)}
+.menu-note{margin:1.1rem auto 0;max-width:54ch;text-align:center;font-size:.9rem;line-height:1.6;color:var(--espresso);opacity:.78}
+.menu-note .place{color:var(--sage-dark);font-weight:600}
+/* allergens: a small, calm, neutral badge — distinct from the terracotta category accent */
+.menu-allergen{margin-top:.7rem;display:inline-flex;align-items:center;gap:.32rem;font:inherit;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;font-weight:600;
+  color:var(--sage-dark);background:transparent;border:1px solid rgba(95,129,119,.4);border-radius:999px;
+  padding:.26rem .7rem;cursor:pointer;opacity:.85;transition:background .2s,opacity .2s,border-color .2s,color .2s}
+.menu-allergen .aller-i{font-size:.76rem;line-height:1;opacity:.9}
+.menu-allergen:hover{opacity:1;background:rgba(95,129,119,.12);border-color:var(--sage-dark);color:var(--espresso)}
+.menu-badge-row{margin-top:.7rem;text-align:center}
+.menu-badge-row .menu-allergen{margin-top:0}
 .rom{font-family:var(--ff-display);color:var(--terracotta);letter-spacing:.06em}
 
 .menu-item{
@@ -307,8 +310,8 @@ header.hero{
 .menu-item:nth-child(even) .price-btn:hover .arr{transform:translateX(-3px)}
 /* category tabs */
 .menu-tabs{
-  display:flex;justify-content:center;gap:2.2rem;width:max-content;max-width:100%;
-  margin:0;padding:.34rem;background:rgba(53,40,31,.07);border-radius:99px;position:relative;z-index:2;
+  display:flex;justify-content:center;gap:.3rem;width:max-content;max-width:100%;
+  margin:0;padding:.34rem;background:rgba(53,40,31,.07);border-radius:99px;
 }
 .menu-tabs button{
   min-height:44px;padding:.55rem 1.6rem;border-radius:99px;font-size:.76rem;letter-spacing:.2em;text-transform:uppercase;
@@ -728,7 +731,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   <div class="section-head" id="menu">
     <span class="eyebrow"><span class="rom">Busug</span>&#8202;· full &amp; satisfied</span>
     <h2>The menu</h2>
-    <p>Everything is made to order, so please place your order in advance. Pickup is at 180 Fairview Mall Dr.</p>
+    <div class="menu-badge-row"><button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel" aria-label="Allergen and kitchen info"><span class="aller-i" aria-hidden="true">&#9432;</span>Allergens</button></div>
   </div>
 
   <div class="menu-toggle">
@@ -736,7 +739,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
       <button type="button" class="active" data-cat="main" role="tab" aria-selected="true">Mains</button>
       <button type="button" data-cat="dessert" role="tab" aria-selected="false">Desserts</button>
     </div>
-    <button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel" aria-label="Allergen and kitchen info"><span class="aller-i" aria-hidden="true">&#9432;</span>Allergen</button>
+    <p class="menu-note">Everything is made to order,<br>then pickup at <span class="place">180 Fairview Mall Dr., North York</span></p>
   </div>
 
   <!-- items injected by JS -->
