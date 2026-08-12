@@ -616,8 +616,11 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .dish-btn img{transition:transform .55s cubic-bezier(.2,.7,.2,1)}
 .dish-btn:hover img{transform:scale(1.045)}
 #menuVine{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:0;pointer-events:none}
-#menuVine .vine{fill:none;stroke:var(--sage-dark);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:.5}
-#menuVine .leaf-node{fill:var(--sage-dark);opacity:0;transition:opacity .5s ease}
+#menuVine .vine-fill{fill:#6f4a2c;opacity:.62}
+#menuVine .vine-shade{fill:#5a3a20;opacity:.28}
+#menuVine .vine-mid{fill:none;stroke:#3f2c1a;stroke-width:1;opacity:.35;stroke-linecap:round;stroke-linejoin:round}
+#menuVine .rootlet{fill:none;stroke:#6f4a2c;stroke-width:1.3;stroke-linecap:round;opacity:.5}
+#menuVine .leaf-node{fill:var(--sage-deep);opacity:.8}
 @media (max-width:760px){#menuVine{display:none}}
 
 /* ---------- scroll reveals (sections) ---------- */
@@ -735,7 +738,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 <!-- MENU -->
 <main>
   <div class="section-head" id="menu">
-    <span class="eyebrow"><span class="rom">Busug</span>&#8202;· full &amp; satisfied</span>
+    <span class="eyebrow">Cooked to order · pick up hot</span>
     <h2>The menu</h2>
     <div class="menu-badge-row"><button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel" aria-label="Allergen and kitchen info"><span class="aller-i" aria-hidden="true">&#9432;</span>Allergens</button></div>
   </div>
@@ -1022,24 +1025,57 @@ function buildVine(){
     leaves+='<path class="leaf-node" data-y="'+y+'" d="M '+nx+','+y+' q '+(16*dir)+',-11 '+(30*dir)+',0 q '+(-14*dir)+',11 '+(-30*dir)+',0 z"/>';
   });
   d+=' C '+prevX+','+((prevY+h)/2)+' '+cx+','+((prevY+h)/2)+' '+cx+','+h;
-  svg.innerHTML='<path class="vine" d="'+d+'"/>'+leaves;
-  const path=svg.querySelector('.vine'), L=path.getTotalLength();
-  svg.dataset.len=L;
-  path.style.strokeDasharray=L;
-  path.style.strokeDashoffset= REDUCE ? 0 : L;
-  if(REDUCE) svg.querySelectorAll('.leaf-node').forEach(n=>n.style.opacity=.85);
+  // ── build a tapered "root": sample the centreline, offset by a varying width ──
+  const SVGNS='http://www.w3.org/2000/svg';
+  const tmp=document.createElementNS(SVGNS,'path');
+  tmp.setAttribute('d', d); svg.appendChild(tmp);
+  const L=tmp.getTotalLength();
+  const N=Math.max(30, Math.round(L/12));
+  const eps=Math.max(0.5, L/1200);
+  const lft=[], rgt=[]; let rootlets='';
+  for(let i=0;i<=N;i++){
+    const t=i/N, s=t*L;
+    const p=tmp.getPointAtLength(s);
+    const a=tmp.getPointAtLength(Math.max(0,s-eps));
+    const b=tmp.getPointAtLength(Math.min(L,s+eps));
+    let tx=b.x-a.x, ty=b.y-a.y; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
+    const nx=-ty, ny=tx;                                   // unit normal
+    const taper=11*(1-t)+2.4*t;                            // thick at base → thin at tip
+    const wob=1+0.15*Math.sin(t*Math.PI*6.3)+0.07*Math.sin(t*Math.PI*13.7);
+    const ribW=taper*wob;
+    lft.push([p.x+nx*ribW/2, p.y+ny*ribW/2]);
+    rgt.push([p.x-nx*ribW/2, p.y-ny*ribW/2]);
+    if(i>2 && i<N-2 && i%5===0){                            // rootlet hairs
+      const dir=(i%10===0)?1:-1, hl=11+9*(1-t);
+      const hx=p.x+nx*dir*ribW/2, hy=p.y+ny*dir*ribW/2;
+      const mx=hx+nx*dir*hl*0.6+tx*4, my=hy+ny*dir*hl*0.6+ty*4;
+      const ex=hx+nx*dir*hl+tx*8,     ey=hy+ny*dir*hl+ty*8;
+      rootlets+='<path class="rootlet" d="M '+hx.toFixed(1)+','+hy.toFixed(1)+' Q '+mx.toFixed(1)+','+my.toFixed(1)+' '+ex.toFixed(1)+','+ey.toFixed(1)+'"/>';
+    }
+  }
+  svg.removeChild(tmp);
+  let ribbon='M '+lft[0][0].toFixed(1)+','+lft[0][1].toFixed(1);
+  for(let i=1;i<lft.length;i++) ribbon+=' L '+lft[i][0].toFixed(1)+','+lft[i][1].toFixed(1);
+  for(let i=rgt.length-1;i>=0;i--) ribbon+=' L '+rgt[i][0].toFixed(1)+','+rgt[i][1].toFixed(1);
+  ribbon+=' Z';
+  svg.innerHTML=
+    '<clipPath id="vineClip"><rect id="vineClipRect" x="-320" y="-24" width="'+(w+640)+'" height="0"/></clipPath>'+
+    '<g clip-path="url(#vineClip)">'+
+      '<path class="vine-fill" d="'+ribbon+'"/>'+
+      '<path class="vine-mid" d="'+d+'"/>'+
+      rootlets+ leaves+
+    '</g>';
   drawVine();
 }
 function drawVine(){
   const svg=document.getElementById('menuVine');
-  if(!svg || svg.style.display==='none' || REDUCE) return;
-  const path=svg.querySelector('.vine'); if(!path) return;
-  const L=+svg.dataset.len || path.getTotalLength();
+  if(!svg || svg.style.display==='none') return;
+  const clip=document.getElementById('vineClipRect'); if(!clip) return;
+  const h=list.clientHeight;
+  if(REDUCE){ clip.setAttribute('height', (h+48).toFixed(1)); return; }
   const rect=list.getBoundingClientRect();
   const prog=Math.min(1, Math.max(0, ((innerHeight*0.82) - rect.top) / (rect.height||1)));
-  path.style.strokeDashoffset = L*(1-prog);
-  const drawnY=prog*list.clientHeight;
-  svg.querySelectorAll('.leaf-node').forEach(n=>{ n.style.opacity = (+n.dataset.y <= drawnY) ? '0.85' : '0'; });
+  clip.setAttribute('height', (prog*h+3).toFixed(1));
 }
 let vTick=false;
 addEventListener('scroll', ()=>{ if(!vTick){ vTick=true; requestAnimationFrame(()=>{ drawVine(); vTick=false; }); } }, {passive:true});
