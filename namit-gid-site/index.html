@@ -1464,19 +1464,19 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     const singleRow = innerWidth>=1000 && cards.every(c=>Math.abs(c.top-topY)<10);
     if(!singleRow){ svg.innerHTML=''; holesSvg.innerHTML=''; branchPath=null; tailPath=null; foliageEls=[]; holeEls=[]; return; }  // stacked: plain settle-in fallback
     // thread goes IN at hole 1, UNDER the card (hidden) to hole 2, OUT, then across the gap to the next card
-    const W=wr.width, holeY=topY+14, hg=20, underDip=topY+27;
+    const W=wr.width, holeY=topY+14, hg=20, underDip=topY+31;
     const hL0=cards[0].cx-hg;
     let d='M '+(cards[0].cx-104).toFixed(1)+',-42 C '+(cards[0].cx-82).toFixed(1)+',-6 '+(hL0-14).toFixed(1)+','+(holeY-16).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
     let holes='', gapMids=[], px=hL0;
     cards.forEach((c,i)=>{
       const hL=c.cx-hg, hR=c.cx+hg;
-      // UNDER the card: dip down between the two holes (this pass is behind the card → hidden)
-      d+=' C '+(c.cx-hg*0.45).toFixed(1)+','+underDip.toFixed(1)+' '+(c.cx+hg*0.45).toFixed(1)+','+underDip.toFixed(1)+' '+hR.toFixed(1)+','+holeY.toFixed(1);
+      // IN at hole 1, dip DOWN UNDER the card (behind it → hidden), back up and OUT at hole 2
+      d+=' C '+(c.cx-hg*0.5).toFixed(1)+','+underDip.toFixed(1)+' '+(c.cx+hg*0.5).toFixed(1)+','+underDip.toFixed(1)+' '+hR.toFixed(1)+','+holeY.toFixed(1);
       holes+='<g class="hole"><circle class="sh" cx="'+hL.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hL.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/></g>'
            + '<g class="hole"><circle class="sh" cx="'+hR.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hR.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/></g>';
-      // OUT and OVER the gap to the next card's first hole (visible)
+      // rise UP out of hole 2, arc OVER the gap (above the cards), dive DOWN into the next card's hole 1
       if(i<cards.length-1){ const nL=cards[i+1].cx-hg, mid=(hR+nL)/2; gapMids.push(mid);
-        d+=' C '+(hR+12).toFixed(1)+','+(holeY-6).toFixed(1)+' '+(nL-12).toFixed(1)+','+(holeY-6).toFixed(1)+' '+nL.toFixed(1)+','+holeY.toFixed(1); }
+        d+=' C '+(hR+8).toFixed(1)+','+(topY-18).toFixed(1)+' '+(nL-8).toFixed(1)+','+(topY-18).toFixed(1)+' '+nL.toFixed(1)+','+holeY.toFixed(1); }
       px=hR;
     });
     const endX=px+34;
@@ -1487,10 +1487,10 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       +' C '+(rightX+12).toFixed(1)+','+(holeY+36).toFixed(1)+' '+(rightX+2).toFixed(1)+','+(wr.height-24).toFixed(1)+' '+(rightX-8).toFixed(1)+','+(wr.height+18).toFixed(1)
       +' C '+(rightX-34).toFixed(1)+','+(wr.height+52).toFixed(1)+' '+(W*0.6).toFixed(1)+','+(wr.height+62).toFixed(1)+' '+(W*0.52).toFixed(1)+','+(wr.height+96).toFixed(1);
     // leaves + a couple of blossoms on the visible spans between cards
-    let fol='<g class="foliage" transform="translate('+(hL0-14).toFixed(1)+','+(holeY-10).toFixed(1)+') rotate(-150) scale(.32)">'+LEAF+'</g>';
+    let fol='<g class="foliage" transform="translate('+(hL0-14).toFixed(1)+','+(holeY-12).toFixed(1)+') rotate(-150) scale(.32)">'+LEAF+'</g>';
     gapMids.forEach((gx,i)=>{
-      fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(holeY-7).toFixed(1)+') rotate('+(i%2?-150:-30)+') scale(.32)">'+LEAF+'</g>';
-      if(i===1) fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(holeY-14).toFixed(1)+') scale(.3)">'+BLOOM+'</g>';
+      fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(topY-17).toFixed(1)+') rotate('+(i%2?-150:-30)+') scale(.32)">'+LEAF+'</g>';
+      if(i===1) fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(topY-24).toFixed(1)+') scale(.3)">'+BLOOM+'</g>';
     });
     svg.innerHTML='<path class="branch" d="'+d+'"/><path class="branch-tail" d="'+tail+'"/>'+fol;
     holesSvg.innerHTML=holes;
