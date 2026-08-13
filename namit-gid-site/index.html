@@ -155,8 +155,9 @@ header.hero{
 @keyframes emblemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .emblem-img{display:block;width:100%;height:auto;position:relative;z-index:2;filter:drop-shadow(0 18px 22px rgba(38,52,47,.24))}
 /* vine that grows from behind the sign frame */
-.emblem-vine{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;overflow:visible;pointer-events:none}
+.emblem-vine{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;overflow:visible;pointer-events:none;filter:drop-shadow(0 1px .8px rgba(45,28,15,.3))}
 .emblem-vine .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
+.emblem-vine .stem-hi{fill:none;stroke:#8f6038;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
 /* bottom-right leaf on top so the enlarged island runs behind it */
 .emblem-leaf{position:absolute;left:72.3%;top:90.1%;width:7.3cqw;height:auto;z-index:3;pointer-events:none}
 .wordmark{position:absolute;left:50%;top:82%;transform:translate(-50%,-50%);z-index:2;
@@ -281,7 +282,7 @@ header.hero{
 /* vine embrace cradling "The menu" — the heading grows from it */
 #menu{position:relative}
 #menu h2{position:relative;z-index:1}
-.menu-embrace{position:absolute;transform:translate(-50%,-50%);height:auto;z-index:0;pointer-events:none;overflow:visible}
+.menu-embrace{position:absolute;transform:translate(-50%,-50%);height:auto;z-index:0;pointer-events:none;overflow:visible;filter:drop-shadow(0 1px .8px rgba(45,28,15,.3))}
 .menu-embrace .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
 .rom{font-family:var(--ff-display);color:var(--terracotta);letter-spacing:.06em}
 
@@ -590,7 +591,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .story-toggle:hover{opacity:.82}
 .story.open .story-caret{transform:rotate(180deg)}
 /* vine arriving into the story — the page vine continuing on */
-.story-vine{position:absolute;left:50%;top:-4px;transform:translateX(-50%);height:58px;z-index:0;pointer-events:none;overflow:visible}
+.story-vine{position:absolute;left:50%;top:-4px;transform:translateX(-50%);height:58px;z-index:0;pointer-events:none;overflow:visible;filter:drop-shadow(0 1px .7px rgba(45,28,15,.28))}
 .story-vine .stem{fill:none;stroke:#6f4a2c;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.15s ease}
 .story.invine .story-vine .stem{stroke-dashoffset:0}
 .story-vine .foliage{opacity:0;transition:opacity .6s ease .55s}
@@ -637,10 +638,11 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 @keyframes nameDissolve{from{opacity:0;filter:blur(10px);transform:translateY(6px)}to{opacity:1;filter:blur(0);transform:none}}
 .dish-btn img{transition:transform .55s cubic-bezier(.2,.7,.2,1)}
 .dish-btn:hover img{transform:scale(1.045)}
-#menuVine{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:0;pointer-events:none}
-#menuVine .vine-fill{fill:#6f4a2c;opacity:.62}
+#menuVine{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:0;pointer-events:none;filter:drop-shadow(0 1.4px 1px rgba(45,28,15,.3))}
+#menuVine .vine-fill{fill:#6f4a2c;opacity:.94}
 #menuVine .vine-shade{fill:#5a3a20;opacity:.28}
-#menuVine .vine-mid{fill:none;stroke:#3f2c1a;stroke-width:1;opacity:.35;stroke-linecap:round;stroke-linejoin:round}
+#menuVine .vine-mid{fill:none;stroke:#3f280f;stroke-width:1.6;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
+#menuVine .vine-hi{fill:none;stroke:#9a6b40;stroke-width:.9;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
 #menuVine .rootlet{fill:none;stroke:#6f4a2c;stroke-width:1.3;stroke-linecap:round;opacity:.5}
 #menuVine .leaf-node{fill:var(--sage-deep);opacity:.8}
 @media (max-width:760px){#menuVine{display:none}}
@@ -656,7 +658,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 
 /* ---------- earthy: growing leafy vine (wide screens) ---------- */
 .roots{position:fixed;top:0;height:100vh;width:160px;z-index:-1;pointer-events:none;opacity:.55;display:none;
-  left:calc((100vw - 1120px)/2 - 140px)}
+  left:calc((100vw - 1120px)/2 - 140px);filter:drop-shadow(0 1px .8px rgba(45,28,15,.28))}
 .roots .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
 @media(min-width:1180px){.roots{display:block}}
 
@@ -704,14 +706,14 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     <g transform="translate(90,690) rotate(-30) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(56,820) rotate(160) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(82,930) rotate(-32) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(88,232) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
-    <g transform="translate(48,555) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+    <g transform="translate(88,232) scale(.5)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+    <g transform="translate(48,555) scale(.5)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
     <g transform="translate(70,98) rotate(-150) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(70,98) rotate(-118) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(70,98) rotate(-90) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(70,98) rotate(-62) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(70,98) rotate(-30) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(70,90) scale(.5)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+    <g transform="translate(70,90) scale(.5)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
   </g>
 </svg>
 
@@ -771,8 +773,8 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
         <g transform="translate(14,80) rotate(180) scale(.32)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
         <g transform="translate(20,102) rotate(150) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
         <g transform="translate(46,120) rotate(-30) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-        <g transform="translate(29,47) scale(.28)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
-        <g transform="translate(50,140) scale(.26)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+        <g transform="translate(29,47) scale(.28)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+        <g transform="translate(50,140) scale(.26)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
         </g>
       </svg>
       <img class="emblem-img" src="images/emblem.png" alt="Namit gid — the cook behind the sign" width="1040" height="1199">
@@ -802,8 +804,8 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
         <g transform="translate(198,52) rotate(-26) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
         <g transform="translate(224,37) rotate(-52) scale(.38)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
         <g transform="translate(238,20) rotate(-78) scale(.29)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-        <g transform="translate(37,6) scale(.34)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
-        <g transform="translate(230,5) scale(.31)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+        <g transform="translate(37,6) scale(.34)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+        <g transform="translate(230,5) scale(.31)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
       </g>
     </svg>
     <span class="eyebrow">Cooked to order · pick up hot</span>
@@ -872,14 +874,14 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     <g transform="translate(35,58) rotate(-142) scale(.42)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(33,42) rotate(-38) scale(.46)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(33,28) rotate(-96) scale(.4)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(38,12) scale(.4)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+    <g transform="translate(38,12) scale(.4)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
   </svg>
   <svg class="earth-tuft right" viewBox="0 0 120 86" aria-hidden="true" focusable="false">
     <path class="stem" d="M34,86 C30,66 40,50 33,32 C31,24 34,18 38,13"/>
     <g transform="translate(35,58) rotate(-142) scale(.42)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(33,42) rotate(-38) scale(.46)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g transform="translate(33,28) rotate(-96) scale(.4)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(38,12) scale(.4)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+    <g transform="translate(38,12) scale(.4)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
   </svg>
 </section>
 
@@ -890,7 +892,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     <g class="foliage" transform="translate(30,34) rotate(202) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g class="foliage" transform="translate(33,60) rotate(-22) scale(.32)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g class="foliage" transform="translate(28,87) rotate(206) scale(.28)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g class="foliage" transform="translate(30,114) scale(.32)"><circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/></g>
+    <g class="foliage" transform="translate(30,114) scale(.32)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
   </svg>
   <div class="wrap">
     <button type="button" class="story-toggle" id="storyToggle" aria-expanded="false" aria-controls="storyBody">
@@ -1087,7 +1089,7 @@ list.querySelectorAll('.menu-item').forEach(el=>io.observe(el));
 
 /* ---------------- connecting leafy vine ---------------- */
 const V_LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
-const V_BLOOM='<circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/>';
+const V_BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
 function buildVine(){
   let svg=document.getElementById('menuVine');
   if(innerWidth < 760){ if(svg) svg.style.display='none'; return; }
@@ -1137,9 +1139,15 @@ function buildVine(){
     if(i>1 && i<N && i%4===0){                             // leaves & the odd blossom
       const dir=(Math.floor(i/4)%2===0)?1:-1;
       const bx=p.x+nx*dir*ribW/2, by=p.y+ny*dir*ribW/2;
-      const ang=(Math.atan2(ny*dir, nx*dir)*180/Math.PI).toFixed(1);
-      const sc=(0.95+0.55*(1-t)).toFixed(2);
+      // deterministic pseudo-random jitter so nothing looks stamped
+      let jr=Math.sin(i*12.9898)*43758.5453; jr-=Math.floor(jr);
+      let js=Math.sin(i*78.233)*24634.6345; js-=Math.floor(js);
       const bloom=(i%16===0);
+      // leaves nod along the stem; blooms tilt more freely
+      const wig=bloom?(jr*70-35):(dir*14+(jr*22-11));
+      const ang=(Math.atan2(ny*dir, nx*dir)*180/Math.PI + wig).toFixed(1);
+      const base=bloom?(1.05+0.35*(1-t)):(0.95+0.55*(1-t));
+      const sc=(base*(0.82+0.36*js)).toFixed(2);
       decor+='<g transform="translate('+bx.toFixed(1)+','+by.toFixed(1)+') rotate('+ang+') scale('+sc+')">'+(bloom?V_BLOOM:V_LEAF)+'</g>';
     }
   }
@@ -1148,11 +1156,15 @@ function buildVine(){
   for(let i=1;i<lft.length;i++) ribbon+=' L '+lft[i][0].toFixed(1)+','+lft[i][1].toFixed(1);
   for(let i=rgt.length-1;i>=0;i--) ribbon+=' L '+rgt[i][0].toFixed(1)+','+rgt[i][1].toFixed(1);
   ribbon+=' Z';
+  // lit edge along one side of the ribbon (adds roundness / dimension)
+  let hi='M '+lft[0][0].toFixed(1)+','+lft[0][1].toFixed(1);
+  for(let i=1;i<lft.length;i++) hi+=' L '+lft[i][0].toFixed(1)+','+lft[i][1].toFixed(1);
   svg.innerHTML=
     '<clipPath id="vineClip"><rect id="vineClipRect" x="-320" y="-40" width="'+(w+640)+'" height="0"/></clipPath>'+
     '<g clip-path="url(#vineClip)">'+
       '<path class="vine-fill" d="'+ribbon+'"/>'+
       '<path class="vine-mid" d="'+d+'"/>'+
+      '<path class="vine-hi" d="'+hi+'"/>'+
       decor+
     '</g>';
   drawVine();
@@ -1449,7 +1461,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const steps=wrap ? [...wrap.querySelectorAll('.step')] : [];
   if(!section || !wrap || steps.length<2) return;
   const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
-  const BLOOM='<circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/>';
+  const BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
   let svg, holesSvg, branchPath, tailPath, foliageEls=[], holeEls=[], played=false;
 
   function build(){
