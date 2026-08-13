@@ -411,9 +411,10 @@ header.hero{
 #howRoot .branch,#howRoot .branch-tail{fill:none;stroke:#6f4a2c;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 #howRoot .foliage{opacity:0;transition:opacity .5s ease}
 #howHoles{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
-#howHoles .hole{opacity:0;transition:opacity .4s ease}
-#howHoles .hole .ring{fill:#9bb9af;stroke:rgba(38,28,20,.5);stroke-width:1.4}
-#howHoles .hole .sh{fill:rgba(38,28,20,.22)}
+#howHoles .cardstitch{opacity:0;transition:opacity .4s ease}
+#howHoles .ring{fill:#9bb9af;stroke:rgba(38,28,20,.5);stroke-width:1.4}
+#howHoles .sh{fill:rgba(38,28,20,.22)}
+#howHoles .bridge{fill:none;stroke:#6f4a2c;stroke-width:2.5;stroke-linecap:round;opacity:.86}
 /* earthy grounding at the base of the lower sections */
 .how,.reviews{position:relative}
 .how::after,.reviews::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(180deg,transparent,rgba(53,40,31,.06));pointer-events:none;z-index:0}
@@ -1472,8 +1473,11 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       const hL=c.cx-hg, hR=c.cx+hg;
       // IN at hole 1 → the pass under the card is NOT drawn (truly hidden) → resume at hole 2
       d+=' M '+hR.toFixed(1)+','+holeY.toFixed(1);
-      holes+='<g class="hole"><circle class="sh" cx="'+hL.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hL.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/></g>'
-           + '<g class="hole"><circle class="sh" cx="'+hR.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hR.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/></g>';
+      holes+='<g class="cardstitch">'
+           +'<path class="bridge" d="M '+hL.toFixed(1)+','+holeY.toFixed(1)+' Q '+c.cx.toFixed(1)+','+(holeY-9).toFixed(1)+' '+hR.toFixed(1)+','+holeY.toFixed(1)+'"/>'
+           +'<circle class="sh" cx="'+hL.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hL.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/>'
+           +'<circle class="sh" cx="'+hR.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hR.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/>'
+           +'</g>';
       // rise UP out of hole 2, arc OVER the gap (above the cards), dive DOWN into the next card's hole 1
       if(i<cards.length-1){ const nL=cards[i+1].cx-hg, mid=(hR+nL)/2; gapMids.push(mid);
         d+=' C '+(hR+8).toFixed(1)+','+(topY-18).toFixed(1)+' '+(nL-8).toFixed(1)+','+(topY-18).toFixed(1)+' '+nL.toFixed(1)+','+holeY.toFixed(1); }
@@ -1495,7 +1499,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     svg.innerHTML='<path class="branch" d="'+d+'"/><path class="branch-tail" d="'+tail+'"/>'+fol;
     holesSvg.innerHTML=holes;
     branchPath=svg.querySelector('.branch'); tailPath=svg.querySelector('.branch-tail');
-    foliageEls=[...svg.querySelectorAll('.foliage')]; holeEls=[...holesSvg.querySelectorAll('.hole')];
+    foliageEls=[...svg.querySelectorAll('.foliage')]; holeEls=[...holesSvg.querySelectorAll('.cardstitch')];
     [branchPath,tailPath].forEach(p=>{ const L=p.getTotalLength(); p.dataset.len=L; p.style.strokeDasharray=L; p.style.strokeDashoffset=(played||REDUCE)?0:L; });
     if(played||REDUCE){ foliageEls.forEach(f=>f.style.opacity=1); holeEls.forEach(h=>h.style.opacity=1); }
   }
@@ -1509,7 +1513,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     const Lb=+branchPath.dataset.len, DRAW=1900, t0=performance.now();
     (function frame(now){ const t=Math.min(1,(now-t0)/DRAW); branchPath.style.strokeDashoffset=Lb*(1-t); if(t<1) requestAnimationFrame(frame); })(t0);
     // 2) holes + steps appear as the lace reaches them, leaves unfurl
-    holeEls.forEach((h,i)=> setTimeout(()=> h.style.opacity=1, DRAW*(Math.floor(i/2)+0.35)/steps.length));
+    holeEls.forEach((g,i)=> setTimeout(()=> g.style.opacity=1, DRAW*(i+0.4)/steps.length));
     steps.forEach((s,i)=> setTimeout(()=> s.classList.add('flow-in'), DRAW*(i+0.55)/steps.length));
     foliageEls.forEach((f,i)=> setTimeout(()=> f.style.opacity=1, 320+i*160));
     // 3) after all four are laced, the branch tails off toward the next section
