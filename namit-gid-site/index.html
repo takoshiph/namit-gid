@@ -406,14 +406,12 @@ header.hero{
 .step .num{flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:var(--terracotta);color:var(--cream);display:grid;place-items:center;font-weight:700;font-size:.85rem;line-height:1}
 
 /* connecting root through the steps */
-#howRoot{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
-#howRoot .branch,#howRoot .branch-tail{fill:none;stroke:#6f4a2c;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:.78}
+/* thread laced over the cards through punched holes (drawn on top so it clearly threads through) */
+#howRoot{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+#howRoot .branch,#howRoot .branch-tail{fill:none;stroke:#6f4a2c;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 #howRoot .foliage{opacity:0;transition:opacity .5s ease}
-/* surface stitches — drawn ON TOP of the cards so the thread clearly pierces each one */
-#howStitch{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
-#howStitch .hstitch{opacity:0;transition:opacity .4s ease}
-#howStitch .stitch{fill:none;stroke:#6f4a2c;stroke-width:2.4;stroke-linecap:round}
-#howStitch .knot{fill:var(--terracotta)}
+#howRoot .hole{opacity:0;transition:opacity .4s ease}
+#howRoot .hole .ring{fill:#9bb9af;stroke:rgba(38,28,20,.5);stroke-width:1.4}
 /* earthy grounding at the base of the lower sections */
 .how,.reviews{position:relative}
 .how::after,.reviews::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(180deg,transparent,rgba(53,40,31,.06));pointer-events:none;z-index:0}
@@ -1449,13 +1447,13 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   if(!section || !wrap || steps.length<2) return;
   const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
   const BLOOM='<circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/>';
-  let svg, stitchSvg, branchPath, tailPath, foliageEls=[], stitchEls=[], played=false;
+  let svg, branchPath, tailPath, foliageEls=[], holeEls=[], played=false;
 
   function build(){
     const wr=wrap.getBoundingClientRect();
     if(!wr.width || !wr.height) return;
     // measure with offset* so the transform on hidden cards doesn't skew the anchor points
-    const cards=steps.map(s=>({ cx:s.offsetLeft+s.offsetWidth/2, top:s.offsetTop, left:s.offsetLeft, right:s.offsetLeft+s.offsetWidth }));
+    const cards=steps.map(s=>({ cx:s.offsetLeft+s.offsetWidth/2, top:s.offsetTop, right:s.offsetLeft+s.offsetWidth }));
     if(!svg){
       svg=document.createElementNS(NS,'svg');
       svg.id='howRoot'; svg.setAttribute('aria-hidden','true');
@@ -1465,66 +1463,54 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     svg.setAttribute('viewBox','0 0 '+wr.width.toFixed(1)+' '+wr.height.toFixed(1));
     const topY=Math.min.apply(null, cards.map(c=>c.top));
     const singleRow = innerWidth>=1000 && cards.every(c=>Math.abs(c.top-topY)<10);
-    if(!singleRow){ svg.innerHTML=''; if(stitchSvg) stitchSvg.innerHTML=''; branchPath=null; tailPath=null; foliageEls=[]; stitchEls=[]; return; }  // stacked: plain settle-in fallback
-    // running stitch: thread rides just above the card tops and dips INTO the middle of each card (hidden behind it), then out
-    const W=wr.width, ride=topY-13, dip=topY+26, dx=26;
-    const x0=cards[0].cx-dx-36;
-    let d='M '+(cards[0].cx-112).toFixed(1)+',-46 C '+(cards[0].cx-84).toFixed(1)+',-8 '+(x0-8).toFixed(1)+','+(ride-10).toFixed(1)+' '+x0.toFixed(1)+','+ride.toFixed(1);
-    let px=x0; const gapMids=[];
-    cards.forEach(c=>{
-      const mL=c.cx-dx, mR=c.cx+dx, mid=(px+mL)/2;
-      d+=' C '+mid.toFixed(1)+','+ride.toFixed(1)+' '+mid.toFixed(1)+','+ride.toFixed(1)+' '+mL.toFixed(1)+','+ride.toFixed(1);   // travel across the gap (visible)
-      gapMids.push(mid);
-      d+=' C '+(c.cx-dx*0.5).toFixed(1)+','+(ride+8).toFixed(1)+' '+(c.cx-dx*0.35).toFixed(1)+','+dip.toFixed(1)+' '+c.cx.toFixed(1)+','+dip.toFixed(1);   // dip IN to the card centre
-      d+=' C '+(c.cx+dx*0.35).toFixed(1)+','+dip.toFixed(1)+' '+(c.cx+dx*0.5).toFixed(1)+','+(ride+8).toFixed(1)+' '+mR.toFixed(1)+','+ride.toFixed(1);   // come back OUT
-      px=mR;
+    if(!singleRow){ svg.innerHTML=''; branchPath=null; tailPath=null; foliageEls=[]; holeEls=[]; return; }  // stacked: plain settle-in fallback
+    // the thread is laced through two punched holes near the top of each card, and drapes between cards
+    const W=wr.width, holeY=topY+15, hg=20;
+    const hL0=cards[0].cx-hg;
+    let d='M '+(cards[0].cx-104).toFixed(1)+',-42 C '+(cards[0].cx-80).toFixed(1)+',-6 '+(hL0-16).toFixed(1)+','+(holeY-14).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
+    let holes='', drapes=[], px=hL0;
+    cards.forEach((c,i)=>{
+      const hL=c.cx-hg, hR=c.cx+hg;
+      d+=' Q '+c.cx.toFixed(1)+','+(holeY-8).toFixed(1)+' '+hR.toFixed(1)+','+holeY.toFixed(1);   // lace OVER the card, hole → hole
+      holes+='<g class="hole"><circle class="ring" cx="'+hL.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.4"/></g>'
+           + '<g class="hole"><circle class="ring" cx="'+hR.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.4"/></g>';
+      if(i<cards.length-1){ const nL=cards[i+1].cx-hg, dm=(hR+nL)/2; drapes.push(dm);
+        d+=' C '+(hR+10).toFixed(1)+','+(holeY+19).toFixed(1)+' '+(nL-10).toFixed(1)+','+(holeY+19).toFixed(1)+' '+nL.toFixed(1)+','+holeY.toFixed(1); }   // drape DOWN to the next card
+      px=hR;
     });
-    const endX=px+42;
-    d+=' C '+((px+endX)/2).toFixed(1)+','+ride.toFixed(1)+' '+endX.toFixed(1)+','+ride.toFixed(1)+' '+endX.toFixed(1)+','+(ride+2).toFixed(1);
+    const endX=px+34;
+    d+=' C '+(px+14).toFixed(1)+','+(holeY+12).toFixed(1)+' '+endX.toFixed(1)+','+(holeY+6).toFixed(1)+' '+endX.toFixed(1)+','+(holeY+8).toFixed(1);
     // tail: down the right gutter, then curve to centre toward the next section (Kalīpay)
-    const rightX=cards[cards.length-1].right+20;
-    const tail='M '+endX.toFixed(1)+','+(ride+2).toFixed(1)
-      +' C '+(rightX+14).toFixed(1)+','+(ride+34).toFixed(1)+' '+(rightX+2).toFixed(1)+','+(wr.height-24).toFixed(1)+' '+(rightX-8).toFixed(1)+','+(wr.height+18).toFixed(1)
+    const rightX=cards[cards.length-1].right+18;
+    const tail='M '+endX.toFixed(1)+','+(holeY+8).toFixed(1)
+      +' C '+(rightX+12).toFixed(1)+','+(holeY+40).toFixed(1)+' '+(rightX+2).toFixed(1)+','+(wr.height-24).toFixed(1)+' '+(rightX-8).toFixed(1)+','+(wr.height+18).toFixed(1)
       +' C '+(rightX-34).toFixed(1)+','+(wr.height+52).toFixed(1)+' '+(W*0.6).toFixed(1)+','+(wr.height+62).toFixed(1)+' '+(W*0.52).toFixed(1)+','+(wr.height+96).toFixed(1);
-    // leaves + a couple of blossoms on the visible arcs between the stitches
-    let fol='<g class="foliage" transform="translate('+(x0-14).toFixed(1)+','+(ride-4).toFixed(1)+') rotate(-148) scale(.34)">'+LEAF+'</g>';
-    gapMids.forEach((gx,i)=>{
-      fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(ride-3).toFixed(1)+') rotate('+(i%2?-150:-30)+') scale(.32)">'+LEAF+'</g>';
-      if(i===1) fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(ride-11).toFixed(1)+') scale(.3)">'+BLOOM+'</g>';
+    // leaves + a couple of blossoms on the draped spans between cards
+    let fol='<g class="foliage" transform="translate('+(hL0-14).toFixed(1)+','+(holeY-8).toFixed(1)+') rotate(-150) scale(.32)">'+LEAF+'</g>';
+    drapes.forEach((dm,i)=>{
+      fol+='<g class="foliage" transform="translate('+dm.toFixed(1)+','+(holeY+19).toFixed(1)+') rotate('+(i%2?150:30)+') scale(.32)">'+LEAF+'</g>';
+      if(i===1) fol+='<g class="foliage" transform="translate('+dm.toFixed(1)+','+(holeY+10).toFixed(1)+') scale(.3)">'+BLOOM+'</g>';
     });
-    fol+='<g class="foliage" transform="translate('+endX.toFixed(1)+','+(ride-9).toFixed(1)+') scale(.32)">'+BLOOM+'</g>';
-    svg.innerHTML='<path class="branch" d="'+d+'"/><path class="branch-tail" d="'+tail+'"/>'+fol;
+    svg.innerHTML='<path class="branch" d="'+d+'"/><path class="branch-tail" d="'+tail+'"/>'+holes+fol;
     branchPath=svg.querySelector('.branch'); tailPath=svg.querySelector('.branch-tail');
-    foliageEls=[...svg.querySelectorAll('.foliage')];
+    foliageEls=[...svg.querySelectorAll('.foliage')]; holeEls=[...svg.querySelectorAll('.hole')];
     [branchPath,tailPath].forEach(p=>{ const L=p.getTotalLength(); p.dataset.len=L; p.style.strokeDasharray=L; p.style.strokeDashoffset=(played||REDUCE)?0:L; });
-    if(played||REDUCE) foliageEls.forEach(f=>f.style.opacity=1);
-    // ON-TOP surface stitch for each card: a small arc that dips into the card top + a knot where it pierces
-    if(!stitchSvg){ stitchSvg=document.createElementNS(NS,'svg'); stitchSvg.id='howStitch'; stitchSvg.setAttribute('aria-hidden','true'); stitchSvg.setAttribute('preserveAspectRatio','none'); wrap.appendChild(stitchSvg); }
-    stitchSvg.setAttribute('viewBox','0 0 '+wr.width.toFixed(1)+' '+wr.height.toFixed(1));
-    let st='';
-    cards.forEach(c=>{ const cx=c.cx, ty=c.top;
-      st+='<g class="hstitch">'
-        +'<path class="stitch" d="M '+(cx-11).toFixed(1)+','+(ty+3).toFixed(1)+' Q '+cx.toFixed(1)+','+(ty+19).toFixed(1)+' '+(cx+11).toFixed(1)+','+(ty+3).toFixed(1)+'"/>'
-        +'<circle class="knot" cx="'+cx.toFixed(1)+'" cy="'+(ty+14).toFixed(1)+'" r="2.3"/>'
-        +'</g>';
-    });
-    stitchSvg.innerHTML=st;
-    stitchEls=[...stitchSvg.querySelectorAll('.hstitch')];
-    if(played||REDUCE) stitchEls.forEach(e=>e.style.opacity=1);
+    if(played||REDUCE){ foliageEls.forEach(f=>f.style.opacity=1); holeEls.forEach(h=>h.style.opacity=1); }
   }
 
   function play(){
     if(played) return;
     played=true;
     if(!branchPath){ steps.forEach(s=>s.classList.add('flow-in')); return; }   // fallback
-    if(REDUCE){ [branchPath,tailPath].forEach(p=>p.style.strokeDashoffset=0); foliageEls.forEach(f=>f.style.opacity=1); steps.forEach(s=>s.classList.add('flow-in')); return; }
-    // 1) the thread sews across, left → right, dipping into each card
+    if(REDUCE){ [branchPath,tailPath].forEach(p=>p.style.strokeDashoffset=0); foliageEls.forEach(f=>f.style.opacity=1); holeEls.forEach(h=>h.style.opacity=1); steps.forEach(s=>s.classList.add('flow-in')); return; }
+    // 1) the thread laces across, left → right, through each card's holes
     const Lb=+branchPath.dataset.len, DRAW=1900, t0=performance.now();
     (function frame(now){ const t=Math.min(1,(now-t0)/DRAW); branchPath.style.strokeDashoffset=Lb*(1-t); if(t<1) requestAnimationFrame(frame); })(t0);
-    // 2) each step settles in as the thread stitches it (surface stitch appears), and leaves unfurl
-    steps.forEach((s,i)=> setTimeout(()=>{ s.classList.add('flow-in'); if(stitchEls[i]) stitchEls[i].style.opacity=1; }, DRAW*(i+0.6)/steps.length));
-    foliageEls.forEach((f,i)=> setTimeout(()=> f.style.opacity=1, 320+i*170));
-    // 3) after all four are sewn, the branch tails off toward the next section
+    // 2) holes + steps appear as the lace reaches them, leaves unfurl
+    holeEls.forEach((h,i)=> setTimeout(()=> h.style.opacity=1, DRAW*(Math.floor(i/2)+0.35)/steps.length));
+    steps.forEach((s,i)=> setTimeout(()=> s.classList.add('flow-in'), DRAW*(i+0.55)/steps.length));
+    foliageEls.forEach((f,i)=> setTimeout(()=> f.style.opacity=1, 320+i*160));
+    // 3) after all four are laced, the branch tails off toward the next section
     const Lt=+tailPath.dataset.len;
     setTimeout(()=>{ const ts=performance.now(); (function tf(now){ const t=Math.min(1,(now-ts)/1000); tailPath.style.strokeDashoffset=Lt*(1-t); if(t<1) requestAnimationFrame(tf); })(ts); }, DRAW+180);
   }
