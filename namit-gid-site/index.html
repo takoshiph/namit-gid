@@ -406,12 +406,14 @@ header.hero{
 .step .num{flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:var(--terracotta);color:var(--cream);display:grid;place-items:center;font-weight:700;font-size:.85rem;line-height:1}
 
 /* connecting root through the steps */
-/* thread laced over the cards through punched holes (drawn on top so it clearly threads through) */
-#howRoot{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+/* thread runs BEHIND the cards (under-card passes hidden); punched holes sit ON TOP to mark in/out */
+#howRoot{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
 #howRoot .branch,#howRoot .branch-tail{fill:none;stroke:#6f4a2c;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 #howRoot .foliage{opacity:0;transition:opacity .5s ease}
-#howRoot .hole{opacity:0;transition:opacity .4s ease}
-#howRoot .hole .ring{fill:#9bb9af;stroke:rgba(38,28,20,.5);stroke-width:1.4}
+#howHoles{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+#howHoles .hole{opacity:0;transition:opacity .4s ease}
+#howHoles .hole .ring{fill:#9bb9af;stroke:rgba(38,28,20,.5);stroke-width:1.4}
+#howHoles .hole .sh{fill:rgba(38,28,20,.22)}
 /* earthy grounding at the base of the lower sections */
 .how,.reviews{position:relative}
 .how::after,.reviews::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(180deg,transparent,rgba(53,40,31,.06));pointer-events:none;z-index:0}
@@ -1447,53 +1449,53 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   if(!section || !wrap || steps.length<2) return;
   const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
   const BLOOM='<circle cx="0" cy="-5" r="3.1" fill="#c4633c"/><circle cx="4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-2.94" cy="4.05" r="3.1" fill="#c4633c"/><circle cx="-4.76" cy="-1.55" r="3.1" fill="#c4633c"/><circle cx="0" cy="0" r="2.3" fill="#f7f0e3"/>';
-  let svg, branchPath, tailPath, foliageEls=[], holeEls=[], played=false;
+  let svg, holesSvg, branchPath, tailPath, foliageEls=[], holeEls=[], played=false;
 
   function build(){
     const wr=wrap.getBoundingClientRect();
     if(!wr.width || !wr.height) return;
     // measure with offset* so the transform on hidden cards doesn't skew the anchor points
     const cards=steps.map(s=>({ cx:s.offsetLeft+s.offsetWidth/2, top:s.offsetTop, right:s.offsetLeft+s.offsetWidth }));
-    if(!svg){
-      svg=document.createElementNS(NS,'svg');
-      svg.id='howRoot'; svg.setAttribute('aria-hidden','true');
-      svg.setAttribute('preserveAspectRatio','none');
-      wrap.prepend(svg);
-    }
-    svg.setAttribute('viewBox','0 0 '+wr.width.toFixed(1)+' '+wr.height.toFixed(1));
+    if(!svg){ svg=document.createElementNS(NS,'svg'); svg.id='howRoot'; svg.setAttribute('aria-hidden','true'); svg.setAttribute('preserveAspectRatio','none'); wrap.prepend(svg); }
+    if(!holesSvg){ holesSvg=document.createElementNS(NS,'svg'); holesSvg.id='howHoles'; holesSvg.setAttribute('aria-hidden','true'); holesSvg.setAttribute('preserveAspectRatio','none'); wrap.appendChild(holesSvg); }
+    const vb='0 0 '+wr.width.toFixed(1)+' '+wr.height.toFixed(1);
+    svg.setAttribute('viewBox',vb); holesSvg.setAttribute('viewBox',vb);
     const topY=Math.min.apply(null, cards.map(c=>c.top));
     const singleRow = innerWidth>=1000 && cards.every(c=>Math.abs(c.top-topY)<10);
-    if(!singleRow){ svg.innerHTML=''; branchPath=null; tailPath=null; foliageEls=[]; holeEls=[]; return; }  // stacked: plain settle-in fallback
-    // the thread is laced through two punched holes near the top of each card, and drapes between cards
-    const W=wr.width, holeY=topY+15, hg=20;
+    if(!singleRow){ svg.innerHTML=''; holesSvg.innerHTML=''; branchPath=null; tailPath=null; foliageEls=[]; holeEls=[]; return; }  // stacked: plain settle-in fallback
+    // thread goes IN at hole 1, UNDER the card (hidden) to hole 2, OUT, then across the gap to the next card
+    const W=wr.width, holeY=topY+14, hg=20, underDip=topY+27;
     const hL0=cards[0].cx-hg;
-    let d='M '+(cards[0].cx-104).toFixed(1)+',-42 C '+(cards[0].cx-80).toFixed(1)+',-6 '+(hL0-16).toFixed(1)+','+(holeY-14).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
-    let holes='', drapes=[], px=hL0;
+    let d='M '+(cards[0].cx-104).toFixed(1)+',-42 C '+(cards[0].cx-82).toFixed(1)+',-6 '+(hL0-14).toFixed(1)+','+(holeY-16).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
+    let holes='', gapMids=[], px=hL0;
     cards.forEach((c,i)=>{
       const hL=c.cx-hg, hR=c.cx+hg;
-      d+=' Q '+c.cx.toFixed(1)+','+(holeY-8).toFixed(1)+' '+hR.toFixed(1)+','+holeY.toFixed(1);   // lace OVER the card, hole → hole
-      holes+='<g class="hole"><circle class="ring" cx="'+hL.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.4"/></g>'
-           + '<g class="hole"><circle class="ring" cx="'+hR.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.4"/></g>';
-      if(i<cards.length-1){ const nL=cards[i+1].cx-hg, dm=(hR+nL)/2; drapes.push(dm);
-        d+=' C '+(hR+10).toFixed(1)+','+(holeY+19).toFixed(1)+' '+(nL-10).toFixed(1)+','+(holeY+19).toFixed(1)+' '+nL.toFixed(1)+','+holeY.toFixed(1); }   // drape DOWN to the next card
+      // UNDER the card: dip down between the two holes (this pass is behind the card → hidden)
+      d+=' C '+(c.cx-hg*0.45).toFixed(1)+','+underDip.toFixed(1)+' '+(c.cx+hg*0.45).toFixed(1)+','+underDip.toFixed(1)+' '+hR.toFixed(1)+','+holeY.toFixed(1);
+      holes+='<g class="hole"><circle class="sh" cx="'+hL.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hL.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/></g>'
+           + '<g class="hole"><circle class="sh" cx="'+hR.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hR.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/></g>';
+      // OUT and OVER the gap to the next card's first hole (visible)
+      if(i<cards.length-1){ const nL=cards[i+1].cx-hg, mid=(hR+nL)/2; gapMids.push(mid);
+        d+=' C '+(hR+12).toFixed(1)+','+(holeY-6).toFixed(1)+' '+(nL-12).toFixed(1)+','+(holeY-6).toFixed(1)+' '+nL.toFixed(1)+','+holeY.toFixed(1); }
       px=hR;
     });
     const endX=px+34;
-    d+=' C '+(px+14).toFixed(1)+','+(holeY+12).toFixed(1)+' '+endX.toFixed(1)+','+(holeY+6).toFixed(1)+' '+endX.toFixed(1)+','+(holeY+8).toFixed(1);
+    d+=' C '+(px+14).toFixed(1)+','+(holeY-3).toFixed(1)+' '+endX.toFixed(1)+','+holeY.toFixed(1)+' '+endX.toFixed(1)+','+(holeY+2).toFixed(1);
     // tail: down the right gutter, then curve to centre toward the next section (Kalīpay)
     const rightX=cards[cards.length-1].right+18;
-    const tail='M '+endX.toFixed(1)+','+(holeY+8).toFixed(1)
-      +' C '+(rightX+12).toFixed(1)+','+(holeY+40).toFixed(1)+' '+(rightX+2).toFixed(1)+','+(wr.height-24).toFixed(1)+' '+(rightX-8).toFixed(1)+','+(wr.height+18).toFixed(1)
+    const tail='M '+endX.toFixed(1)+','+(holeY+2).toFixed(1)
+      +' C '+(rightX+12).toFixed(1)+','+(holeY+36).toFixed(1)+' '+(rightX+2).toFixed(1)+','+(wr.height-24).toFixed(1)+' '+(rightX-8).toFixed(1)+','+(wr.height+18).toFixed(1)
       +' C '+(rightX-34).toFixed(1)+','+(wr.height+52).toFixed(1)+' '+(W*0.6).toFixed(1)+','+(wr.height+62).toFixed(1)+' '+(W*0.52).toFixed(1)+','+(wr.height+96).toFixed(1);
-    // leaves + a couple of blossoms on the draped spans between cards
-    let fol='<g class="foliage" transform="translate('+(hL0-14).toFixed(1)+','+(holeY-8).toFixed(1)+') rotate(-150) scale(.32)">'+LEAF+'</g>';
-    drapes.forEach((dm,i)=>{
-      fol+='<g class="foliage" transform="translate('+dm.toFixed(1)+','+(holeY+19).toFixed(1)+') rotate('+(i%2?150:30)+') scale(.32)">'+LEAF+'</g>';
-      if(i===1) fol+='<g class="foliage" transform="translate('+dm.toFixed(1)+','+(holeY+10).toFixed(1)+') scale(.3)">'+BLOOM+'</g>';
+    // leaves + a couple of blossoms on the visible spans between cards
+    let fol='<g class="foliage" transform="translate('+(hL0-14).toFixed(1)+','+(holeY-10).toFixed(1)+') rotate(-150) scale(.32)">'+LEAF+'</g>';
+    gapMids.forEach((gx,i)=>{
+      fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(holeY-7).toFixed(1)+') rotate('+(i%2?-150:-30)+') scale(.32)">'+LEAF+'</g>';
+      if(i===1) fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(holeY-14).toFixed(1)+') scale(.3)">'+BLOOM+'</g>';
     });
-    svg.innerHTML='<path class="branch" d="'+d+'"/><path class="branch-tail" d="'+tail+'"/>'+holes+fol;
+    svg.innerHTML='<path class="branch" d="'+d+'"/><path class="branch-tail" d="'+tail+'"/>'+fol;
+    holesSvg.innerHTML=holes;
     branchPath=svg.querySelector('.branch'); tailPath=svg.querySelector('.branch-tail');
-    foliageEls=[...svg.querySelectorAll('.foliage')]; holeEls=[...svg.querySelectorAll('.hole')];
+    foliageEls=[...svg.querySelectorAll('.foliage')]; holeEls=[...holesSvg.querySelectorAll('.hole')];
     [branchPath,tailPath].forEach(p=>{ const L=p.getTotalLength(); p.dataset.len=L; p.style.strokeDasharray=L; p.style.strokeDashoffset=(played||REDUCE)?0:L; });
     if(played||REDUCE){ foliageEls.forEach(f=>f.style.opacity=1); holeEls.forEach(h=>h.style.opacity=1); }
   }
@@ -1503,7 +1505,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     played=true;
     if(!branchPath){ steps.forEach(s=>s.classList.add('flow-in')); return; }   // fallback
     if(REDUCE){ [branchPath,tailPath].forEach(p=>p.style.strokeDashoffset=0); foliageEls.forEach(f=>f.style.opacity=1); holeEls.forEach(h=>h.style.opacity=1); steps.forEach(s=>s.classList.add('flow-in')); return; }
-    // 1) the thread laces across, left → right, through each card's holes
+    // 1) the thread laces across, left → right, in one hole and out the next
     const Lb=+branchPath.dataset.len, DRAW=1900, t0=performance.now();
     (function frame(now){ const t=Math.min(1,(now-t0)/DRAW); branchPath.style.strokeDashoffset=Lb*(1-t); if(t<1) requestAnimationFrame(frame); })(t0);
     // 2) holes + steps appear as the lace reaches them, leaves unfurl
