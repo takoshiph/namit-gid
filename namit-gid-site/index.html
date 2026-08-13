@@ -1470,8 +1470,8 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     let holes='', gapMids=[], px=hL0;
     cards.forEach((c,i)=>{
       const hL=c.cx-hg, hR=c.cx+hg;
-      // IN at hole 1, dip DOWN UNDER the card (behind it → hidden), back up and OUT at hole 2
-      d+=' C '+(c.cx-hg*0.5).toFixed(1)+','+underDip.toFixed(1)+' '+(c.cx+hg*0.5).toFixed(1)+','+underDip.toFixed(1)+' '+hR.toFixed(1)+','+holeY.toFixed(1);
+      // IN at hole 1 → the pass under the card is NOT drawn (truly hidden) → resume at hole 2
+      d+=' M '+hR.toFixed(1)+','+holeY.toFixed(1);
       holes+='<g class="hole"><circle class="sh" cx="'+hL.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hL.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/></g>'
            + '<g class="hole"><circle class="sh" cx="'+hR.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hR.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/></g>';
       // rise UP out of hole 2, arc OVER the gap (above the cards), dive DOWN into the next card's hole 1
