@@ -776,7 +776,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <svg class="emblem-vine" viewBox="0 0 104 120" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
         <clipPath id="emblemVineClip"><rect id="emblemVineClipRect" x="-24" y="-24" width="160" height="0"/></clipPath>
         <g clip-path="url(#emblemVineClip)">
-        <path class="stem" style="stroke-width:2.6" d="M30,50 C18,60 12,74 16,90 C20,106 30,113 40,120 C52,129 51,149 43,168 C34,189 27,198 24,214"/>
+        <path class="stem" style="stroke-width:2.6" d="M30,50 C18,60 12,74 16,90 C20,106 30,113 42,117 C54,121 57,133 53,150"/>
         <path class="stem" style="stroke-width:1.5" d="M17,88 C11,95 9,104 13,113"/>
         <g transform="translate(30,50) rotate(-150) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
         <g transform="translate(30,50) rotate(-100) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
@@ -1253,7 +1253,7 @@ addEventListener('load', ()=>buildVine());
     const left=r[0].left, right=r[7].right;
     const textTop=Math.min(...r.map(b=>b.top)), textBot=Math.max(...r.map(b=>b.bottom));
     const textH=textBot-textTop;
-    const padX=(right-left)*0.16+12, padTop=textH*0.95, padBot=textH*1.25;
+    const padX=(right-left)*0.16+12, padTop=textH*0.95, padBot=textH*0.5;
     const boxLeft=left-padX, boxTop=textTop-padTop;
     const W=(right-left)+padX*2, H=textH+padTop+padBot;
     // position the (transform-centred) svg over the box
@@ -1275,10 +1275,8 @@ addEventListener('load', ()=>buildVine());
       P(4,0.48),                             // m  (behind)
       [CX(6)+(CX(7)-CX(6))*0.15, vlo+textH*0.06], // scoop just left of the u
       P(7,0.34),                             // u  (emerges up through the middle, in front)
-      [CX(7)+(right-left)*0.015, botY+textH*0.12], // dips just past the u
-      [CX(7), botY+textH*1.05]               // then dives straight DOWN below the u
+      [CX(7), botY+textH*0.20]               // short stub out of the u — the behind-bridge carries the descent
     ];
-    window.__menuExit={x:(r[7].left+r[7].right)/2+scrollX, y:textBot+textH*1.0+scrollY};
     const d=catmull(pts);
     // Fibonacci-spaced foliage nodes: cumulative fib normalised + mirror for balance
     const fib=[1,2,3,5,8], tot=fib.reduce((a,b)=>a+b,0); let acc=0;
@@ -1336,11 +1334,11 @@ addEventListener('load', ()=>buildVine());
 (function(){
   const rect=document.getElementById('emblemVineClipRect'); if(!rect) return;
   const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(REDUCE){ rect.setAttribute('height',250); return; }
+  if(REDUCE){ rect.setAttribute('height',190); return; }
   let tick=false;
   function draw(){
     const p=Math.min(1,Math.max(0, scrollY/(innerHeight*0.5) ));
-    rect.setAttribute('height', (p*250).toFixed(1));
+    rect.setAttribute('height', (p*190).toFixed(1));
     tick=false;
   }
   draw();
