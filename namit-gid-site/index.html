@@ -280,6 +280,10 @@ header.hero{
 .menu-badge-row{margin-top:.7rem;text-align:center}
 .menu-badge-row .menu-allergen{margin-top:0}
 /* vine embrace cradling "The menu" — the heading grows from it, braiding through the letters */
+main{position:relative}
+#menuBridge{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;overflow:visible;filter:drop-shadow(0 1.4px 1px rgba(45,28,15,.3))}
+#menuBridge .mb{fill:none;stroke:#6f4a2c;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
+#menuBridge .mb-hi{fill:none;stroke:#9a6b40;stroke-width:1;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
 #menu{position:relative}
 #menu h2{position:relative}                 /* no z-index: let letter spans share the section stacking context */
 #menu h2.weave-h2 span{position:relative;z-index:2;white-space:pre}   /* letters sit in FRONT of the arc by default */
@@ -772,7 +776,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <svg class="emblem-vine" viewBox="0 0 104 120" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
         <clipPath id="emblemVineClip"><rect id="emblemVineClipRect" x="-24" y="-24" width="160" height="0"/></clipPath>
         <g clip-path="url(#emblemVineClip)">
-        <path class="stem" style="stroke-width:2.6" d="M30,50 C18,60 12,74 16,90 C20,106 30,113 42,117 C54,121 57,133 53,150"/>
+        <path class="stem" style="stroke-width:2.6" d="M30,50 C18,60 12,74 16,90 C20,106 30,113 40,120 C52,129 51,149 43,168 C34,189 27,198 24,214"/>
         <path class="stem" style="stroke-width:1.5" d="M17,88 C11,95 9,104 13,113"/>
         <g transform="translate(30,50) rotate(-150) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
         <g transform="translate(30,50) rotate(-100) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
@@ -1173,6 +1177,49 @@ let vTick=false;
 addEventListener('scroll', ()=>{ if(!vTick){ vTick=true; requestAnimationFrame(()=>{ drawVine(); vTick=false; }); } }, {passive:true});
 addEventListener('resize', ()=>buildVine(), {passive:true});
 addEventListener('load', ()=>buildVine());
+
+/* menu bridge: one continuous vine from the weave's u-exit, straight down behind the
+   Mains/Desserts toggle and pickup note, into the top of the dish vine (→ Shawarma Rice) */
+(function(){
+  const main=document.querySelector('main'); const listEl=document.getElementById('menuList');
+  const h2=document.querySelector('#menu h2'); const uSpan=document.querySelector('#menu h2 span:last-child');
+  if(!main||!listEl||!h2||!uSpan) return;
+  if(innerWidth<760) return;
+  const NS='http://www.w3.org/2000/svg';
+  const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
+  let svg=document.getElementById('menuBridge');
+  function build(){
+    if(innerWidth<760){ if(svg) svg.style.display='none'; return; }
+    const mr=main.getBoundingClientRect();
+    if(!mr.width||!mr.height) return;
+    if(!svg){ svg=document.createElementNS(NS,'svg'); svg.id='menuBridge'; svg.setAttribute('aria-hidden','true'); svg.setAttribute('preserveAspectRatio','none'); main.prepend(svg); }
+    svg.style.display='block';
+    svg.setAttribute('viewBox','0 0 '+mr.width.toFixed(1)+' '+mr.height.toFixed(1));
+    const ur=uSpan.getBoundingClientRect(), hr=h2.getBoundingClientRect(), lr=listEl.getBoundingClientRect();
+    const sx=((ur.left+ur.right)/2)-mr.left, sy=(hr.bottom-mr.top)+6;    // just under the u
+    const ex=(lr.left-mr.left)+listEl.clientWidth/2, ey=(lr.top-mr.top)+2; // top-centre of the dish vine
+    if(ey-sy < 20){ svg.innerHTML=''; return; }
+    // gentle S down the middle, with a slight lean so it isn't a ruler-straight line
+    const midY=(sy+ey)/2, lean=Math.min(38,(ey-sy)*0.10);
+    const d='M '+sx.toFixed(1)+','+sy.toFixed(1)+
+            ' C '+(sx-lean).toFixed(1)+','+(sy+(ey-sy)*0.30).toFixed(1)+
+            ' '+(ex+lean).toFixed(1)+','+(midY+ (ey-sy)*0.12).toFixed(1)+
+            ' '+ex.toFixed(1)+','+ey.toFixed(1);
+    const tmp=document.createElementNS(NS,'path'); tmp.setAttribute('d',d); svg.appendChild(tmp);
+    const Ll=tmp.getTotalLength(); let decor='';
+    [0.34,0.64].forEach((f,ix)=>{ const p=tmp.getPointAtLength(Ll*f); const dir=ix%2?1:-1;
+      decor+='<g transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+(dir>0?126:-126)+') scale(.5)">'+LEAF+'</g>'; });
+    svg.removeChild(tmp);
+    svg.innerHTML='<path class="mb" d="'+d+'"/><path class="mb-hi" d="'+d+'"/>'+decor;
+  }
+  build();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
+  addEventListener('load', ()=>setTimeout(build,80));
+  let bt; addEventListener('resize', ()=>{ clearTimeout(bt); bt=setTimeout(build,140); }, {passive:true});
+  // rebuild when the menu category toggles (list height changes)
+  document.querySelectorAll('.menu-tabs button[data-cat]').forEach(b=>b.addEventListener('click', ()=>setTimeout(build,80)));
+})();
+
 /* "The menu" vine embrace: a woven line that braids through the letters —
    behind T, in front of h, behind m, out of the middle of u — with foliage
    dropped at Fibonacci intervals, drawing itself in as you scroll. */
@@ -1228,9 +1275,10 @@ addEventListener('load', ()=>buildVine());
       P(4,0.48),                             // m  (behind)
       [CX(6)+(CX(7)-CX(6))*0.15, vlo+textH*0.06], // scoop just left of the u
       P(7,0.34),                             // u  (emerges up through the middle, in front)
-      [CX(7)+(right-left)*0.06, botY+textH*0.10], // dips just past the u
-      [CX(7)+(right-left)*0.02, botY+textH*0.95]  // then dives DOWN — starting the branch toward the dishes
+      [CX(7)+(right-left)*0.015, botY+textH*0.12], // dips just past the u
+      [CX(7), botY+textH*1.05]               // then dives straight DOWN below the u
     ];
+    window.__menuExit={x:(r[7].left+r[7].right)/2+scrollX, y:textBot+textH*1.0+scrollY};
     const d=catmull(pts);
     // Fibonacci-spaced foliage nodes: cumulative fib normalised + mirror for balance
     const fib=[1,2,3,5,8], tot=fib.reduce((a,b)=>a+b,0); let acc=0;
@@ -1288,11 +1336,11 @@ addEventListener('load', ()=>buildVine());
 (function(){
   const rect=document.getElementById('emblemVineClipRect'); if(!rect) return;
   const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(REDUCE){ rect.setAttribute('height',190); return; }
+  if(REDUCE){ rect.setAttribute('height',250); return; }
   let tick=false;
   function draw(){
     const p=Math.min(1,Math.max(0, scrollY/(innerHeight*0.5) ));
-    rect.setAttribute('height', (p*190).toFixed(1));
+    rect.setAttribute('height', (p*250).toFixed(1));
     tick=false;
   }
   draw();
