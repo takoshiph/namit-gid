@@ -1186,8 +1186,10 @@ addEventListener('load', ()=>buildVine());
   if(!main||!listEl||!h2||!uSpan) return;
   if(innerWidth<760) return;
   const NS='http://www.w3.org/2000/svg';
+  const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
   let svg=document.getElementById('menuBridge');
+  let lines=[], decorEls=[], LEN=0, startDocY=0, spanDocY=1;
   function build(){
     if(innerWidth<760){ if(svg) svg.style.display='none'; return; }
     const mr=main.getBoundingClientRect();
@@ -1198,7 +1200,7 @@ addEventListener('load', ()=>buildVine());
     const ur=uSpan.getBoundingClientRect(), hr=h2.getBoundingClientRect(), lr=listEl.getBoundingClientRect();
     const sx=((ur.left+ur.right)/2)-mr.left, sy=(hr.bottom-mr.top)+6;    // just under the u
     const ex=(lr.left-mr.left)+listEl.clientWidth/2, ey=(lr.top-mr.top)+2; // top-centre of the dish vine
-    if(ey-sy < 20){ svg.innerHTML=''; return; }
+    if(ey-sy < 20){ svg.innerHTML=''; lines=[]; return; }
     // gentle S down the middle, with a slight lean so it isn't a ruler-straight line
     const midY=(sy+ey)/2, lean=Math.min(38,(ey-sy)*0.10);
     const d='M '+sx.toFixed(1)+','+sy.toFixed(1)+
@@ -1206,16 +1208,32 @@ addEventListener('load', ()=>buildVine());
             ' '+(ex+lean).toFixed(1)+','+(midY+ (ey-sy)*0.12).toFixed(1)+
             ' '+ex.toFixed(1)+','+ey.toFixed(1);
     const tmp=document.createElementNS(NS,'path'); tmp.setAttribute('d',d); svg.appendChild(tmp);
-    const Ll=tmp.getTotalLength(); let decor='';
-    [0.34,0.64].forEach((f,ix)=>{ const p=tmp.getPointAtLength(Ll*f); const dir=ix%2?1:-1;
-      decor+='<g transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+(dir>0?126:-126)+') scale(.5)">'+LEAF+'</g>'; });
+    LEN=tmp.getTotalLength(); let decor='';
+    const fr=[0.34,0.64];
+    fr.forEach((f,ix)=>{ const p=tmp.getPointAtLength(LEN*f); const dir=ix%2?1:-1;
+      decor+='<g class="mb-lf" data-fr="'+f+'" transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+(dir>0?126:-126)+') scale(.5)">'+LEAF+'</g>'; });
     svg.removeChild(tmp);
     svg.innerHTML='<path class="mb" d="'+d+'"/><path class="mb-hi" d="'+d+'"/>'+decor;
+    lines=[...svg.querySelectorAll('.mb,.mb-hi')];
+    decorEls=[...svg.querySelectorAll('.mb-lf')];
+    lines.forEach(l=>{ l.style.strokeDasharray=LEN; });
+    // document-space span for the scroll math (so it grows as a continuation of the vine)
+    startDocY=hr.bottom+scrollY; spanDocY=Math.max(1,(lr.top+scrollY)-(hr.bottom+scrollY));
+    draw();
+  }
+  function draw(){
+    if(!lines.length) return;
+    let p=1;
+    if(!REDUCE){ p=Math.min(1,Math.max(0, ((scrollY+innerHeight*0.46)-startDocY)/spanDocY )); }
+    lines.forEach(l=>{ l.style.strokeDashoffset=(LEN*(1-p)).toFixed(1); });
+    decorEls.forEach(g=>{ const f=parseFloat(g.getAttribute('data-fr'));
+      g.style.transition='opacity .4s ease'; g.style.opacity=(p>f+0.02)?1:0; });
   }
   build();
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
   addEventListener('load', ()=>setTimeout(build,80));
   let bt; addEventListener('resize', ()=>{ clearTimeout(bt); bt=setTimeout(build,140); }, {passive:true});
+  let tick=false; addEventListener('scroll', ()=>{ if(!tick){ tick=true; requestAnimationFrame(()=>{ draw(); tick=false; }); } }, {passive:true});
   // rebuild when the menu category toggles (list height changes)
   document.querySelectorAll('.menu-tabs button[data-cat]').forEach(b=>b.addEventListener('click', ()=>setTimeout(build,80)));
 })();
