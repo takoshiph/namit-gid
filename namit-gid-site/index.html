@@ -659,8 +659,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .js .rise.d4{transition-delay:.40s}
 
 /* ---------- earthy: growing leafy vine (wide screens) ---------- */
-.roots{position:fixed;top:0;height:100vh;width:190px;z-index:-1;pointer-events:none;opacity:.9;display:none;
-  left:calc((100vw - 1120px)/2 - 150px);filter:drop-shadow(0 1.5px 1.2px rgba(45,28,15,.32))}
+.roots{position:absolute;top:0;left:0;width:100%;z-index:-1;pointer-events:none;opacity:.85;display:none;overflow:visible;
+  filter:drop-shadow(0 1.5px 1.2px rgba(45,28,15,.3))}
 .roots .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
 .roots .tk-fill{fill:#6f4a2c}
 .roots .tk-mid{fill:none;stroke:#3f280f;stroke-width:1.4;opacity:.4;stroke-linecap:round;stroke-linejoin:round}
@@ -1552,8 +1552,8 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     // thread goes IN at hole 1, UNDER the card (hidden) to hole 2, OUT, then across the gap to the next card
     const W=wr.width, holeY=topY+14, hg=20, underDip=topY+31;
     const hL0=cards[0].cx-hg;
-    // enters horizontally from the far left — off the trunk in the gutter — and rises into hole 1
-    let d='M '+(-96).toFixed(1)+','+(holeY-10).toFixed(1)+' C '+(cards[0].cx*0.34).toFixed(1)+','+(holeY-9).toFixed(1)+' '+(hL0-30).toFixed(1)+','+(holeY-1).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
+    // short lead-in from the left where the trunk's connector limb delivers into hole 1
+    let d='M '+(hL0-34).toFixed(1)+','+(holeY-3).toFixed(1)+' Q '+(hL0-14).toFixed(1)+','+(holeY).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
     let holes='', gapMids=[], px=hL0;
     cards.forEach((c,i)=>{
       const hL=c.cx-hg, hR=c.cx+hg;
@@ -1613,8 +1613,8 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   addEventListener('resize', ()=>{ if(played) build(); }, {passive:true});
 })();
 
-/* ---------------- the trunk: a tapered tree down the left edge that everything hangs from,
-   growing top-down on scroll (soil deepens with it) ---------------- */
+/* ---------------- the trunk: a full-height tree down the left of the page that the
+   sections branch off of, growing top-down as you scroll ---------------- */
 (function(){
   const roots=document.getElementById('roots'), soil=document.getElementById('soil');
   const g=document.getElementById('trunkG');
@@ -1623,23 +1623,35 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const NS='http://www.w3.org/2000/svg';
   const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
   const BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
+  let docH=0;
+  function smooth(p){ let d='M '+p[0][0].toFixed(1)+','+p[0][1].toFixed(1);
+    for(let i=0;i<p.length-1;i++){ const a=p[i-1]||p[i],b=p[i],c=p[i+1],e=p[i+2]||c;
+      d+=' C '+(b[0]+(c[0]-a[0])/6).toFixed(1)+','+(b[1]+(c[1]-a[1])/6).toFixed(1)+' '+(c[0]-(e[0]-b[0])/6).toFixed(1)+','+(c[1]-(e[1]-b[1])/6).toFixed(1)+' '+c[0].toFixed(1)+','+c[1].toFixed(1); }
+    return d; }
+  function dpt(el){ const r=el.getBoundingClientRect(); return {l:r.left+scrollX,t:r.top+scrollY,r:r.right+scrollX,b:r.bottom+scrollY,w:r.width,h:r.height}; }
   function buildTrunk(){
-    if(!g) return;
-    // centreline of the trunk (viewBox 140 x 1000) — hugs the left, meanders gently
-    const spine=[[46,4],[38,150],[52,330],[36,520],[50,710],[40,880],[46,1000]];
-    // Catmull-Rom → smooth path
-    function smooth(p){ let d='M '+p[0][0]+','+p[0][1];
-      for(let i=0;i<p.length-1;i++){ const a=p[i-1]||p[i],b=p[i],c=p[i+1],e=p[i+2]||c;
-        d+=' C '+(b[0]+(c[0]-a[0])/6).toFixed(1)+','+(b[1]+(c[1]-a[1])/6).toFixed(1)+' '+(c[0]-(e[0]-b[0])/6).toFixed(1)+','+(c[1]-(e[1]-b[1])/6).toFixed(1)+' '+c[0]+','+c[1]; }
-      return d; }
-    const cd=smooth(spine);
+    if(!g||!roots) return;
+    if(innerWidth<1180){ roots.style.display='none'; return; }
+    roots.style.display='block';
+    const W=document.documentElement.clientWidth;
+    docH=document.documentElement.scrollHeight;
+    roots.setAttribute('viewBox','0 0 '+W+' '+docH);
+    roots.setAttribute('preserveAspectRatio','none');
+    roots.style.height=docH+'px';
+    if(clip){ clip.setAttribute('x',-60); clip.setAttribute('width',W+300); }
+    const contentLeft=Math.max(24,(W-1120)/2);
+    const gx=Math.max(30, contentLeft-82);        // spine sits ~82px left of the content column
+    // spine down the whole page, gentle organic meander
+    const seg=Math.max(7, Math.round(docH/430)), spts=[];
+    for(let i=0;i<=seg;i++){ const t=i/seg, y=t*docH; const mx=gx+18*Math.sin(t*Math.PI*3.3)+9*Math.sin(t*Math.PI*7.1); spts.push([mx,y]); }
+    const cd=smooth(spts);
     const tmp=document.createElementNS(NS,'path'); tmp.setAttribute('d',cd); g.appendChild(tmp);
-    const L=tmp.getTotalLength(), N=90, lft=[],rgt=[];
+    const L=tmp.getTotalLength(), N=Math.max(46,Math.round(docH/70)), lft=[],rgt=[];
     for(let i=0;i<=N;i++){ const t=i/N,s=t*L,pt=tmp.getPointAtLength(s);
       const a=tmp.getPointAtLength(Math.max(0,s-1)),b=tmp.getPointAtLength(Math.min(L,s+1));
       let tx=b.x-a.x,ty=b.y-a.y; const tl=Math.hypot(tx,ty)||1; tx/=tl;ty/=tl; const nx=-ty,ny=tx;
-      const taper=13.5*(1-t)+3.2*t;                                  // thick near the crown, thin at the foot
-      const wob=1+0.10*Math.sin(t*Math.PI*5.2)+0.05*Math.sin(t*Math.PI*11.3);
+      const taper=17*(1-t)+6*t;                                     // thick crown → thin foot
+      const wob=1+0.08*Math.sin(t*Math.PI*6.4)+0.04*Math.sin(t*Math.PI*13.1);
       const w=taper*wob;
       lft.push([pt.x+nx*w/2,pt.y+ny*w/2]); rgt.push([pt.x-nx*w/2,pt.y-ny*w/2]);
     }
@@ -1649,36 +1661,51 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     ribbon+=' Z';
     let hi='M '+rgt[0][0].toFixed(1)+','+rgt[0][1].toFixed(1);
     for(let i=1;i<rgt.length;i++) hi+=' L '+rgt[i][0].toFixed(1)+','+rgt[i][1].toFixed(1);
-    // limbs reaching toward the content (right), one per major section band
-    const limbs=[{y:250,len:64,up:-1},{y:470,len:78,up:1},{y:700,len:70,up:-1},{y:860,len:56,up:1}];
-    let limbPaths='', decor='';
-    limbs.forEach((lm,k)=>{
-      const pt=tmp.getPointAtLength(L*(lm.y/1000)); const bx=pt.x+6, by=lm.y;
-      const ex=bx+lm.len, ey=by+lm.up*26;
-      limbPaths+='<path class="stem" style="stroke-width:'+(3.4-k*0.4).toFixed(1)+';opacity:.9" d="M '+bx.toFixed(1)+','+by.toFixed(1)+' Q '+(bx+lm.len*0.5).toFixed(1)+','+(by+lm.up*4).toFixed(1)+' '+ex.toFixed(1)+','+ey.toFixed(1)+'"/>';
-      decor+='<g transform="translate('+ex.toFixed(1)+','+ey.toFixed(1)+') rotate('+(lm.up*30)+') scale(.5)">'+(k%2? BLOOM:LEAF)+'</g>';
-      decor+='<g transform="translate('+(bx+lm.len*0.5).toFixed(1)+','+(by+lm.up*2).toFixed(1)+') rotate('+(lm.up*-40)+') scale(.5)">'+LEAF+'</g>';
-    });
-    // foliage sprinkled up the spine
-    for(let i=8;i<N;i+=11){ const t=i/N,pt=tmp.getPointAtLength(t*L); const dir=(i%22<11)?1:-1;
-      decor+='<g transform="translate('+(pt.x+dir*6).toFixed(1)+','+pt.y.toFixed(1)+') rotate('+(dir>0?-40:200)+') scale(.5)">'+LEAF+'</g>'; }
+    let limbs='', decor='';
+    // spine x at a given document y (for attaching limbs)
+    function spineXat(y){ let best=tmp.getPointAtLength(0), bd=1e9; for(let s=0;s<=L;s+=Math.max(6,L/400)){ const p=tmp.getPointAtLength(s); const d=Math.abs(p.y-y); if(d<bd){bd=d;best=p;} } return best.x; }
+    // a curved limb from the spine (at the target's height) out to (px,py) + a leaf/bloom at the tip
+    function connect(px,py,thick,bloom){
+      const bx=spineXat(py)+2, by=py;
+      const len=Math.abs(px-bx), sag=Math.min(42,len*0.12);       // gentle downward droop like a real bough
+      const d='M '+bx.toFixed(1)+','+by.toFixed(1)+' C '+(bx+(px-bx)*0.30).toFixed(1)+','+(by+sag*0.7).toFixed(1)+' '+(bx+(px-bx)*0.72).toFixed(1)+','+(py+sag).toFixed(1)+' '+px.toFixed(1)+','+py.toFixed(1);
+      limbs+='<path class="stem" style="stroke-width:'+thick+';opacity:.92" d="'+d+'"/>';
+      const lp=document.createElementNS(NS,'path'); lp.setAttribute('d',d); g.appendChild(lp);
+      const Ll=lp.getTotalLength();
+      [0.30,0.52,0.74].forEach((f,ix)=>{ const p=lp.getPointAtLength(Ll*f); const dir=ix%2?1:-1;
+        decor+='<g transform="translate('+p.x.toFixed(1)+','+(p.y-1).toFixed(1)+') rotate('+(dir>0?-34:214)+') scale(.5)">'+LEAF+'</g>'; });
+      g.removeChild(lp);
+      if(bloom) decor+='<g transform="translate('+(px-6).toFixed(1)+','+(py-4).toFixed(1)+') scale(.44)">'+BLOOM+'</g>';
+    }
+    // —— connect the HOW-IT-WORKS lacing branch to the trunk ——
+    const firstStep=document.querySelector('.how .step');
+    if(firstStep){ const c=dpt(firstStep); const holeY=c.t+14, hole1x=c.l+c.w/2-20; connect(hole1x-26, holeY, 3.4, false); }
+    // —— reach a limb toward THE MENU heading so it grows off the tree ——
+    const h2=document.querySelector('#menu h2');
+    if(h2){ const m=dpt(h2); connect(m.l-18, m.t+m.h*0.5, 3.0, true); }
+    // foliage sprinkled up the spine (skip the very top so the crown is clean)
+    for(let i=6;i<N;i+=9){ const t=i/N,pt=tmp.getPointAtLength(t*L); const dir=(i%18<9)?1:-1;
+      decor+='<g transform="translate('+(pt.x+dir*7).toFixed(1)+','+pt.y.toFixed(1)+') rotate('+(dir>0?-38:202)+') scale(.5)">'+LEAF+'</g>'; }
     g.removeChild(tmp);
-    g.innerHTML='<path class="tk-fill" d="'+ribbon+'"/>'+limbPaths+'<path class="tk-hi" d="'+hi+'"/>'+decor;
+    g.innerHTML='<path class="tk-fill" d="'+ribbon+'"/>'+limbs+'<path class="tk-hi" d="'+hi+'"/>'+decor;
+    draw();
   }
-  buildTrunk();
-  if(reduce){ if(clip) clip.setAttribute('height', 1020); if(soil) soil.style.opacity=.5; return; }
   let tick=false;
   function draw(){
-    const max=(document.documentElement.scrollHeight - innerHeight) || 1;
-    const prog=Math.min(1, Math.max(0, scrollY / max));
-    const lp=Math.min(1, Math.max(0, (prog-0.05)/0.85));   // crown first, body reveals as you scroll
-    if(clip) clip.setAttribute('height', (lp*1020).toFixed(1));
-    if(soil) soil.style.opacity = (prog*0.7).toFixed(3);
+    if(!clip) return;
+    if(reduce){ clip.setAttribute('height', docH+60); if(soil) soil.style.opacity=.5; return; }
+    const reveal=Math.min(docH+60, scrollY + innerHeight*0.9);   // grows top-down, a bit ahead of the fold
+    clip.setAttribute('height', reveal.toFixed(1));
+    const max=(docH-innerHeight)||1;
+    if(soil) soil.style.opacity=(Math.min(1,scrollY/max)*0.7).toFixed(3);
     tick=false;
   }
+  buildTrunk();
+  addEventListener('load', ()=>setTimeout(buildTrunk,60));
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>setTimeout(buildTrunk,60));
+  setTimeout(buildTrunk,1400);                                    // catch late layout (images, injected menu)
+  let rt; addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(buildTrunk,140); }, {passive:true});
   addEventListener('scroll', ()=>{ if(!tick){ tick=true; requestAnimationFrame(draw); } }, {passive:true});
-  addEventListener('resize', draw, {passive:true});
-  draw();
 })();
 
 /* ---------------- earthy: drifting leaves ---------------- */
