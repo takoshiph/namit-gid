@@ -1206,7 +1206,7 @@ addEventListener('load', ()=>buildVine());
     const left=r[0].left, right=r[7].right;
     const textTop=Math.min(...r.map(b=>b.top)), textBot=Math.max(...r.map(b=>b.bottom));
     const textH=textBot-textTop;
-    const padX=(right-left)*0.16+12, padTop=textH*0.95, padBot=textH*0.55;
+    const padX=(right-left)*0.16+12, padTop=textH*0.95, padBot=textH*1.25;
     const boxLeft=left-padX, boxTop=textTop-padTop;
     const W=(right-left)+padX*2, H=textH+padTop+padBot;
     // position the (transform-centred) svg over the box
@@ -1228,7 +1228,8 @@ addEventListener('load', ()=>buildVine());
       P(4,0.48),                             // m  (behind)
       [CX(6)+(CX(7)-CX(6))*0.15, vlo+textH*0.06], // scoop just left of the u
       P(7,0.34),                             // u  (emerges up through the middle, in front)
-      [W*0.93, arm]                          // right arm mirrors the left
+      [CX(7)+(right-left)*0.06, botY+textH*0.10], // dips just past the u
+      [CX(7)+(right-left)*0.02, botY+textH*0.95]  // then dives DOWN — starting the branch toward the dishes
     ];
     const d=catmull(pts);
     // Fibonacci-spaced foliage nodes: cumulative fib normalised + mirror for balance
@@ -1552,8 +1553,8 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     // thread goes IN at hole 1, UNDER the card (hidden) to hole 2, OUT, then across the gap to the next card
     const W=wr.width, holeY=topY+14, hg=20, underDip=topY+31;
     const hL0=cards[0].cx-hg;
-    // short lead-in from the left where the trunk's connector limb delivers into hole 1
-    let d='M '+(hL0-34).toFixed(1)+','+(holeY-3).toFixed(1)+' Q '+(hL0-14).toFixed(1)+','+(holeY).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
+    // the vine comes in from the far left, laces the cards, and carries on to the right
+    let d='M '+(-160).toFixed(1)+','+(holeY-2).toFixed(1)+' C '+(-40).toFixed(1)+','+(holeY-8).toFixed(1)+' '+(hL0-44).toFixed(1)+','+(holeY-1).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
     let holes='', gapMids=[], px=hL0;
     cards.forEach((c,i)=>{
       const hL=c.cx-hg, hR=c.cx+hg;
@@ -1571,9 +1572,9 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     });
     const endX=px+34;
     d+=' C '+(px+14).toFixed(1)+','+(holeY-3).toFixed(1)+' '+endX.toFixed(1)+','+holeY.toFixed(1)+' '+endX.toFixed(1)+','+(holeY+2).toFixed(1);
-    // tail: after the last card the branch rises back up to the right and dissolves (mirrors the entry)
+    // tail: after the last card the vine carries on out to the right and tapers away
     const tail='M '+endX.toFixed(1)+','+(holeY+2).toFixed(1)
-      +' C '+(endX+42).toFixed(1)+','+(holeY-6).toFixed(1)+' '+(endX+80).toFixed(1)+','+(holeY-28).toFixed(1)+' '+(endX+96).toFixed(1)+','+(holeY-72).toFixed(1);
+      +' C '+(endX+54).toFixed(1)+','+(holeY-2).toFixed(1)+' '+(endX+116).toFixed(1)+','+(holeY-12).toFixed(1)+' '+(endX+178).toFixed(1)+','+(holeY-30).toFixed(1);
     // leaves + a couple of blossoms on the visible spans between cards
     let fol='<g class="foliage" transform="translate('+(hL0-14).toFixed(1)+','+(holeY-12).toFixed(1)+') rotate(-150) scale(.32)">'+LEAF+'</g>';
     gapMids.forEach((gx,i)=>{
@@ -1631,8 +1632,8 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   function dpt(el){ const r=el.getBoundingClientRect(); return {l:r.left+scrollX,t:r.top+scrollY,r:r.right+scrollX,b:r.bottom+scrollY,w:r.width,h:r.height}; }
   function buildTrunk(){
     if(!g||!roots) return;
-    if(innerWidth<1180){ roots.style.display='none'; return; }
-    roots.style.display='block';
+    // trunk retired — the sections now carry one continuous vine instead of a separate tree
+    roots.style.display='none'; g.innerHTML=''; docH=document.documentElement.scrollHeight; draw(); return;
     const W=document.documentElement.clientWidth;
     docH=document.documentElement.scrollHeight;
     roots.setAttribute('viewBox','0 0 '+W+' '+docH);
