@@ -279,10 +279,12 @@ header.hero{
 .menu-allergen:hover{opacity:1;background:rgba(95,129,119,.12);border-color:var(--sage-dark);color:var(--espresso)}
 .menu-badge-row{margin-top:.7rem;text-align:center}
 .menu-badge-row .menu-allergen{margin-top:0}
-/* vine embrace cradling "The menu" — the heading grows from it */
+/* vine embrace cradling "The menu" — the heading grows from it, braiding through the letters */
 #menu{position:relative}
-#menu h2{position:relative;z-index:1}
-.menu-embrace{position:absolute;transform:translate(-50%,-50%);height:auto;z-index:0;pointer-events:none;overflow:visible;filter:drop-shadow(0 1px .8px rgba(45,28,15,.3))}
+#menu h2{position:relative}                 /* no z-index: let letter spans share the section stacking context */
+#menu h2.weave-h2 span{position:relative;z-index:2;white-space:pre}   /* letters sit in FRONT of the arc by default */
+#menu h2.weave-h2 span.lz-bot{z-index:0}     /* dropped BEHIND the arc so the vine crosses in front */
+.menu-embrace{position:absolute;transform:translate(-50%,-50%);height:auto;z-index:1;pointer-events:none;overflow:visible;filter:drop-shadow(0 1px .8px rgba(45,28,15,.3))}
 .menu-embrace .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
 .rom{font-family:var(--ff-display);color:var(--terracotta);letter-spacing:.06em}
 
@@ -791,25 +793,9 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 <!-- MENU -->
 <main>
   <div class="section-head" id="menu">
-    <svg class="menu-embrace" viewBox="0 0 264 62" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-      <clipPath id="embraceClip"><rect id="embraceClipRect" x="-12" y="62" width="288" height="0"/></clipPath>
-      <g clip-path="url(#embraceClip)">
-        <path class="stem" style="stroke-width:2.1" d="M132,58 C106,60 80,57 58,47 C42,40 30,30 28,20 C27,14 31,9 37,7"/>
-        <path class="stem" style="stroke-width:1.9" d="M132,58 C160,59 189,54 211,42 C228,33 240,25 240,16 C240,10 236,6 230,6"/>
-        <path class="stem" style="stroke-width:1.1" d="M58,47 C52,44 48,45 45,50"/>
-        <path class="stem" style="stroke-width:1.1" d="M211,42 C217,39 221,40 223,45"/>
-        <g transform="translate(70,54) rotate(206) scale(.36)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-        <g transform="translate(43,38) rotate(232) scale(.31)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-        <g transform="translate(29,21) rotate(256) scale(.35)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-        <g transform="translate(198,52) rotate(-26) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-        <g transform="translate(224,37) rotate(-52) scale(.38)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-        <g transform="translate(238,20) rotate(-78) scale(.29)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-        <g transform="translate(37,6) scale(.34)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
-        <g transform="translate(230,5) scale(.31)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
-      </g>
-    </svg>
+    <svg class="menu-embrace" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
     <span class="eyebrow">Cooked to order · pick up hot</span>
-    <h2>The menu</h2>
+    <h2 aria-label="The menu" class="weave-h2"><span>T</span><span>h</span><span>e</span><span>&nbsp;</span><span>m</span><span>e</span><span>n</span><span>u</span></h2>
     <div class="menu-badge-row"><button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel" aria-label="Allergen and kitchen info"><span class="aller-i" aria-hidden="true">&#9432;</span>Allergens</button></div>
   </div>
 
@@ -1183,30 +1169,111 @@ let vTick=false;
 addEventListener('scroll', ()=>{ if(!vTick){ vTick=true; requestAnimationFrame(()=>{ drawVine(); vTick=false; }); } }, {passive:true});
 addEventListener('resize', ()=>buildVine(), {passive:true});
 addEventListener('load', ()=>buildVine());
-/* "The menu" vine embrace: hug just the word, and grow (draw) bottom-up on scroll */
+/* "The menu" vine embrace: a woven line that braids through the letters —
+   behind T, in front of h, behind m, out of the middle of u — with foliage
+   dropped at Fibonacci intervals, drawing itself in as you scroll. */
 (function(){
   const menu=document.getElementById('menu'); if(!menu) return;
   const emb=menu.querySelector('.menu-embrace'); const h2=menu.querySelector('h2');
   if(!emb||!h2) return;
-  const clip=emb.querySelector('#embraceClipRect');
   const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function place(){
-    const mr=menu.getBoundingClientRect(), hr=h2.getBoundingClientRect();
-    emb.style.height=(hr.height*1.7).toFixed(1)+'px';
-    emb.style.left=(((hr.left+hr.right)/2)-mr.left).toFixed(1)+'px';
-    emb.style.top=(((hr.top+hr.bottom)/2)-mr.top).toFixed(1)+'px';
+  const spans=[...h2.querySelectorAll('span')];
+  // drop 'h' (1) and 'u' (7) BEHIND the vine so it crosses in front of them
+  if(spans[1]) spans[1].classList.add('lz-bot');
+  if(spans[7]) spans[7].classList.add('lz-bot');
+  const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
+  const BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
+  const SVGNS='http://www.w3.org/2000/svg';
+  let LEN=0, mainPath=null;
+  function catmull(pts){
+    let d='M '+pts[0][0].toFixed(1)+','+pts[0][1].toFixed(1);
+    for(let i=0;i<pts.length-1;i++){
+      const p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||p2;
+      const c1x=p1[0]+(p2[0]-p0[0])/6, c1y=p1[1]+(p2[1]-p0[1])/6;
+      const c2x=p2[0]-(p3[0]-p1[0])/6, c2y=p2[1]-(p3[1]-p1[1])/6;
+      d+=' C '+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p2[0].toFixed(1)+','+p2[1].toFixed(1);
+    }
+    return d;
+  }
+  function build(){
+    if(!spans.length || !spans[7]) return;
+    const mr=menu.getBoundingClientRect();
+    const r=spans.map(s=>s.getBoundingClientRect());
+    const left=r[0].left, right=r[7].right;
+    const textTop=Math.min(...r.map(b=>b.top)), textBot=Math.max(...r.map(b=>b.bottom));
+    const textH=textBot-textTop;
+    const padX=(right-left)*0.16+12, padTop=textH*0.95, padBot=textH*0.55;
+    const boxLeft=left-padX, boxTop=textTop-padTop;
+    const W=(right-left)+padX*2, H=textH+padTop+padBot;
+    // position the (transform-centred) svg over the box
+    emb.setAttribute('viewBox','0 0 '+W.toFixed(1)+' '+H.toFixed(1));
+    emb.style.width=W.toFixed(1)+'px'; emb.style.height=H.toFixed(1)+'px';
+    emb.style.left=(((boxLeft+ (right+padX))/2)-mr.left).toFixed(1)+'px';
+    emb.style.top=(((boxTop+(textBot+padBot))/2)-mr.top).toFixed(1)+'px';
+    const CX=i=>((r[i].left+r[i].right)/2)-boxLeft;
+    const P=(i,f)=>[CX(i), (r[i].top-boxTop)+r[i].height*f];
+    const midY=((textTop+textBot)/2)-boxTop, botY=textBot-boxTop, topY=textTop-boxTop;
+    const vx=(a,b)=>(CX(a)+CX(b))/2;
+    const arm=topY+textH*0.16, vlo=midY+textH*0.10;   // gentle valley, right at the word's middle
+    const pts=[
+      [W*0.05, arm],                         // left arm curls down from above
+      P(0,0.50),                             // T  (behind — grazes middle)
+      [vx(0,1), midY+textH*0.02],            // easy dip T→h
+      P(1,0.38),                             // h  (in front, upper-middle)
+      [vx(1,4), vlo],                        // valley over "e ·"
+      P(4,0.48),                             // m  (behind)
+      [CX(6)+(CX(7)-CX(6))*0.15, vlo+textH*0.06], // scoop just left of the u
+      P(7,0.34),                             // u  (emerges up through the middle, in front)
+      [W*0.93, arm]                          // right arm mirrors the left
+    ];
+    const d=catmull(pts);
+    // Fibonacci-spaced foliage nodes: cumulative fib normalised + mirror for balance
+    const fib=[1,2,3,5,8], tot=fib.reduce((a,b)=>a+b,0); let acc=0;
+    const base=fib.map(f=>{acc+=f; return acc/tot;});          // .05,.16,.31,.56,1
+    const fr=[...new Set(base.concat(base.map(x=>1-x)))].filter(x=>x>0.05&&x<0.95).sort((a,b)=>a-b);
+    // measure to place decor along the real curve
+    const tmp=document.createElementNS(SVGNS,'path'); tmp.setAttribute('d',d); emb.appendChild(tmp);
+    LEN=tmp.getTotalLength();
+    let decor='';
+    const nodes=fr.map(f=>({f, bloom:false}));
+    nodes.push({f:0.02,bloom:true},{f:0.98,bloom:true});      // blooms at the two arm-tips
+    nodes.sort((a,b)=>a.f-b.f);
+    nodes.forEach((nd,k)=>{
+      const s=nd.f*LEN, p=tmp.getPointAtLength(s);
+      const a=tmp.getPointAtLength(Math.max(0,s-1)), b=tmp.getPointAtLength(Math.min(LEN,s+1));
+      let tx=b.x-a.x, ty=b.y-a.y; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
+      const nx=-ty, ny=tx;                                     // normal, biased upward/outward
+      const dir=(ny>0)?-1:1;                                   // push foliage to the open (upper) side
+      let jr=Math.sin(nd.f*137.5)*1e4; jr-=Math.floor(jr);     // deterministic jitter
+      const ang=(Math.atan2(ny*dir,nx*dir)*180/Math.PI+(nd.bloom?jr*40-20:dir*12+(jr*20-10))).toFixed(1);
+      const sc=(nd.bloom?0.34:0.30)*(0.85+0.3*jr);
+      decor+='<g class="edecor" data-fr="'+nd.f+'" transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+ang+') scale('+sc.toFixed(2)+')">'+(nd.bloom?BLOOM:LEAF)+'</g>';
+    });
+    emb.removeChild(tmp);
+    emb.innerHTML=
+      '<path class="stem eline" style="stroke-width:2.5" d="'+d+'"/>'+
+      '<path class="stem eline-hi" style="stroke:#9a6b40;stroke-width:.9;opacity:.55" d="'+d+'"/>'+
+      decor;
+    mainPath=emb.querySelector('.eline');
+    emb.querySelectorAll('.eline,.eline-hi').forEach(el=>{ el.style.strokeDasharray=LEN; });
+    draw();
   }
   function draw(){
-    if(!clip) return;
-    if(REDUCE){ clip.setAttribute('y',-14); clip.setAttribute('height',78); return; }
+    if(!mainPath) return;
     const hr=h2.getBoundingClientRect();
-    const p=Math.min(1,Math.max(0, ((innerHeight*0.86)-hr.top)/(innerHeight*0.32) ));
-    clip.setAttribute('y', (62 - p*78).toFixed(1));
-    clip.setAttribute('height', (p*78+4).toFixed(1));
+    let p=1;
+    if(!REDUCE) p=Math.min(1,Math.max(0, ((innerHeight*0.86)-hr.top)/(innerHeight*0.30) ));
+    emb.querySelectorAll('.eline,.eline-hi').forEach(el=>{ el.style.strokeDashoffset=(LEN*(1-p)).toFixed(1); });
+    emb.querySelectorAll('.edecor').forEach(g=>{
+      const f=parseFloat(g.getAttribute('data-fr'));
+      g.style.opacity=(p>f+0.02)?1:0;
+      g.style.transition='opacity .45s ease';
+    });
   }
-  place(); draw();
-  addEventListener('load', ()=>{ place(); draw(); });
-  addEventListener('resize', ()=>{ place(); draw(); }, {passive:true});
+  build();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
+  addEventListener('load', build);
+  addEventListener('resize', ()=>{ clearTimeout(emb._t); emb._t=setTimeout(build,120); }, {passive:true});
   addEventListener('scroll', ()=>{ requestAnimationFrame(draw); }, {passive:true});
 })();
 
