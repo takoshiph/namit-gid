@@ -279,18 +279,6 @@ header.hero{
 .menu-allergen:hover{opacity:1;background:rgba(95,129,119,.12);border-color:var(--sage-dark);color:var(--espresso)}
 .menu-badge-row{margin-top:.7rem;text-align:center}
 .menu-badge-row .menu-allergen{margin-top:0}
-/* vine embrace cradling "The menu" — the heading grows from it, braiding through the letters */
-main{position:relative}
-#menuBridge{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;overflow:visible;filter:drop-shadow(0 1.4px 1px rgba(45,28,15,.3))}
-#menuBridge .mb{fill:none;stroke:#6f4a2c;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
-#menuBridge .mb-hi{fill:none;stroke:#9a6b40;stroke-width:1.9;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
-#menuBridge .mb-ring{fill:none;stroke:#6f4a2c;stroke-width:2.6;opacity:.6}
-#menu{position:relative}
-#menu h2{position:relative}                 /* no z-index: let letter spans share the section stacking context */
-#menu h2.weave-h2 span{position:relative;z-index:2;white-space:pre}   /* letters sit in FRONT of the arc by default */
-#menu h2.weave-h2 span.lz-bot{z-index:0}     /* dropped BEHIND the arc so the vine crosses in front */
-.menu-embrace{position:absolute;transform:translate(-50%,-50%);height:auto;z-index:1;pointer-events:none;overflow:visible;filter:drop-shadow(0 1px .8px rgba(45,28,15,.3))}
-.menu-embrace .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
 .rom{font-family:var(--ff-display);color:var(--terracotta);letter-spacing:.06em}
 
 .menu-item{
@@ -637,7 +625,9 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   .story .wrap,.how{padding-top:3rem;padding-bottom:3rem}
 }
 
-/* ---------- menu: name dissolve-in, hover, connecting vine ---------- */
+main{position:relative}
+#menu{position:relative}
+/* ---------- menu: name dissolve-in, hover ---------- */
 .menu-item{position:relative;z-index:1}
 .menu-item h3{min-height:1em}
 .menu-item h3.pre-dissolve{opacity:0;filter:blur(10px)}
@@ -645,15 +635,6 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 @keyframes nameDissolve{from{opacity:0;filter:blur(10px);transform:translateY(6px)}to{opacity:1;filter:blur(0);transform:none}}
 .dish-btn img{transition:transform .55s cubic-bezier(.2,.7,.2,1)}
 .dish-btn:hover img{transform:scale(1.045)}
-#menuVine{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:0;pointer-events:none;filter:drop-shadow(0 1.4px 1px rgba(45,28,15,.3))}
-#menuVine .vine-fill{fill:#6f4a2c;opacity:.94}
-#menuVine .vine-shade{fill:#5a3a20;opacity:.28}
-#menuVine .vine-mid{fill:none;stroke:#3f280f;stroke-width:1.6;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
-#menuVine .vine-hi{fill:none;stroke:#9a6b40;stroke-width:.9;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
-#menuVine .rootlet{fill:none;stroke:#6f4a2c;stroke-width:1.3;stroke-linecap:round;opacity:.5}
-#menuVine .leaf-node{fill:var(--sage-deep);opacity:.8}
-@media (max-width:760px){#menuVine{display:none}}
-
 /* ---------- scroll reveals (sections) ---------- */
 .js .rise{opacity:0;transform:translateY(30px);
   transition:opacity 1.15s cubic-bezier(.2,.7,.2,1), transform 1.15s cubic-bezier(.2,.7,.2,1);will-change:opacity,transform}
@@ -802,9 +783,8 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 <!-- MENU -->
 <main>
   <div class="section-head" id="menu">
-    <svg class="menu-embrace" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
     <span class="eyebrow">Cooked to order · pick up hot</span>
-    <h2 aria-label="The menu" class="weave-h2"><span>T</span><span>h</span><span>e</span><span>&nbsp;</span><span>m</span><span>e</span><span>n</span><span>u</span></h2>
+    <h2>The menu</h2>
     <div class="menu-badge-row"><button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel" aria-label="Allergen and kitchen info"><span class="aller-i" aria-hidden="true">&#9432;</span>Allergens</button></div>
   </div>
 
@@ -1082,329 +1062,8 @@ function revealItem(el){
 }
 list.querySelectorAll('.menu-item').forEach(el=>io.observe(el));
 
-/* ---------------- connecting leafy vine ---------------- */
-const V_LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
-const V_BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
-function buildVine(){
-  let svg=document.getElementById('menuVine');
-  if(innerWidth < 760){ if(svg) svg.style.display='none'; return; }
-  if(!svg){
-    svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.id='menuVine'; svg.setAttribute('aria-hidden','true');
-    list.style.position='relative';
-    list.prepend(svg);
-  }
-  svg.style.display='block';
-  const all=[...list.querySelectorAll('.menu-item')];
-  const items=all.filter(el=>!el.classList.contains('hidden'));
-  const w=list.clientWidth, h=list.clientHeight;
-  if(!items.length || !h){ svg.innerHTML=''; return; }
-  svg.setAttribute('viewBox','0 0 '+w+' '+h);
-  svg.setAttribute('preserveAspectRatio','none');
-  // Run the spine down the gutter between the photo and the copy, touching neither.
-  // The gutter is NOT always centred — the dish image carries a min-width, so at some
-  // widths the two grid tracks are uneven — measure it per row instead of assuming w/2.
-  // Measure with offset*, NOT getBoundingClientRect: .dish-stage/.info carry
-  // translateX(±90px) until they scroll into view, and rects include transforms.
-  // Reading rects here made every row look like it had no gutter on first load,
-  // which blanked the whole vine until a resize. (Same reason the how-it-works
-  // lace measures its cards with offset*.)
-  const gutterOf=el=>{
-    const kids=[...el.children]
-      .map(k=>({l:el.offsetLeft+k.offsetLeft, r:el.offsetLeft+k.offsetLeft+k.offsetWidth}))
-      .sort((a,b)=>a.l-b.l);
-    if(kids.length<2) return null;
-    const a=kids[0].r, b=kids[1].l;
-    return (b-a)>12 ? {mid:(a+b)/2, room:b-a} : null;   // stacked rows report no gutter
-  };
-  const gutters=items.map(gutterOf), valid=gutters.filter(Boolean);
-  if(!valid.length){ svg.innerHTML=''; return; }         // single-column layout: no room for a spine
-  const room=Math.min(...valid.map(g=>g.room));
-  const cx=valid.reduce((s,g)=>s+g.mid,0)/valid.length;
-  const amp=Math.max(4, Math.min(w*0.022, 30, room/2 - 9));
-  let d='M '+cx+',0', prevX=cx, prevY=0;
-  items.forEach((el,idx)=>{
-    const y=el.offsetTop + el.offsetHeight/2;
-    // nth-child(even) puts the PHOTO on the left, so lean toward the photo, away from the copy
-    const side=(all.indexOf(el)%2===1)?-1:1;
-    const base=gutters[idx] ? gutters[idx].mid : cx;
-    const nx=base + side*amp, midY=(prevY+y)/2;
-    d+=' C '+prevX+','+midY+' '+nx+','+midY+' '+nx+','+y;
-    prevX=nx; prevY=y;
-  });
-  d+=' C '+prevX+','+((prevY+h)/2)+' '+cx+','+((prevY+h)/2)+' '+cx+','+h;
-  // ── build a tapered "root": sample the centreline, offset by a varying width ──
-  const SVGNS='http://www.w3.org/2000/svg';
-  const tmp=document.createElementNS(SVGNS,'path');
-  tmp.setAttribute('d', d); svg.appendChild(tmp);
-  const L=tmp.getTotalLength();
-  const N=Math.max(30, Math.round(L/12));
-  const eps=Math.max(0.5, L/1200);
-  const lft=[], rgt=[]; let decor='';
-  for(let i=0;i<=N;i++){
-    const t=i/N, s=t*L;
-    const p=tmp.getPointAtLength(s);
-    const a=tmp.getPointAtLength(Math.max(0,s-eps));
-    const b=tmp.getPointAtLength(Math.min(L,s+eps));
-    let tx=b.x-a.x, ty=b.y-a.y; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
-    const nx=-ty, ny=tx;                                   // unit normal
-    const taper=6.6*(1-t)+4.2*t;                           // woody stem: thick base → thin tip
-    const wob=1+0.12*Math.sin(t*Math.PI*6.3)+0.06*Math.sin(t*Math.PI*13.7);
-    const ribW=taper*wob;
-    lft.push([p.x+nx*ribW/2, p.y+ny*ribW/2]);
-    rgt.push([p.x-nx*ribW/2, p.y-ny*ribW/2]);
-    if(i>1 && i<N && i%4===0){                             // leaves & the odd blossom
-      const dir=(Math.floor(i/4)%2===0)?1:-1;
-      const bx=p.x+nx*dir*ribW/2, by=p.y+ny*dir*ribW/2;
-      // deterministic pseudo-random jitter so nothing looks stamped
-      let jr=Math.sin(i*12.9898)*43758.5453; jr-=Math.floor(jr);
-      let js=Math.sin(i*78.233)*24634.6345; js-=Math.floor(js);
-      const bloom=(i%16===0);
-      // leaves nod along the stem; blooms tilt more freely
-      const wig=bloom?(jr*70-35):(dir*14+(jr*22-11));
-      const ang=(Math.atan2(ny*dir, nx*dir)*180/Math.PI + wig).toFixed(1);
-      const base=bloom?(1.05+0.35*(1-t)):(0.95+0.55*(1-t));
-      const sc=(base*(0.82+0.36*js)).toFixed(2);
-      decor+='<g transform="translate('+bx.toFixed(1)+','+by.toFixed(1)+') rotate('+ang+') scale('+sc+')">'+(bloom?V_BLOOM:V_LEAF)+'</g>';
-    }
-  }
-  svg.removeChild(tmp);
-  let ribbon='M '+lft[0][0].toFixed(1)+','+lft[0][1].toFixed(1);
-  for(let i=1;i<lft.length;i++) ribbon+=' L '+lft[i][0].toFixed(1)+','+lft[i][1].toFixed(1);
-  for(let i=rgt.length-1;i>=0;i--) ribbon+=' L '+rgt[i][0].toFixed(1)+','+rgt[i][1].toFixed(1);
-  ribbon+=' Z';
-  // lit edge along one side of the ribbon (adds roundness / dimension)
-  let hi='M '+lft[0][0].toFixed(1)+','+lft[0][1].toFixed(1);
-  for(let i=1;i<lft.length;i++) hi+=' L '+lft[i][0].toFixed(1)+','+lft[i][1].toFixed(1);
-  svg.innerHTML=
-    '<clipPath id="vineClip"><rect id="vineClipRect" x="-320" y="-40" width="'+(w+640)+'" height="0"/></clipPath>'+
-    '<g clip-path="url(#vineClip)">'+
-      '<path class="vine-fill" d="'+ribbon+'"/>'+
-      '<path class="vine-mid" d="'+d+'"/>'+
-      '<path class="vine-hi" d="'+hi+'"/>'+
-      decor+
-    '</g>';
-  drawVine();
-}
-function drawVine(){
-  const svg=document.getElementById('menuVine');
-  if(!svg || svg.style.display==='none') return;
-  const clip=document.getElementById('vineClipRect'); if(!clip) return;
-  const h=list.clientHeight;
-  if(REDUCE){ clip.setAttribute('height', (h+48).toFixed(1)); return; }
-  const rect=list.getBoundingClientRect();
-  const prog=Math.min(1, Math.max(0, ((innerHeight*0.82) - rect.top) / (rect.height||1)));
-  clip.setAttribute('height', (prog*h+3).toFixed(1));
-}
-let vTick=false;
-addEventListener('scroll', ()=>{ if(!vTick){ vTick=true; requestAnimationFrame(()=>{ drawVine(); vTick=false; }); } }, {passive:true});
-addEventListener('resize', ()=>buildVine(), {passive:true});
-addEventListener('load', ()=>buildVine());
-// webfont swap changes row heights, so the spine has to be re-measured after it lands
-if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>buildVine());
 
-/* menu bridge: one continuous vine from the weave's u-exit, straight down behind the
-   Mains/Desserts toggle and pickup note, into the top of the dish vine (→ Shawarma Rice) */
-(function(){
-  const main=document.querySelector('main'); const listEl=document.getElementById('menuList');
-  const h2=document.querySelector('#menu h2'); const uSpan=document.querySelector('#menu h2 span:last-child');
-  if(!main||!listEl||!h2||!uSpan) return;
-  if(innerWidth<760) return;
-  const NS='http://www.w3.org/2000/svg';
-  const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
-  let svg=document.getElementById('menuBridge');
-  let lines=[], decorEls=[], LEN=0, startDocY=0, spanDocY=1;
-  function build(){
-    if(innerWidth<760){ if(svg) svg.style.display='none'; return; }
-    const mr=main.getBoundingClientRect();
-    if(!mr.width||!mr.height) return;
-    if(!svg){ svg=document.createElementNS(NS,'svg'); svg.id='menuBridge'; svg.setAttribute('aria-hidden','true'); svg.setAttribute('preserveAspectRatio','none'); main.prepend(svg); }
-    svg.style.display='block';
-    svg.setAttribute('viewBox','0 0 '+mr.width.toFixed(1)+' '+mr.height.toFixed(1));
-    const ur=uSpan.getBoundingClientRect(), hr=h2.getBoundingClientRect(), lr=listEl.getBoundingClientRect();
-    const sx=((ur.left+ur.right)/2)-mr.left, sy=(hr.bottom-mr.top)+6;    // just under the u
-    const ex=(lr.left-mr.left)+listEl.clientWidth/2, ey=(lr.top-mr.top)+2; // top-centre of the dish vine
-    if(ey-sy < 20){ svg.innerHTML=''; lines=[]; return; }
-    // The original note says this descent runs BEHIND the toggle — but .menu-tabs is
-    // only 7% opaque, so the vine showed through and read as a line drawn across the
-    // Desserts button. Use the idiom the how-it-works lace already uses: stop at the
-    // control, don't draw the pass underneath, resume below it. Calm straight descent,
-    // no detour, and the gap explains itself.
-    const midY=(sy+ey)/2, lean=Math.min(38,(ey-sy)*0.10);
-    const spine='M '+sx.toFixed(1)+','+sy.toFixed(1)+
-      ' C '+(sx-lean).toFixed(1)+','+(sy+(ey-sy)*0.30).toFixed(1)+
-      ' '+(ex+lean).toFixed(1)+','+(midY+ (ey-sy)*0.12).toFixed(1)+
-      ' '+ex.toFixed(1)+','+ey.toFixed(1);
-    const probe=document.createElementNS(NS,'path'); probe.setAttribute('d',spine); svg.appendChild(probe);
-    const SL=probe.getTotalLength(), N=90, pts=[];
-    for(let i=0;i<=N;i++) pts.push(probe.getPointAtLength(SL*i/N));
-    svg.removeChild(probe);
-    // one pass underneath, covering the toggle AND the pickup note — exactly what the
-    // original note described, just actually hidden this time instead of shining through
-    const ctrl=main.querySelector('.menu-tabs'), note=main.querySelector('.menu-note');
-    let duckT=Infinity, duckB=-Infinity;
-    if(ctrl){ const cr=ctrl.getBoundingClientRect();
-      duckT=(cr.top-mr.top)-16; duckB=(cr.bottom-mr.top)+16;
-      if(note){ const nr=note.getBoundingClientRect(); duckB=Math.max(duckB,(nr.bottom-mr.top)+16); } }
-    const before=pts.filter(q=>q.y<=duckT), after=pts.filter(q=>q.y>=duckB);
-    let d, enter=null, exit=null;
-    if(before.length>1 && after.length>1){
-      enter=before[before.length-1]; exit=after[0];
-      const poly=a=>'M '+a.map(q=>q.x.toFixed(1)+','+q.y.toFixed(1)).join(' L ');
-      d=poly(before)+' '+poly(after);
-    } else {
-      d=spine;                                   // nothing in the way — one clean run
-    }
-    const tmp=document.createElementNS(NS,'path'); tmp.setAttribute('d',d); svg.appendChild(tmp);
-    LEN=tmp.getTotalLength(); let decor='';
-    const fr=[0.34,0.64];
-    fr.forEach((f,ix)=>{ const p=tmp.getPointAtLength(LEN*f); const dir=ix%2?1:-1;
-      decor+='<g class="mb-lf" data-fr="'+f+'" transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+(dir>0?126:-126)+') scale(.5)">'+LEAF+'</g>'; });
-    svg.removeChild(tmp);
-    // small rings where it ducks under and comes back out — same cue as the card stitches
-    if(enter&&exit){
-      const ring=q=>'<circle class="mb-ring" data-fr="'+(q===enter?0.3:0.72)+'" cx="'+q.x.toFixed(1)+'" cy="'+q.y.toFixed(1)+'" r="4.6"/>';
-      decor+=ring(enter)+ring(exit);
-    }
-    svg.innerHTML='<path class="mb" d="'+d+'"/><path class="mb-hi" d="'+d+'"/>'+decor;
-    lines=[...svg.querySelectorAll('.mb,.mb-hi')];
-    decorEls=[...svg.querySelectorAll('.mb-lf,.mb-ring')];
-    lines.forEach(l=>{ l.style.strokeDasharray=LEN; });
-    // document-space span for the scroll math (so it grows as a continuation of the vine)
-    startDocY=hr.bottom+scrollY; spanDocY=Math.max(1,(lr.top+scrollY)-(hr.bottom+scrollY));
-    draw();
-  }
-  function draw(){
-    if(!lines.length) return;
-    let p=1;
-    if(!REDUCE){ p=Math.min(1,Math.max(0, ((scrollY+innerHeight*0.46)-startDocY)/spanDocY )); }
-    lines.forEach(l=>{ l.style.strokeDashoffset=(LEN*(1-p)).toFixed(1); });
-    decorEls.forEach(g=>{ const f=parseFloat(g.getAttribute('data-fr'));
-      g.style.transition='opacity .4s ease'; g.style.opacity=(p>f+0.02)?1:0; });
-  }
-  build();
-  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
-  addEventListener('load', ()=>setTimeout(build,80));
-  let bt; addEventListener('resize', ()=>{ clearTimeout(bt); bt=setTimeout(build,140); }, {passive:true});
-  let tick=false; addEventListener('scroll', ()=>{ if(!tick){ tick=true; requestAnimationFrame(()=>{ draw(); tick=false; }); } }, {passive:true});
-  // rebuild when the menu category toggles (list height changes)
-  document.querySelectorAll('.menu-tabs button[data-cat]').forEach(b=>b.addEventListener('click', ()=>setTimeout(build,80)));
-})();
 
-/* "The menu" vine embrace: a woven line that braids through the letters —
-   behind T, in front of h, behind m, out of the middle of u — with foliage
-   dropped at Fibonacci intervals, drawing itself in as you scroll. */
-(function(){
-  const menu=document.getElementById('menu'); if(!menu) return;
-  const emb=menu.querySelector('.menu-embrace'); const h2=menu.querySelector('h2');
-  if(!emb||!h2) return;
-  const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const spans=[...h2.querySelectorAll('span')];
-  // drop 'h' (1) and 'u' (7) BEHIND the vine so it crosses in front of them
-  if(spans[1]) spans[1].classList.add('lz-bot');
-  if(spans[7]) spans[7].classList.add('lz-bot');
-  const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
-  const BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
-  const SVGNS='http://www.w3.org/2000/svg';
-  let LEN=0, mainPath=null;
-  function catmull(pts){
-    let d='M '+pts[0][0].toFixed(1)+','+pts[0][1].toFixed(1);
-    for(let i=0;i<pts.length-1;i++){
-      const p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||p2;
-      const c1x=p1[0]+(p2[0]-p0[0])/6, c1y=p1[1]+(p2[1]-p0[1])/6;
-      const c2x=p2[0]-(p3[0]-p1[0])/6, c2y=p2[1]-(p3[1]-p1[1])/6;
-      d+=' C '+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p2[0].toFixed(1)+','+p2[1].toFixed(1);
-    }
-    return d;
-  }
-  function build(){
-    if(!spans.length || !spans[7]) return;
-    const mr=menu.getBoundingClientRect();
-    const r=spans.map(s=>s.getBoundingClientRect());
-    const left=r[0].left, right=r[7].right;
-    const textTop=Math.min(...r.map(b=>b.top)), textBot=Math.max(...r.map(b=>b.bottom));
-    const textH=textBot-textTop;
-    const padX=(right-left)*0.16+12, padTop=textH*0.95, padBot=textH*0.5;
-    const boxLeft=left-padX, boxTop=textTop-padTop;
-    const W=(right-left)+padX*2, H=textH+padTop+padBot;
-    // position the (transform-centred) svg over the box
-    emb.setAttribute('viewBox','0 0 '+W.toFixed(1)+' '+H.toFixed(1));
-    emb.style.width=W.toFixed(1)+'px'; emb.style.height=H.toFixed(1)+'px';
-    emb.style.left=(((boxLeft+ (right+padX))/2)-mr.left).toFixed(1)+'px';
-    emb.style.top=(((boxTop+(textBot+padBot))/2)-mr.top).toFixed(1)+'px';
-    const CX=i=>((r[i].left+r[i].right)/2)-boxLeft;
-    const P=(i,f)=>[CX(i), (r[i].top-boxTop)+r[i].height*f];
-    const midY=((textTop+textBot)/2)-boxTop, botY=textBot-boxTop, topY=textTop-boxTop;
-    const vx=(a,b)=>(CX(a)+CX(b))/2;
-    // A braid only reads as a braid if it travels: the old control points all sat between
-    // 0.34 and 0.55 of the text height, so the line never left the middle of the word
-    // and looked like a twig laid on top. Swing it clearly ABOVE the caps and clearly
-    // BELOW the baseline between letters, crossing each letter near its middle.
-    const above=topY+textH*0.06, below=botY+textH*0.10;
-    const pts=[
-      [W*0.04, midY+textH*0.26],             // left arm arrives low and curls up
-      P(0,0.58),                             // T  (behind)
-      [vx(0,1), above],                      // lifts over the gap T→h
-      P(1,0.44),                             // h  (in front)
-      [vx(1,4), below],                      // dips under "e ·"
-      P(4,0.54),                             // m  (behind)
-      [CX(6)+(CX(7)-CX(6))*0.35, above],     // lifts again just before the u
-      P(7,0.44),                             // u  (in front, on the way down)
-      [CX(7), botY+textH*0.20]               // short stub out of the u — the behind-bridge carries the descent
-    ];
-    const d=catmull(pts);
-    // Fibonacci-spaced foliage nodes: cumulative fib normalised + mirror for balance
-    const fib=[1,2,3,5,8], tot=fib.reduce((a,b)=>a+b,0); let acc=0;
-    const base=fib.map(f=>{acc+=f; return acc/tot;});          // .05,.16,.31,.56,1
-    const fr=[...new Set(base.concat(base.map(x=>1-x)))].filter(x=>x>0.05&&x<0.95).sort((a,b)=>a-b);
-    // measure to place decor along the real curve
-    const tmp=document.createElementNS(SVGNS,'path'); tmp.setAttribute('d',d); emb.appendChild(tmp);
-    LEN=tmp.getTotalLength();
-    let decor='';
-    const nodes=fr.map(f=>({f, bloom:false}));
-    nodes.push({f:0.02,bloom:true},{f:0.98,bloom:true});      // blooms at the two arm-tips
-    nodes.sort((a,b)=>a.f-b.f);
-    nodes.forEach((nd,k)=>{
-      const s=nd.f*LEN, p=tmp.getPointAtLength(s);
-      const a=tmp.getPointAtLength(Math.max(0,s-1)), b=tmp.getPointAtLength(Math.min(LEN,s+1));
-      let tx=b.x-a.x, ty=b.y-a.y; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
-      const nx=-ty, ny=tx;                                     // normal, biased upward/outward
-      const dir=(ny>0)?-1:1;                                   // push foliage to the open (upper) side
-      let jr=Math.sin(nd.f*137.5)*1e4; jr-=Math.floor(jr);     // deterministic jitter
-      const ang=(Math.atan2(ny*dir,nx*dir)*180/Math.PI+(nd.bloom?jr*40-20:dir*12+(jr*20-10))).toFixed(1);
-      const sc=(nd.bloom?0.34:0.30)*(0.85+0.3*jr);
-      decor+='<g class="edecor" data-fr="'+nd.f+'" transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+ang+') scale('+sc.toFixed(2)+')">'+(nd.bloom?BLOOM:LEAF)+'</g>';
-    });
-    emb.removeChild(tmp);
-    emb.innerHTML=
-      '<path class="stem eline" style="stroke-width:7.6" d="'+d+'"/>'+
-      '<path class="stem eline-hi" style="stroke:#9a6b40;stroke-width:2;opacity:.32" d="'+d+'"/>'+
-      decor;
-    mainPath=emb.querySelector('.eline');
-    emb.querySelectorAll('.eline,.eline-hi').forEach(el=>{ el.style.strokeDasharray=LEN; });
-    draw();
-  }
-  function draw(){
-    if(!mainPath) return;
-    const hr=h2.getBoundingClientRect();
-    let p=1;
-    // delayed: let the branch descending from the sign arrive at the menu first,
-    // then the weave draws itself through the letters
-    if(!REDUCE) p=Math.min(1,Math.max(0, ((innerHeight*0.58)-hr.top)/(innerHeight*0.26) ));
-    emb.querySelectorAll('.eline,.eline-hi').forEach(el=>{ el.style.strokeDashoffset=(LEN*(1-p)).toFixed(1); });
-    emb.querySelectorAll('.edecor').forEach(g=>{
-      const f=parseFloat(g.getAttribute('data-fr'));
-      g.style.opacity=(p>f+0.02)?1:0;
-      g.style.transition='opacity .45s ease';
-    });
-  }
-  build();
-  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
-  addEventListener('load', build);
-  addEventListener('resize', ()=>{ clearTimeout(emb._t); emb._t=setTimeout(build,120); }, {passive:true});
-  addEventListener('scroll', ()=>{ requestAnimationFrame(draw); }, {passive:true});
-})();
 
 /* hero vine: hidden at load (just the logo), grows out from behind the sign as you scroll */
 (function(){
@@ -1474,7 +1133,6 @@ function setMenuCat(cat){
       const r=el.getBoundingClientRect();
       if(r.top < innerHeight*0.92 && r.bottom > 0) revealItem(el);
     });
-    buildVine();
   });
 }
 menuTabs.forEach(t=>{
