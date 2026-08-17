@@ -1100,12 +1100,28 @@ function buildVine(){
   if(!items.length || !h){ svg.innerHTML=''; return; }
   svg.setAttribute('viewBox','0 0 '+w+' '+h);
   svg.setAttribute('preserveAspectRatio','none');
-  const cx=w/2, amp=Math.min(w*0.12, 120);
+  // Run the spine down the gutter between the photo and the copy, touching neither.
+  // The gutter is NOT always centred — the dish image carries a min-width, so at some
+  // widths the two grid tracks are uneven — measure it per row instead of assuming w/2.
+  const lrect=list.getBoundingClientRect();
+  const gutterOf=el=>{
+    const kids=[...el.children].map(k=>k.getBoundingClientRect()).sort((a,b)=>a.left-b.left);
+    if(kids.length<2) return null;
+    const a=kids[0].right-lrect.left, b=kids[1].left-lrect.left;
+    return (b-a)>12 ? {mid:(a+b)/2, room:b-a} : null;   // stacked rows report no gutter
+  };
+  const gutters=items.map(gutterOf), valid=gutters.filter(Boolean);
+  if(!valid.length){ svg.innerHTML=''; return; }         // single-column layout: no room for a spine
+  const room=Math.min(...valid.map(g=>g.room));
+  const cx=valid.reduce((s,g)=>s+g.mid,0)/valid.length;
+  const amp=Math.max(4, Math.min(w*0.022, 30, room/2 - 9));
   let d='M '+cx+',0', prevX=cx, prevY=0;
-  items.forEach(el=>{
+  items.forEach((el,idx)=>{
     const y=el.offsetTop + el.offsetHeight/2;
-    const side=(all.indexOf(el)%2===1)?1:-1;   // even nth-child => dish on right
-    const nx=cx + side*amp, midY=(prevY+y)/2;
+    // nth-child(even) puts the PHOTO on the left, so lean toward the photo, away from the copy
+    const side=(all.indexOf(el)%2===1)?-1:1;
+    const base=gutters[idx] ? gutters[idx].mid : cx;
+    const nx=base + side*amp, midY=(prevY+y)/2;
     d+=' C '+prevX+','+midY+' '+nx+','+midY+' '+nx+','+y;
     prevX=nx; prevY=y;
   });
