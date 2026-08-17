@@ -1104,11 +1104,17 @@ function buildVine(){
   // Run the spine down the gutter between the photo and the copy, touching neither.
   // The gutter is NOT always centred — the dish image carries a min-width, so at some
   // widths the two grid tracks are uneven — measure it per row instead of assuming w/2.
-  const lrect=list.getBoundingClientRect();
+  // Measure with offset*, NOT getBoundingClientRect: .dish-stage/.info carry
+  // translateX(±90px) until they scroll into view, and rects include transforms.
+  // Reading rects here made every row look like it had no gutter on first load,
+  // which blanked the whole vine until a resize. (Same reason the how-it-works
+  // lace measures its cards with offset*.)
   const gutterOf=el=>{
-    const kids=[...el.children].map(k=>k.getBoundingClientRect()).sort((a,b)=>a.left-b.left);
+    const kids=[...el.children]
+      .map(k=>({l:el.offsetLeft+k.offsetLeft, r:el.offsetLeft+k.offsetLeft+k.offsetWidth}))
+      .sort((a,b)=>a.l-b.l);
     if(kids.length<2) return null;
-    const a=kids[0].right-lrect.left, b=kids[1].left-lrect.left;
+    const a=kids[0].r, b=kids[1].l;
     return (b-a)>12 ? {mid:(a+b)/2, room:b-a} : null;   // stacked rows report no gutter
   };
   const gutters=items.map(gutterOf), valid=gutters.filter(Boolean);
@@ -1194,6 +1200,8 @@ let vTick=false;
 addEventListener('scroll', ()=>{ if(!vTick){ vTick=true; requestAnimationFrame(()=>{ drawVine(); vTick=false; }); } }, {passive:true});
 addEventListener('resize', ()=>buildVine(), {passive:true});
 addEventListener('load', ()=>buildVine());
+// webfont swap changes row heights, so the spine has to be re-measured after it lands
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>buildVine());
 
 /* menu bridge: one continuous vine from the weave's u-exit, straight down behind the
    Mains/Desserts toggle and pickup note, into the top of the dish vine (→ Shawarma Rice) */
