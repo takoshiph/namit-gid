@@ -282,9 +282,9 @@ header.hero{
 /* vine embrace cradling "The menu" — the heading grows from it, braiding through the letters */
 main{position:relative}
 #menuBridge{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;overflow:visible;filter:drop-shadow(0 1.4px 1px rgba(45,28,15,.3))}
-#menuBridge .mb{fill:none;stroke:#6f4a2c;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
-#menuBridge .mb-hi{fill:none;stroke:#9a6b40;stroke-width:1;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
-#menuBridge .mb-ring{fill:none;stroke:#6f4a2c;stroke-width:1.8;opacity:.5}
+#menuBridge .mb{fill:none;stroke:#6f4a2c;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+#menuBridge .mb-hi{fill:none;stroke:#9a6b40;stroke-width:1.9;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
+#menuBridge .mb-ring{fill:none;stroke:#6f4a2c;stroke-width:2.6;opacity:.6}
 #menu{position:relative}
 #menu h2{position:relative}                 /* no z-index: let letter spans share the section stacking context */
 #menu h2.weave-h2 span{position:relative;z-index:2;white-space:pre}   /* letters sit in FRONT of the arc by default */
@@ -416,7 +416,7 @@ main{position:relative}
 /* connecting root through the steps */
 /* thread runs BEHIND the cards (under-card passes hidden); punched holes sit ON TOP to mark in/out */
 #howRoot{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
-#howRoot .branch,#howRoot .branch-tail{fill:none;stroke:#6f4a2c;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
+#howRoot .branch,#howRoot .branch-tail{fill:none;stroke:#6f4a2c;stroke-width:3.8;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 #howRoot .foliage{opacity:0;transition:opacity .5s ease}
 #howHoles{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
 #howHoles .cardstitch{opacity:0;transition:opacity .4s ease}
@@ -599,7 +599,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .story.open .story-caret{transform:rotate(180deg)}
 /* vine arriving into the story — the page vine continuing on */
 .story-vine{position:absolute;left:50%;top:-4px;transform:translateX(-50%);height:58px;z-index:0;pointer-events:none;overflow:visible;filter:drop-shadow(0 1px .7px rgba(45,28,15,.28))}
-.story-vine .stem{fill:none;stroke:#6f4a2c;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.15s ease}
+.story-vine .stem{fill:none;stroke:#6f4a2c;stroke-width:6.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.15s ease}
 .story.invine .story-vine .stem{stroke-dashoffset:0}
 .story-vine .foliage{opacity:0;transition:opacity .6s ease .55s}
 .story.invine .story-vine .foliage{opacity:1}
@@ -777,8 +777,8 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <svg class="emblem-vine" viewBox="0 0 104 120" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
         <clipPath id="emblemVineClip"><rect id="emblemVineClipRect" x="-24" y="-24" width="160" height="0"/></clipPath>
         <g clip-path="url(#emblemVineClip)">
-        <path class="stem" style="stroke-width:2.6" d="M30,50 C18,60 12,74 16,90 C20,106 30,113 42,117 C54,121 57,133 53,150"/>
-        <path class="stem" style="stroke-width:1.5" d="M17,88 C11,95 9,104 13,113"/>
+        <path class="stem" style="stroke-width:2.18" d="M30,50 C18,60 12,74 16,90 C20,106 30,113 42,117 C54,121 57,133 53,150"/>
+        <path class="stem" style="stroke-width:1.26" d="M17,88 C11,95 9,104 13,113"/>
         <g transform="translate(30,50) rotate(-150) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
         <g transform="translate(30,50) rotate(-100) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
         <g transform="translate(14,80) rotate(180) scale(.32)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
@@ -1148,7 +1148,7 @@ function buildVine(){
     const b=tmp.getPointAtLength(Math.min(L,s+eps));
     let tx=b.x-a.x, ty=b.y-a.y; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
     const nx=-ty, ny=tx;                                   // unit normal
-    const taper=8.5*(1-t)+2.2*t;                           // woody stem: thick base → thin tip
+    const taper=6.6*(1-t)+4.2*t;                           // woody stem: thick base → thin tip
     const wob=1+0.12*Math.sin(t*Math.PI*6.3)+0.06*Math.sin(t*Math.PI*13.7);
     const ribW=taper*wob;
     lft.push([p.x+nx*ribW/2, p.y+ny*ribW/2]);
@@ -1245,8 +1245,8 @@ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>buildVine
     const ctrl=main.querySelector('.menu-tabs'), note=main.querySelector('.menu-note');
     let duckT=Infinity, duckB=-Infinity;
     if(ctrl){ const cr=ctrl.getBoundingClientRect();
-      duckT=(cr.top-mr.top)-6; duckB=(cr.bottom-mr.top)+8;
-      if(note){ const nr=note.getBoundingClientRect(); duckB=Math.max(duckB,(nr.bottom-mr.top)+8); } }
+      duckT=(cr.top-mr.top)-16; duckB=(cr.bottom-mr.top)+16;
+      if(note){ const nr=note.getBoundingClientRect(); duckB=Math.max(duckB,(nr.bottom-mr.top)+16); } }
     const before=pts.filter(q=>q.y<=duckT), after=pts.filter(q=>q.y>=duckB);
     let d, enter=null, exit=null;
     if(before.length>1 && after.length>1){
@@ -1264,7 +1264,7 @@ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>buildVine
     svg.removeChild(tmp);
     // small rings where it ducks under and comes back out — same cue as the card stitches
     if(enter&&exit){
-      const ring=q=>'<circle class="mb-ring" data-fr="'+(q===enter?0.3:0.72)+'" cx="'+q.x.toFixed(1)+'" cy="'+q.y.toFixed(1)+'" r="3.1"/>';
+      const ring=q=>'<circle class="mb-ring" data-fr="'+(q===enter?0.3:0.72)+'" cx="'+q.x.toFixed(1)+'" cy="'+q.y.toFixed(1)+'" r="4.6"/>';
       decor+=ring(enter)+ring(exit);
     }
     svg.innerHTML='<path class="mb" d="'+d+'"/><path class="mb-hi" d="'+d+'"/>'+decor;
@@ -1378,8 +1378,8 @@ if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>buildVine
     });
     emb.removeChild(tmp);
     emb.innerHTML=
-      '<path class="stem eline" style="stroke-width:3.7" d="'+d+'"/>'+
-      '<path class="stem eline-hi" style="stroke:#9a6b40;stroke-width:1;opacity:.32" d="'+d+'"/>'+
+      '<path class="stem eline" style="stroke-width:7.6" d="'+d+'"/>'+
+      '<path class="stem eline-hi" style="stroke:#9a6b40;stroke-width:2;opacity:.32" d="'+d+'"/>'+
       decor;
     mainPath=emb.querySelector('.eline');
     emb.querySelectorAll('.eline,.eline-hi').forEach(el=>{ el.style.strokeDasharray=LEN; });
@@ -1695,6 +1695,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
   const BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
   let svg, holesSvg, branchPath, tailPath, foliageEls=[], holeEls=[], played=false;
+  let wipeRect=null, wipeFrom=-200, wipeTo=0;
 
   function build(){
     const wr=wrap.getBoundingClientRect();
@@ -1739,37 +1740,63 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(topY-17).toFixed(1)+') rotate('+(i%2?-150:-30)+') scale(.32)">'+LEAF+'</g>';
       if(i===1) fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(topY-24).toFixed(1)+') scale(.3)">'+BLOOM+'</g>';
     });
-    svg.innerHTML='<path class="branch" d="'+d+'"/><path class="branch-tail" d="'+tail+'"/>'+fol;
+    // Reveal with a left→right wipe, NOT stroke-dashoffset. The branch deliberately
+    // contains M jumps (the passes under each card aren't drawn), and SVG restarts the
+    // dash pattern at every subpath — so a dash reveal made all four gap-arcs draw at
+    // once instead of lacing across. A clip rectangle sweeping right is a true wipe, and
+    // it carries the leaves along with it for free.
+    wipeFrom=-200; wipeTo=endX+178+60;
+    svg.innerHTML='<clipPath id="howLaceClip"><rect id="howLaceRect" x="'+wipeFrom+'" y="'+(topY-140).toFixed(1)+'" width="0" height="'+(wr.height+280).toFixed(1)+'"/></clipPath>'+
+      '<g clip-path="url(#howLaceClip)"><path class="branch" d="'+d+'"/><path class="branch-tail" d="'+tail+'"/>'+fol+'</g>';
     holesSvg.innerHTML=holes;
     branchPath=svg.querySelector('.branch'); tailPath=svg.querySelector('.branch-tail');
+    wipeRect=svg.querySelector('#howLaceRect');
     foliageEls=[...svg.querySelectorAll('.foliage')]; holeEls=[...holesSvg.querySelectorAll('.cardstitch')];
-    [branchPath,tailPath].forEach(p=>{ const L=p.getTotalLength(); p.dataset.len=L; p.style.strokeDasharray=L; p.style.strokeDashoffset=(played||REDUCE)?0:L; });
-    if(played||REDUCE){ foliageEls.forEach(f=>f.style.opacity=1); holeEls.forEach(h=>h.style.opacity=1); }
+    foliageEls.forEach(f=>f.style.opacity=1);            // the wipe reveals them, not opacity
+    // anchor each stitch and card to an x, so they land exactly as the lace passes them
+    holeEls.forEach((g,i)=> g.dataset.x = (cards[i] ? cards[i].cx-hg : 0));
+    steps.forEach((s,i)=> s.dataset.x = (cards[i] ? cards[i].cx+hg : 0));
   }
 
+  // The lace used to run on a fixed 1900ms timer started by an IntersectionObserver at
+  // 28% visibility — which fires while the section is still mostly below the fold, so by
+  // the time the cards were on screen the animation had already finished and the whole
+  // thing read as static. Drive it off scroll position instead: the vine laces left→right
+  // as you scroll through the section, and each card lands as the lace reaches it.
+  const LACE=0.86;                       // lace occupies the first 86% of the run, tail the rest
+  function progress(){
+    const wr=wrap.getBoundingClientRect();
+    const start=innerHeight*0.95, span=wr.height+innerHeight*0.62;   // ~a full screen of scroll to lace across
+    return Math.min(1, Math.max(0, (start-wr.top)/span));
+  }
+  function settle(){
+    if(wipeRect) wipeRect.setAttribute('width', Math.max(0,wipeTo-wipeFrom));
+    foliageEls.forEach(f=>f.style.opacity=1);
+    holeEls.forEach(h=>h.style.opacity=1);
+    steps.forEach(s=>s.classList.add('flow-in'));
+  }
   function play(){
-    if(played) return;
+    if(!wipeRect || REDUCE){ settle(); return; }
+    const p=progress();
+    const lace=Math.min(1, p/LACE);
+    const wipeX=wipeFrom + lace*(wipeTo-wipeFrom);          // where the vine tip is, right now
+    wipeRect.setAttribute('width', Math.max(0, wipeX-wipeFrom).toFixed(1));
+    // stitches and cards land the moment the tip passes their x — no timers, no guessing
+    holeEls.forEach(g=> g.style.opacity = wipeX > +g.dataset.x ? 1 : 0);
+    steps.forEach(s=> s.classList.toggle('flow-in', wipeX > +s.dataset.x));
     played=true;
-    if(!branchPath){ steps.forEach(s=>s.classList.add('flow-in')); return; }   // fallback
-    if(REDUCE){ [branchPath,tailPath].forEach(p=>p.style.strokeDashoffset=0); foliageEls.forEach(f=>f.style.opacity=1); holeEls.forEach(h=>h.style.opacity=1); steps.forEach(s=>s.classList.add('flow-in')); return; }
-    // 1) the thread laces across, left → right, in one hole and out the next
-    const Lb=+branchPath.dataset.len, DRAW=1900, t0=performance.now();
-    (function frame(now){ const t=Math.min(1,(now-t0)/DRAW); branchPath.style.strokeDashoffset=Lb*(1-t); if(t<1) requestAnimationFrame(frame); })(t0);
-    // 2) holes + steps appear as the lace reaches them, leaves unfurl
-    holeEls.forEach((g,i)=> setTimeout(()=> g.style.opacity=1, DRAW*(i+0.4)/steps.length));
-    steps.forEach((s,i)=> setTimeout(()=> s.classList.add('flow-in'), DRAW*(i+0.55)/steps.length));
-    foliageEls.forEach((f,i)=> setTimeout(()=> f.style.opacity=1, 320+i*160));
-    // 3) after all four are laced, the branch tails off toward the next section
-    const Lt=+tailPath.dataset.len;
-    setTimeout(()=>{ const ts=performance.now(); (function tf(now){ const t=Math.min(1,(now-ts)/1000); tailPath.style.strokeDashoffset=Lt*(1-t); if(t<1) requestAnimationFrame(tf); })(ts); }, DRAW+180);
   }
 
   build();
-  const io=new IntersectionObserver(es=>{
-    es.forEach(e=>{ if(e.isIntersecting){ build(); play(); io.unobserve(e.target); } });
-  }, {threshold:.28});
-  io.observe(section);
-  addEventListener('resize', ()=>{ if(played) build(); }, {passive:true});
+  if(REDUCE){ settle(); }
+  else{
+    play();
+    let t=false;
+    addEventListener('scroll', ()=>{ if(!t){ t=true; requestAnimationFrame(()=>{ play(); t=false; }); } }, {passive:true});
+  }
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ build(); play(); });
+  addEventListener('load', ()=>{ build(); play(); });
+  let rt; addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ build(); play(); },140); }, {passive:true});
 })();
 
 /* ---------------- the trunk: a full-height tree down the left of the page that the
