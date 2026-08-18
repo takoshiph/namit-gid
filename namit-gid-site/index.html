@@ -387,9 +387,10 @@ header.hero{
 
 /* ---------- how ---------- */
 .how{padding:clamp(2.8rem,6vw,4.4rem) clamp(1.4rem,5vw,3rem)}
-.how .steps{max-width:1000px;margin:2.2rem auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.2rem}
+/* wider gutters than the old 1.2rem: the thread has to have a visible span to sag across */
+.how .steps{max-width:1060px;margin:2.2rem auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:2.9rem}
 .how .steps{position:relative}
-@media(min-width:1000px){.how .steps{padding-top:48px}}  /* room for the sewing branch to enter */
+@media(min-width:1000px){.how .steps{padding-top:64px}}  /* room for the sewing branch to enter */
 .step{
   position:relative;z-index:1;
   background:rgba(247,240,227,.55);border:1px solid rgba(53,40,31,.1);border-radius:20px;
@@ -406,11 +407,12 @@ header.hero{
 #howRoot{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
 #howRoot .branch,#howRoot .branch-tail{fill:none;stroke:#6f4a2c;stroke-width:3.8;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
 #howRoot .foliage{opacity:0;transition:opacity .5s ease}
+#howRoot .tdl{fill:none;stroke:#6f4a2c;stroke-width:2.2;stroke-linecap:round;opacity:.8}
 #howHoles{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
 #howHoles .cardstitch{opacity:0;transition:opacity .4s ease}
 #howHoles .ring{fill:#9bb9af;stroke:rgba(38,28,20,.5);stroke-width:1.4}
 #howHoles .sh{fill:rgba(38,28,20,.22)}
-#howHoles .bridge{fill:none;stroke:#6f4a2c;stroke-width:2.5;stroke-linecap:round;opacity:.86}
+#howHoles .stub{fill:none;stroke:#6f4a2c;stroke-width:3.8;stroke-linecap:round;opacity:.82}
 /* earthy grounding at the base of the lower sections */
 .how,.reviews{position:relative}
 .how::after,.reviews::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(180deg,transparent,rgba(53,40,31,.06));pointer-events:none;z-index:0}
@@ -1489,7 +1491,8 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     const wr=wrap.getBoundingClientRect();
     if(!wr.width || !wr.height) return;
     // measure with offset* so the transform on hidden cards doesn't skew the anchor points
-    const cards=steps.map(s=>({ cx:s.offsetLeft+s.offsetWidth/2, top:s.offsetTop, right:s.offsetLeft+s.offsetWidth }));
+    const cards=steps.map(s=>({ cx:s.offsetLeft+s.offsetWidth/2, top:s.offsetTop,
+      left:s.offsetLeft, right:s.offsetLeft+s.offsetWidth }));
     if(!svg){ svg=document.createElementNS(NS,'svg'); svg.id='howRoot'; svg.setAttribute('aria-hidden','true'); svg.setAttribute('preserveAspectRatio','none'); wrap.prepend(svg); }
     if(!holesSvg){ holesSvg=document.createElementNS(NS,'svg'); holesSvg.id='howHoles'; holesSvg.setAttribute('aria-hidden','true'); holesSvg.setAttribute('preserveAspectRatio','none'); wrap.appendChild(holesSvg); }
     const vb='0 0 '+wr.width.toFixed(1)+' '+wr.height.toFixed(1);
@@ -1499,35 +1502,85 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     if(!singleRow){ svg.innerHTML=''; holesSvg.innerHTML=''; branchPath=null; tailPath=null; foliageEls=[]; holeEls=[]; return; }  // stacked: plain settle-in fallback
     // thread goes IN at hole 1, UNDER the card (hidden) to hole 2, OUT, then across the gap to the next card
     const W=wr.width, holeY=topY+14, hg=20, underDip=topY+31;
-    const hL0=cards[0].cx-hg;
-    // the vine comes in from the far left, laces the cards, and carries on to the right
-    let d='M '+(-160).toFixed(1)+','+(holeY-2).toFixed(1)+' C '+(-40).toFixed(1)+','+(holeY-8).toFixed(1)+' '+(hL0-44).toFixed(1)+','+(holeY-1).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
+    // deterministic jitter — stable across reloads, so nothing ever looks stamped
+    const jit=n=>{const x=Math.sin(n*127.1+11.7)*43758.5453; return x-Math.floor(x);};
+    // Holes belong at the card's OUTER corners, not 20px either side of its centre.
+    // With centred holes the visible span ran across the inner half of both cards and
+    // ghosted through their translucent backs. At the corners, the hidden pass is the
+    // full width of the card and the only drawn span is the gap — which is exactly what
+    // you want a hanging tag to look like.
+    const HI=18;
+    const hL0=cards[0].left+HI;
+    // the thread arrives from off-frame left, dipping as it takes the weight of the first card
+    let d='M '+(-160).toFixed(1)+','+(holeY-16).toFixed(1)+' C '+(-40).toFixed(1)+','+(holeY-14).toFixed(1)+' '+(hL0-70).toFixed(1)+','+(holeY+7).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
     let holes='', gapMids=[], px=hL0;
     cards.forEach((c,i)=>{
-      const hL=c.cx-hg, hR=c.cx+hg;
-      // IN at hole 1 → the pass under the card is NOT drawn (truly hidden) → resume at hole 2
+      const hL=c.left+HI, hR=c.right-HI;
+      // IN at hole 1 → the pass behind the card is NOT drawn (truly hidden) → resume at hole 2
       d+=' M '+hR.toFixed(1)+','+holeY.toFixed(1);
+      // A short visible stub from each hole out over the card edge — without it the
+      // thread vanishes behind the card 18px before the hole and the holes look unattached.
       holes+='<g class="cardstitch">'
-           +'<path class="bridge" d="M '+hL.toFixed(1)+','+holeY.toFixed(1)+' Q '+c.cx.toFixed(1)+','+(holeY-9).toFixed(1)+' '+hR.toFixed(1)+','+holeY.toFixed(1)+'"/>'
+           +'<path class="stub" d="M '+hL.toFixed(1)+','+holeY.toFixed(1)+' Q '+(hL-11).toFixed(1)+','+(holeY+1).toFixed(1)+' '+(c.left-3).toFixed(1)+','+(holeY+4).toFixed(1)+'"/>'
+           +'<path class="stub" d="M '+hR.toFixed(1)+','+holeY.toFixed(1)+' Q '+(hR+11).toFixed(1)+','+(holeY+1).toFixed(1)+' '+(c.right+3).toFixed(1)+','+(holeY+4).toFixed(1)+'"/>'
            +'<circle class="sh" cx="'+hL.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hL.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/>'
            +'<circle class="sh" cx="'+hR.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hR.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/>'
            +'</g>';
-      // rise UP out of hole 2, arc OVER the gap (above the cards), dive DOWN into the next card's hole 1
-      if(i<cards.length-1){ const nL=cards[i+1].cx-hg, mid=(hR+nL)/2; gapMids.push(mid);
-        d+=' C '+(hR+8).toFixed(1)+','+(topY-18).toFixed(1)+' '+(nL-8).toFixed(1)+','+(topY-18).toFixed(1)+' '+nL.toFixed(1)+','+holeY.toFixed(1); }
+      // SAG across the gap to the next card's hole 1. The cards hang off this thread, so
+      // the span between them has to droop under their weight — the old curve bowed 32px
+      // UPWARD, which is what made it read as a rigid wire instead of a loaded line.
+      if(i<cards.length-1){ const nL=cards[i+1].left+HI, gap=nL-hR, mid=(hR+nL)/2;
+        const j=jit(i*3.1), j2=jit(i*7.7);
+        const sag=Math.max(11, Math.min(34, gap*0.34)) * (0.78+0.44*j);  // no two spans alike
+        const lean=(j2-0.5)*gap*0.16;                                    // asymmetric droop
+        gapMids.push({x:mid+lean*0.5, y:holeY+sag*0.92, sag:sag, gap:gap, i:i});
+        d+=' C '+(hR+gap*0.24+lean).toFixed(1)+','+(holeY+sag).toFixed(1)+
+           ' '+(nL-gap*0.24+lean).toFixed(1)+','+(holeY+sag).toFixed(1)+
+           ' '+nL.toFixed(1)+','+holeY.toFixed(1); }
       px=hR;
     });
-    const endX=px+34;
+    const endX=px+38;
     d+=' C '+(px+14).toFixed(1)+','+(holeY-3).toFixed(1)+' '+endX.toFixed(1)+','+holeY.toFixed(1)+' '+endX.toFixed(1)+','+(holeY+2).toFixed(1);
     // tail: after the last card the vine carries on out to the right and tapers away
     const tail='M '+endX.toFixed(1)+','+(holeY+2).toFixed(1)
       +' C '+(endX+54).toFixed(1)+','+(holeY-2).toFixed(1)+' '+(endX+116).toFixed(1)+','+(holeY-12).toFixed(1)+' '+(endX+178).toFixed(1)+','+(holeY-30).toFixed(1);
-    // leaves + a couple of blossoms on the visible spans between cards
-    let fol='<g class="foliage" transform="translate('+(hL0-14).toFixed(1)+','+(holeY-12).toFixed(1)+') rotate(-150) scale(.32)">'+LEAF+'</g>';
-    gapMids.forEach((gx,i)=>{
-      fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(topY-17).toFixed(1)+') rotate('+(i%2?-150:-30)+') scale(.32)">'+LEAF+'</g>';
-      if(i===1) fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(topY-24).toFixed(1)+') scale(.3)">'+BLOOM+'</g>';
+    // Foliage rides the sag: sampled along each span at jittered positions, angled off the
+    // real tangent so leaves sit ON the curve, with gravity biasing them downward. Tendrils
+    // hang from the low point of each droop — the strongest "this is alive" cue.
+    const TENDRIL=(dir,s)=>'<path class="tdl" d="M0,0 c'+(3*dir)+',5 '+(-4*dir)+',7 '+(-1*dir)+',12 c'+(3*dir)+',4 '+(5*dir)+',2 '+(4*dir)+',6 c0,3 '+(-3*dir)+',4 '+(-5*dir)+',2" transform="scale('+s+')"/>';
+    const probe=document.createElementNS(NS,'path'); probe.setAttribute('d',d); svg.appendChild(probe);
+    const PL=probe.getTotalLength();
+    let fol='';
+    // 3–4 leaves per span, placed by arc-length with jitter, rotated to the local tangent
+    gapMids.forEach((g,i)=>{
+      const n=3+Math.round(jit(i*5.3));
+      for(let k=0;k<n;k++){
+        const jf=jit(i*13.3+k*2.7), ja=jit(i*3.9+k*8.1), js=jit(i*17.1+k*4.4);
+        // find the arc-length position nearest this span's x, then offset along the curve
+        const targetX=g.x + (jf-0.5)*g.gap*0.8;   // keep leaves inside the gutter
+        let best=0,bd=1e9;
+        for(let t=0;t<=120;t++){const q=probe.getPointAtLength(PL*t/120);
+          if(Math.abs(q.y-g.y)<g.sag*1.5){const dd=Math.abs(q.x-targetX); if(dd<bd){bd=dd;best=PL*t/120;}}}
+        if(bd>g.gap) continue;
+        const p0=probe.getPointAtLength(Math.max(0,best-2)), p1=probe.getPointAtLength(Math.min(PL,best+2));
+        const p=probe.getPointAtLength(best);
+        const tang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
+        const up=(ja>0.62)?-1:1;                                  // mostly hanging, some reaching up
+        const ang=(tang + up*(58+ja*44)).toFixed(1);
+        const sc=(0.24+0.16*js).toFixed(2);
+        fol+='<g class="foliage" transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+ang+') scale('+sc+')">'+LEAF+'</g>';
+      }
+      // one tendril curling down out of the lowest point of the droop
+      const td=jit(i*23.7);
+      fol+='<g class="foliage" transform="translate('+(g.x+(td-0.5)*g.gap*0.42).toFixed(1)+','+(g.y+2).toFixed(1)+') rotate('+((td-0.5)*26).toFixed(1)+')">'+TENDRIL(td>0.5?1:-1,(0.85+td*0.5).toFixed(2))+'</g>';
+      // a bloom on roughly every other span, chosen by jitter rather than hardcoded
+      if(jit(i*31.4)>0.45)
+        fol+='<g class="foliage" transform="translate('+(g.x+(jit(i*9.1)-0.5)*g.gap*0.5).toFixed(1)+','+(g.y-6).toFixed(1)+') scale('+(0.26+0.1*jit(i*6.2)).toFixed(2)+')">'+BLOOM+'</g>';
     });
+    // a leaf and a tendril where the thread first arrives, so the left edge isn't bare
+    fol+='<g class="foliage" transform="translate('+(hL0-16).toFixed(1)+','+(holeY-9).toFixed(1)+') rotate(-142) scale(.3)">'+LEAF+'</g>';
+    fol+='<g class="foliage" transform="translate('+(hL0-52).toFixed(1)+','+(holeY+3).toFixed(1)+')">'+TENDRIL(-1,'1')+'</g>';
+    svg.removeChild(probe);
     // Reveal with a left→right wipe, NOT stroke-dashoffset. The branch deliberately
     // contains M jumps (the passes under each card aren't drawn), and SVG restarts the
     // dash pattern at every subpath — so a dash reveal made all four gap-arcs draw at
