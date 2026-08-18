@@ -423,9 +423,25 @@ header.hero{
 .earth-tuft .stem{fill:none;stroke:#6f4a2c;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:600px){.earth-tuft{display:none}}
 /* flow/morph reveal for the step cards (JS-only, after the root draws) */
-.js .how .step{opacity:0;transform:translateY(18px) scale(.97);transform-origin:top center;
+/* The card hangs off the thread, so it pivots about the stitch line (14px below its
+   top edge), not its centre. --tilt is set per card in JS: alternating sign with a
+   little jitter, so they don't swing in unison like a metronome. */
+.js .how .step{opacity:0;transform:translateY(18px) scale(.97);
+  transform-origin:50% 14px;
   transition:opacity .6s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.9,.25,1)}
-.js .how .step.flow-in{opacity:1;transform:none}
+.js .how .step.flow-in{opacity:1;transform:none;
+  animation:hangDrop 1.05s cubic-bezier(.22,.9,.3,1) both, hangSway var(--dur,6.5s) ease-in-out 1.05s infinite}
+@keyframes hangDrop{                       /* takes up the slack, overshoots, settles */
+  0%  {opacity:0;transform:translateY(16px) rotate(var(--tilt,1deg))}
+  45% {opacity:1;transform:translateY(0)    rotate(calc(var(--tilt,1deg) * -.55))}
+  72% {transform:rotate(calc(var(--tilt,1deg) * .26))}
+  88% {transform:rotate(calc(var(--tilt,1deg) * -.11))}
+  100%{opacity:1;transform:rotate(calc(var(--tilt,1deg) * .05))}
+}
+@keyframes hangSway{                       /* the idle breath afterwards */
+  0%,100%{transform:rotate(calc(var(--tilt,1deg) *  .05))}
+  50%    {transform:rotate(calc(var(--tilt,1deg) * -.30))}
+}
 
 /* ---------- footer ---------- */
 footer{background:var(--sage-deep);color:var(--cream);margin-top:clamp(2rem,6vw,4rem)}
@@ -679,7 +695,7 @@ main{position:relative}
   *{animation:none !important;transition:none !important}
   .reveal-l,.reveal-r{opacity:1;transform:none}
   .js .rise{opacity:1;transform:none}
-  .js .how .step{opacity:1;transform:none}
+  .js .how .step{opacity:1;transform:none;animation:none !important}
   #howRoot .how-node{opacity:.9}
   .leaf,.soil{display:none}
   #fx{display:none}
@@ -1595,8 +1611,14 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     foliageEls=[...svg.querySelectorAll('.foliage')]; holeEls=[...holesSvg.querySelectorAll('.cardstitch')];
     foliageEls.forEach(f=>f.style.opacity=1);            // the wipe reveals them, not opacity
     // anchor each stitch and card to an x, so they land exactly as the lace passes them
-    holeEls.forEach((g,i)=> g.dataset.x = (cards[i] ? cards[i].cx-hg : 0));
-    steps.forEach((s,i)=> s.dataset.x = (cards[i] ? cards[i].cx+hg : 0));
+    holeEls.forEach((g,i)=> g.dataset.x = (cards[i] ? cards[i].left+HI : 0));
+    steps.forEach((s,i)=>{
+      s.dataset.x = (cards[i] ? cards[i].right-HI : 0);
+      // alternating lean so neighbours never swing in step, magnitude .55-1.05deg
+      const t=(0.55+0.5*jit(i*41.3)) * (i%2 ? -1 : 1);
+      s.style.setProperty('--tilt', t.toFixed(2)+'deg');
+      s.style.setProperty('--dur', (5.6+2.4*jit(i*19.9)).toFixed(2)+'s');
+    });
   }
 
   // The lace used to run on a fixed 1900ms timer started by an IntersectionObserver at
