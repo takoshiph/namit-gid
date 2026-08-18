@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Namit Gid · Filipino home cooking · Toronto</title>
+<meta name="description" content="Namit gid, so delicious. Filipino home cooking in Toronto: palabok, baked sushi, lumpia, shawarma rice and desserts, cooked from scratch and ordered with a tap.">
+<link rel="icon" type="image/png" href="images/favicon.png">
+<meta name="theme-color" content="#9bb9af">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="canonical" href="https://namitgid.takoshi.ca/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Namit Gid">
+<meta property="og:title" content="Namit Gid · Filipino home cooking · Toronto">
+<meta property="og:description" content="Namit gid, so delicious. Filipino home cooking in Toronto: shawarma rice, lumpia, baked sushi, palabok and desserts, cooked from scratch and ordered with a tap.">
+<meta property="og:url" content="https://namitgid.takoshi.ca/">
+<meta property="og:image" content="https://namitgid.takoshi.ca/images/logo-badge.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Namit Gid · Filipino home cooking · Toronto">
+<meta name="twitter:description" content="So delicious. Filipino home cooking in Toronto, ordered with a tap.">
+<meta name="twitter:image" content="https://namitgid.takoshi.ca/images/logo-badge.webp">
+<link rel="preload" as="image" href="images/logo-badge.webp">
+<link rel="preload" as="image" href="images/logo-girl.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Karla:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sage:#9bb9af;
+  --sage-deep:#7fa196;
+  --sage-dark:#5f8177;
+  --espresso:#35281f;
+  --cream:#f7f0e3;
+  --cream-soft:#efe6d4;
+  --terracotta:#c4633c;
+  --gold:#d9a441;
+  --ring: rgba(53,40,31,.85);
+  --shadow: rgba(38,52,47,.35);
+  --ff-display:'Young Serif', Georgia, serif;
+  --ff-body:'Karla', 'Helvetica Neue', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;touch-action:pan-y}
+body{
+  font-family:var(--ff-body);
+  background:var(--sage);
+  color:var(--espresso);
+  line-height:1.6;
+  overflow-x:hidden;
+}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none;touch-action:manipulation}
+button{font-family:inherit;cursor:pointer;border:none;background:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+img{-webkit-user-drag:none;user-select:none}
+:focus-visible{outline:3px solid var(--terracotta);outline-offset:3px;border-radius:4px}
+
+/* ---------- splash ---------- */
+#splash{
+  position:fixed;inset:0;z-index:100;
+  background:var(--cream);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.4rem;
+  transition:opacity .7s ease, visibility .7s;
+}
+#splash.gone{opacity:0;visibility:hidden;pointer-events:none}
+/* splash now shows the real emblem, dropping in and settling like a hanging sign */
+#splash .s-emblem{width:min(66vw,320px);margin:0;transform-origin:50% 16%;
+  animation:signDrop 1.2s cubic-bezier(.2,.85,.3,1) .1s both}
+@keyframes signDrop{
+  0%{opacity:0;transform:translateY(-54px) rotate(-6deg)}
+  50%{opacity:1;transform:translateY(0) rotate(4.5deg)}
+  70%{transform:rotate(-3deg)}85%{transform:rotate(1.6deg)}100%{transform:rotate(0)}
+}
+.s-logo{position:relative;width:min(52vw,250px);aspect-ratio:1}
+.s-badge{position:absolute;inset:0;width:100%;height:100%;opacity:0;transform:scale(.55);
+  animation:badgePop .75s cubic-bezier(.2,1.4,.35,1) .15s forwards;
+  filter:drop-shadow(0 14px 26px rgba(38,52,47,.3))}
+@keyframes badgePop{to{opacity:1;transform:scale(1)}}
+.s-girl{position:absolute;left:50%;bottom:4%;height:92%;width:auto;
+  transform:translateX(-50%) translateY(46px);opacity:0;
+  animation:girlRise .7s cubic-bezier(.2,.9,.25,1) .7s forwards;
+  filter:drop-shadow(0 10px 18px rgba(38,52,47,.35))}
+@keyframes girlRise{to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes riseIn{to{opacity:1;transform:none}}
+.splash-word{
+  font-family:var(--ff-display);font-size:clamp(1.5rem,5vw,2.1rem);
+  letter-spacing:.02em;opacity:0;animation:riseIn .7s 1.15s forwards;
+}
+.splash-word em{font-style:normal;color:var(--terracotta)}
+.splash-sub{
+  font-size:.8rem;letter-spacing:.35em;text-transform:uppercase;color:var(--sage-dark);
+  opacity:0;animation:riseIn .7s 1.35s forwards;
+}
+.splash-bar{width:min(220px,50vw);height:2px;background:rgba(53,40,31,.15);border-radius:2px;overflow:hidden;opacity:0;animation:riseIn .5s 1.45s forwards}
+.splash-bar i{display:block;height:100%;width:0;background:var(--terracotta);animation:fill 2.1s 1.45s ease forwards}
+@keyframes fill{to{width:100%}}
+.splash-cook{display:flex;flex-direction:column;align-items:center;gap:.4rem;opacity:0;animation:riseIn .5s 1.55s forwards}
+.cook-icon{overflow:visible}
+.cook-icon .steam{fill:none;stroke:var(--sage-dark);stroke-width:2;stroke-linecap:round;opacity:0;animation:steamRise 1.8s ease-in-out infinite}
+.cook-icon .steam:nth-child(2){animation-delay:.3s}
+.cook-icon .steam:nth-child(3){animation-delay:.6s}
+@keyframes steamRise{
+  0%{opacity:0;transform:translateY(2px)}
+  35%{opacity:.7}
+  100%{opacity:0;transform:translateY(-6px)}
+}
+.cook-caption{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sage-dark);opacity:.85;transition:opacity .3s ease}
+.cook-caption.fade{opacity:0}
+.splash-skip{
+  position:absolute;bottom:2rem;font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--sage-dark);padding:.6rem 1.2rem;border:1px solid rgba(53,40,31,.2);border-radius:99px;
+}
+.splash-skip:hover{color:var(--espresso);border-color:var(--espresso)}
+
+/* ---------- nav ---------- */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.1rem clamp(1.2rem,4vw,3rem);
+  transition:background .4s, box-shadow .4s, padding .4s;
+}
+nav.scrolled{background:rgba(155,185,175,.88);backdrop-filter:blur(10px);box-shadow:0 1px 0 rgba(53,40,31,.08);padding:.7rem clamp(1.2rem,4vw,3rem)}
+.nav-logo{font-family:var(--ff-display);font-size:1.15rem;letter-spacing:.04em;display:flex;align-items:baseline;gap:.45rem}
+.nav-logo em{font-style:normal;color:var(--terracotta)}
+.nav-links{display:flex;align-items:center;gap:clamp(1rem,3vw,2.2rem);font-size:.78rem;letter-spacing:.22em;text-transform:uppercase}
+.nav-links a{opacity:.75;transition:opacity .2s}
+.nav-links a:hover{opacity:1}
+.nav-cta{
+  background:var(--espresso);color:var(--cream);
+  padding:.65rem 1.4rem;border-radius:99px;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;
+  transition:background .25s, transform .25s;
+}
+.nav-cta:hover{background:var(--terracotta);transform:translateY(-1px)}
+@media(max-width:640px){.nav-links a.hide-m{display:none}}
+
+/* ---------- hero ---------- */
+header.hero{
+  position:relative;min-height:82svh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:5rem 1rem 2rem;text-align:center;
+}
+#fx{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.7rem}
+.logo-stage{position:relative;z-index:2;width:min(58vw,320px);aspect-ratio:1;margin:.4rem 0 .2rem}
+.logo-badge{position:absolute;inset:0;width:100%;height:100%;
+  animation:slowSpin 85s linear infinite;
+  filter:drop-shadow(0 16px 30px rgba(38,52,47,.3))}
+@keyframes slowSpin{to{transform:rotate(360deg)}}
+.logo-girl{position:absolute;left:50%;bottom:4%;height:92%;width:auto;
+  transform:translateX(-50%);
+  animation:girlBob 6s ease-in-out infinite;
+  filter:drop-shadow(0 10px 18px rgba(38,52,47,.35))}
+@keyframes girlBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-9px)}}
+/* hanging wooden sign holding the wordmark; live text overlaid on the inner panel */
+.emblem{position:relative;width:min(90vw,430px);margin:.1rem auto 0;container-type:inline-size;
+  animation:emblemFloat 6.5s ease-in-out infinite}
+@keyframes emblemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.emblem-img{display:block;width:100%;height:auto;position:relative;z-index:2;filter:drop-shadow(0 18px 22px rgba(38,52,47,.24))}
+/* vine that grows from behind the sign frame */
+.emblem-vine{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;overflow:visible;pointer-events:none;filter:drop-shadow(0 1px .8px rgba(45,28,15,.3))}
+.emblem-vine .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
+.emblem-vine .stem-hi{fill:none;stroke:#8f6038;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
+/* bottom-right leaf on top so the enlarged island runs behind it */
+.emblem-leaf{position:absolute;left:72.3%;top:90.1%;width:7.3cqw;height:auto;z-index:3;pointer-events:none}
+.wordmark{position:absolute;left:50%;top:82%;transform:translate(-50%,-50%);z-index:2;
+  font-family:var(--ff-display);font-weight:400;margin:0;line-height:.9;font-size:11cqw;
+  display:inline-flex;flex-direction:column;align-items:flex-start}
+.wordmark em{font-style:normal}
+.wm-namit{color:#f7f0e3;text-shadow:0 2px 3px rgba(38,20,8,.5)}
+/* gid aligned under Namit (g under N); island trails right as an overflow layer, tail over the d */
+.wm-row2{position:relative;display:inline-block;margin-top:.03em;margin-left:.55em}
+.wm-gid{position:relative;z-index:2;color:#f6ac66;text-shadow:0 1px 1px rgba(30,16,6,.75),0 4px 9px rgba(30,16,6,.5)}
+.wm-island{position:absolute;left:44%;top:74%;width:36%;height:auto;z-index:3;
+  pointer-events:none;filter:drop-shadow(0 3px 6px rgba(38,20,8,.5))}
+.wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
+.eyebrow{
+  font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--espresso);
+  opacity:.65;display:inline-flex;align-items:center;gap:.7rem;
+}
+.eyebrow::before,.eyebrow::after{content:"";width:26px;height:1px;background:currentColor;opacity:.5}
+
+/* the floating dish + orbit ring — signature element */
+.dish-stage{position:relative;width:min(74vw,440px);aspect-ratio:1;margin:1rem 0 .4rem}
+/* giant editorial type behind the dish */
+.back-type{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);
+  font-family:var(--ff-display);font-weight:400;line-height:.9;
+  font-size:clamp(2.4rem,7vw,4rem);
+  color:transparent;-webkit-text-stroke:1px rgba(247,240,227,.18);
+  paint-order:stroke;white-space:normal;text-align:center;
+  width:100%;max-width:100%;
+  letter-spacing:.01em;pointer-events:none;user-select:none;
+  z-index:0;will-change:transform;
+}
+@supports not (-webkit-text-stroke: 1px #000){
+  .back-type{color:var(--cream);opacity:.16}
+}
+.back-type.two{font-size:clamp(2rem,5.5vw,3.2rem);width:100%}
+/* small rotating corner badge keeps the kinetic charm */
+.badge{
+  position:absolute;right:-4%;bottom:2%;width:88px;height:88px;z-index:3;
+  animation:orbit 18s linear infinite;pointer-events:none;
+}
+@keyframes orbit{to{transform:rotate(360deg)}}
+.badge text{
+  font-family:var(--ff-body);font-weight:700;font-size:12.5px;
+  letter-spacing:.32em;text-transform:uppercase;fill:var(--espresso);
+}
+.badge circle{fill:var(--cream);opacity:.9}
+.badge .dotmark{fill:var(--terracotta);opacity:1}
+.dish-btn{
+  position:absolute;inset:0;border-radius:50%;overflow:hidden;z-index:1;
+  animation:bob 5.5s ease-in-out infinite;
+  transition:transform .35s cubic-bezier(.2,.7,.2,1);
+  box-shadow:0 0 0 0 rgba(196,99,60,0);
+}
+.dish-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.dish-btn.natural{border-radius:0;overflow:visible}
+.dish-btn.natural img{object-fit:contain;border-radius:0;filter:drop-shadow(0 18px 26px rgba(38,52,47,.28))}
+.dish-btn.natural::after{border-radius:99px;background:rgba(53,40,31,.55);inset:auto;left:50%;top:50%;transform:translate(-50%,-50%);padding:.7rem 1.3rem;white-space:nowrap}
+.modal .m-head img.natural{border-radius:12px;object-fit:contain;box-shadow:none;background:transparent}
+.dish-btn::after{
+  content:"tap to order";
+  position:absolute;inset:0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;letter-spacing:.3em;text-transform:uppercase;color:var(--cream);
+  background:rgba(53,40,31,.45);opacity:0;transition:opacity .3s;
+}
+.dish-btn:focus-visible::after{opacity:1}
+@media (hover:hover) and (pointer:fine){
+  .dish-btn:hover::after{opacity:1}
+}
+.dish-btn:hover{transform:scale(1.03)}
+@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -12px}}
+.dish-shadow{
+  position:absolute;left:50%;bottom:-9%;translate:-50% 0;
+  width:52%;height:26px;border-radius:50%;
+  background:radial-gradient(closest-side, var(--shadow), transparent 70%);
+  animation:shadowBreathe 5.5s ease-in-out infinite;
+}
+@keyframes shadowBreathe{0%,100%{transform:scaleX(1);opacity:1}50%{transform:scaleX(.86);opacity:.7}}
+.menu-item:nth-child(odd) .dish-btn{animation-delay:-2.7s}
+.menu-item:nth-child(odd) .dish-shadow{animation-delay:-2.7s}
+.menu-item:nth-child(3n) .badge{animation-delay:-6s}
+.menu-item:nth-child(3n+1) .badge{animation-delay:-12s}
+.hero h1{font-family:var(--ff-display);font-size:clamp(2.1rem,6vw,3.4rem);font-weight:400;letter-spacing:.01em}
+.hero .price{font-family:var(--ff-display);color:var(--terracotta);font-size:1.35rem}
+.hero p.lede{max-width:34ch;font-size:1rem;opacity:.85}
+.hero p.lede + p.lede{margin-top:.7rem}
+/* story panel: left-aligned readable column; "Namit gid" blooms + root grows after typing */
+.story-body .lede{opacity:1;min-height:1em;max-width:min(90vw,32rem);margin:0 auto;text-align:left}
+.story-body .lede + .lede{margin-top:.85rem}
+.story-body .hl{font-family:var(--ff-display);font-style:normal;color:inherit;transition:color .55s ease}
+.story-body.revealed .hl{color:var(--terracotta)}
+.story-body .root{position:relative;white-space:nowrap}
+.root-uline{position:absolute;left:-2%;bottom:-.44em;width:104%;height:.55em;overflow:visible;pointer-events:none}
+.root-uline path{fill:none;stroke:var(--terracotta);stroke-linecap:round;stroke-linejoin:round}
+.root-uline path:first-child{stroke-width:2.4;stroke-dasharray:230;stroke-dashoffset:230;transition:stroke-dashoffset 1s ease .15s}
+.root-uline .tendril{stroke-width:1.7;opacity:.85;stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .5s ease .8s}
+.story-body.revealed .root-uline path{stroke-dashoffset:0}
+.type-caret{display:inline-block;width:2px;height:1.05em;background:var(--terracotta);margin-left:2px;vertical-align:-.16em;animation:caretBlink .8s step-end infinite}
+@keyframes caretBlink{50%{opacity:0}}
+
+/* ---------- menu ---------- */
+.section-head{
+  text-align:center;padding:clamp(2.8rem,6vw,4.4rem) 1.5rem 1rem;
+  display:flex;flex-direction:column;align-items:center;gap:.7rem;
+}
+.section-head h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
+.section-head p{max-width:44ch;opacity:.8}
+.section-head .head-tr{font-size:.95rem;font-style:italic;letter-spacing:.02em;color:var(--sage-dark);opacity:.82;margin-top:-.35rem}
+/* menu toggle + quiet practical caption (made-to-order, pickup, allergens) */
+.menu-toggle{display:flex;flex-direction:column;align-items:center;width:max-content;max-width:92%;margin:0 auto 2.6rem}
+.menu-note{margin:1.1rem auto 0;max-width:54ch;text-align:center;font-size:.9rem;line-height:1.6;color:var(--espresso);opacity:.78}
+.menu-note .place{color:var(--espresso);font-weight:700;opacity:.95}
+/* allergens: a small, calm, neutral badge — distinct from the terracotta category accent */
+.menu-allergen{margin-top:.7rem;display:inline-flex;align-items:center;gap:.32rem;font:inherit;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;font-weight:600;
+  color:var(--sage-dark);background:transparent;border:1px solid rgba(95,129,119,.4);border-radius:999px;
+  padding:.26rem .7rem;cursor:pointer;opacity:.85;transition:background .2s,opacity .2s,border-color .2s,color .2s}
+.menu-allergen .aller-i{font-size:.6rem;line-height:1;opacity:.85}
+.menu-allergen:hover{opacity:1;background:rgba(95,129,119,.12);border-color:var(--sage-dark);color:var(--espresso)}
+.menu-badge-row{margin-top:.7rem;text-align:center}
+.menu-badge-row .menu-allergen{margin-top:0}
+/* vine embrace cradling "The menu" — the heading grows from it, braiding through the letters */
+main{position:relative}
+#menuBridge{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;overflow:visible;filter:drop-shadow(0 1.4px 1px rgba(45,28,15,.3))}
+#menuBridge .mb{fill:none;stroke:#6f4a2c;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+#menuBridge .mb-hi{fill:none;stroke:#9a6b40;stroke-width:1.9;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
+#menuBridge .mb-ring{fill:none;stroke:#6f4a2c;stroke-width:2.6;opacity:.6}
+#menu{position:relative}
+#menu h2{position:relative}                 /* no z-index: let letter spans share the section stacking context */
+#menu h2.weave-h2 span{position:relative;z-index:2;white-space:pre}   /* letters sit in FRONT of the arc by default */
+#menu h2.weave-h2 span.lz-bot{z-index:0}     /* dropped BEHIND the arc so the vine crosses in front */
+.menu-embrace{position:absolute;transform:translate(-50%,-50%);height:auto;z-index:1;pointer-events:none;overflow:visible;filter:drop-shadow(0 1px .8px rgba(45,28,15,.3))}
+.menu-embrace .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
+.rom{font-family:var(--ff-display);color:var(--terracotta);letter-spacing:.06em}
+
+.menu-item{
+  display:grid;grid-template-columns:1fr 1fr;align-items:center;
+  gap:clamp(1.5rem,5vw,4.5rem);
+  max-width:1060px;margin:0 auto;
+  padding:clamp(2.5rem,7vw,5rem) clamp(1.2rem,4vw,3rem);
+}
+.menu-item .dish-stage{width:min(64vw,360px);justify-self:center}
+.menu-item .info{display:flex;flex-direction:column;gap:.9rem;max-width:40ch}
+.menu-item .info .num{font-size:.72rem;letter-spacing:.35em;color:var(--sage-dark);text-transform:uppercase}
+.menu-item h3{font-family:var(--ff-display);font-size:clamp(1.7rem,4vw,2.4rem);font-weight:400}
+.menu-item .tag{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--terracotta)}
+.menu-item .desc{opacity:.85}
+.menu-item .row{display:flex;align-items:center;gap:1.2rem;margin-top:.3rem}
+.menu-item .price{font-family:var(--ff-display);font-size:1.5rem}
+/* clickable price (replaces the old Order button) */
+.menu-item .price-btn{
+  font-family:var(--ff-display);font-size:1.5rem;color:var(--espresso);
+  display:inline-flex;align-items:center;gap:.7rem;line-height:1;min-height:44px;
+  padding:.35rem 1.15rem;border:1px solid rgba(53,40,31,.22);border-radius:99px;
+  transition:color .2s, border-color .2s, background .2s;
+}
+.menu-item .price-btn:hover{border-color:var(--terracotta);background:rgba(196,99,60,.06)}
+.menu-item .price-btn .arr{
+  font-size:1rem;width:1.9rem;height:1.9rem;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:50%;background:var(--espresso);color:var(--cream);
+  transition:background .2s, transform .2s;
+}
+.menu-item .price-btn:hover{color:var(--terracotta)}
+.menu-item .price-btn:hover .arr{background:var(--terracotta);transform:translateX(3px)}
+.menu-item:nth-child(even) .price-btn{flex-direction:row-reverse}
+.menu-item:nth-child(even) .price-btn:hover .arr{transform:translateX(-3px)}
+/* category tabs */
+.menu-tabs{
+  display:flex;justify-content:center;gap:.3rem;width:max-content;max-width:100%;
+  margin:0;padding:.34rem;background:rgba(53,40,31,.07);border-radius:99px;
+}
+.menu-tabs button{
+  min-height:44px;padding:.55rem 1.6rem;border-radius:99px;font-size:.76rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--espresso);opacity:.72;font-weight:500;transition:opacity .25s, background .25s, color .25s, box-shadow .25s;
+}
+.menu-tabs button.active{background:var(--cream);opacity:1;color:var(--terracotta);font-weight:700;box-shadow:0 3px 10px -4px var(--shadow)}
+.menu-item.hidden{display:none}
+.order-btn{
+  background:var(--espresso);color:var(--cream);padding:.75rem 1.6rem;border-radius:99px;
+  font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;
+  transition:background .25s, transform .25s;
+}
+.order-btn:hover{background:var(--terracotta);transform:translateY(-2px)}
+.menu-item:nth-child(even){grid-template-columns:1fr 1fr}
+.menu-item:nth-child(even) .dish-stage{order:2}
+.menu-item:nth-child(even) .info{order:1;justify-self:end;text-align:right;align-items:flex-end}
+/* reveal states */
+.reveal-l,.reveal-r{opacity:0;transition:opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal-l{transform:translateX(-90px)}
+.reveal-r{transform:translateX(90px)}
+.in .reveal-l,.in .reveal-r{opacity:1;transform:none}
+@media(max-width:720px){
+  .menu-item{
+    display:flex;align-items:center;text-align:left;
+    padding:1.8rem 0;gap:0;max-width:100%;
+  }
+  .menu-item .dish-stage{
+    flex:0 0 auto;width:58vw;
+    margin-left:calc(-1 * var(--peek, 20) * 1vw);
+  }
+  .menu-item .info{
+    flex:1 1 auto;min-width:0;max-width:none;
+    padding-right:1.1rem;text-align:left;align-items:flex-start;
+  }
+  .menu-item:nth-child(even) .dish-stage{
+    order:2;
+    margin-left:0;margin-right:calc(-1 * var(--peek, 20) * 1vw);
+  }
+  .menu-item:nth-child(even) .info{
+    order:1;
+    padding-right:0;padding-left:1.1rem;
+    text-align:left;align-items:flex-start;
+  }
+}
+
+/* ---------- story ---------- */
+.story{background:
+    linear-gradient(180deg, var(--sage) 0, rgba(155,185,175,0) 16%, rgba(155,185,175,0) 84%, var(--sage) 100%),
+    radial-gradient(90% 130% at 50% -20%, rgba(155,185,175,.22), transparent 55%),
+    radial-gradient(70% 90% at 100% 120%, rgba(196,99,60,.08), transparent 60%),
+    var(--cream);
+  position:relative;overflow:hidden}
+.story .wrap{
+  max-width:820px;margin:0 auto;
+  padding:clamp(1rem,2.6vw,1.6rem) clamp(1.4rem,5vw,3rem);
+  display:flex;flex-direction:column;gap:1rem;text-align:center;align-items:center;
+}
+.story h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
+.story p{max-width:58ch;font-size:1.05rem;opacity:.88}
+.story .word-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;width:100%;margin-top:1.4rem}
+.word-card{
+  background:var(--cream-soft);border:1px solid rgba(53,40,31,.08);border-radius:18px;
+  padding:1.3rem 1rem;display:flex;flex-direction:column;gap:.35rem;
+  transition:transform .3s, box-shadow .3s;
+}
+.word-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px -18px rgba(53,40,31,.4)}
+.word-card b{font-family:var(--ff-display);font-weight:400;font-size:1.25rem;color:var(--terracotta)}
+.word-card span{font-size:.85rem;opacity:.75}
+
+/* ---------- how ---------- */
+.how{padding:clamp(2.8rem,6vw,4.4rem) clamp(1.4rem,5vw,3rem)}
+.how .steps{max-width:1000px;margin:2.2rem auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.2rem}
+.how .steps{position:relative}
+@media(min-width:1000px){.how .steps{padding-top:48px}}  /* room for the sewing branch to enter */
+.step{
+  position:relative;z-index:1;
+  background:rgba(247,240,227,.55);border:1px solid rgba(53,40,31,.1);border-radius:20px;
+  padding:1.8rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;
+  backdrop-filter:blur(4px);
+}
+.step .step-head{display:flex;flex-wrap:nowrap;align-items:center;gap:.7rem}
+.step .k{flex:1 1 auto;min-width:0;font-family:var(--ff-display);font-size:1.2rem;line-height:1.15}
+.step p{font-size:.92rem;opacity:.8}
+.step .num{flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:var(--terracotta);color:var(--cream);display:grid;place-items:center;font-weight:700;font-size:.85rem;line-height:1}
+
+/* connecting root through the steps */
+/* thread runs BEHIND the cards (under-card passes hidden); punched holes sit ON TOP to mark in/out */
+#howRoot{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible}
+#howRoot .branch,#howRoot .branch-tail{fill:none;stroke:#6f4a2c;stroke-width:3.8;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
+#howRoot .foliage{opacity:0;transition:opacity .5s ease}
+#howHoles{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+#howHoles .cardstitch{opacity:0;transition:opacity .4s ease}
+#howHoles .ring{fill:#9bb9af;stroke:rgba(38,28,20,.5);stroke-width:1.4}
+#howHoles .sh{fill:rgba(38,28,20,.22)}
+#howHoles .bridge{fill:none;stroke:#6f4a2c;stroke-width:2.5;stroke-linecap:round;opacity:.86}
+/* earthy grounding at the base of the lower sections */
+.how,.reviews{position:relative}
+.how::after,.reviews::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(180deg,transparent,rgba(53,40,31,.06));pointer-events:none;z-index:0}
+/* small foliage tufts creeping up at a section's base */
+.earth-tuft{position:absolute;bottom:-4px;width:clamp(72px,9vw,116px);height:auto;z-index:0;pointer-events:none;opacity:.85}
+.earth-tuft.left{left:1.5%}
+.earth-tuft.right{right:1.5%;transform:scaleX(-1)}
+.earth-tuft .stem{fill:none;stroke:#6f4a2c;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:600px){.earth-tuft{display:none}}
+/* flow/morph reveal for the step cards (JS-only, after the root draws) */
+.js .how .step{opacity:0;transform:translateY(18px) scale(.97);transform-origin:top center;
+  transition:opacity .6s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.9,.25,1)}
+.js .how .step.flow-in{opacity:1;transform:none}
+
+/* ---------- footer ---------- */
+footer{background:var(--sage-deep);color:var(--cream);margin-top:clamp(2rem,6vw,4rem)}
+footer .wrap{
+  max-width:1060px;margin:0 auto;padding:3.4rem clamp(1.4rem,5vw,3rem) 2.4rem;
+  display:flex;flex-wrap:wrap;gap:2rem;justify-content:space-between;align-items:flex-end;
+}
+footer .fm{font-family:var(--ff-display);font-size:2rem;line-height:.85}
+footer .fm em{font-style:normal;color:var(--gold)}
+footer .cols{display:flex;gap:3rem;font-size:.85rem}
+footer .cols b{display:block;font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;opacity:.7;margin-bottom:.5rem}
+footer a{opacity:.9}
+footer a:hover{text-decoration:underline}
+footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-top:1px solid rgba(247,240,227,.2);padding-top:1.2rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+
+/* ---------- modal ---------- */
+.modal-veil{
+  position:fixed;inset:0;z-index:90;background:rgba(53,40,31,.5);backdrop-filter:blur(6px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;visibility:hidden;transition:opacity .35s, visibility .35s;
+}
+@media(min-width:640px){.modal-veil{align-items:center}}
+.modal-veil.open{opacity:1;visibility:visible}
+.modal{
+  background:var(--cream);width:min(480px,100%);max-height:92svh;overflow:auto;
+  border-radius:26px 26px 0 0;padding:1.8rem 1.6rem 2rem;
+  transform:translateY(40px);transition:transform .4s cubic-bezier(.2,.7,.2,1);
+  display:flex;flex-direction:column;gap:1.1rem;
+  scrollbar-width:none;-ms-overflow-style:none;   /* hide scrollbar (still scrollable) */
+}
+.modal::-webkit-scrollbar{display:none}
+@media(min-width:640px){.modal{border-radius:26px}}
+.modal-veil.open .modal{transform:none}
+.modal .m-head{display:flex;gap:1rem;align-items:center}
+.modal .m-head img{width:78px;height:78px;border-radius:50%;object-fit:cover;box-shadow:0 10px 22px -12px var(--shadow)}
+.modal .m-head h3{font-family:var(--ff-display);font-weight:400;font-size:1.5rem}
+.modal .m-head .price{color:var(--terracotta);font-family:var(--ff-display);font-size:1.1rem}
+.m-close{margin-left:auto;font-size:1.4rem;line-height:1;opacity:.6;padding:.4rem}
+.m-close:hover{opacity:1}
+.qty{display:flex;align-items:center;gap:1rem}
+.qty button{
+  width:42px;height:42px;border-radius:50%;background:var(--espresso);color:var(--cream);
+  font-size:1.2rem;transition:background .2s;
+}
+.qty button:hover{background:var(--terracotta)}
+.qty output{font-family:var(--ff-display);font-size:1.4rem;min-width:2ch;text-align:center}
+.m-size{display:flex;gap:.6rem;flex-wrap:wrap}
+.m-size button{
+  flex:1;min-width:calc(50% - .3rem);padding:.6rem .5rem;border-radius:12px;
+  border:1px solid rgba(53,40,31,.2);background:#fff;color:var(--espresso);
+  font-family:inherit;font-size:.95rem;line-height:1.2;transition:background .2s,color .2s,border-color .2s;
+}
+.m-size button .s-price{display:block;font-family:var(--ff-display);color:var(--terracotta);font-size:1.05rem;margin-top:.15rem}
+.m-size button.active{background:var(--espresso);color:var(--cream);border-color:transparent}
+.m-size button.active .s-price{color:var(--gold)}
+.m-note{font-size:.78rem;color:var(--terracotta);opacity:.95;margin-top:.1rem}
+.field.hidden{display:none}
+.field{display:flex;flex-direction:column;gap:.35rem}
+.field label{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;opacity:.7}
+.field input,.field textarea{
+  font-family:inherit;font-size:1rem;padding:.8rem .95rem;border-radius:12px;
+  border:1px solid rgba(53,40,31,.2);background:#fff;color:var(--espresso);
+}
+.field input:focus,.field textarea:focus{outline:2px solid var(--terracotta);border-color:transparent}
+.m-total{display:flex;justify-content:space-between;font-family:var(--ff-display);font-size:1.15rem;border-top:1px dashed rgba(53,40,31,.25);padding-top:1rem}
+.m-submit{
+  background:var(--terracotta);color:var(--cream);border-radius:99px;padding:1rem;
+  font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;
+  transition:background .25s, transform .2s;
+}
+.m-submit:hover{background:var(--espresso);transform:translateY(-1px)}
+.m-success{display:none;flex-direction:column;align-items:center;gap:.7rem;text-align:center;padding:1.5rem 0}
+.m-success h3{font-family:var(--ff-display);font-weight:400;font-size:1.8rem;color:var(--terracotta)}
+/* ── Closed banner ── */
+#closedBanner{display:none;position:sticky;top:0;z-index:60;background:var(--espresso);color:var(--cream);text-align:center;padding:.6rem 2.4rem .6rem 1rem;font-size:.92rem;line-height:1.4}
+#closedBanner.show{display:block}
+#closedBanner b{color:var(--gold)}
+#closedBannerClose{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--cream);font-size:1.1rem;cursor:pointer;opacity:.7}
+#closedBannerClose:hover{opacity:1}
+/* ── Deposit step ── */
+.m-deposit{display:none;flex-direction:column;gap:.8rem;padding:.4rem 0 .3rem}
+.modal.deposit form{display:none}
+.modal.deposit .m-deposit{display:flex}
+.m-dep-back{align-self:flex-start;background:none;border:0;color:var(--sage-dark);font:inherit;cursor:pointer;padding:0}
+.m-deposit>h3{font-family:var(--ff-display);font-weight:400;font-size:1.5rem;color:var(--terracotta)}
+.m-dep-lead{font-size:.95rem;line-height:1.55;color:var(--espresso)}
+.m-dep-lead strong{color:var(--sage-dark)}
+.m-dep-upload{display:flex;align-items:center;gap:.6rem;justify-content:center;border:1.5px dashed var(--sage-deep);border-radius:14px;padding:1rem;cursor:pointer;color:var(--sage-dark);font-size:.92rem;text-align:center;transition:background .2s,border-color .2s}
+.m-dep-upload:hover{background:var(--cream-soft);border-color:var(--terracotta)}
+.m-dep-ico{font-size:1.2rem}
+.m-dep-preview{max-width:120px;border-radius:12px;align-self:center;box-shadow:0 8px 20px -12px var(--shadow)}
+/* ── Allergen bubble ── */
+.hero-allergen{margin-top:.1rem;background:rgba(255,255,255,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--espresso);border:1px solid rgba(53,40,31,.16);border-radius:999px;padding:.5rem 1rem;font:inherit;font-size:.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem;opacity:.92;transition:background .2s,opacity .2s,transform .2s}
+.hero-allergen:hover{background:rgba(255,255,255,.7);opacity:1;transform:translateY(-1px)}
+#allergenBackdrop{position:fixed;inset:0;z-index:56;background:rgba(38,52,47,.35);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);opacity:0;visibility:hidden;transition:opacity .25s}
+#allergenBackdrop.show{opacity:1;visibility:visible}
+#allergenPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);opacity:0;pointer-events:none;z-index:57;width:min(360px,90vw);background:var(--cream);border:1px solid rgba(53,40,31,.14);border-radius:20px;padding:1.4rem;box-shadow:0 30px 60px -24px rgba(38,52,47,.6);font-size:.9rem;line-height:1.6;color:var(--espresso);transition:opacity .25s ease,transform .25s ease}
+#allergenPanel.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
+#allergenPanel h4{font-family:var(--ff-display);font-weight:400;font-size:1.15rem;margin-bottom:.4rem;color:var(--terracotta)}
+#allergenPanel .aller-close{position:absolute;right:.6rem;top:.5rem;background:none;border:0;font-size:1.1rem;cursor:pointer;opacity:.6}
+/* ── Reviews ── */
+.reviews{padding:1rem 0 2.5rem}
+.reviews .rev-carousel{position:relative;max-width:820px;margin:0 auto}
+.reviews .rev-track{display:flex;gap:0;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;
+  padding:1.6rem calc(50% - min(42%,205px)) 1.6rem;scrollbar-width:none}
+.reviews .rev-track::-webkit-scrollbar{display:none}
+.reviews .rev-card{scroll-snap-align:center;flex:0 0 min(78%,400px);margin:0 -5%;
+  background:var(--cream);border:1px solid rgba(53,40,31,.1);border-radius:18px;padding:1.5rem 1.6rem;
+  transform:scale(.82);opacity:.5;z-index:1;box-shadow:0 12px 30px -20px var(--shadow);
+  transition:transform .4s cubic-bezier(.2,.7,.2,1), opacity .4s ease, box-shadow .4s ease}
+.reviews .rev-card.is-active{transform:scale(1);opacity:1;z-index:3;
+  box-shadow:0 26px 52px -22px rgba(38,52,47,.55)}
+/* nav arrows */
+.reviews .rev-arrow{position:absolute;top:calc(50% - .6rem);transform:translateY(-50%);z-index:3;
+  width:44px;height:44px;border-radius:50%;background:var(--cream);color:var(--espresso);
+  border:1px solid rgba(53,40,31,.14);box-shadow:0 10px 24px -16px var(--shadow);
+  font-size:1.5rem;line-height:1;display:grid;place-items:center;cursor:pointer;
+  transition:background .2s,transform .2s,opacity .2s}
+.reviews .rev-arrow.prev{left:.2rem}
+.reviews .rev-arrow.next{right:.2rem}
+.reviews .rev-arrow:hover{background:var(--cream-soft);border-color:var(--terracotta)}
+.reviews .rev-arrow:active{transform:translateY(-50%) scale(.94)}
+.reviews .rev-arrow[disabled]{opacity:.35;cursor:default;pointer-events:none}
+/* dots */
+.reviews .rev-dots{display:flex;justify-content:center;gap:.5rem;margin-top:1rem}
+.reviews .rev-dots button{width:8px;height:8px;border-radius:50%;background:rgba(53,40,31,.22);border:0;padding:0;cursor:pointer;transition:background .25s,transform .25s}
+.reviews .rev-dots button.on{background:var(--terracotta);transform:scale(1.35)}
+@media(max-width:560px){.reviews .rev-arrow{display:none}}
+.reviews .rev-stars{color:var(--gold);letter-spacing:.1em;margin-bottom:.5rem}
+.reviews .rev-text{font-size:.98rem;line-height:1.6;color:var(--espresso)}
+.reviews .rev-name{margin-top:.8rem;font-family:var(--ff-display);color:var(--sage-dark)}
+.reviews .rev-photo{width:100%;height:150px;object-fit:cover;border-radius:12px;margin-bottom:.8rem}
+/* ── Add-review form ── */
+.rev-add{max-width:520px;margin:2.2rem auto 0;padding:1.9rem 1.7rem;text-align:center;position:relative;overflow:hidden;z-index:1;
+  background:var(--cream);border:1px solid rgba(53,40,31,.1);border-radius:22px;
+  box-shadow:0 22px 46px -26px rgba(38,52,47,.4)}
+.rev-add::before{content:'';position:absolute;inset:0;background:radial-gradient(120% 90% at 0% 0%,rgba(196,99,60,.06),transparent 55%);pointer-events:none}
+.rev-add>*{position:relative}
+.rev-add-lead{font-family:var(--ff-display);font-size:1.18rem;color:var(--espresso);margin-bottom:1rem;line-height:1.4}
+.rev-form{text-align:left}
+.rev-add-btn{background:var(--cream);border:1px solid rgba(53,40,31,.18);color:var(--espresso);font:inherit;font-size:.95rem;padding:.75rem 1.4rem;border-radius:999px;cursor:pointer;transition:background .2s,border-color .2s,transform .2s;box-shadow:0 10px 22px -16px rgba(38,52,47,.5)}
+.rev-add-btn:active{transform:scale(.97)}
+.rev-add-btn:hover{background:var(--cream-soft);border-color:var(--terracotta)}
+.rev-form{margin-top:1rem;display:flex;flex-direction:column;gap:.7rem}
+.rev-form[hidden]{display:none}
+.rev-form-row{display:flex;gap:.6rem}
+.rev-form input,.rev-form select,.rev-form textarea{font:inherit;padding:.7rem .9rem;border:1px solid rgba(53,40,31,.2);border-radius:12px;background:var(--cream);color:var(--espresso);width:100%}
+.rev-form select{flex:0 0 auto;width:auto;color:var(--gold)}
+.rev-form textarea{resize:vertical}
+.rev-form-send{background:var(--espresso);color:var(--cream);border:0;font:inherit;padding:.8rem;border-radius:12px;cursor:pointer;transition:background .2s,transform .2s}
+.rev-form-send:hover{background:var(--sage-dark);transform:translateY(-1px)}
+.rev-form-note{font-size:.82rem;color:var(--sage-dark);text-align:center}
+/* ── Story expander ── */
+/* story intro now uses the same eyebrow language as every other section */
+.story-toggle{display:inline-flex;align-items:center;gap:.55rem;background:transparent;border:0;cursor:pointer;padding:.25rem .4rem;transition:opacity .2s}
+.story-toggle .eyebrow{cursor:pointer}
+.story-toggle .rom{font-size:1.02em}
+.story-caret{font-size:.66rem;color:var(--sage-dark);opacity:.65;transition:transform .35s ease,opacity .2s}
+.story-toggle:hover .story-caret{opacity:1}
+.story-toggle:hover{opacity:.82}
+.story.open .story-caret{transform:rotate(180deg)}
+/* vine arriving into the story — the page vine continuing on */
+.story-vine{position:absolute;left:50%;top:-4px;transform:translateX(-50%);height:58px;z-index:0;pointer-events:none;overflow:visible;filter:drop-shadow(0 1px .7px rgba(45,28,15,.28))}
+.story-vine .stem{fill:none;stroke:#6f4a2c;stroke-width:6.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.15s ease}
+.story.invine .story-vine .stem{stroke-dashoffset:0}
+.story-vine .foliage{opacity:0;transition:opacity .6s ease .55s}
+.story.invine .story-vine .foliage{opacity:1}
+.story-body{max-height:0;overflow:hidden;opacity:0;transition:max-height .55s ease,opacity .4s ease}
+.story.open .story-body{max-height:1400px;opacity:1;margin-top:1rem}
+.modal.done form{display:none}
+.modal.done .m-success{display:flex}
+
+/* ---------- mobile pass ---------- */
+@media (max-width: 720px){
+  /* hero: fit 100svh without cramming */
+  header.hero{padding:5rem 1rem 3.2rem}
+  .hero-inner{gap:.75rem}
+  .logo-stage{width:min(52vw,230px);margin:.3rem 0 0}
+  .hero p.lede{font-size:.92rem;max-width:30ch}
+
+  /* backdrop type: wrap instead of clipping at screen edges */
+  .back-type{white-space:normal;text-align:center;width:118%;
+    font-size:clamp(2.4rem,12.5vw,4rem);line-height:.95}
+  .back-type.two{width:130%;font-size:clamp(2rem,10vw,3.2rem)}
+  .menu-item .back-type{display:none}
+
+  /* badge scales down with the dishes */
+  .badge{width:62px;height:62px;right:-2%;bottom:0}
+  .menu-item:nth-child(even) .badge{right:auto;left:-2%}
+
+  /* tighter menu rhythm, lighter shadows for scroll perf */
+  .menu-item h3{font-size:1.55rem}
+  .menu-item .desc{font-size:.92rem}
+  .menu-item:not(:last-child){border-bottom:1px solid rgba(53,40,31,.12)}
+  .dish-btn.natural img{filter:drop-shadow(0 10px 12px rgba(38,52,47,.26))}
+  .dish-btn{animation:none}
+  .dish-shadow{animation:none}
+  .section-head{padding-top:3rem}
+  .story .wrap,.how{padding-top:3rem;padding-bottom:3rem}
+}
+
+/* ---------- menu: name dissolve-in, hover, connecting vine ---------- */
+.menu-item{position:relative;z-index:1}
+.menu-item h3{min-height:1em}
+.menu-item h3.pre-dissolve{opacity:0;filter:blur(10px)}
+.menu-item h3.dissolve-in{animation:nameDissolve .85s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes nameDissolve{from{opacity:0;filter:blur(10px);transform:translateY(6px)}to{opacity:1;filter:blur(0);transform:none}}
+.dish-btn img{transition:transform .55s cubic-bezier(.2,.7,.2,1)}
+.dish-btn:hover img{transform:scale(1.045)}
+#menuVine{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:0;pointer-events:none;filter:drop-shadow(0 1.4px 1px rgba(45,28,15,.3))}
+#menuVine .vine-fill{fill:#6f4a2c;opacity:.94}
+#menuVine .vine-shade{fill:#5a3a20;opacity:.28}
+#menuVine .vine-mid{fill:none;stroke:#3f280f;stroke-width:1.6;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
+#menuVine .vine-hi{fill:none;stroke:#9a6b40;stroke-width:.9;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
+#menuVine .rootlet{fill:none;stroke:#6f4a2c;stroke-width:1.3;stroke-linecap:round;opacity:.5}
+#menuVine .leaf-node{fill:var(--sage-deep);opacity:.8}
+@media (max-width:760px){#menuVine{display:none}}
+
+/* ---------- scroll reveals (sections) ---------- */
+.js .rise{opacity:0;transform:translateY(30px);
+  transition:opacity 1.15s cubic-bezier(.2,.7,.2,1), transform 1.15s cubic-bezier(.2,.7,.2,1);will-change:opacity,transform}
+.js .rise.in-view{opacity:1;transform:none}
+.js .rise.d1{transition-delay:.10s}
+.js .rise.d2{transition-delay:.20s}
+.js .rise.d3{transition-delay:.30s}
+.js .rise.d4{transition-delay:.40s}
+
+/* ---------- earthy: growing leafy vine (wide screens) ---------- */
+.roots{position:absolute;top:0;left:0;width:100%;z-index:-1;pointer-events:none;opacity:.85;display:none;overflow:visible;
+  filter:drop-shadow(0 1.5px 1.2px rgba(45,28,15,.3))}
+.roots .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
+.roots .tk-fill{fill:#6f4a2c}
+.roots .tk-mid{fill:none;stroke:#3f280f;stroke-width:1.4;opacity:.4;stroke-linecap:round;stroke-linejoin:round}
+.roots .tk-hi{fill:none;stroke:#9a6b40;stroke-width:1;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
+@media(min-width:1180px){.roots{display:block}}
+
+/* ---------- earthy: drifting leaves ---------- */
+.leaf{position:absolute;width:40px;height:40px;opacity:.15;pointer-events:none;z-index:-1;
+  transform-origin:top center;animation:leafSway 9s ease-in-out infinite}
+.leaf svg{width:100%;height:100%;display:block}
+.leaf svg path{fill:var(--sage-dark)}
+@keyframes leafSway{0%,100%{transform:rotate(-9deg) translateY(0)}50%{transform:rotate(10deg) translateY(7px)}}
+
+/* ---------- earthy: soil deepening on scroll ---------- */
+.soil{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg, rgba(53,40,31,0) 40%, rgba(53,40,31,.5) 100%)}
+
+/* ---------- motion safety ---------- */
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important}
+  .reveal-l,.reveal-r{opacity:1;transform:none}
+  .js .rise{opacity:1;transform:none}
+  .js .how .step{opacity:1;transform:none}
+  #howRoot .how-node{opacity:.9}
+  .leaf,.soil{display:none}
+  #fx{display:none}
+}
+</style>
+</head>
+<body>
+<script>/* always open at the top on load/refresh (so the scroll story starts from the beginning) */
+if('scrollRestoration' in history) history.scrollRestoration='manual';
+window.addEventListener('beforeunload', function(){ window.scrollTo(0,0); });
+window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
+
+<!-- EARTHY DECOR -->
+<div class="soil" id="soil" aria-hidden="true"></div>
+<svg class="roots" id="roots" viewBox="0 0 140 1000" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
+  <clipPath id="rootsClip"><rect id="rootsClipRect" x="-40" y="-10" width="240" height="0"/></clipPath>
+  <g id="trunkG" clip-path="url(#rootsClip)"></g>
+  <g style="display:none">
+    <path class="stem" style="stroke-width:3.2" d="M70,92 C60,180 92,280 78,400 C66,500 44,620 64,760 C80,880 66,940 74,1000"/>
+    <path class="stem" style="stroke-width:1.7" d="M78,380 C104,398 120,430 124,470"/>
+    <path class="stem" style="stroke-width:1.7" d="M64,760 C40,776 30,806 27,846"/>
+    <g transform="translate(80,150) rotate(-38) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(60,300) rotate(158) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(84,430) rotate(-30) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(52,560) rotate(160) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(90,690) rotate(-30) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(56,820) rotate(160) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(82,930) rotate(-32) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(88,232) scale(.5)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+    <g transform="translate(48,555) scale(.5)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+    <g transform="translate(70,98) rotate(-150) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(70,98) rotate(-118) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(70,98) rotate(-90) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(70,98) rotate(-62) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(70,98) rotate(-30) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(70,90) scale(.5)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+  </g>
+</svg>
+
+<!-- SPLASH -->
+<div id="splash" role="dialog" aria-label="Namit gid intro">
+  <div class="s-emblem emblem" aria-hidden="true">
+    <img class="emblem-img" src="images/emblem.png" alt="">
+    <img class="wm-island" src="images/biaringan_island_v4.png" alt="">
+    <div class="wordmark">
+      <span class="wm-namit">Namit</span>
+      <span class="wm-row2"><span class="wm-gid">gid</span></span>
+    </div>
+    <img class="emblem-leaf" src="images/leaf.png" alt="">
+  </div>
+  <div class="splash-sub">so delicious · filipino home cooking</div>
+  <div class="splash-bar" aria-hidden="true"><i></i></div>
+  <div class="splash-cook" aria-hidden="true"><span class="cook-caption" id="cookCaption">Preparing menu&hellip;</span></div>
+  <button class="splash-skip" id="skipSplash">Skip intro</button>
+</div>
+
+<!-- NAV -->
+<div id="closedBanner" role="status">
+  <span id="closedBannerText"></span>
+  <button id="closedBannerClose" aria-label="Dismiss">&#10005;</button>
+</div>
+
+<div id="allergenBackdrop"></div>
+<div id="allergenPanel" role="dialog" aria-label="Allergen information">
+  <button class="aller-close" id="allergenClose" aria-label="Close">&#10005;</button>
+  <h4>Allergen note</h4>
+  <p>Everything is cooked in a home kitchen that also handles <strong>shellfish, fish, egg, soy, wheat/gluten, dairy, sesame, and peanuts/tree nuts</strong>. Cross-contact is possible. Please tell us about any allergies in your order notes and we'll do our best.</p>
+</div>
+
+<nav id="nav" aria-label="Main">
+  <a class="nav-logo" href="#top">Namit <em>gid</em></a>
+  <div class="nav-links">
+    <a href="#menu" class="hide-m">Menu</a>
+    <a href="#story" class="hide-m">Our story</a>
+    <a href="#menu" class="nav-cta">Order now</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><path id="badgePath" d="M50,50 m-36,0 a36,36 0 1,1 72,0 a36,36 0 1,1 -72,0"/></defs></svg>
+    <span class="eyebrow">Home-cooked Filipino · Made in Toronto</span>
+    <div class="emblem">
+      <svg class="emblem-vine" viewBox="0 0 104 120" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
+        <clipPath id="emblemVineClip"><rect id="emblemVineClipRect" x="-24" y="-24" width="160" height="0"/></clipPath>
+        <g clip-path="url(#emblemVineClip)">
+        <path class="stem" style="stroke-width:2.18" d="M30,50 C18,60 12,74 16,90 C20,106 30,113 42,117 C54,121 57,133 53,150"/>
+        <path class="stem" style="stroke-width:1.26" d="M17,88 C11,95 9,104 13,113"/>
+        <g transform="translate(30,50) rotate(-150) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(30,50) rotate(-100) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(14,80) rotate(180) scale(.32)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(20,102) rotate(150) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(46,120) rotate(-30) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+        <g transform="translate(29,47) scale(.28)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+        <g transform="translate(50,140) scale(.26)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+        </g>
+      </svg>
+      <img class="emblem-img" src="images/emblem.png" alt="Namit gid — the cook behind the sign" width="1040" height="1199">
+      <img class="wm-island" src="images/biaringan_island_v4.png" alt="" aria-hidden="true">
+      <h1 class="wordmark" aria-label="Namit gid">
+        <span class="wm-namit" aria-hidden="true">Namit</span>
+        <span class="wm-row2" aria-hidden="true"><span class="wm-gid">gid</span></span>
+      </h1>
+      <img class="emblem-leaf" src="images/leaf.png" alt="" aria-hidden="true">
+    </div>
+  </div>
+</header>
+
+<!-- MENU -->
+<main>
+  <div class="section-head" id="menu">
+    <svg class="menu-embrace" preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
+    <span class="eyebrow">Cooked to order · pick up hot</span>
+    <h2 aria-label="The menu" class="weave-h2"><span>T</span><span>h</span><span>e</span><span>&nbsp;</span><span>m</span><span>e</span><span>n</span><span>u</span></h2>
+    <div class="menu-badge-row"><button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel" aria-label="Allergen and kitchen info"><span class="aller-i" aria-hidden="true">&#9432;</span>Allergens</button></div>
+  </div>
+
+  <div class="menu-toggle">
+    <div class="menu-tabs" role="tablist" aria-label="Menu categories">
+      <button type="button" class="active" data-cat="main" role="tab" aria-selected="true">Mains</button>
+      <button type="button" data-cat="dessert" role="tab" aria-selected="false">Desserts</button>
+    </div>
+    <p class="menu-note">Everything is made to order,<br>then pickup at <span class="place">180 Fairview Mall Dr., North York</span></p>
+  </div>
+
+  <!-- items injected by JS -->
+  <div id="menuList"></div>
+</main>
+
+<!-- HOW -->
+<section class="how" aria-labelledby="howH">
+  <div class="section-head" style="padding-top:0">
+    <span class="eyebrow">How it works</span>
+    <h2 id="howH">From order to pickup</h2>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="step-head"><span class="num">1</span><span class="k">Finish your order</span></div><p>Pick your dish and add your name and contact. It takes under a minute.</p></div>
+    <div class="step"><div class="step-head"><span class="num">2</span><span class="k">Send your $10 deposit</span></div><p>A $10 Interac e-Transfer to orders@takoshi.ca holds your spot. Upload the screenshot to confirm.</p></div>
+    <div class="step"><div class="step-head"><span class="num">3</span><span class="k">We start cooking</span></div><p>Every order is made fresh from scratch once your deposit is confirmed.</p></div>
+    <div class="step"><div class="step-head"><span class="num">4</span><span class="k">Pick up warm</span></div><p>Collect at 180 Fairview Mall Drive and pay the balance in cash or Interac, whichever works.</p></div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews" id="reviews" aria-labelledby="revH">
+  <div class="section-head" style="padding-top:0">
+    <span class="eyebrow"><span class="rom">Kalīpay</span>&#8202;· noun · the joy of gathering to share a meal</span>
+    <h2 id="revH">Ano ang Aton <span class="rom">Kalīpay</span></h2>
+    <span class="head-tr">What brings us joy</span>
+  </div>
+  <div class="rev-carousel">
+    <button type="button" class="rev-arrow prev" id="revPrev" aria-label="Previous review">&#8249;</button>
+    <div class="rev-track" id="revTrack"><p style="padding:0 6vw;color:var(--sage-dark)">Loading&#8230;</p></div>
+    <button type="button" class="rev-arrow next" id="revNext" aria-label="Next review">&#8250;</button>
+    <div class="rev-dots" id="revDots" aria-hidden="true"></div>
+  </div>
+  <div class="rev-add">
+    <p class="rev-add-lead">Namit gid? Tell us, your kind words help this little kitchen grow.</p>
+    <button type="button" class="rev-add-btn" id="revAddToggle" aria-expanded="false" aria-controls="revForm">＋ Leave a review</button>
+    <form class="rev-form" id="revForm" hidden>
+      <div class="rev-form-row">
+        <input id="rvName" type="text" placeholder="Your name" maxlength="40" required>
+        <select id="rvStars" aria-label="Rating">
+          <option value="5">★★★★★</option>
+          <option value="4">★★★★</option>
+          <option value="3">★★★</option>
+        </select>
+      </div>
+      <textarea id="rvText" rows="3" placeholder="How was it? Namit gid?" maxlength="300" required></textarea>
+      <button type="submit" class="rev-form-send">Send review</button>
+      <p class="rev-form-note" id="revFormNote">Reviews are checked before they show up. Salamat gid!</p>
+    </form>
+  </div>
+  <svg class="earth-tuft left" viewBox="0 0 120 86" aria-hidden="true" focusable="false">
+    <path class="stem" d="M34,86 C30,66 40,50 33,32 C31,24 34,18 38,13"/>
+    <g transform="translate(35,58) rotate(-142) scale(.42)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(33,42) rotate(-38) scale(.46)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(33,28) rotate(-96) scale(.4)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(38,12) scale(.4)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+  </svg>
+  <svg class="earth-tuft right" viewBox="0 0 120 86" aria-hidden="true" focusable="false">
+    <path class="stem" d="M34,86 C30,66 40,50 33,32 C31,24 34,18 38,13"/>
+    <g transform="translate(35,58) rotate(-142) scale(.42)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(33,42) rotate(-38) scale(.46)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(33,28) rotate(-96) scale(.4)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(38,12) scale(.4)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+  </svg>
+</section>
+
+<!-- STORY (tap to expand) -->
+<section class="story" id="story">
+  <svg class="story-vine" viewBox="0 0 60 120" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
+    <path class="stem" pathLength="1" d="M30,0 C26,22 38,44 31,66 C27,84 33,101 30,118"/>
+    <g class="foliage" transform="translate(30,34) rotate(202) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g class="foliage" transform="translate(33,60) rotate(-22) scale(.32)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g class="foliage" transform="translate(28,87) rotate(206) scale(.28)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g class="foliage" transform="translate(30,114) scale(.32)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+  </svg>
+  <div class="wrap">
+    <button type="button" class="story-toggle" id="storyToggle" aria-expanded="false" aria-controls="storyBody">
+      <span class="eyebrow"><span class="rom">Ari ang aton istorya</span> · here's our story</span>
+      <span class="story-caret" aria-hidden="true">&#9662;</span>
+    </button>
+    <div class="story-body" id="storyBody">
+      <p class="lede">At my husband's family table in Romblon, a good dish started a chain: one bite, one "<span class="hl">Namit gid</span>," then everyone turning to each other, nodding, saying it again. So good you say it twice. One day I caught myself doing it too.</p>
+      <p class="lede">It stuck, and it's the only review I cook for. Every plate I send out is meant to remind you what good food feels like. So don't be shy, say it out loud, "<span class="hl root">Namit gid<svg class="root-uline" viewBox="0 0 200 22" preserveAspectRatio="none" aria-hidden="true"><path d="M3,9 C34,3 55,17 92,10 C120,5 150,16 197,8"/><path class="tendril" d="M64,12 C60,17 63,20 58,21"/><path class="tendril" d="M150,11 C154,16 151,19 156,20"/></svg></span>." You never know, the one beside you might know it too.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="fm">N<br><em>&#8195;G</em></div>
+    </div>
+    <div class="cols">
+      <div><b>Kitchen</b><a href="#menu">Menu</a><br><a href="#story">Our story</a></div>
+      <div><b>Order</b><a href="#menu">Order now</a><br><span style="opacity:.75">Toronto, ON</span></div>
+      <div><b>Say hi</b><a href="https://takoshi.ca" target="_blank" rel="noopener">Takoshi</a></div>
+    </div>
+    <div class="tiny"><span>© 2026 Namit Gid · abang <span class="rom" style="color:var(--gold)">kalipay</span> gid a</span><span>namit gid, so delicious</span></div>
+  </div>
+</footer>
+
+<!-- ORDER MODAL -->
+<div class="modal-veil" id="veil" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" id="modal">
+    <div class="m-head">
+      <img id="mImg" src="" alt="">
+      <div>
+        <h3 id="mTitle">Dish</h3>
+        <div class="price" id="mPrice">$0</div>
+      </div>
+      <button class="m-close" id="mClose" aria-label="Close order form">&#10005;</button>
+    </div>
+    <form id="orderForm">
+      <div class="field hidden" id="sizeField" style="margin-bottom:1rem">
+        <label id="sizeLabel">Size</label>
+        <div class="m-size" id="mSize"></div>
+      </div>
+      <div class="field" style="margin-bottom:1rem">
+        <label>Quantity</label>
+        <div class="qty">
+          <button type="button" id="qMinus" aria-label="Decrease quantity">−</button>
+          <output id="qOut">1</output>
+          <button type="button" id="qPlus" aria-label="Increase quantity">+</button>
+        </div>
+        <span class="m-note hidden" id="mNote"></span>
+      </div>
+      <div class="field" style="margin-bottom:1rem">
+        <label for="fName">Your name</label>
+        <input id="fName" required autocomplete="name" placeholder="Juan D.">
+      </div>
+      <div class="field" style="margin-bottom:1rem">
+        <label for="fPhone">Phone or IG handle</label>
+        <input id="fPhone" required placeholder="For pickup coordination">
+      </div>
+      <div class="field" style="margin-bottom:1rem">
+        <label for="fNotes">Notes <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+        <textarea id="fNotes" rows="2" placeholder="Extra chicharron? Less spicy?"></textarea>
+      </div>
+      <div class="m-total" style="margin-bottom:1rem"><span>Total</span><span id="mTotal">$16</span></div>
+      <button class="m-submit" type="submit" style="width:100%">Send order</button>
+    </form>
+    <div class="m-deposit">
+      <button type="button" class="m-dep-back" id="depBack">&#8592; Back</button>
+      <h3>Reserve your batch</h3>
+      <p class="m-dep-lead">Send a <strong>$10 deposit</strong> by Interac e-Transfer to <strong>orders@takoshi.ca</strong> to confirm your order, then upload the screenshot below (optional, but it speeds up confirmation).</p>
+      <label class="m-dep-upload" for="depShot"><span class="m-dep-ico">&#128247;</span><span id="depUploadText">Tap to add your e-Transfer screenshot</span></label>
+      <input type="file" id="depShot" accept="image/*" hidden>
+      <img id="depPreview" alt="" class="m-dep-preview" hidden>
+      <button class="m-submit" type="button" id="placeOrderBtn" style="width:100%">Place my order</button>
+    </div>
+    <div class="m-success">
+      <h3>Salamat gid! 😋❤️</h3>
+      <p>Kung namit, balik liwat! We'll message you to confirm pickup. See you Saturday!</p>
+      <button class="order-btn" id="mDone" type="button">Back to menu</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ---------------- disable pinch/double-tap zoom ---------------- */
+['gesturestart','gesturechange','gestureend'].forEach(evt=>{
+  document.addEventListener(evt, e=>e.preventDefault());
+});
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e=>{
+  const now = Date.now();
+  if(now - lastTouchEnd <= 320) e.preventDefault();
+  lastTouchEnd = now;
+}, {passive:false});
+
+/* ---------------- data ---------------- */
+const IMGS = {
+  palabok:'images/palabok.webp',
+  sushi:'images/sushi.webp',
+  shawarma:'images/shawarma.webp',
+  lumpia:'images/lumpia.webp',
+  tiramisu:'images/tiramisu.webp',
+  cheesecake:'images/cheesecake.webp',
+  banana:'images/banana.webp'
+};
+const DISHES = [
+  {name:'Shawarma Rice', cat:'main', tag:'Best seller', img:'shawarma', shape:'natural',
+   variants:[{label:'Small', price:50},{label:'Medium', price:65}],
+   desc:'Spiced ground beef shawarma over turmeric rice, ringed with cucumber and cherry tomatoes, finished with a heavy drizzle of garlic sauce.'},
+  {name:'Lumpiang Shanghai', cat:'main', tag:'Hand-rolled crunch', img:'lumpia', shape:'natural',
+   variants:[{label:'30 pcs', price:35},{label:'50 pcs', price:45}],
+   desc:'Hand-rolled pork spring rolls fried to a loud crunch, packed shoulder to shoulder. Sweet-chili dip included. They never survive the drive home.'},
+  {name:'Baked Sushi', cat:'main', tag:'The crowd favourite', img:'sushi', shape:'natural',
+   variants:[{label:'Small', price:45},{label:'Large', price:60}],
+   desc:'California-roll flavours baked as a bubbling tray \u2014 sushi rice, kani, cream cheese, torched mayo, nori and scallions. Scoop, wrap, repeat.'},
+  {name:'Palabok', cat:'main', tag:'The signature', img:'palabok', shape:'natural',
+   variants:[{label:'Small', price:50},{label:'Medium', price:65}],
+   desc:'Rice noodles under rich shrimp gravy \u2014 loaded with prawns, boiled egg, crushed chicharron, and a whole lot of home.'},
+  {name:'Tiramisu', cat:'dessert', tag:'Made to order', price:25, img:'tiramisu', shape:'natural',
+   desc:'Espresso-soaked layers under a thick, even blanket of cocoa, set overnight so every slice holds its shape. Coffee-shop quality, home-kitchen heart.'},
+  {name:'Cheesecake', cat:'dessert', tag:'Three flavours', axis:'Flavour', minQty:4, img:'cheesecake', shape:'natural',
+   variants:[{label:'Regular', price:15},{label:'Matcha', price:15},{label:'Pistachio', price:15}],
+   desc:'Creamy, slow-set cheesecake in three flavours \u2014 Regular, Matcha, and Pistachio. $15 each, minimum 4 per order.'},
+  {name:'Banana Bread Loaf', cat:'dessert', tag:'Chocolate chip', price:10, img:'banana', shape:'natural',
+   desc:'Small-batch banana bread studded with chocolate chips, baked in individual foil loaves. Grab one for the road or three for the week.'}
+];
+/* helpers for single/variant pricing */
+function dishPrices(d){ return d.variants ? d.variants.map(function(v){return v.price;}) : [d.price]; }
+function dishPriceLabel(d){ var p=dishPrices(d),lo=Math.min.apply(null,p),hi=Math.max.apply(null,p); return lo===hi?('$'+lo):('$'+lo+'\u2013$'+hi); }
+
+/* ---------------- build menu ---------------- */
+const list = document.getElementById('menuList');
+function peekTier(desc){
+  if(desc.length < 130) return 17;
+  if(desc.length <= 145) return 20;
+  return 23;
+}
+DISHES.forEach((d,i)=>{
+  const sec = document.createElement('section');
+  sec.className = 'menu-item';
+  sec.dataset.cat = d.cat;
+  const fromL = i % 2 === 0;
+  const peek = peekTier(d.desc);
+  const pl = dishPriceLabel(d);
+  sec.innerHTML = `
+    <div class="dish-stage ${fromL?'reveal-l':'reveal-r'}" style="--peek:${peek}">
+      <span class="back-type ${d.name.split(' ').length>2?'two':''}" aria-hidden="true" data-parallax>${d.name}</span>
+      <button class="dish-btn ${d.shape==='natural'?'natural':''}" data-idx="${i}" data-img="${d.img||''}" aria-label="Order ${d.name}">
+        <img src="${IMGS[d.img]}" alt="${d.name}" loading="lazy" width="640" height="640">
+      </button>
+      <span class="dish-shadow" aria-hidden="true"></span>
+    </div>
+    <div class="info ${fromL?'reveal-r':'reveal-l'}">
+      <span class="num">${d.cat==='dessert'?'Dessert':'Main dish'}</span>
+      <h3>${d.name}</h3>
+      <span class="tag">${d.tag}</span>
+      <p class="desc">${d.desc}</p>
+      <div class="row">
+        <button class="price-btn" data-idx="${i}" data-img="${d.img||''}" aria-label="Order ${d.name}, ${pl}">${pl}<span class="arr" aria-hidden="true">&#8594;</span></button>
+      </div>
+    </div>`;
+  list.appendChild(sec);
+});
+
+/* ---------------- reveal engine: float-in + typewriter ---------------- */
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+list.querySelectorAll('.menu-item h3').forEach(h=>{
+  h.dataset.full = h.textContent;
+  if(!REDUCE){ h.classList.add('pre-dissolve'); }
+});
+function typeText(h){
+  if(h.dataset.typed) return;
+  h.dataset.typed='1';
+  if(REDUCE){ h.classList.remove('pre-dissolve'); return; }
+  // Dissolve-in: fade + de-blur the whole name (replaces the letter-by-letter typewriter).
+  h.classList.remove('pre-dissolve');
+  h.classList.add('dissolve-in');
+}
+const io = new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting) revealItem(e.target); });
+}, {threshold:.22});
+function revealItem(el){
+  if(el.dataset.shown) return;
+  el.dataset.shown='1';
+  el.classList.add('in');
+  io.unobserve(el);
+  const h=el.querySelector('h3');
+  if(h) setTimeout(()=>typeText(h), 240);
+}
+list.querySelectorAll('.menu-item').forEach(el=>io.observe(el));
+
+/* ---------------- connecting leafy vine ---------------- */
+const V_LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
+const V_BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
+function buildVine(){
+  let svg=document.getElementById('menuVine');
+  if(innerWidth < 760){ if(svg) svg.style.display='none'; return; }
+  if(!svg){
+    svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.id='menuVine'; svg.setAttribute('aria-hidden','true');
+    list.style.position='relative';
+    list.prepend(svg);
+  }
+  svg.style.display='block';
+  const all=[...list.querySelectorAll('.menu-item')];
+  const items=all.filter(el=>!el.classList.contains('hidden'));
+  const w=list.clientWidth, h=list.clientHeight;
+  if(!items.length || !h){ svg.innerHTML=''; return; }
+  svg.setAttribute('viewBox','0 0 '+w+' '+h);
+  svg.setAttribute('preserveAspectRatio','none');
+  // Run the spine down the gutter between the photo and the copy, touching neither.
+  // The gutter is NOT always centred — the dish image carries a min-width, so at some
+  // widths the two grid tracks are uneven — measure it per row instead of assuming w/2.
+  // Measure with offset*, NOT getBoundingClientRect: .dish-stage/.info carry
+  // translateX(±90px) until they scroll into view, and rects include transforms.
+  // Reading rects here made every row look like it had no gutter on first load,
+  // which blanked the whole vine until a resize. (Same reason the how-it-works
+  // lace measures its cards with offset*.)
+  const gutterOf=el=>{
+    const kids=[...el.children]
+      .map(k=>({l:el.offsetLeft+k.offsetLeft, r:el.offsetLeft+k.offsetLeft+k.offsetWidth}))
+      .sort((a,b)=>a.l-b.l);
+    if(kids.length<2) return null;
+    const a=kids[0].r, b=kids[1].l;
+    return (b-a)>12 ? {mid:(a+b)/2, room:b-a} : null;   // stacked rows report no gutter
+  };
+  const gutters=items.map(gutterOf), valid=gutters.filter(Boolean);
+  if(!valid.length){ svg.innerHTML=''; return; }         // single-column layout: no room for a spine
+  const room=Math.min(...valid.map(g=>g.room));
+  const cx=valid.reduce((s,g)=>s+g.mid,0)/valid.length;
+  const amp=Math.max(4, Math.min(w*0.022, 30, room/2 - 9));
+  let d='M '+cx+',0', prevX=cx, prevY=0;
+  items.forEach((el,idx)=>{
+    const y=el.offsetTop + el.offsetHeight/2;
+    // nth-child(even) puts the PHOTO on the left, so lean toward the photo, away from the copy
+    const side=(all.indexOf(el)%2===1)?-1:1;
+    const base=gutters[idx] ? gutters[idx].mid : cx;
+    const nx=base + side*amp, midY=(prevY+y)/2;
+    d+=' C '+prevX+','+midY+' '+nx+','+midY+' '+nx+','+y;
+    prevX=nx; prevY=y;
+  });
+  d+=' C '+prevX+','+((prevY+h)/2)+' '+cx+','+((prevY+h)/2)+' '+cx+','+h;
+  // ── build a tapered "root": sample the centreline, offset by a varying width ──
+  const SVGNS='http://www.w3.org/2000/svg';
+  const tmp=document.createElementNS(SVGNS,'path');
+  tmp.setAttribute('d', d); svg.appendChild(tmp);
+  const L=tmp.getTotalLength();
+  const N=Math.max(30, Math.round(L/12));
+  const eps=Math.max(0.5, L/1200);
+  const lft=[], rgt=[]; let decor='';
+  for(let i=0;i<=N;i++){
+    const t=i/N, s=t*L;
+    const p=tmp.getPointAtLength(s);
+    const a=tmp.getPointAtLength(Math.max(0,s-eps));
+    const b=tmp.getPointAtLength(Math.min(L,s+eps));
+    let tx=b.x-a.x, ty=b.y-a.y; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
+    const nx=-ty, ny=tx;                                   // unit normal
+    const taper=6.6*(1-t)+4.2*t;                           // woody stem: thick base → thin tip
+    const wob=1+0.12*Math.sin(t*Math.PI*6.3)+0.06*Math.sin(t*Math.PI*13.7);
+    const ribW=taper*wob;
+    lft.push([p.x+nx*ribW/2, p.y+ny*ribW/2]);
+    rgt.push([p.x-nx*ribW/2, p.y-ny*ribW/2]);
+    if(i>1 && i<N && i%4===0){                             // leaves & the odd blossom
+      const dir=(Math.floor(i/4)%2===0)?1:-1;
+      const bx=p.x+nx*dir*ribW/2, by=p.y+ny*dir*ribW/2;
+      // deterministic pseudo-random jitter so nothing looks stamped
+      let jr=Math.sin(i*12.9898)*43758.5453; jr-=Math.floor(jr);
+      let js=Math.sin(i*78.233)*24634.6345; js-=Math.floor(js);
+      const bloom=(i%16===0);
+      // leaves nod along the stem; blooms tilt more freely
+      const wig=bloom?(jr*70-35):(dir*14+(jr*22-11));
+      const ang=(Math.atan2(ny*dir, nx*dir)*180/Math.PI + wig).toFixed(1);
+      const base=bloom?(1.05+0.35*(1-t)):(0.95+0.55*(1-t));
+      const sc=(base*(0.82+0.36*js)).toFixed(2);
+      decor+='<g transform="translate('+bx.toFixed(1)+','+by.toFixed(1)+') rotate('+ang+') scale('+sc+')">'+(bloom?V_BLOOM:V_LEAF)+'</g>';
+    }
+  }
+  svg.removeChild(tmp);
+  let ribbon='M '+lft[0][0].toFixed(1)+','+lft[0][1].toFixed(1);
+  for(let i=1;i<lft.length;i++) ribbon+=' L '+lft[i][0].toFixed(1)+','+lft[i][1].toFixed(1);
+  for(let i=rgt.length-1;i>=0;i--) ribbon+=' L '+rgt[i][0].toFixed(1)+','+rgt[i][1].toFixed(1);
+  ribbon+=' Z';
+  // lit edge along one side of the ribbon (adds roundness / dimension)
+  let hi='M '+lft[0][0].toFixed(1)+','+lft[0][1].toFixed(1);
+  for(let i=1;i<lft.length;i++) hi+=' L '+lft[i][0].toFixed(1)+','+lft[i][1].toFixed(1);
+  svg.innerHTML=
+    '<clipPath id="vineClip"><rect id="vineClipRect" x="-320" y="-40" width="'+(w+640)+'" height="0"/></clipPath>'+
+    '<g clip-path="url(#vineClip)">'+
+      '<path class="vine-fill" d="'+ribbon+'"/>'+
+      '<path class="vine-mid" d="'+d+'"/>'+
+      '<path class="vine-hi" d="'+hi+'"/>'+
+      decor+
+    '</g>';
+  drawVine();
+}
+function drawVine(){
+  const svg=document.getElementById('menuVine');
+  if(!svg || svg.style.display==='none') return;
+  const clip=document.getElementById('vineClipRect'); if(!clip) return;
+  const h=list.clientHeight;
+  if(REDUCE){ clip.setAttribute('height', (h+48).toFixed(1)); return; }
+  const rect=list.getBoundingClientRect();
+  const prog=Math.min(1, Math.max(0, ((innerHeight*0.82) - rect.top) / (rect.height||1)));
+  clip.setAttribute('height', (prog*h+3).toFixed(1));
+}
+let vTick=false;
+addEventListener('scroll', ()=>{ if(!vTick){ vTick=true; requestAnimationFrame(()=>{ drawVine(); vTick=false; }); } }, {passive:true});
+addEventListener('resize', ()=>buildVine(), {passive:true});
+addEventListener('load', ()=>buildVine());
+// webfont swap changes row heights, so the spine has to be re-measured after it lands
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>buildVine());
+
+/* menu bridge: one continuous vine from the weave's u-exit, straight down behind the
+   Mains/Desserts toggle and pickup note, into the top of the dish vine (→ Shawarma Rice) */
+(function(){
+  const main=document.querySelector('main'); const listEl=document.getElementById('menuList');
+  const h2=document.querySelector('#menu h2'); const uSpan=document.querySelector('#menu h2 span:last-child');
+  if(!main||!listEl||!h2||!uSpan) return;
+  if(innerWidth<760) return;
+  const NS='http://www.w3.org/2000/svg';
+  const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
+  let svg=document.getElementById('menuBridge');
+  let lines=[], decorEls=[], LEN=0, startDocY=0, spanDocY=1;
+  function build(){
+    if(innerWidth<760){ if(svg) svg.style.display='none'; return; }
+    const mr=main.getBoundingClientRect();
+    if(!mr.width||!mr.height) return;
+    if(!svg){ svg=document.createElementNS(NS,'svg'); svg.id='menuBridge'; svg.setAttribute('aria-hidden','true'); svg.setAttribute('preserveAspectRatio','none'); main.prepend(svg); }
+    svg.style.display='block';
+    svg.setAttribute('viewBox','0 0 '+mr.width.toFixed(1)+' '+mr.height.toFixed(1));
+    const ur=uSpan.getBoundingClientRect(), hr=h2.getBoundingClientRect(), lr=listEl.getBoundingClientRect();
+    const sx=((ur.left+ur.right)/2)-mr.left, sy=(hr.bottom-mr.top)+6;    // just under the u
+    const ex=(lr.left-mr.left)+listEl.clientWidth/2, ey=(lr.top-mr.top)+2; // top-centre of the dish vine
+    if(ey-sy < 20){ svg.innerHTML=''; lines=[]; return; }
+    // The original note says this descent runs BEHIND the toggle — but .menu-tabs is
+    // only 7% opaque, so the vine showed through and read as a line drawn across the
+    // Desserts button. Use the idiom the how-it-works lace already uses: stop at the
+    // control, don't draw the pass underneath, resume below it. Calm straight descent,
+    // no detour, and the gap explains itself.
+    const midY=(sy+ey)/2, lean=Math.min(38,(ey-sy)*0.10);
+    const spine='M '+sx.toFixed(1)+','+sy.toFixed(1)+
+      ' C '+(sx-lean).toFixed(1)+','+(sy+(ey-sy)*0.30).toFixed(1)+
+      ' '+(ex+lean).toFixed(1)+','+(midY+ (ey-sy)*0.12).toFixed(1)+
+      ' '+ex.toFixed(1)+','+ey.toFixed(1);
+    const probe=document.createElementNS(NS,'path'); probe.setAttribute('d',spine); svg.appendChild(probe);
+    const SL=probe.getTotalLength(), N=90, pts=[];
+    for(let i=0;i<=N;i++) pts.push(probe.getPointAtLength(SL*i/N));
+    svg.removeChild(probe);
+    // one pass underneath, covering the toggle AND the pickup note — exactly what the
+    // original note described, just actually hidden this time instead of shining through
+    const ctrl=main.querySelector('.menu-tabs'), note=main.querySelector('.menu-note');
+    let duckT=Infinity, duckB=-Infinity;
+    if(ctrl){ const cr=ctrl.getBoundingClientRect();
+      duckT=(cr.top-mr.top)-16; duckB=(cr.bottom-mr.top)+16;
+      if(note){ const nr=note.getBoundingClientRect(); duckB=Math.max(duckB,(nr.bottom-mr.top)+16); } }
+    const before=pts.filter(q=>q.y<=duckT), after=pts.filter(q=>q.y>=duckB);
+    let d, enter=null, exit=null;
+    if(before.length>1 && after.length>1){
+      enter=before[before.length-1]; exit=after[0];
+      const poly=a=>'M '+a.map(q=>q.x.toFixed(1)+','+q.y.toFixed(1)).join(' L ');
+      d=poly(before)+' '+poly(after);
+    } else {
+      d=spine;                                   // nothing in the way — one clean run
+    }
+    const tmp=document.createElementNS(NS,'path'); tmp.setAttribute('d',d); svg.appendChild(tmp);
+    LEN=tmp.getTotalLength(); let decor='';
+    const fr=[0.34,0.64];
+    fr.forEach((f,ix)=>{ const p=tmp.getPointAtLength(LEN*f); const dir=ix%2?1:-1;
+      decor+='<g class="mb-lf" data-fr="'+f+'" transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+(dir>0?126:-126)+') scale(.5)">'+LEAF+'</g>'; });
+    svg.removeChild(tmp);
+    // small rings where it ducks under and comes back out — same cue as the card stitches
+    if(enter&&exit){
+      const ring=q=>'<circle class="mb-ring" data-fr="'+(q===enter?0.3:0.72)+'" cx="'+q.x.toFixed(1)+'" cy="'+q.y.toFixed(1)+'" r="4.6"/>';
+      decor+=ring(enter)+ring(exit);
+    }
+    svg.innerHTML='<path class="mb" d="'+d+'"/><path class="mb-hi" d="'+d+'"/>'+decor;
+    lines=[...svg.querySelectorAll('.mb,.mb-hi')];
+    decorEls=[...svg.querySelectorAll('.mb-lf,.mb-ring')];
+    lines.forEach(l=>{ l.style.strokeDasharray=LEN; });
+    // document-space span for the scroll math (so it grows as a continuation of the vine)
+    startDocY=hr.bottom+scrollY; spanDocY=Math.max(1,(lr.top+scrollY)-(hr.bottom+scrollY));
+    draw();
+  }
+  function draw(){
+    if(!lines.length) return;
+    let p=1;
+    if(!REDUCE){ p=Math.min(1,Math.max(0, ((scrollY+innerHeight*0.46)-startDocY)/spanDocY )); }
+    lines.forEach(l=>{ l.style.strokeDashoffset=(LEN*(1-p)).toFixed(1); });
+    decorEls.forEach(g=>{ const f=parseFloat(g.getAttribute('data-fr'));
+      g.style.transition='opacity .4s ease'; g.style.opacity=(p>f+0.02)?1:0; });
+  }
+  build();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
+  addEventListener('load', ()=>setTimeout(build,80));
+  let bt; addEventListener('resize', ()=>{ clearTimeout(bt); bt=setTimeout(build,140); }, {passive:true});
+  let tick=false; addEventListener('scroll', ()=>{ if(!tick){ tick=true; requestAnimationFrame(()=>{ draw(); tick=false; }); } }, {passive:true});
+  // rebuild when the menu category toggles (list height changes)
+  document.querySelectorAll('.menu-tabs button[data-cat]').forEach(b=>b.addEventListener('click', ()=>setTimeout(build,80)));
+})();
+
+/* "The menu" vine embrace: a woven line that braids through the letters —
+   behind T, in front of h, behind m, out of the middle of u — with foliage
+   dropped at Fibonacci intervals, drawing itself in as you scroll. */
+(function(){
+  const menu=document.getElementById('menu'); if(!menu) return;
+  const emb=menu.querySelector('.menu-embrace'); const h2=menu.querySelector('h2');
+  if(!emb||!h2) return;
+  const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const spans=[...h2.querySelectorAll('span')];
+  // drop 'h' (1) and 'u' (7) BEHIND the vine so it crosses in front of them
+  if(spans[1]) spans[1].classList.add('lz-bot');
+  if(spans[7]) spans[7].classList.add('lz-bot');
+  const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
+  const BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
+  const SVGNS='http://www.w3.org/2000/svg';
+  let LEN=0, mainPath=null;
+  function catmull(pts){
+    let d='M '+pts[0][0].toFixed(1)+','+pts[0][1].toFixed(1);
+    for(let i=0;i<pts.length-1;i++){
+      const p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||p2;
+      const c1x=p1[0]+(p2[0]-p0[0])/6, c1y=p1[1]+(p2[1]-p0[1])/6;
+      const c2x=p2[0]-(p3[0]-p1[0])/6, c2y=p2[1]-(p3[1]-p1[1])/6;
+      d+=' C '+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+p2[0].toFixed(1)+','+p2[1].toFixed(1);
+    }
+    return d;
+  }
+  function build(){
+    if(!spans.length || !spans[7]) return;
+    const mr=menu.getBoundingClientRect();
+    const r=spans.map(s=>s.getBoundingClientRect());
+    const left=r[0].left, right=r[7].right;
+    const textTop=Math.min(...r.map(b=>b.top)), textBot=Math.max(...r.map(b=>b.bottom));
+    const textH=textBot-textTop;
+    const padX=(right-left)*0.16+12, padTop=textH*0.95, padBot=textH*0.5;
+    const boxLeft=left-padX, boxTop=textTop-padTop;
+    const W=(right-left)+padX*2, H=textH+padTop+padBot;
+    // position the (transform-centred) svg over the box
+    emb.setAttribute('viewBox','0 0 '+W.toFixed(1)+' '+H.toFixed(1));
+    emb.style.width=W.toFixed(1)+'px'; emb.style.height=H.toFixed(1)+'px';
+    emb.style.left=(((boxLeft+ (right+padX))/2)-mr.left).toFixed(1)+'px';
+    emb.style.top=(((boxTop+(textBot+padBot))/2)-mr.top).toFixed(1)+'px';
+    const CX=i=>((r[i].left+r[i].right)/2)-boxLeft;
+    const P=(i,f)=>[CX(i), (r[i].top-boxTop)+r[i].height*f];
+    const midY=((textTop+textBot)/2)-boxTop, botY=textBot-boxTop, topY=textTop-boxTop;
+    const vx=(a,b)=>(CX(a)+CX(b))/2;
+    // A braid only reads as a braid if it travels: the old control points all sat between
+    // 0.34 and 0.55 of the text height, so the line never left the middle of the word
+    // and looked like a twig laid on top. Swing it clearly ABOVE the caps and clearly
+    // BELOW the baseline between letters, crossing each letter near its middle.
+    const above=topY+textH*0.06, below=botY+textH*0.10;
+    const pts=[
+      [W*0.04, midY+textH*0.26],             // left arm arrives low and curls up
+      P(0,0.58),                             // T  (behind)
+      [vx(0,1), above],                      // lifts over the gap T→h
+      P(1,0.44),                             // h  (in front)
+      [vx(1,4), below],                      // dips under "e ·"
+      P(4,0.54),                             // m  (behind)
+      [CX(6)+(CX(7)-CX(6))*0.35, above],     // lifts again just before the u
+      P(7,0.44),                             // u  (in front, on the way down)
+      [CX(7), botY+textH*0.20]               // short stub out of the u — the behind-bridge carries the descent
+    ];
+    const d=catmull(pts);
+    // Fibonacci-spaced foliage nodes: cumulative fib normalised + mirror for balance
+    const fib=[1,2,3,5,8], tot=fib.reduce((a,b)=>a+b,0); let acc=0;
+    const base=fib.map(f=>{acc+=f; return acc/tot;});          // .05,.16,.31,.56,1
+    const fr=[...new Set(base.concat(base.map(x=>1-x)))].filter(x=>x>0.05&&x<0.95).sort((a,b)=>a-b);
+    // measure to place decor along the real curve
+    const tmp=document.createElementNS(SVGNS,'path'); tmp.setAttribute('d',d); emb.appendChild(tmp);
+    LEN=tmp.getTotalLength();
+    let decor='';
+    const nodes=fr.map(f=>({f, bloom:false}));
+    nodes.push({f:0.02,bloom:true},{f:0.98,bloom:true});      // blooms at the two arm-tips
+    nodes.sort((a,b)=>a.f-b.f);
+    nodes.forEach((nd,k)=>{
+      const s=nd.f*LEN, p=tmp.getPointAtLength(s);
+      const a=tmp.getPointAtLength(Math.max(0,s-1)), b=tmp.getPointAtLength(Math.min(LEN,s+1));
+      let tx=b.x-a.x, ty=b.y-a.y; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
+      const nx=-ty, ny=tx;                                     // normal, biased upward/outward
+      const dir=(ny>0)?-1:1;                                   // push foliage to the open (upper) side
+      let jr=Math.sin(nd.f*137.5)*1e4; jr-=Math.floor(jr);     // deterministic jitter
+      const ang=(Math.atan2(ny*dir,nx*dir)*180/Math.PI+(nd.bloom?jr*40-20:dir*12+(jr*20-10))).toFixed(1);
+      const sc=(nd.bloom?0.34:0.30)*(0.85+0.3*jr);
+      decor+='<g class="edecor" data-fr="'+nd.f+'" transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+ang+') scale('+sc.toFixed(2)+')">'+(nd.bloom?BLOOM:LEAF)+'</g>';
+    });
+    emb.removeChild(tmp);
+    emb.innerHTML=
+      '<path class="stem eline" style="stroke-width:7.6" d="'+d+'"/>'+
+      '<path class="stem eline-hi" style="stroke:#9a6b40;stroke-width:2;opacity:.32" d="'+d+'"/>'+
+      decor;
+    mainPath=emb.querySelector('.eline');
+    emb.querySelectorAll('.eline,.eline-hi').forEach(el=>{ el.style.strokeDasharray=LEN; });
+    draw();
+  }
+  function draw(){
+    if(!mainPath) return;
+    const hr=h2.getBoundingClientRect();
+    let p=1;
+    // delayed: let the branch descending from the sign arrive at the menu first,
+    // then the weave draws itself through the letters
+    if(!REDUCE) p=Math.min(1,Math.max(0, ((innerHeight*0.58)-hr.top)/(innerHeight*0.26) ));
+    emb.querySelectorAll('.eline,.eline-hi').forEach(el=>{ el.style.strokeDashoffset=(LEN*(1-p)).toFixed(1); });
+    emb.querySelectorAll('.edecor').forEach(g=>{
+      const f=parseFloat(g.getAttribute('data-fr'));
+      g.style.opacity=(p>f+0.02)?1:0;
+      g.style.transition='opacity .45s ease';
+    });
+  }
+  build();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
+  addEventListener('load', build);
+  addEventListener('resize', ()=>{ clearTimeout(emb._t); emb._t=setTimeout(build,120); }, {passive:true});
+  addEventListener('scroll', ()=>{ requestAnimationFrame(draw); }, {passive:true});
+})();
+
+/* hero vine: hidden at load (just the logo), grows out from behind the sign as you scroll */
+(function(){
+  const rect=document.getElementById('emblemVineClipRect'); if(!rect) return;
+  const svg=document.querySelector('.emblem-vine');
+  const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const FULL=190;
+  // The vine overhangs the emblem box, and how much room it has before the next
+  // section depends on viewport HEIGHT, not width — below ~1400px of viewport the
+  // tip used to land on top of "Cooked to order · pick up hot". Cap the reveal at
+  // whatever room actually exists instead of always growing the full 190 units.
+  function cap(){
+    const next=document.querySelector('#menu .eyebrow');
+    if(!svg||!next) return FULL;
+    const m=svg.getScreenCTM(); if(!m||!m.d) return FULL;
+    const stop=next.getBoundingClientRect().top-18;          // 18px of breathing room
+    return Math.max(0, Math.min(FULL, (stop-m.f)/m.d + 24)); // +24 = clip rect's y offset
+  }
+  // Draw the stems with a dash offset rather than clipping them: a clip rectangle
+  // slices the stroke off square, which reads as a chopped stick sitting in mid-air.
+  // stroke-linecap:round + a growing dash gives the vine a proper rounded tip.
+  const grp=svg.querySelector('g[clip-path]');
+  if(grp) grp.removeAttribute('clip-path');
+  const stems=[...svg.querySelectorAll('.stem')].map(el=>{
+    const L=el.getTotalLength(), ys=[];
+    for(let i=0;i<=200;i++) ys.push(el.getPointAtLength(L*i/200).y);
+    el.style.strokeDasharray=L;
+    return {el, L, ys};
+  });
+  const decor=[...svg.querySelectorAll('g[transform]')].map(el=>{
+    const m=/translate\(\s*(-?[\d.]+)[ ,]+(-?[\d.]+)/.exec(el.getAttribute('transform')||'');
+    el.style.transition='opacity .35s ease';
+    return {el, y:m?parseFloat(m[2]):0};
+  });
+  const lenAtY=(s,y)=>{                      // length revealed when the sweep reaches y
+    for(let i=0;i<s.ys.length;i++) if(s.ys[i]>y) return s.L*i/200;
+    return s.L;
+  };
+  let tick=false;
+  function draw(){
+    const p=REDUCE ? 1 : Math.min(1,Math.max(0, scrollY/(innerHeight*0.5) ));
+    const revealY=-24 + p*cap();             // the sweep line, in viewBox units
+    stems.forEach(s=>{ s.el.style.strokeDashoffset=(s.L-lenAtY(s,revealY)).toFixed(1); });
+    decor.forEach(d=>{ d.el.style.opacity=(d.y<=revealY)?1:0; });
+    tick=false;
+  }
+  draw();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(draw);
+  addEventListener('load', draw);
+  if(!REDUCE) addEventListener('scroll', ()=>{ if(!tick){ tick=true; requestAnimationFrame(draw); } }, {passive:true});
+  addEventListener('resize', draw, {passive:true});
+})();
+
+/* ---------------- category tabs ---------------- */
+const menuTabs = document.querySelectorAll('.menu-tabs button[data-cat]');
+function setMenuCat(cat){
+  menuTabs.forEach(t=>{
+    const on = t.dataset.cat===cat;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  document.querySelectorAll('.menu-item').forEach(el=>{
+    el.classList.toggle('hidden', el.dataset.cat!==cat);
+  });
+  requestAnimationFrame(()=>{
+    list.querySelectorAll('.menu-item:not(.hidden)').forEach(el=>{
+      const r=el.getBoundingClientRect();
+      if(r.top < innerHeight*0.92 && r.bottom > 0) revealItem(el);
+    });
+    buildVine();
+  });
+}
+menuTabs.forEach(t=>{
+  const n=DISHES.filter(d=>d.cat===t.dataset.cat).length;
+  t.textContent=(t.dataset.cat==='dessert'?'Desserts':'Mains')+' \u00b7 '+n;
+  t.addEventListener('click', ()=>setMenuCat(t.dataset.cat));
+});
+setMenuCat('main');
+
+/* ---------------- splash ---------------- */
+const splash = document.getElementById('splash');
+const killSplash = ()=> splash.classList.add('gone');
+document.getElementById('skipSplash').addEventListener('click', killSplash);
+setTimeout(killSplash, 3800);
+
+/* ---------------- splash cooking captions ---------------- */
+const cookCaption = document.getElementById('cookCaption');
+if (cookCaption && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const captions = ['Preparing menu…','Cutting ingredients…','Simmering slowly…','Plating with love…'];
+  let ci = 0;
+  const rotateCaption = setInterval(()=>{
+    ci = (ci+1) % captions.length;
+    cookCaption.classList.add('fade');
+    setTimeout(()=>{ cookCaption.textContent = captions[ci]; cookCaption.classList.remove('fade'); }, 250);
+  }, 850);
+  setTimeout(()=>clearInterval(rotateCaption), 3800);
+}
+
+/* ---------------- logo layer parallax ---------------- */
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const ems=document.querySelectorAll('.emblem');
+  if(ems.length) addEventListener('pointermove', e=>{
+    const dx=e.clientX/innerWidth-.5, dy=e.clientY/innerHeight-.5;
+    ems.forEach(m=>{ m.style.translate = `${dx*8}px ${dy*6}px`; });
+  }, {passive:true});
+}
+
+/* ---------------- back-type parallax (desktop only) ---------------- */
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(min-width: 721px)').matches){
+  const pEls = () => document.querySelectorAll('[data-parallax]');
+  let ticking = false;
+  addEventListener('scroll', () => {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(() => {
+      const vh = innerHeight;
+      pEls().forEach(el => {
+        const r = el.parentElement.getBoundingClientRect();
+        const prog = (r.top + r.height/2 - vh/2) / vh;   // -0.5..0.5 around center
+        el.style.transform = `translate(-50%, calc(-52% + ${prog * 46}px))`;
+      });
+      ticking = false;
+    });
+  }, {passive:true});
+}
+
+/* ---------------- nav scroll ---------------- */
+const nav = document.getElementById('nav');
+addEventListener('scroll', ()=> nav.classList.toggle('scrolled', scrollY > 40), {passive:true});
+
+/* ---------------- reveals: handled by the reveal engine above ---------------- */
+
+/* ---------------- order modal ---------------- */
+const veil = document.getElementById('veil'), modal = document.getElementById('modal');
+const mTitle=document.getElementById('mTitle'), mPrice=document.getElementById('mPrice'),
+      mImg=document.getElementById('mImg'), mTotal=document.getElementById('mTotal'),
+      qOut=document.getElementById('qOut');
+let curIdx=null, curVar=0, qty=1, unit=0, minQty=1, lastFocus=null;
+function money(n){return '$'+n}
+function currentDishName(){
+  const d=DISHES[curIdx];
+  return d.variants ? (d.name+' ('+d.variants[curVar].label+')') : d.name;
+}
+function updateTotals(){
+  mPrice.textContent=money(unit);
+  qOut.textContent=qty;
+  mTotal.textContent=money(unit*qty);
+}
+function selectVariant(i){
+  const d=DISHES[curIdx];
+  curVar=i; unit=d.variants[i].price;
+  document.querySelectorAll('#mSize button').forEach((b,bi)=>b.classList.toggle('active', bi===i));
+  updateTotals();
+}
+function openModal(idx, imgSrc){
+  lastFocus=document.activeElement;
+  curIdx=idx; curVar=0;
+  const d=DISHES[idx];
+  const sizeField=document.getElementById('sizeField'), mSize=document.getElementById('mSize'), note=document.getElementById('mNote');
+  mTitle.textContent=d.name;
+  mImg.src=imgSrc; mImg.alt=d.name;
+  minQty=d.minQty||1; qty=minQty;
+  if(d.variants){
+    document.getElementById('sizeLabel').textContent = d.axis || 'Size';
+    mSize.innerHTML='';
+    d.variants.forEach((v,vi)=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.innerHTML=v.label+'<span class="s-price">'+money(v.price)+'</span>';
+      b.addEventListener('click', ()=>selectVariant(vi));
+      mSize.appendChild(b);
+    });
+    sizeField.classList.remove('hidden');
+    selectVariant(0);
+  } else {
+    sizeField.classList.add('hidden'); mSize.innerHTML='';
+    unit=d.price; updateTotals();
+  }
+  if(minQty>1){ note.textContent='Minimum '+minQty+' per order'; note.classList.remove('hidden'); }
+  else { note.textContent=''; note.classList.add('hidden'); }
+  modal.classList.remove('done','deposit');
+  document.getElementById('orderForm').reset();
+  veil.classList.add('open'); veil.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+  document.getElementById('fName').focus();
+}
+function closeModal(){
+  veil.classList.remove('open'); veil.setAttribute('aria-hidden','true');
+  document.body.style.overflow='';
+  if(lastFocus) lastFocus.focus();
+}
+document.addEventListener('click', e=>{
+  const b=e.target.closest('[data-idx]');
+  if(b){
+    const idx=+b.dataset.idx;
+    const src = IMGS[DISHES[idx].img] || IMGS.palabok;
+    mImg.classList.add('natural');
+    openModal(idx, src);
+  }
+});
+document.getElementById('mClose').addEventListener('click', closeModal);
+document.getElementById('mDone').addEventListener('click', closeModal);
+veil.addEventListener('click', e=>{ if(e.target===veil) closeModal(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && veil.classList.contains('open')) closeModal(); });
+document.getElementById('qMinus').addEventListener('click', ()=>{ qty=Math.max(minQty,qty-1); updateTotals(); });
+document.getElementById('qPlus').addEventListener('click', ()=>{ qty=Math.min(20,qty+1); updateTotals(); });
+/* ---- live order submission (Supabase edge function) ---- */
+const SB_URL = 'https://ktgclbvdkhvfvebajtao.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Z2NsYnZka2h2ZnZlYmFqdGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NDE3MjAsImV4cCI6MjA5OTIxNzcyMH0.m63CuAy7NjuyKXh_yXFy749QGEFxzoDvrORSdTHPbog';
+// Step 1 \u2014 order form: if closed, block; otherwise move to the deposit step.
+document.getElementById('orderForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  if(window.NG_AVAILABLE === false){
+    alert(window.NG_CLOSED_MSG || "We're currently closed for orders. Please check back soon!");
+    return;
+  }
+  const ds=document.getElementById('depShot'); if(ds) ds.value='';
+  const dp=document.getElementById('depPreview'); if(dp){ dp.hidden=true; dp.src=''; }
+  const dt=document.getElementById('depUploadText'); if(dt) dt.textContent='Tap to add your e-Transfer screenshot';
+  modal.classList.add('deposit');
+});
+document.getElementById('depBack').addEventListener('click', ()=>modal.classList.remove('deposit'));
+document.getElementById('depShot').addEventListener('change', function(){
+  const f=this.files && this.files[0];
+  const prev=document.getElementById('depPreview'), txt=document.getElementById('depUploadText');
+  if(f){ prev.src=URL.createObjectURL(f); prev.hidden=false; txt.textContent='\u2713 '+f.name+' (tap to change)'; }
+});
+// Step 2 \u2014 place order: upload the (optional) screenshot, then submit via the Worker.
+document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
+  const btn=document.getElementById('placeOrderBtn');
+  const prev=btn.textContent; btn.disabled=true;
+  try{
+    let depositUrl=null;
+    const f=document.getElementById('depShot').files[0];
+    if(f){
+      btn.textContent='Uploading screenshot\u2026';
+      try{
+        const fd=new FormData(); fd.append('file', f);
+        const up=await fetch('/api/upload-deposit', { method:'POST', body:fd });
+        const ud=await up.json(); if(ud && ud.url) depositUrl=ud.url;
+      }catch(_){ /* non-fatal \u2014 order can still go through */ }
+    }
+    btn.textContent='Sending\u2026';
+    const res = await fetch('/api/submit-order', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ order:{
+        dish: currentDishName(),
+        qty,
+        name: document.getElementById('fName').value,
+        contact: document.getElementById('fPhone').value,
+        notes: document.getElementById('fNotes').value,
+        deposit_screenshot_url: depositUrl
+      }})
+    });
+    const data = await res.json();
+    if(!res.ok || !data.success) throw new Error(data.error || 'failed');
+    modal.classList.remove('deposit'); modal.classList.add('done');
+    document.getElementById('mDone').focus();
+  }catch(err){
+    alert("Couldn't send your order just now \u2014 please try again in a moment, or reach us at takoshi.ca.");
+  }finally{
+    btn.textContent = prev; btn.disabled = false;
+  }
+});
+
+/* ---------------- staged scroll reveals ---------------- */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.querySelectorAll('main > .section-head, .menu-tabs, .story .wrap > .eyebrow, .story .wrap > h2, .story .wrap > p, .how .section-head').forEach(el=>el.classList.add('rise'));
+  const stagger = nodes => nodes.forEach((el,i)=>el.classList.add('rise','d'+Math.min(i+1,4)));
+  stagger([...document.querySelectorAll('.word-card')]);
+  /* .how .step cards are handled by the root-then-flow engine below */
+  stagger([...document.querySelectorAll('footer .cols > div')]);
+  const io2 = new IntersectionObserver(es=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in-view'); io2.unobserve(e.target); } });
+  }, {threshold:.16, rootMargin:'0px 0px -6% 0px'});
+  document.querySelectorAll('.rise').forEach(el=>io2.observe(el));
+})();
+
+/* ---------------- How-it-works: root connects, then the steps flow in ---------------- */
+(function(){
+  const NS='http://www.w3.org/2000/svg';
+  const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const section=document.querySelector('.how');
+  const wrap=document.querySelector('.how .steps');
+  const steps=wrap ? [...wrap.querySelectorAll('.step')] : [];
+  if(!section || !wrap || steps.length<2) return;
+  const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
+  const BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
+  let svg, holesSvg, branchPath, tailPath, foliageEls=[], holeEls=[], played=false;
+  let wipeRect=null, wipeFrom=-200, wipeTo=0;
+
+  function build(){
+    const wr=wrap.getBoundingClientRect();
+    if(!wr.width || !wr.height) return;
+    // measure with offset* so the transform on hidden cards doesn't skew the anchor points
+    const cards=steps.map(s=>({ cx:s.offsetLeft+s.offsetWidth/2, top:s.offsetTop, right:s.offsetLeft+s.offsetWidth }));
+    if(!svg){ svg=document.createElementNS(NS,'svg'); svg.id='howRoot'; svg.setAttribute('aria-hidden','true'); svg.setAttribute('preserveAspectRatio','none'); wrap.prepend(svg); }
+    if(!holesSvg){ holesSvg=document.createElementNS(NS,'svg'); holesSvg.id='howHoles'; holesSvg.setAttribute('aria-hidden','true'); holesSvg.setAttribute('preserveAspectRatio','none'); wrap.appendChild(holesSvg); }
+    const vb='0 0 '+wr.width.toFixed(1)+' '+wr.height.toFixed(1);
+    svg.setAttribute('viewBox',vb); holesSvg.setAttribute('viewBox',vb);
+    const topY=Math.min.apply(null, cards.map(c=>c.top));
+    const singleRow = innerWidth>=1000 && cards.every(c=>Math.abs(c.top-topY)<10);
+    if(!singleRow){ svg.innerHTML=''; holesSvg.innerHTML=''; branchPath=null; tailPath=null; foliageEls=[]; holeEls=[]; return; }  // stacked: plain settle-in fallback
+    // thread goes IN at hole 1, UNDER the card (hidden) to hole 2, OUT, then across the gap to the next card
+    const W=wr.width, holeY=topY+14, hg=20, underDip=topY+31;
+    const hL0=cards[0].cx-hg;
+    // the vine comes in from the far left, laces the cards, and carries on to the right
+    let d='M '+(-160).toFixed(1)+','+(holeY-2).toFixed(1)+' C '+(-40).toFixed(1)+','+(holeY-8).toFixed(1)+' '+(hL0-44).toFixed(1)+','+(holeY-1).toFixed(1)+' '+hL0.toFixed(1)+','+holeY.toFixed(1);
+    let holes='', gapMids=[], px=hL0;
+    cards.forEach((c,i)=>{
+      const hL=c.cx-hg, hR=c.cx+hg;
+      // IN at hole 1 → the pass under the card is NOT drawn (truly hidden) → resume at hole 2
+      d+=' M '+hR.toFixed(1)+','+holeY.toFixed(1);
+      holes+='<g class="cardstitch">'
+           +'<path class="bridge" d="M '+hL.toFixed(1)+','+holeY.toFixed(1)+' Q '+c.cx.toFixed(1)+','+(holeY-9).toFixed(1)+' '+hR.toFixed(1)+','+holeY.toFixed(1)+'"/>'
+           +'<circle class="sh" cx="'+hL.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hL.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/>'
+           +'<circle class="sh" cx="'+hR.toFixed(1)+'" cy="'+(holeY+.6).toFixed(1)+'" r="3.4"/><circle class="ring" cx="'+hR.toFixed(1)+'" cy="'+holeY.toFixed(1)+'" r="3.2"/>'
+           +'</g>';
+      // rise UP out of hole 2, arc OVER the gap (above the cards), dive DOWN into the next card's hole 1
+      if(i<cards.length-1){ const nL=cards[i+1].cx-hg, mid=(hR+nL)/2; gapMids.push(mid);
+        d+=' C '+(hR+8).toFixed(1)+','+(topY-18).toFixed(1)+' '+(nL-8).toFixed(1)+','+(topY-18).toFixed(1)+' '+nL.toFixed(1)+','+holeY.toFixed(1); }
+      px=hR;
+    });
+    const endX=px+34;
+    d+=' C '+(px+14).toFixed(1)+','+(holeY-3).toFixed(1)+' '+endX.toFixed(1)+','+holeY.toFixed(1)+' '+endX.toFixed(1)+','+(holeY+2).toFixed(1);
+    // tail: after the last card the vine carries on out to the right and tapers away
+    const tail='M '+endX.toFixed(1)+','+(holeY+2).toFixed(1)
+      +' C '+(endX+54).toFixed(1)+','+(holeY-2).toFixed(1)+' '+(endX+116).toFixed(1)+','+(holeY-12).toFixed(1)+' '+(endX+178).toFixed(1)+','+(holeY-30).toFixed(1);
+    // leaves + a couple of blossoms on the visible spans between cards
+    let fol='<g class="foliage" transform="translate('+(hL0-14).toFixed(1)+','+(holeY-12).toFixed(1)+') rotate(-150) scale(.32)">'+LEAF+'</g>';
+    gapMids.forEach((gx,i)=>{
+      fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(topY-17).toFixed(1)+') rotate('+(i%2?-150:-30)+') scale(.32)">'+LEAF+'</g>';
+      if(i===1) fol+='<g class="foliage" transform="translate('+gx.toFixed(1)+','+(topY-24).toFixed(1)+') scale(.3)">'+BLOOM+'</g>';
+    });
+    // Reveal with a left→right wipe, NOT stroke-dashoffset. The branch deliberately
+    // contains M jumps (the passes under each card aren't drawn), and SVG restarts the
+    // dash pattern at every subpath — so a dash reveal made all four gap-arcs draw at
+    // once instead of lacing across. A clip rectangle sweeping right is a true wipe, and
+    // it carries the leaves along with it for free.
+    wipeFrom=-200; wipeTo=endX+178+60;
+    svg.innerHTML='<clipPath id="howLaceClip"><rect id="howLaceRect" x="'+wipeFrom+'" y="'+(topY-140).toFixed(1)+'" width="0" height="'+(wr.height+280).toFixed(1)+'"/></clipPath>'+
+      '<g clip-path="url(#howLaceClip)"><path class="branch" d="'+d+'"/><path class="branch-tail" d="'+tail+'"/>'+fol+'</g>';
+    holesSvg.innerHTML=holes;
+    branchPath=svg.querySelector('.branch'); tailPath=svg.querySelector('.branch-tail');
+    wipeRect=svg.querySelector('#howLaceRect');
+    foliageEls=[...svg.querySelectorAll('.foliage')]; holeEls=[...holesSvg.querySelectorAll('.cardstitch')];
+    foliageEls.forEach(f=>f.style.opacity=1);            // the wipe reveals them, not opacity
+    // anchor each stitch and card to an x, so they land exactly as the lace passes them
+    holeEls.forEach((g,i)=> g.dataset.x = (cards[i] ? cards[i].cx-hg : 0));
+    steps.forEach((s,i)=> s.dataset.x = (cards[i] ? cards[i].cx+hg : 0));
+  }
+
+  // The lace used to run on a fixed 1900ms timer started by an IntersectionObserver at
+  // 28% visibility — which fires while the section is still mostly below the fold, so by
+  // the time the cards were on screen the animation had already finished and the whole
+  // thing read as static. Drive it off scroll position instead: the vine laces left→right
+  // as you scroll through the section, and each card lands as the lace reaches it.
+  const LACE=0.86;                       // lace occupies the first 86% of the run, tail the rest
+  function progress(){
+    const wr=wrap.getBoundingClientRect();
+    const start=innerHeight*0.95, span=wr.height+innerHeight*0.62;   // ~a full screen of scroll to lace across
+    return Math.min(1, Math.max(0, (start-wr.top)/span));
+  }
+  function settle(){
+    if(wipeRect) wipeRect.setAttribute('width', Math.max(0,wipeTo-wipeFrom));
+    foliageEls.forEach(f=>f.style.opacity=1);
+    holeEls.forEach(h=>h.style.opacity=1);
+    steps.forEach(s=>s.classList.add('flow-in'));
+  }
+  function play(){
+    if(!wipeRect || REDUCE){ settle(); return; }
+    const p=progress();
+    const lace=Math.min(1, p/LACE);
+    const wipeX=wipeFrom + lace*(wipeTo-wipeFrom);          // where the vine tip is, right now
+    wipeRect.setAttribute('width', Math.max(0, wipeX-wipeFrom).toFixed(1));
+    // stitches and cards land the moment the tip passes their x — no timers, no guessing
+    holeEls.forEach(g=> g.style.opacity = wipeX > +g.dataset.x ? 1 : 0);
+    steps.forEach(s=> s.classList.toggle('flow-in', wipeX > +s.dataset.x));
+    played=true;
+  }
+
+  build();
+  if(REDUCE){ settle(); }
+  else{
+    play();
+    let t=false;
+    addEventListener('scroll', ()=>{ if(!t){ t=true; requestAnimationFrame(()=>{ play(); t=false; }); } }, {passive:true});
+  }
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ build(); play(); });
+  addEventListener('load', ()=>{ build(); play(); });
+  let rt; addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ build(); play(); },140); }, {passive:true});
+})();
+
+/* ---------------- the trunk: a full-height tree down the left of the page that the
+   sections branch off of, growing top-down as you scroll ---------------- */
+(function(){
+  const roots=document.getElementById('roots'), soil=document.getElementById('soil');
+  const g=document.getElementById('trunkG');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clip= roots ? roots.querySelector('#rootsClipRect') : null;
+  const NS='http://www.w3.org/2000/svg';
+  const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
+  const BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
+  let docH=0;
+  function smooth(p){ let d='M '+p[0][0].toFixed(1)+','+p[0][1].toFixed(1);
+    for(let i=0;i<p.length-1;i++){ const a=p[i-1]||p[i],b=p[i],c=p[i+1],e=p[i+2]||c;
+      d+=' C '+(b[0]+(c[0]-a[0])/6).toFixed(1)+','+(b[1]+(c[1]-a[1])/6).toFixed(1)+' '+(c[0]-(e[0]-b[0])/6).toFixed(1)+','+(c[1]-(e[1]-b[1])/6).toFixed(1)+' '+c[0].toFixed(1)+','+c[1].toFixed(1); }
+    return d; }
+  function dpt(el){ const r=el.getBoundingClientRect(); return {l:r.left+scrollX,t:r.top+scrollY,r:r.right+scrollX,b:r.bottom+scrollY,w:r.width,h:r.height}; }
+  function buildTrunk(){
+    if(!g||!roots) return;
+    // trunk retired — the sections now carry one continuous vine instead of a separate tree
+    roots.style.display='none'; g.innerHTML=''; docH=document.documentElement.scrollHeight; draw(); return;
+    const W=document.documentElement.clientWidth;
+    docH=document.documentElement.scrollHeight;
+    roots.setAttribute('viewBox','0 0 '+W+' '+docH);
+    roots.setAttribute('preserveAspectRatio','none');
+    roots.style.height=docH+'px';
+    if(clip){ clip.setAttribute('x',-60); clip.setAttribute('width',W+300); }
+    const contentLeft=Math.max(24,(W-1120)/2);
+    const gx=Math.max(30, contentLeft-82);        // spine sits ~82px left of the content column
+    // spine down the whole page, gentle organic meander
+    const seg=Math.max(7, Math.round(docH/430)), spts=[];
+    for(let i=0;i<=seg;i++){ const t=i/seg, y=t*docH; const mx=gx+18*Math.sin(t*Math.PI*3.3)+9*Math.sin(t*Math.PI*7.1); spts.push([mx,y]); }
+    const cd=smooth(spts);
+    const tmp=document.createElementNS(NS,'path'); tmp.setAttribute('d',cd); g.appendChild(tmp);
+    const L=tmp.getTotalLength(), N=Math.max(46,Math.round(docH/70)), lft=[],rgt=[];
+    for(let i=0;i<=N;i++){ const t=i/N,s=t*L,pt=tmp.getPointAtLength(s);
+      const a=tmp.getPointAtLength(Math.max(0,s-1)),b=tmp.getPointAtLength(Math.min(L,s+1));
+      let tx=b.x-a.x,ty=b.y-a.y; const tl=Math.hypot(tx,ty)||1; tx/=tl;ty/=tl; const nx=-ty,ny=tx;
+      const taper=17*(1-t)+6*t;                                     // thick crown → thin foot
+      const wob=1+0.08*Math.sin(t*Math.PI*6.4)+0.04*Math.sin(t*Math.PI*13.1);
+      const w=taper*wob;
+      lft.push([pt.x+nx*w/2,pt.y+ny*w/2]); rgt.push([pt.x-nx*w/2,pt.y-ny*w/2]);
+    }
+    let ribbon='M '+lft[0][0].toFixed(1)+','+lft[0][1].toFixed(1);
+    for(let i=1;i<lft.length;i++) ribbon+=' L '+lft[i][0].toFixed(1)+','+lft[i][1].toFixed(1);
+    for(let i=rgt.length-1;i>=0;i--) ribbon+=' L '+rgt[i][0].toFixed(1)+','+rgt[i][1].toFixed(1);
+    ribbon+=' Z';
+    let hi='M '+rgt[0][0].toFixed(1)+','+rgt[0][1].toFixed(1);
+    for(let i=1;i<rgt.length;i++) hi+=' L '+rgt[i][0].toFixed(1)+','+rgt[i][1].toFixed(1);
+    let limbs='', decor='';
+    // spine x at a given document y (for attaching limbs)
+    function spineXat(y){ let best=tmp.getPointAtLength(0), bd=1e9; for(let s=0;s<=L;s+=Math.max(6,L/400)){ const p=tmp.getPointAtLength(s); const d=Math.abs(p.y-y); if(d<bd){bd=d;best=p;} } return best.x; }
+    // a curved limb from the spine (at the target's height) out to (px,py) + a leaf/bloom at the tip
+    function connect(px,py,thick,bloom){
+      const bx=spineXat(py)+2, by=py;
+      const len=Math.abs(px-bx), sag=Math.min(42,len*0.12);       // gentle downward droop like a real bough
+      const d='M '+bx.toFixed(1)+','+by.toFixed(1)+' C '+(bx+(px-bx)*0.30).toFixed(1)+','+(by+sag*0.7).toFixed(1)+' '+(bx+(px-bx)*0.72).toFixed(1)+','+(py+sag).toFixed(1)+' '+px.toFixed(1)+','+py.toFixed(1);
+      limbs+='<path class="stem" style="stroke-width:'+thick+';opacity:.92" d="'+d+'"/>';
+      const lp=document.createElementNS(NS,'path'); lp.setAttribute('d',d); g.appendChild(lp);
+      const Ll=lp.getTotalLength();
+      [0.30,0.52,0.74].forEach((f,ix)=>{ const p=lp.getPointAtLength(Ll*f); const dir=ix%2?1:-1;
+        decor+='<g transform="translate('+p.x.toFixed(1)+','+(p.y-1).toFixed(1)+') rotate('+(dir>0?-34:214)+') scale(.5)">'+LEAF+'</g>'; });
+      g.removeChild(lp);
+      if(bloom) decor+='<g transform="translate('+(px-6).toFixed(1)+','+(py-4).toFixed(1)+') scale(.44)">'+BLOOM+'</g>';
+    }
+    // —— connect the HOW-IT-WORKS lacing branch to the trunk ——
+    const firstStep=document.querySelector('.how .step');
+    if(firstStep){ const c=dpt(firstStep); const holeY=c.t+14, hole1x=c.l+c.w/2-20; connect(hole1x-26, holeY, 3.4, false); }
+    // —— reach a limb toward THE MENU heading so it grows off the tree ——
+    const h2=document.querySelector('#menu h2');
+    if(h2){ const m=dpt(h2); connect(m.l-18, m.t+m.h*0.5, 3.0, true); }
+    // foliage sprinkled up the spine (skip the very top so the crown is clean)
+    for(let i=6;i<N;i+=9){ const t=i/N,pt=tmp.getPointAtLength(t*L); const dir=(i%18<9)?1:-1;
+      decor+='<g transform="translate('+(pt.x+dir*7).toFixed(1)+','+pt.y.toFixed(1)+') rotate('+(dir>0?-38:202)+') scale(.5)">'+LEAF+'</g>'; }
+    g.removeChild(tmp);
+    g.innerHTML='<path class="tk-fill" d="'+ribbon+'"/>'+limbs+'<path class="tk-hi" d="'+hi+'"/>'+decor;
+    draw();
+  }
+  let tick=false;
+  function draw(){
+    if(!clip) return;
+    if(reduce){ clip.setAttribute('height', docH+60); if(soil) soil.style.opacity=.5; return; }
+    const reveal=Math.min(docH+60, scrollY + innerHeight*0.9);   // grows top-down, a bit ahead of the fold
+    clip.setAttribute('height', reveal.toFixed(1));
+    const max=(docH-innerHeight)||1;
+    if(soil) soil.style.opacity=(Math.min(1,scrollY/max)*0.7).toFixed(3);
+    tick=false;
+  }
+  buildTrunk();
+  addEventListener('load', ()=>setTimeout(buildTrunk,60));
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>setTimeout(buildTrunk,60));
+  setTimeout(buildTrunk,1400);                                    // catch late layout (images, injected menu)
+  let rt; addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(buildTrunk,140); }, {passive:true});
+  addEventListener('scroll', ()=>{ if(!tick){ tick=true; requestAnimationFrame(draw); } }, {passive:true});
+})();
+
+/* ---------------- earthy: drifting leaves ---------------- */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || innerWidth < 820) return;
+  const LEAF='<svg viewBox="0 0 24 24"><path d="M12 2C6 6 4 14 12 22C20 14 18 6 12 2Z"/></svg>';
+  const spots=[
+    {sel:'main',   css:{top:'14%', left:'5%'}},
+    {sel:'main',   css:{top:'64%', right:'6%'}},
+    {sel:'.story', css:{top:'18%', right:'7%'}},
+    {sel:'.how',   css:{top:'26%', left:'6%'}},
+    {sel:'.reviews', css:{top:'22%', left:'4%'}},
+    {sel:'.reviews', css:{top:'60%', right:'4%'}}
+  ];
+  spots.forEach((s,i)=>{
+    const host=document.querySelector(s.sel); if(!host) return;
+    if(getComputedStyle(host).position==='static') host.style.position='relative';
+    const el=document.createElement('span'); el.className='leaf'; el.innerHTML=LEAF;
+    Object.assign(el.style, s.css); el.style.animationDelay=(i*1.4)+'s';
+    host.appendChild(el);
+  });
+})();
+
+/* ---------------- three.js ambient particles ---------------- */
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || typeof THREE==='undefined') return;
+  const canvas=document.getElementById('fx');
+  const renderer=new THREE.WebGLRenderer({canvas, alpha:true, antialias:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth<721 ? 1.5 : 2));
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(60,1,0.1,100); cam.position.z=8;
+
+  const MOBILE = innerWidth < 721;
+  const N=MOBILE?70:140, pos=new Float32Array(N*3), spd=new Float32Array(N), ph=new Float32Array(N);
+  for(let i=0;i<N;i++){
+    pos[i*3]=(Math.random()-0.5)*16;
+    pos[i*3+1]=(Math.random()-0.5)*10;
+    pos[i*3+2]=(Math.random()-0.5)*6;
+    spd[i]=0.15+Math.random()*0.35; ph[i]=Math.random()*Math.PI*2;
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  // soft round sprite
+  const c=document.createElement('canvas'); c.width=c.height=64;
+  const g=c.getContext('2d'), grad=g.createRadialGradient(32,32,0,32,32,32);
+  grad.addColorStop(0,'rgba(247,240,227,0.9)'); grad.addColorStop(0.5,'rgba(217,164,65,0.35)'); grad.addColorStop(1,'rgba(217,164,65,0)');
+  g.fillStyle=grad; g.fillRect(0,0,64,64);
+  const tex=new THREE.CanvasTexture(c);
+  const mat=new THREE.PointsMaterial({size:0.32,map:tex,transparent:true,opacity:0.65,depthWrite:false,blending:THREE.AdditiveBlending});
+  const pts=new THREE.Points(geo,mat); scene.add(pts);
+
+  // drifting leaves (province layer)
+  const LN=MOBILE?10:22, lpos=new Float32Array(LN*3), lspd=new Float32Array(LN), lph=new Float32Array(LN);
+  for(let i=0;i<LN;i++){
+    lpos[i*3]=(Math.random()-0.5)*16; lpos[i*3+1]=(Math.random()-0.5)*10; lpos[i*3+2]=(Math.random()-0.5)*5;
+    lspd[i]=0.22+Math.random()*0.3; lph[i]=Math.random()*Math.PI*2;
+  }
+  const lgeo=new THREE.BufferGeometry();
+  lgeo.setAttribute('position', new THREE.BufferAttribute(lpos,3));
+  const lc=document.createElement('canvas'); lc.width=lc.height=64;
+  const lg2=lc.getContext('2d');
+  lg2.translate(32,32); lg2.rotate(-0.6);
+  const lgrad=lg2.createLinearGradient(-14,0,14,0);
+  lgrad.addColorStop(0,'rgba(111,155,111,0.95)'); lgrad.addColorStop(1,'rgba(74,107,82,0.95)');
+  lg2.fillStyle=lgrad;
+  lg2.beginPath(); lg2.ellipse(0,0,15,7,0,0,Math.PI*2); lg2.fill();
+  lg2.strokeStyle='rgba(60,88,66,0.9)'; lg2.lineWidth=1.4;
+  lg2.beginPath(); lg2.moveTo(-15,0); lg2.lineTo(15,0); lg2.stroke();
+  const ltex=new THREE.CanvasTexture(lc);
+  const lmat=new THREE.PointsMaterial({size:0.42,map:ltex,transparent:true,opacity:0.8,depthWrite:false});
+  scene.add(new THREE.Points(lgeo,lmat));
+
+  let mx=0,my=0;
+  addEventListener('pointermove',e=>{ mx=(e.clientX/innerWidth-0.5); my=(e.clientY/innerHeight-0.5); },{passive:true});
+
+  const hero=document.querySelector('header.hero');
+  function size(){
+    const w=hero.clientWidth,h=hero.clientHeight;
+    renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix();
+  }
+  size(); addEventListener('resize',size);
+
+  let t=0, running=true;
+  new IntersectionObserver(([e])=>{running=e.isIntersecting;},{threshold:0}).observe(hero);
+  (function loop(){
+    requestAnimationFrame(loop);
+    if(!running) return;
+    t+=0.008;
+    const p=geo.attributes.position.array;
+    for(let i=0;i<N;i++){
+      p[i*3+1]+=spd[i]*0.008;                 // slow rise, like steam
+      p[i*3]+=Math.sin(t*2+ph[i])*0.0015;     // gentle sway
+      if(p[i*3+1]>5.2) p[i*3+1]=-5.2;
+    }
+    geo.attributes.position.needsUpdate=true;
+    const lp=lgeo.attributes.position.array;
+    for(let i=0;i<LN;i++){
+      lp[i*3+1]-=lspd[i]*0.0085;                 // leaves fall
+      lp[i*3]+=Math.sin(t*1.6+lph[i])*0.004;     // swaying descent
+      if(lp[i*3+1]<-5.4){ lp[i*3+1]=5.4; lp[i*3]=(Math.random()-0.5)*16; }
+    }
+    lgeo.attributes.position.needsUpdate=true;
+    cam.position.x+=(mx*0.9-cam.position.x)*0.04;   // mouse parallax
+    cam.position.y+=(-my*0.6-cam.position.y)*0.04;
+    cam.lookAt(0,0,0);
+    renderer.render(scene,cam);
+  })();
+})();
+</script>
+
+<!-- ── availability banner · allergen bubble · reviews (Worker /api) ── -->
+<script>
+(function(){
+  // ── Store availability → closed banner + order gating ──
+  fetch('/api/availability').then(function(r){return r.json();}).then(function(a){
+    window.NG_AVAILABLE = a.available !== false;
+    window.NG_CLOSED_MSG = a.message || '';
+    if(a.available === false){
+      var b=document.getElementById('closedBanner'), t=document.getElementById('closedBannerText');
+      var msg = a.message || "We're currently closed for orders.";
+      if(a.until){ try{ var d=new Date(a.until); msg += ' Back <b>'+d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'})+'</b>.'; }catch(_){} }
+      t.innerHTML = msg; b.classList.add('show');
+    }
+  }).catch(function(){ window.NG_AVAILABLE = true; });
+  var cbc=document.getElementById('closedBannerClose');
+  if(cbc) cbc.addEventListener('click', function(){ document.getElementById('closedBanner').classList.remove('show'); });
+
+  // ── Allergen bubble ──
+  var ab=document.getElementById('allergenBtn'), ap=document.getElementById('allergenPanel'), ac=document.getElementById('allergenClose'), abd=document.getElementById('allergenBackdrop');
+  function toggleA(show){ ap.classList.toggle('show', show); if(abd) abd.classList.toggle('show', show); if(ab) ab.setAttribute('aria-expanded', show?'true':'false'); }
+  if(ab) ab.addEventListener('click', function(){ toggleA(!ap.classList.contains('show')); });
+  if(ac) ac.addEventListener('click', function(){ toggleA(false); });
+  if(abd) abd.addEventListener('click', function(){ toggleA(false); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') toggleA(false); });
+
+  // ── Reviews ──
+  function escR(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function stars(n){ var full=Math.floor(n), half=(n-full)>=0.5, empty=Math.max(0,5-full-(half?1:0)); return '★'.repeat(full)+(half?'½':'')+'☆'.repeat(empty); }
+  function initRevCarousel(){
+    var track=document.getElementById('revTrack');
+    var dotsWrap=document.getElementById('revDots');
+    var prev=document.getElementById('revPrev'), next=document.getElementById('revNext');
+    if(!track) return;
+    var cards=[].slice.call(track.querySelectorAll('.rev-card'));
+    var single = cards.length<2;
+    [prev,next].forEach(function(b){ if(b) b.style.display = single?'none':''; });
+    if(dotsWrap) dotsWrap.innerHTML='';
+    if(!cards.length){ return; }
+    // build dots
+    var dots=[];
+    if(dotsWrap && !single){
+      cards.forEach(function(c,i){
+        var d=document.createElement('button'); d.type='button'; d.setAttribute('aria-label','Go to review '+(i+1));
+        d.addEventListener('click', function(){ scrollToCard(i); });
+        dotsWrap.appendChild(d); dots.push(d);
+      });
+    }
+    function centerOf(el){ return el.offsetLeft + el.offsetWidth/2; }
+    function activeIndex(){
+      var mid=track.scrollLeft + track.clientWidth/2, best=0, bd=Infinity;
+      cards.forEach(function(c,i){ var dd=Math.abs(centerOf(c)-mid); if(dd<bd){ bd=dd; best=i; } });
+      return best;
+    }
+    function scrollToCard(i,behavior){ if(cards[i]) track.scrollTo({left:centerOf(cards[i])-track.clientWidth/2, behavior:behavior||'smooth'}); }
+    function sync(){
+      var a=activeIndex();
+      cards.forEach(function(c,i){ c.classList.toggle('is-active', i===a); });
+      dots.forEach(function(d,i){ d.classList.toggle('on', i===a); });
+      if(prev) prev.disabled = a<=0;
+      if(next) next.disabled = a>=cards.length-1;
+    }
+    if(prev) prev.addEventListener('click', function(){ scrollToCard(activeIndex()-1); });
+    if(next) next.addEventListener('click', function(){ scrollToCard(activeIndex()+1); });
+    var tk=false;
+    track.addEventListener('scroll', function(){ if(!tk){ tk=true; requestAnimationFrame(function(){ sync(); tk=false; }); } }, {passive:true});
+    addEventListener('resize', sync, {passive:true});
+    // open on the middle review, floating center-stage
+    requestAnimationFrame(function(){ scrollToCard(Math.floor(cards.length/2),'auto'); sync(); });
+  }
+  fetch('/api/reviews').then(function(r){return r.json();}).then(function(rows){
+    var t=document.getElementById('revTrack');
+    if(!Array.isArray(rows) || !rows.length){ t.innerHTML='<p style="padding:0 6vw;color:var(--sage-dark)">Be the first to leave a review. Namit gid?</p>'; initRevCarousel(); return; }
+    t.innerHTML = rows.map(function(rv){
+      var photo = rv.photo_url ? '<img class="rev-photo" src="'+escR(rv.photo_url)+'" alt="" loading="lazy">' : '';
+      return '<div class="rev-card">'+photo+'<div class="rev-stars">'+stars(Number(rv.stars)||5)+'</div><p class="rev-text">'+escR(rv.review_text)+'</p><div class="rev-name">— '+escR(rv.name)+'</div></div>';
+    }).join('');
+    initRevCarousel();
+  }).catch(function(){ var t=document.getElementById('revTrack'); if(t) t.innerHTML=''; });
+
+  // ── Add a review (saved hidden until approved in the admin) ──
+  var raToggle=document.getElementById('revAddToggle'), raForm=document.getElementById('revForm');
+  if(raToggle && raForm){
+    raToggle.addEventListener('click', function(){
+      var open = raForm.hasAttribute('hidden');
+      if(open){ raForm.removeAttribute('hidden'); } else { raForm.setAttribute('hidden',''); }
+      raToggle.setAttribute('aria-expanded', open?'true':'false');
+    });
+    raForm.addEventListener('submit', async function(e){
+      e.preventDefault();
+      var send=raForm.querySelector('.rev-form-send'), note=document.getElementById('revFormNote');
+      var name=document.getElementById('rvName').value.trim();
+      var text=document.getElementById('rvText').value.trim();
+      var starsV=document.getElementById('rvStars').value;
+      if(!name || !text) return;
+      var prev=send.textContent; send.disabled=true; send.textContent='Sending…';
+      try{
+        var res=await fetch('/api/submit-review',{ method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ name:name, text:text, stars:starsV }) });
+        if(!res.ok) throw new Error('failed');
+        raForm.reset();
+        raForm.querySelectorAll('input,select,textarea,.rev-form-send').forEach(function(el){ el.style.display='none'; });
+        note.textContent='Salamat gid! Your review will show up once we’ve checked it. 💛';
+        note.style.color='var(--terracotta)';
+      }catch(_){
+        send.disabled=false; send.textContent=prev;
+        note.textContent='Couldn’t send just now. Please try again in a moment.';
+      }
+    });
+  }
+
+  // (hero story removed — it now lives in the "Ari ang aton istorya" section below)
+
+  // ── Anchor the Biaringan island to the real "gid": tail on the d, waterline on the baseline ──
+  (function(){
+    var placers=[];
+    document.querySelectorAll('.emblem').forEach(function(em){
+      var namitEl=em.querySelector('.wm-namit'), gidEl=em.querySelector('.wm-gid'), island=em.querySelector('.wm-island');
+      if(!namitEl||!gidEl||!island) return;
+      function place(){
+        var e=em.getBoundingClientRect(), g=gidEl.getBoundingClientRect(), nm=namitEl.getBoundingClientRect();
+        var ih=island.offsetHeight||1;
+        island.style.left=((nm.left-e.left)+g.width*0.62).toFixed(1)+'px';   // anchored to Namit (fixed)
+        island.style.top=((g.top-e.top)+g.height*0.80-ih*0.84).toFixed(1)+'px'; // waterline on baseline
+      }
+      placers.push(place); place();
+    });
+    function all(){ placers.forEach(function(p){ p(); }); }
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(all); }
+    addEventListener('load', all);
+    addEventListener('resize', all, {passive:true});
+  })();
+
+  // ── Story: opens under the pill, types out, then blooms "Namit gid" + the root underline ──
+  var stToggle=document.getElementById('storyToggle'), stSec=document.getElementById('story');
+  var stBody=document.getElementById('storyBody');
+  var stLedes=stBody ? [].slice.call(stBody.querySelectorAll('.lede')) : [];
+  var stData=stLedes.map(function(p){ return {styled:p.innerHTML, text:p.textContent}; });
+  var stTyped=false, REDUCE_S=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function escH(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function typeStory(){
+    if(stTyped || !stLedes.length) return; stTyped=true;
+    if(REDUCE_S){ stLedes.forEach(function(p,i){ p.innerHTML=stData[i].styled; }); stBody.classList.add('revealed'); return; }
+    stLedes.forEach(function(p){ p.innerHTML=''; });
+    var pi=0, ci=0;
+    (function step(){
+      if(pi>=stLedes.length){ stLedes.forEach(function(p,i){ p.innerHTML=stData[i].styled; }); requestAnimationFrame(function(){ stBody.classList.add('revealed'); }); return; }
+      var p=stLedes[pi], t=stData[pi].text;
+      if(ci<t.length){ ci++; p.innerHTML=escH(t.slice(0,ci))+'<span class="type-caret"></span>'; setTimeout(step, 11+Math.random()*20); }
+      else { p.innerHTML=escH(t); pi++; ci=0; setTimeout(step, 240); }
+    })();
+  }
+  function openStory(){
+    if(!stSec) return;
+    stSec.classList.add('open');
+    if(stToggle) stToggle.setAttribute('aria-expanded','true');
+    document.querySelectorAll('#storyBody .rise').forEach(function(el){ el.classList.add('in-view'); });
+    setTimeout(typeStory, 380);
+  }
+  if(stToggle && stSec){
+    stToggle.addEventListener('click', function(){
+      var open = stSec.classList.toggle('open');
+      stToggle.setAttribute('aria-expanded', open?'true':'false');
+      if(open){ document.querySelectorAll('#storyBody .rise').forEach(function(el){ el.classList.add('in-view'); }); setTimeout(typeStory, 380); }
+    });
+  }
+  document.querySelectorAll('a[href="#story"]').forEach(function(a){
+    a.addEventListener('click', function(){ setTimeout(openStory, 60); });
+  });
+
+  // ── story vine grows in as the section arrives (continuation of the page vine) ──
+  (function(){
+    if(!stSec) return;
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches){ stSec.classList.add('invine'); return; }
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ stSec.classList.add('invine'); io.disconnect(); } }); }, {threshold:.35});
+    io.observe(stSec);
+  })();
+})();
+</script>
+</body>
+</html>
