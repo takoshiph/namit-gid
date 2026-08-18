@@ -543,7 +543,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 #allergenPanel h4{font-family:var(--ff-display);font-weight:400;font-size:1.15rem;margin-bottom:.4rem;color:var(--terracotta)}
 #allergenPanel .aller-close{position:absolute;right:.6rem;top:.5rem;background:none;border:0;font-size:1.1rem;cursor:pointer;opacity:.6}
 /* ── Reviews ── */
-.reviews{padding:1rem 0 2.5rem}
+.reviews{padding:1rem 0 2.5rem;position:relative}
 .reviews .rev-carousel{position:relative;max-width:820px;margin:0 auto}
 .reviews .rev-track{display:flex;gap:0;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;
   padding:1.6rem calc(50% - min(42%,205px)) 1.6rem;scrollbar-width:none}
@@ -554,6 +554,26 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   transition:transform .4s cubic-bezier(.2,.7,.2,1), opacity .4s ease, box-shadow .4s ease}
 .reviews .rev-card.is-active{transform:scale(1);opacity:1;z-index:3;
   box-shadow:0 26px 52px -22px rgba(38,52,47,.55)}
+/* the active review hangs off the thread, so advancing the carousel swings it.
+   transform-origin sits at the top edge — the point it is strung from. */
+.reviews .rev-card{transform-origin:50% -14px}
+.reviews .rev-card.is-active.swing{animation:revSwing 1.25s cubic-bezier(.25,.8,.35,1) 1}
+@keyframes revSwing{
+  0%  {transform:scale(1) rotate(calc(var(--swing,1) *  1.9deg))}
+  32% {transform:scale(1) rotate(calc(var(--swing,1) * -1.05deg))}
+  58% {transform:scale(1) rotate(calc(var(--swing,1) *  .52deg))}
+  80% {transform:scale(1) rotate(calc(var(--swing,1) * -.2deg))}
+  100%{transform:scale(1) rotate(0deg)}
+}
+/* thread coming down from the how-it-works line into the carousel */
+#revThread{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;overflow:visible;
+  filter:drop-shadow(0 1.4px 1px rgba(45,28,15,.28))}
+#revThread .rt{fill:none;stroke:#6f4a2c;stroke-width:3.8;stroke-linecap:round;stroke-linejoin:round;opacity:.82}
+#revThread .rt-knot{fill:none;stroke:#6f4a2c;stroke-width:3.2;opacity:.8}
+#revThread .rt-drop{fill:none;stroke:#6f4a2c;stroke-width:3.2;stroke-linecap:round;opacity:.7}
+#revThread .foliage{opacity:0;transition:opacity .5s ease}
+#revThread .tdl{fill:none;stroke:#6f4a2c;stroke-width:2.2;stroke-linecap:round;opacity:.8}
+@media(max-width:820px){#revThread{display:none}}
 /* nav arrows */
 .reviews .rev-arrow{position:absolute;top:calc(50% - .6rem);transform:translateY(-50%);z-index:3;
   width:44px;height:44px;border-radius:50%;background:var(--cream);color:var(--espresso);
@@ -1212,6 +1232,103 @@ addEventListener('load', ()=>buildVine());
 // webfont swap changes row heights, so the spine has to be re-measured after it lands
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>buildVine());
 
+/* ---------------- reviews: the how-it-works thread carries on down and the
+   active quote hangs off a knot at the carousel's centre ---------------- */
+(function(){
+  const NS='http://www.w3.org/2000/svg';
+  const sec=document.querySelector('.reviews'), car=document.querySelector('.rev-carousel');
+  if(!sec||!car) return;
+  const REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
+  const TENDRIL='<path class="tdl" d="M0,0 c3,5 -4,7 -1,12 c3,4 5,2 4,6 c0,3 -3,4 -5,2"/>';
+  let svg=null, path=null, LEN=0, decorEls=[];
+  function build(){
+    if(innerWidth<820){ if(svg) svg.style.display='none'; return; }
+    const sr=sec.getBoundingClientRect(), cr=car.getBoundingClientRect();
+    if(!sr.width||!cr.width) return;
+    if(!svg){ svg=document.createElementNS(NS,'svg'); svg.id='revThread'; svg.setAttribute('aria-hidden','true');
+      svg.setAttribute('preserveAspectRatio','none'); sec.prepend(svg); }
+    svg.style.display='block';
+    svg.setAttribute('viewBox','0 0 '+sr.width.toFixed(1)+' '+sr.height.toFixed(1));
+    // start where the how-it-works tail stopped (page coords), or a sensible fallback
+    const t=window.__threadTail;
+    const sx = t ? (t.x-(sr.left+scrollX)) : sr.width*0.84;
+    const sy = t ? (t.y-(sr.top+scrollY))  : -70;
+    // Knot sits just above the ACTIVE CARD, not above the carousel frame. The frame's top
+    // is only ~16px below the heading on narrow screens, which left the thread no room to
+    // clear the "What brings us joy" line — and the card is what actually hangs from it.
+    const ac=sec.querySelector('.rev-card.is-active')||sec.querySelector('.rev-card');
+    const kx = (cr.left-sr.left)+cr.width/2;
+    const ky = ac ? ((ac.getBoundingClientRect().top-sr.top)-15) : ((cr.top-sr.top)-20);
+    if(ky-sy < 30){ svg.innerHTML=''; path=null; return; }
+    // Stay to the RIGHT of the section heading until we are below it, then sweep in.
+    // A straight run from the tail to the knot slices through "Ano ang Aton Kalipay".
+    // Measure the INKED text, not the block box: h2 and the eyebrow are block-level and
+    // report full section width, which gave the descent nothing to steer around.
+    const head=sec.querySelector('.section-head');
+    let hb=sy, hRight=0;
+    if(head){
+      const rg=document.createRange(); rg.selectNodeContents(head);
+      const rs=[...rg.getClientRects()].filter(z=>z.width>1&&z.height>1);
+      if(rs.length){
+        hb=(Math.max(...rs.map(z=>z.bottom))-sr.top)+9;
+        hRight=Math.max(...rs.map(z=>z.right))-sr.left;
+      } else { const hr=head.getBoundingClientRect(); hb=(hr.bottom-sr.top)+9; }
+    }
+    const clearY=Math.min(ky-12, Math.max(sy+40, hb));
+    // hold clear of the heading's right edge on the way down
+    const midX=Math.min(sr.width-14, Math.max(kx+40, hRight+24, sx-34));
+    const d='M '+sx.toFixed(1)+','+sy.toFixed(1)+
+            ' C '+(sx+16).toFixed(1)+','+(sy+(clearY-sy)*0.42).toFixed(1)+
+            ' '+(midX+16).toFixed(1)+','+(clearY-(clearY-sy)*0.28).toFixed(1)+
+            ' '+midX.toFixed(1)+','+clearY.toFixed(1)+
+            ' C '+midX.toFixed(1)+','+(clearY+(ky-clearY)*0.66).toFixed(1)+
+            ' '+(kx+(midX-kx)*0.55).toFixed(1)+','+(ky-3).toFixed(1)+
+            ' '+kx.toFixed(1)+','+ky.toFixed(1);
+    const tmp=document.createElementNS(NS,'path'); tmp.setAttribute('d',d); svg.appendChild(tmp);
+    const L=tmp.getTotalLength();
+    let decor='';
+    [0.34,0.58,0.79].forEach((f,i)=>{
+      const p0=tmp.getPointAtLength(L*f), a=tmp.getPointAtLength(Math.max(0,L*f-2)), b2=tmp.getPointAtLength(Math.min(L,L*f+2));
+      const ang=(Math.atan2(b2.y-a.y,b2.x-a.x)*180/Math.PI + (i%2?74:-68)).toFixed(1);
+      decor+='<g class="foliage" data-fr="'+f+'" transform="translate('+p0.x.toFixed(1)+','+p0.y.toFixed(1)+') rotate('+ang+') scale(.3)">'+LEAF+'</g>';
+    });
+    const tp=tmp.getPointAtLength(L*0.5);
+    decor+='<g class="foliage" data-fr="0.5" transform="translate('+tp.x.toFixed(1)+','+(tp.y+3).toFixed(1)+')">'+TENDRIL+'</g>';
+    svg.removeChild(tmp);
+    svg.innerHTML='<path class="rt" d="'+d+'"/>'+
+      '<circle class="rt-knot" cx="'+kx.toFixed(1)+'" cy="'+ky.toFixed(1)+'" r="5.2"/>'+
+      '<path class="rt-drop" d="M '+kx.toFixed(1)+','+(ky+5).toFixed(1)+' L '+kx.toFixed(1)+','+(ky+26).toFixed(1)+'"/>'+decor;
+    path=svg.querySelector('.rt'); LEN=path.getTotalLength();
+    path.style.strokeDasharray=LEN;
+    decorEls=[...svg.querySelectorAll('.foliage')];
+    draw();
+  }
+  function draw(){
+    if(!path) return;
+    let p=1;
+    if(!REDUCE){ const sr=sec.getBoundingClientRect();
+      p=Math.min(1,Math.max(0,((innerHeight*0.88)-sr.top)/(sr.height*0.55||1))); }
+    path.style.strokeDashoffset=(LEN*(1-p)).toFixed(1);
+    decorEls.forEach(g=>{ g.style.opacity = p>parseFloat(g.dataset.fr||0.5)+0.04 ? 1 : 0; });
+    const knot=svg&&svg.querySelector('.rt-knot'), drop=svg&&svg.querySelector('.rt-drop');
+    if(knot) knot.style.opacity = p>0.96?0.8:0;
+    if(drop) drop.style.opacity = p>0.98?0.7:0;
+  }
+  build();
+  // reviews arrive async, and the active card changes as you advance — rebuild on both
+  const track=document.getElementById('revTrack');
+  if(track && 'MutationObserver' in window){
+    let mt; new MutationObserver(()=>{ clearTimeout(mt); mt=setTimeout(build,90); })
+      .observe(track,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+  }
+  addEventListener('threadtail', build);
+  addEventListener('load', ()=>setTimeout(build,90));
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
+  let rt2; addEventListener('resize', ()=>{ clearTimeout(rt2); rt2=setTimeout(build,140); }, {passive:true});
+  let tk=false; addEventListener('scroll', ()=>{ if(!tk){ tk=true; requestAnimationFrame(()=>{ draw(); tk=false; }); } }, {passive:true});
+})();
+
 /* hero vine: hidden at load (just the logo), grows out from behind the sign as you scroll */
 (function(){
   const rect=document.getElementById('emblemVineClipRect'); if(!rect) return;
@@ -1558,8 +1675,13 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     const endX=px+38;
     d+=' C '+(px+14).toFixed(1)+','+(holeY-3).toFixed(1)+' '+endX.toFixed(1)+','+holeY.toFixed(1)+' '+endX.toFixed(1)+','+(holeY+2).toFixed(1);
     // tail: after the last card the vine carries on out to the right and tapers away
+    // the tail now leaves to the right and turns DOWN, so the reviews section can pick it up
+    const tEndX=Math.min(wr.width+26, endX+96), tEndY=holeY+128;
     const tail='M '+endX.toFixed(1)+','+(holeY+2).toFixed(1)
-      +' C '+(endX+54).toFixed(1)+','+(holeY-2).toFixed(1)+' '+(endX+116).toFixed(1)+','+(holeY-12).toFixed(1)+' '+(endX+178).toFixed(1)+','+(holeY-30).toFixed(1);
+      +' C '+(endX+52).toFixed(1)+','+(holeY+6).toFixed(1)+' '+tEndX.toFixed(1)+','+(holeY+44).toFixed(1)+' '+tEndX.toFixed(1)+','+tEndY.toFixed(1);
+    // hand the end point to the reviews connector, in page coordinates
+    window.__threadTail={ x:wr.left+scrollX+tEndX, y:wr.top+scrollY+tEndY };
+    dispatchEvent(new CustomEvent('threadtail'));
     // Foliage rides the sag: sampled along each span at jittered positions, angled off the
     // real tangent so leaves sit ON the curve, with gravity biasing them downward. Tendrils
     // hang from the low point of each droop — the strongest "this is alive" cue.
@@ -1908,7 +2030,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     if(dotsWrap && !single){
       cards.forEach(function(c,i){
         var d=document.createElement('button'); d.type='button'; d.setAttribute('aria-label','Go to review '+(i+1));
-        d.addEventListener('click', function(){ scrollToCard(i); });
+        d.addEventListener('click', function(){ var was=activeIndex(); scrollToCard(i); setTimeout(function(){nudge(i>=was?1:-1);},300); });
         dotsWrap.appendChild(d); dots.push(d);
       });
     }
@@ -1926,8 +2048,16 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       if(prev) prev.disabled = a<=0;
       if(next) next.disabled = a>=cards.length-1;
     }
-    if(prev) prev.addEventListener('click', function(){ scrollToCard(activeIndex()-1); });
-    if(next) next.addEventListener('click', function(){ scrollToCard(activeIndex()+1); });
+    function nudge(dir){                      // the card is hanging, so moving it should swing it
+      if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      requestAnimationFrame(function(){
+        var c=track.querySelector('.rev-card.is-active'); if(!c) return;
+        c.style.setProperty('--swing', (dir>0?1:-1));
+        c.classList.remove('swing'); void c.offsetWidth; c.classList.add('swing');
+      });
+    }
+    if(prev) prev.addEventListener('click', function(){ scrollToCard(activeIndex()-1); setTimeout(function(){nudge(-1);},300); });
+    if(next) next.addEventListener('click', function(){ scrollToCard(activeIndex()+1); setTimeout(function(){nudge(1);},300); });
     var tk=false;
     track.addEventListener('scroll', function(){ if(!tk){ tk=true; requestAnimationFrame(function(){ sync(); tk=false; }); } }, {passive:true});
     addEventListener('resize', sync, {passive:true});
