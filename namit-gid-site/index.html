@@ -501,11 +501,19 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .field.hidden{display:none}
 .field{display:flex;flex-direction:column;gap:.35rem}
 .field label{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;opacity:.7}
-.field input,.field textarea{
+.field input,.field textarea,.field select{
   font-family:inherit;font-size:1rem;padding:.8rem .95rem;border-radius:12px;
   border:1px solid rgba(53,40,31,.2);background:#fff;color:var(--espresso);
 }
-.field input:focus,.field textarea:focus{outline:2px solid var(--terracotta);border-color:transparent}
+.field select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--sage-dark) 50%),linear-gradient(135deg,var(--sage-dark) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:2.2rem}
+.field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--terracotta);border-color:transparent}
+.field input.field-error,.field select.field-error{border-color:var(--terracotta);background:rgba(196,99,60,.05)}
+/* pickup date + slot sit side by side; they stack under 380px */
+.m-pickup{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+@media(max-width:380px){.m-pickup{grid-template-columns:1fr}}
+.m-sub{font-size:.74rem;letter-spacing:0;text-transform:none;opacity:.6}
+.m-hint{font-size:.8rem;color:var(--sage-dark);line-height:1.45}
+.m-hint.warn{color:var(--terracotta)}
 .m-total{display:flex;justify-content:space-between;font-family:var(--ff-display);font-size:1.15rem;border-top:1px dashed rgba(53,40,31,.25);padding-top:1rem}
 .m-submit{
   background:var(--terracotta);color:var(--cream);border-radius:99px;padding:1rem;
@@ -864,10 +872,10 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     <h2 id="howH">From order to pickup</h2>
   </div>
   <div class="steps">
-    <div class="step"><div class="step-head"><span class="num">1</span><span class="k">Finish your order</span></div><p>Pick your dish and add your name and contact. It takes under a minute.</p></div>
-    <div class="step"><div class="step-head"><span class="num">2</span><span class="k">Send your $10 deposit</span></div><p>A $10 Interac e-Transfer to orders@takoshi.ca holds your spot. Upload the screenshot to confirm.</p></div>
+    <div class="step"><div class="step-head"><span class="num">1</span><span class="k">Finish your order</span></div><p>Pick your dish, choose a pickup day and time, and add your contact. It takes under a minute.</p></div>
+    <div class="step"><div class="step-head"><span class="num">2</span><span class="k">Send your $10 deposit</span></div><p>A $10 Interac e-Transfer to orders@takoshi.ca holds your slot. Send the screenshot too and we'll confirm faster.</p></div>
     <div class="step"><div class="step-head"><span class="num">3</span><span class="k">We start cooking</span></div><p>Every order is made fresh from scratch once your deposit is confirmed.</p></div>
-    <div class="step"><div class="step-head"><span class="num">4</span><span class="k">Pick up warm</span></div><p>Collect at 180 Fairview Mall Drive and pay the balance in cash or Interac, whichever works.</p></div>
+    <div class="step"><div class="step-head"><span class="num">4</span><span class="k">Pick up warm</span></div><p>Collect at 180 Fairview Mall Drive at your chosen time and pay the balance in cash or Interac, whichever works.</p></div>
   </div>
 </section>
 
@@ -987,7 +995,21 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
         <input id="fPhone" required placeholder="For pickup coordination">
       </div>
       <div class="field" style="margin-bottom:1rem">
-        <label for="fNotes">Notes <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+        <label for="fEmail">Email <span class="m-sub">(optional — we'll send a confirmation)</span></label>
+        <input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com">
+      </div>
+      <div class="field" style="margin-bottom:.4rem">
+        <label>Pickup</label>
+        <div class="m-pickup">
+          <input id="fDate" type="date" required aria-label="Pickup date">
+          <select id="fTime" required aria-label="Pickup time">
+            <option value="" disabled selected>Pick a time</option>
+          </select>
+        </div>
+      </div>
+      <p class="m-hint" id="pickupHint" style="margin-bottom:1rem">Everything is cooked the day you collect it, at 180 Fairview Mall Dr.</p>
+      <div class="field" style="margin-bottom:1rem">
+        <label for="fNotes">Notes <span class="m-sub">(optional)</span></label>
         <textarea id="fNotes" rows="2" placeholder="Extra chicharron? Less spicy?"></textarea>
       </div>
       <div class="m-total" style="margin-bottom:1rem"><span>Total</span><span id="mTotal">$16</span></div>
@@ -997,6 +1019,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <button type="button" class="m-dep-back" id="depBack">&#8592; Back</button>
       <h3>Reserve your batch</h3>
       <p class="m-dep-lead">Send a <strong>$10 deposit</strong> by Interac e-Transfer to <strong>orders@takoshi.ca</strong> to confirm your order, then upload the screenshot below (optional, but it speeds up confirmation).</p>
+      <p class="m-hint" id="depBalanceLine"></p>
       <label class="m-dep-upload" for="depShot"><span class="m-dep-ico">&#128247;</span><span id="depUploadText">Tap to add your e-Transfer screenshot</span></label>
       <input type="file" id="depShot" accept="image/*" hidden>
       <img id="depPreview" alt="" class="m-dep-preview" hidden>
@@ -1004,7 +1027,8 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     </div>
     <div class="m-success">
       <h3>Salamat gid! 😋❤️</h3>
-      <p>Kung namit, balik liwat! We'll message you to confirm pickup. See you Saturday!</p>
+      <p id="mSuccessLine">Kung namit, balik liwat! We'll message you to confirm pickup.</p>
+      <p class="m-hint" id="mSuccessMeta"></p>
       <button class="order-btn" id="mDone" type="button">Back to menu</button>
     </div>
   </div>
@@ -1489,6 +1513,8 @@ function openModal(idx, imgSrc){
   else { note.textContent=''; note.classList.add('hidden'); }
   modal.classList.remove('done','deposit');
   document.getElementById('orderForm').reset();
+  document.querySelectorAll('#orderForm .field-error').forEach(el=>el.classList.remove('field-error'));
+  resetPickup();
   veil.classList.add('open'); veil.setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden';
   document.getElementById('fName').focus();
@@ -1513,19 +1539,149 @@ veil.addEventListener('click', e=>{ if(e.target===veil) closeModal(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && veil.classList.contains('open')) closeModal(); });
 document.getElementById('qMinus').addEventListener('click', ()=>{ qty=Math.max(minQty,qty-1); updateTotals(); });
 document.getElementById('qPlus').addEventListener('click', ()=>{ qty=Math.min(20,qty+1); updateTotals(); });
-/* ---- live order submission (Supabase edge function) ---- */
-const SB_URL = 'https://ktgclbvdkhvfvebajtao.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0Z2NsYnZka2h2ZnZlYmFqdGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2NDE3MjAsImV4cCI6MjA5OTIxNzcyMH0.m63CuAy7NjuyKXh_yXFy749QGEFxzoDvrORSdTHPbog';
-// Step 1 \u2014 order form: if closed, block; otherwise move to the deposit step.
-document.getElementById('orderForm').addEventListener('submit', e=>{
+/* ---------------- pickup date + slot ----------------
+   Ported from Takoshi: one order reserves a 1.5-hour prep window, so a slot is
+   unavailable if any live order sits within 90 minutes of it, before or after.
+   Slots inside a scheduled closure are blocked too, even while the store is
+   otherwise open. Both rules are re-checked server-side in submit-order. */
+const DEPOSIT = 10;
+const BLOCK_WINDOW_MIN = 90;
+const SLOT_TIMES = (function(){
+  const out=[];
+  for(let m=10*60; m<=20*60; m+=30){            // 10:00 AM \u2192 8:00 PM, every 30 min
+    let h=Math.floor(m/60), mi=m%60, ap=h>=12?'PM':'AM', h12=h%12===0?12:h%12;
+    out.push(h12+':'+String(mi).padStart(2,'0')+' '+ap);
+  }
+  return out;
+})();
+function timeToMin(t){
+  const m=String(t||'').match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if(!m) return null;
+  let h=parseInt(m[1],10); const mi=parseInt(m[2],10), ap=m[3].toUpperCase();
+  if(ap==='PM'&&h!==12) h+=12;
+  if(ap==='AM'&&h===12) h=0;
+  return h*60+mi;
+}
+function localISODate(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function prettyDate(iso){
+  try{ return new Date(iso+'T00:00:00').toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'}); }
+  catch(_){ return iso; }
+}
+const fDate=document.getElementById('fDate'), fTime=document.getElementById('fTime'),
+      pickupHint=document.getElementById('pickupHint');
+SLOT_TIMES.forEach(t=>{
+  const o=document.createElement('option'); o.value=t; o.textContent=t; fTime.appendChild(o);
+});
+// Closure windows come from /api/availability; the storefront script sets them.
+function closureWindows(){ return (window.NG_WINDOWS||[]).map(w=>({
+  from: w.from ? new Date(w.from) : null, until: new Date(w.until)
+})); }
+function pickupDateTime(dateStr, timeStr){
+  const mins=timeToMin(timeStr);
+  if(mins===null || !dateStr) return null;
+  const p=dateStr.split('-').map(Number);
+  return new Date(p[0], p[1]-1, p[2], Math.floor(mins/60), mins%60, 0, 0);
+}
+function isClosedAt(dateStr, timeStr){
+  const dt=pickupDateTime(dateStr,timeStr); if(!dt) return false;
+  return closureWindows().some(w=>(!w.from || dt>=w.from) && dt<w.until);
+}
+function isBlockedByLoad(load, timeStr){
+  const t=timeToMin(timeStr); if(t===null) return false;
+  return Object.keys(load||{}).some(booked=>{
+    if(!load[booked]) return false;
+    const b=timeToMin(booked);
+    return b!==null && Math.abs(b-t) < BLOCK_WINDOW_MIN;
+  });
+}
+function isPast(dateStr, timeStr){
+  const dt=pickupDateTime(dateStr,timeStr);
+  return !!dt && dt.getTime() < Date.now() + 45*60*1000;   // 45 min of lead time
+}
+let slotLoad={}, slotLoadDate=null;
+async function refreshSlots(){
+  if(!fDate||!fTime||!fDate.value) return;
+  if(slotLoadDate!==fDate.value){
+    slotLoad={};
+    try{
+      const r=await fetch('/api/slot-load?date='+encodeURIComponent(fDate.value));
+      if(r.ok) slotLoad=(await r.json()).load||{};
+    }catch(_){ /* a failed lookup must not stop someone ordering */ }
+    slotLoadDate=fDate.value;
+  }
+  let open=0;
+  [...fTime.options].forEach(opt=>{
+    if(!opt.value) return;
+    const past=isPast(fDate.value,opt.value);
+    const closed=isClosedAt(fDate.value,opt.value);
+    const full=isBlockedByLoad(slotLoad,opt.value);
+    opt.disabled = past||closed||full;
+    opt.textContent = opt.value + (past?' (too soon)':closed?' (closed)':full?' (taken)':'');
+    if(opt.disabled && fTime.value===opt.value) fTime.value='';
+    if(!opt.disabled) open++;
+  });
+  if(pickupHint){
+    if(!open){
+      pickupHint.textContent='No slots left on '+prettyDate(fDate.value)+' \u2014 please try another day.';
+      pickupHint.classList.add('warn');
+    } else {
+      pickupHint.textContent='Everything is cooked the day you collect it, at 180 Fairview Mall Dr.';
+      pickupHint.classList.remove('warn');
+    }
+  }
+}
+function resetPickup(){
+  const today=new Date();
+  const min=localISODate(today);
+  fDate.min=min;
+  // default to the next weekend day \u2014 this kitchen cooks Saturdays and Sundays
+  const d=new Date(today);
+  let guard=0;
+  do{ d.setDate(d.getDate()+1); guard++; } while(d.getDay()!==6 && d.getDay()!==0 && guard<8);
+  fDate.value=localISODate(d);
+  fTime.value='';
+  slotLoadDate=null;
+  refreshSlots();
+}
+if(fDate) fDate.addEventListener('change', ()=>{ slotLoadDate=null; refreshSlots(); });
+if(fTime) fTime.addEventListener('change', ()=>fTime.classList.remove('field-error'));
+
+/* ---- live order submission (via the Worker \u2192 Supabase edge function) ---- */
+// Step 1 \u2014 order form: if closed or the slot is gone, block; otherwise move on.
+document.getElementById('orderForm').addEventListener('submit', async e=>{
   e.preventDefault();
   if(window.NG_AVAILABLE === false){
     alert(window.NG_CLOSED_MSG || "We're currently closed for orders. Please check back soon!");
     return;
   }
+  const date=fDate.value, time=fTime.value;
+  if(!date || !time){
+    (!date?fDate:fTime).classList.add('field-error');
+    alert('Please choose a pickup date and time.');
+    return;
+  }
+  if(isClosedAt(date,time) || isPast(date,time)){
+    fTime.classList.add('field-error');
+    await refreshSlots();
+    alert("That pickup time isn't available. Please pick another.");
+    return;
+  }
+  // Re-check capacity right before the deposit step \u2014 someone may have taken it.
+  slotLoadDate=null;
+  await refreshSlots();
+  if(isBlockedByLoad(slotLoad,time)){
+    fTime.value=''; fTime.classList.add('field-error');
+    alert('Sorry, that pickup time was just taken. Please choose another.');
+    return;
+  }
   const ds=document.getElementById('depShot'); if(ds) ds.value='';
   const dp=document.getElementById('depPreview'); if(dp){ dp.hidden=true; dp.src=''; }
   const dt=document.getElementById('depUploadText'); if(dt) dt.textContent='Tap to add your e-Transfer screenshot';
+  const bal=Math.max(0, unit*qty - DEPOSIT);
+  const dl=document.getElementById('depBalanceLine');
+  if(dl) dl.textContent='Pickup '+prettyDate(date)+' at '+time+' \u00b7 $'+bal+' balance due then.';
   modal.classList.add('deposit');
 });
 document.getElementById('depBack').addEventListener('click', ()=>modal.classList.remove('deposit'));
@@ -1550,6 +1706,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       }catch(_){ /* non-fatal \u2014 order can still go through */ }
     }
     btn.textContent='Sending\u2026';
+    const pickupDate=fDate.value, pickupTime=fTime.value;
     const res = await fetch('/api/submit-order', {
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
@@ -1558,12 +1715,34 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
         qty,
         name: document.getElementById('fName').value,
         contact: document.getElementById('fPhone').value,
+        email: document.getElementById('fEmail').value,
         notes: document.getElementById('fNotes').value,
+        pickupDate,
+        pickup: pickupTime,
         deposit_screenshot_url: depositUrl
       }})
     });
-    const data = await res.json();
+    const data = await res.json().catch(()=>({}));
+    // The store can close, or the slot can be taken, between the form and here.
+    if(res.status===409){
+      modal.classList.remove('deposit');
+      slotLoadDate=null; await refreshSlots();
+      fTime.value=''; fTime.classList.add('field-error');
+      alert(data.error==='closed_slot'
+        ? "Sorry, we're closed at that pickup time. Please choose another."
+        : (data.message || "We're currently closed for orders. Please check back soon!"));
+      return;
+    }
     if(!res.ok || !data.success) throw new Error(data.error || 'failed');
+    const meta=document.getElementById('mSuccessMeta');
+    if(meta){
+      const bits=[];
+      if(pickupDate && pickupTime) bits.push('Pickup ' + prettyDate(pickupDate) + ' at ' + pickupTime);
+      if(data.balanceDue != null) bits.push('$' + Number(data.balanceDue).toFixed(2) + ' balance due at pickup');
+      if(data.orderId) bits.push('Order #' + data.orderId);
+      meta.textContent = bits.join(' \u00b7 ');
+    }
+    slotLoadDate=null;
     modal.classList.remove('deposit'); modal.classList.add('done');
     document.getElementById('mDone').focus();
   }catch(err){
@@ -1972,13 +2151,16 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   fetch('/api/availability').then(function(r){return r.json();}).then(function(a){
     window.NG_AVAILABLE = a.available !== false;
     window.NG_CLOSED_MSG = a.message || '';
+    // Every scheduled closure window, so the pickup picker can grey out times
+    // inside one even while the store is open for the rest of the week.
+    window.NG_WINDOWS = Array.isArray(a.windows) ? a.windows.filter(function(w){ return w && w.until; }) : [];
     if(a.available === false){
       var b=document.getElementById('closedBanner'), t=document.getElementById('closedBannerText');
       var msg = a.message || "We're currently closed for orders.";
       if(a.until){ try{ var d=new Date(a.until); msg += ' Back <b>'+d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'})+'</b>.'; }catch(_){} }
       t.innerHTML = msg; b.classList.add('show');
     }
-  }).catch(function(){ window.NG_AVAILABLE = true; });
+  }).catch(function(){ window.NG_AVAILABLE = true; window.NG_WINDOWS = []; });
   var cbc=document.getElementById('closedBannerClose');
   if(cbc) cbc.addEventListener('click', function(){ document.getElementById('closedBanner').classList.remove('show'); });
 

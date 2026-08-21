@@ -6,18 +6,26 @@
 //  Cloudflare Pages → Settings → Environment variables (Encrypt the secrets):
 //    SUPABASE_URL               https://ktgclbvdkhvfvebajtao.supabase.co
 //    SUPABASE_KEY               Supabase anon key (namit-gid-by-leni)
-//    SUPABASE_SERVICE_ROLE_KEY  Supabase service-role key (server-side uploads)
+//    SUPABASE_SERVICE_ROLE_KEY  Supabase service-role key — REQUIRED. Every table
+//                               in this project has RLS on with no policies, so
+//                               anything but the service role reads back empty and
+//                               writes silently affect zero rows.
 //    CORRECT_PIN                admin PIN — MUST match Takoshi's so the shared
 //                               admin's login token is accepted here too.
 //    TOKEN_SECRET               long random string — MUST match Takoshi's, for
 //                               the same reason (tokens are validated by secret).
 //    RESEND_API_KEY   (optional) order-confirmation emails; skipped if unset.
-//    TURNSTILE_SECRET_KEY (optional) bot check on order submit; skipped if unset.
+//    TURNSTILE_SECRET_KEY (optional) bot check on order submit. LEAVE UNSET unless
+//                               you also add a Turnstile widget to index.html — the
+//                               storefront sends no token, so setting this alone
+//                               makes every order fail the check.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TOKEN_EXPIRY_MS  = 24 * 60 * 60 * 1000; // 24h session
 const PIN_MAX_ATTEMPTS = 5;
 const PIN_LOCKOUT_MS   = 15 * 60 * 1000;
+const DEPOSIT          = 10;
+const BLOCK_WINDOW_MIN = 90;   // one order reserves a 1.5h prep window
 
 const pinAttempts = new Map(); // IP → { count, lockedUntil }
 
@@ -84,13 +92,65 @@ function requireAuth(request, env) {
   return verifyToken(token, env.TOKEN_SECRET);
 }
 
+// ── Order shape translation ──────────────────────────────────────────────────
+// Namit Gid's orders table speaks a different vocabulary from Takoshi's
+// (dish/qty/customer_name/contact vs size/filling/sauce/name/phone), but the
+// shared admin only knows Takoshi's. Translate on the way out and back on the
+// way in, so one admin renders both brands without a fork.
+//
+// Status: Namit allows pending|confirmed|ready|picked_up|cancelled; the admin
+// knows pending|confirmed|completed|cancelled.
+
+const STATUS_OUT = { picked_up: 'completed', ready: 'confirmed' };
+const STATUS_IN  = { completed: 'picked_up' };
+
+function toAdminOrder(o) {
+  const total = o.total != null ? Number(o.total) : null;
+  const balance = o.balance_due != null
+    ? Number(o.balance_due)
+    : (total != null ? Math.max(0, total - DEPOSIT) : null);
+  return {
+    ...o,                                  // keep dish/qty/unit_price/total intact
+    status:      STATUS_OUT[o.status] || o.status || 'pending',
+    name:        o.customer_name,
+    phone:       o.contact,
+    email:       o.email || null,
+    size:        total != null ? `${o.dish} · $${total.toFixed(2)}` : o.dish,
+    filling:     o.qty != null ? `Qty ${o.qty}` : '',
+    sauce:       o.deposit_screenshot_url ? 'Deposit screenshot received' : 'No deposit screenshot',
+    pickup_date: o.pickup_date || null,
+    pickup_time: o.pickup_time || null,
+    balance_due: balance,
+    discount_type: 'none',
+    discount_pct:  0,
+  };
+}
+
+// ── Pickup-time helpers (same scale as the submit-order edge function) ───────
+
+function timeToMin(t) {
+  const m = String(t || '').match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!m) return null;
+  let h = parseInt(m[1], 10);
+  const min = parseInt(m[2], 10);
+  const ap = m[3].toUpperCase();
+  if (ap === 'PM' && h !== 12) h += 12;
+  if (ap === 'AM' && h === 12) h = 0;
+  return h * 60 + min;
+}
+
 // ── Order confirmation email (Namit Gid branded, best-effort) ─────────────────
 
-async function sendConfirmationEmail(resendApiKey, order) {
+async function sendConfirmationEmail(resendApiKey, order, result) {
   const { name, email, dish, qty, notes } = order;
-  const notesLine = notes
-    ? `<tr><td style="padding:6px 0;color:#8a7f74;font-size:13px;">Notes</td><td style="padding:6px 0;font-size:13px;color:#3a332e;">${notes}</td></tr>`
-    : '';
+  const balance = result && result.balanceDue != null ? Number(result.balanceDue) : null;
+  const pickupLine = order.pickupDate
+    ? new Date(order.pickupDate + 'T00:00:00').toLocaleDateString('en-CA',
+        { weekday: 'long', month: 'long', day: 'numeric' })
+      + (order.pickup ? ' · ' + order.pickup : '')
+    : null;
+  const row = (label, value) =>
+    `<tr><td style="padding:6px 0;color:#8a7f74;font-size:13px;width:40%;">${label}</td><td style="padding:6px 0;font-size:13px;color:#3a332e;">${value}</td></tr>`;
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
 <body style="margin:0;padding:0;background:#f6efe6;font-family:'Helvetica Neue',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;padding:40px 20px;"><tr><td align="center">
@@ -102,12 +162,15 @@ async function sendConfirmationEmail(resendApiKey, order) {
       <tr><td style="padding:30px 36px;">
         <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#c2604a;">Order received</p>
         <h1 style="margin:0 0 18px;font-family:Georgia,serif;font-size:24px;color:#2a241f;">Salamat, ${name}!</h1>
-        <p style="margin:0 0 24px;font-size:15px;color:#6f645a;line-height:1.7;">We've got your order. We cook fresh every weekend — we'll be in touch to confirm pickup.</p>
+        <p style="margin:0 0 24px;font-size:15px;color:#6f645a;line-height:1.7;">We've got your order and we'll message you to confirm. Everything is cooked fresh, so it's made the day you pick it up.</p>
         <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
           <tr><td colspan="2" style="padding-bottom:12px;font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#c07a3a;">Your order</td></tr>
-          <tr><td style="padding:6px 0;color:#8a7f74;font-size:13px;width:40%;">Dish</td><td style="padding:6px 0;font-size:13px;color:#3a332e;">${dish}</td></tr>
-          <tr><td style="padding:6px 0;color:#8a7f74;font-size:13px;">Quantity</td><td style="padding:6px 0;font-size:13px;color:#3a332e;">${qty}</td></tr>
-          ${notesLine}
+          ${row('Dish', dish)}
+          ${row('Quantity', qty)}
+          ${pickupLine ? row('Pickup', pickupLine) : ''}
+          ${row('Pickup at', '180 Fairview Mall Dr., North York')}
+          ${balance != null ? row('Balance at pickup', '$' + balance.toFixed(2)) : ''}
+          ${notes ? row('Notes', notes) : ''}
         </table>
         <p style="margin:0;font-size:13px;color:#9a8f83;">Namit gid — so delicious. 💛</p>
       </td></tr>
@@ -130,6 +193,42 @@ async function sendConfirmationEmail(resendApiKey, order) {
   });
 }
 
+// ── Review request email (admin-triggered, Namit Gid branded) ────────────────
+
+async function sendReviewRequestEmail(resendApiKey, { name, email, dish }) {
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;padding:0;background:#f6efe6;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;padding:40px 20px;"><tr><td align="center">
+    <table width="100%" style="max-width:520px;background:#fffaf3;border-radius:16px;overflow:hidden;border:1px solid #ece0d1;">
+      <tr><td style="padding:32px 36px 20px;text-align:center;border-bottom:1px solid #efe4d6;">
+        <div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#1f5c3d;">Namit Gid</div>
+        <p style="margin:6px 0 0;font-size:13px;color:#9a8f83;">Filipino home cooking · Toronto</p>
+      </td></tr>
+      <tr><td style="padding:30px 36px;text-align:center;">
+        <h1 style="margin:0 0 14px;font-family:Georgia,serif;font-size:24px;color:#2a241f;">Namit gid?</h1>
+        <p style="margin:0 0 24px;font-size:15px;color:#6f645a;line-height:1.7;">Hi ${name} — thank you for ordering${dish ? ' the ' + dish : ''}. If it was good, would you tell us in a line or two? Your words help this little kitchen grow.</p>
+        <a href="https://namitgid.takoshi.ca/#reviews" style="display:inline-block;background:#c2604a;color:#fffaf3;text-decoration:none;border-radius:99px;padding:14px 30px;font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">Leave a review</a>
+      </td></tr>
+      <tr><td style="padding:18px 36px;text-align:center;border-top:1px solid #efe4d6;">
+        <p style="margin:0;font-size:11px;color:#b6a89a;">© 2026 Namit Gid · Toronto, ON</p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: 'Namit Gid <orders@takoshi.ca>',
+      to: [email],
+      subject: 'Namit gid? Tell us how it was 💛',
+      html,
+    }),
+  });
+  if (!res.ok) throw new Error('resend failed');
+}
+
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 export default {
@@ -146,9 +245,14 @@ export default {
     }
 
     const SB = env.SUPABASE_URL;
+    // Every table in this project has RLS enabled with no policies, so the anon
+    // key reads back an empty array and writes report success while changing
+    // nothing. The Worker is the trust boundary (admin routes check the session
+    // token first), so it talks to PostgREST as the service role.
+    const SB_ADMIN_KEY = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_KEY;
     const sbHeaders = {
-      'apikey': env.SUPABASE_KEY,
-      'Authorization': `Bearer ${env.SUPABASE_KEY}`,
+      'apikey': SB_ADMIN_KEY,
+      'Authorization': `Bearer ${SB_ADMIN_KEY}`,
     };
     const sbWrite = { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' };
 
@@ -182,25 +286,34 @@ export default {
     if (url.pathname === '/api/orders' && request.method === 'GET') {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
       const res = await fetch(`${SB}/rest/v1/orders?select=*&order=created_at.desc`, { headers: sbHeaders });
-      return jsonResponse(await res.json(), res.ok ? 200 : res.status, request);
+      if (!res.ok) return jsonResponse({ error: 'Failed to load' }, res.status, request);
+      const rows = await res.json().catch(() => []);
+      return jsonResponse(Array.isArray(rows) ? rows.map(toAdminOrder) : rows, 200, request);
     }
 
     // ── PATCH /api/orders/:id (admin) ─────────────────────────────────────────
     if (url.pathname.startsWith('/api/orders/') && request.method === 'PATCH') {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
       const id = url.pathname.split('/api/orders/')[1];
+      if (!/^\d+$/.test(id)) return jsonResponse({ error: 'Bad id' }, 400, request);
       let body;
       try { body = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
-      // Namit Gid's orders table allows: pending | confirmed | ready | picked_up | cancelled.
-      // The shared admin may send Takoshi's 'completed' — map it to 'picked_up'.
-      let status = body.status === 'completed' ? 'picked_up' : body.status;
+      // The shared admin sends Takoshi's vocabulary — translate to this table's.
+      const status = STATUS_IN[body.status] || body.status;
       const allowed = ['pending', 'confirmed', 'ready', 'picked_up', 'cancelled'];
       if (!allowed.includes(status)) return jsonResponse({ error: 'Invalid status' }, 400, request);
       const res = await fetch(`${SB}/rest/v1/orders?id=eq.${encodeURIComponent(id)}`, {
-        method: 'PATCH', headers: sbWrite, body: JSON.stringify({ status }),
+        method: 'PATCH',
+        headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify({ status }),
       });
       if (!res.ok) return jsonResponse({ error: 'Failed to update' }, 500, request);
-      return jsonResponse({ ok: true }, 200, request);
+      // return=representation so a policy-blocked write can't masquerade as success
+      const updated = await res.json().catch(() => []);
+      if (!Array.isArray(updated) || !updated.length) {
+        return jsonResponse({ error: 'Order not found or not updatable' }, 404, request);
+      }
+      return jsonResponse({ ok: true, status }, 200, request);
     }
 
     // ── GET /api/availability (public) ────────────────────────────────────────
@@ -208,7 +321,7 @@ export default {
       const res = await fetch(`${SB}/rest/v1/store_schedule?id=eq.1&select=*`, { headers: sbHeaders });
       const rows = await res.json();
       const s = rows[0];
-      if (!s) return jsonResponse({ available: true }, 200, request);
+      if (!s) return jsonResponse({ available: true, windows: [] }, 200, request);
       const nowTs = new Date();
       const windows = [];
       if (s.unavailable_until && new Date(s.unavailable_until) > nowTs) {
@@ -250,7 +363,8 @@ export default {
       let body;
       try { body = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
       const res = await fetch(`${SB}/rest/v1/store_schedule?id=eq.1`, {
-        method: 'PATCH', headers: sbWrite,
+        method: 'PATCH',
+        headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
         body: JSON.stringify({
           is_available: body.is_available,
           unavailable_from: body.unavailable_from || null,
@@ -260,6 +374,22 @@ export default {
         }),
       });
       if (!res.ok) return jsonResponse({ error: 'Failed to save' }, 500, request);
+      const saved = await res.json().catch(() => []);
+      if (!Array.isArray(saved) || !saved.length) {
+        // No row id=1 yet — create it rather than reporting a phantom success.
+        const ins = await fetch(`${SB}/rest/v1/store_schedule`, {
+          method: 'POST', headers: sbWrite,
+          body: JSON.stringify({
+            id: 1,
+            is_available: body.is_available,
+            unavailable_from: body.unavailable_from || null,
+            unavailable_until: body.unavailable_until || null,
+            unavailable_message: body.unavailable_message || null,
+            updated_at: new Date().toISOString(),
+          }),
+        });
+        if (!ins.ok) return jsonResponse({ error: 'Failed to save' }, 500, request);
+      }
       try {
         const chUrl = `${SB}/rest/v1/closures`;
         const nowISO = new Date().toISOString();
@@ -356,6 +486,22 @@ export default {
         const cfData = await cf.json();
         if (!cfData.success) return jsonResponse({ error: 'Security check failed. Please refresh and try again.' }, 403, request);
       }
+      // Refuse orders while the store is closed. The storefront also gates this,
+      // but a stale tab or a direct POST must not slip through.
+      try {
+        const availRes = await fetch(`${SB}/rest/v1/store_schedule?id=eq.1&select=*`, { headers: sbHeaders });
+        const s = (await availRes.json().catch(() => []))[0];
+        if (s) {
+          const now = new Date();
+          const liveWindow = s.unavailable_until && new Date(s.unavailable_until) > now &&
+            (!s.unavailable_from || new Date(s.unavailable_from) <= now);
+          const closedIndefinitely = s.is_available === false && !s.unavailable_until;
+          if (liveWindow || closedIndefinitely) {
+            return jsonResponse({ error: 'closed', message: s.unavailable_message || "We're currently closed for orders." }, 409, request);
+          }
+        }
+      } catch (e) { /* never block a real order on a schedule lookup failure */ }
+
       const res = await fetch(`${SB}/functions/v1/submit-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.SUPABASE_KEY}`, 'apikey': env.SUPABASE_KEY },
@@ -363,9 +509,28 @@ export default {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && body.order?.email && env.RESEND_API_KEY) {
-        try { await sendConfirmationEmail(env.RESEND_API_KEY, body.order); } catch (e) { /* email never breaks order */ }
+        try { await sendConfirmationEmail(env.RESEND_API_KEY, body.order, data); } catch (e) { /* email never breaks order */ }
       }
       return jsonResponse(data, res.ok ? 200 : res.status, request);
+    }
+
+    // ── POST /api/send-review-request (admin) ─────────────────────────────────
+    // The shared admin shows "✉ Request Review" on any order that carries an
+    // email. Namit Gid orders can now carry one, so this route has to exist —
+    // otherwise that button 404s.
+    if (url.pathname === '/api/send-review-request' && request.method === 'POST') {
+      if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
+      let body;
+      try { body = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
+      if (!body.email || !body.name) return jsonResponse({ error: 'email and name required' }, 400, request);
+      if (!env.RESEND_API_KEY) return jsonResponse({ error: 'Resend not configured' }, 500, request);
+      try {
+        // The admin sends Takoshi's field names; `size` is where the dish lands.
+        await sendReviewRequestEmail(env.RESEND_API_KEY, { name: body.name, email: body.email, dish: body.dish || body.size || '' });
+        return jsonResponse({ ok: true }, 200, request);
+      } catch (e) {
+        return jsonResponse({ error: 'Failed to send email' }, 500, request);
+      }
     }
 
     // ── GET /api/reviews (public) ─────────────────────────────────────────────
@@ -416,6 +581,7 @@ export default {
     if (url.pathname.startsWith('/api/reviews/') && request.method === 'PATCH') {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
       const id = url.pathname.split('/api/reviews/')[1];
+      if (!/^\d+$/.test(id)) return jsonResponse({ error: 'Bad id' }, 400, request);
       let body;
       try { body = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
       const res = await fetch(`${SB}/rest/v1/reviews?id=eq.${id}`, {
@@ -429,11 +595,14 @@ export default {
     if (url.pathname.startsWith('/api/reviews/') && request.method === 'DELETE') {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
       const id = url.pathname.split('/api/reviews/')[1];
+      if (!/^\d+$/.test(id)) return jsonResponse({ error: 'Bad id' }, 400, request);
       const res = await fetch(`${SB}/rest/v1/reviews?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders });
       return jsonResponse({ ok: res.ok }, res.ok ? 200 : 500, request);
     }
 
     // ── GET /api/referral-stats (admin) — best-effort so admin page 2 loads ───
+    // Namit Gid has no referral programme yet; this reports honest zeros rather
+    // than leaving the shared admin's referral page spinning.
     if (url.pathname === '/api/referral-stats' && request.method === 'GET') {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
       const res = await fetch(`${SB}/rest/v1/referrals?select=referrer_phone,reward_status,created_at`, { headers: sbHeaders });
@@ -449,14 +618,30 @@ export default {
       const monthly = []; const now = new Date();
       for (let i = 0; i < 6; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        monthly.push({ month: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), count: monthCounts[d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')] || 0 });
+        const ym = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        monthly.push({ month: ym, count: monthCounts[ym] || 0 });
       }
       return jsonResponse({ total: (rows || []).length, pending, redeemed, top, monthly }, 200, request);
     }
 
-    // ── GET /api/slot-load (public) — Namit Gid has no timed slots yet ────────
+    // ── GET /api/slot-load?date=YYYY-MM-DD (public) ──────────────────────────
+    // How many live orders sit on each pickup time that day. The storefront uses
+    // this to grey out slots within 90 minutes of an existing pickup.
     if (url.pathname === '/api/slot-load' && request.method === 'GET') {
-      return jsonResponse({ load: {} }, 200, request);
+      const date = url.searchParams.get('date') || '';
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return jsonResponse({ load: {} }, 200, request);
+      const res = await fetch(
+        `${SB}/rest/v1/orders?pickup_date=eq.${date}&select=pickup_time,status`,
+        { headers: sbHeaders });
+      if (!res.ok) return jsonResponse({ load: {} }, 200, request);
+      const rows = await res.json().catch(() => []);
+      const load = {};
+      (rows || []).forEach(o => {
+        if (o.status === 'cancelled') return;
+        if (!o.pickup_time || timeToMin(o.pickup_time) === null) return;
+        load[o.pickup_time] = (load[o.pickup_time] || 0) + 1;
+      });
+      return jsonResponse({ load, blockWindowMin: BLOCK_WINDOW_MIN }, 200, request);
     }
 
     return jsonResponse({ error: 'Not found' }, 404, request);
