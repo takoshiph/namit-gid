@@ -181,7 +181,7 @@ async function sendConfirmationEmail(resendApiKey, order, result) {
   </td></tr></table>
 </body></html>`;
 
-  await fetch('https://api.resend.com/emails', {
+  const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -191,6 +191,12 @@ async function sendConfirmationEmail(resendApiKey, order, result) {
       html,
     }),
   });
+  // Resend answers a rejected send with 4xx and a JSON body rather than throwing,
+  // so an unchecked fetch here reports success for mail that never went anywhere.
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error('resend ' + res.status + ' ' + detail.slice(0, 200));
+  }
 }
 
 // ── Review request email (admin-triggered, Namit Gid branded) ────────────────
@@ -508,10 +514,29 @@ export default {
         body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && body.order?.email && env.RESEND_API_KEY) {
-        try { await sendConfirmationEmail(env.RESEND_API_KEY, body.order, data); } catch (e) { /* email never breaks order */ }
+      if (!res.ok) return jsonResponse(data, res.status, request);
+
+      // The confirmation email must never break an order — but it must not fail
+      // invisibly either. That combination is what hid a dead send for months:
+      // a bare try/catch around a fetch whose status nobody checked. Report the
+      // outcome in the response and the log, and let the caller decide.
+      let confirmation = 'not_requested';
+      if (body.order?.email) {
+        if (!env.RESEND_API_KEY) {
+          confirmation = 'skipped_no_key';
+          console.error('[namitgid] RESEND_API_KEY is not set on this deployment — order',
+            data?.orderId, 'saved, no confirmation email sent to', body.order.email);
+        } else {
+          try {
+            await sendConfirmationEmail(env.RESEND_API_KEY, body.order, data);
+            confirmation = 'sent';
+          } catch (e) {
+            confirmation = 'failed';
+            console.error('[namitgid] confirmation email failed for order', data?.orderId, e);
+          }
+        }
       }
-      return jsonResponse(data, res.ok ? 200 : res.status, request);
+      return jsonResponse({ ...data, confirmation }, 200, request);
     }
 
     // ── POST /api/send-review-request (admin) ─────────────────────────────────
