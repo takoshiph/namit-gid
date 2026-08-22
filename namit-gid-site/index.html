@@ -503,6 +503,27 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .m-size button.active{background:var(--espresso);color:var(--cream);border-color:transparent}
 .m-size button.active .s-price{color:var(--gold)}
 .m-note{font-size:.78rem;color:var(--terracotta);opacity:.95;margin-top:.1rem}
+/* mixable dish: one row per flavour, each with its own count, so a four-cake
+   minimum can be split however the customer likes */
+.m-mix{display:flex;flex-direction:column;gap:.5rem}
+.m-mix-row{display:flex;align-items:center;gap:.7rem;padding:.5rem .55rem .5rem .85rem;
+  border:1px solid rgba(53,40,31,.2);border-radius:12px;background:#fff;
+  transition:border-color .2s,background .2s}
+.m-mix-row.on{border-color:var(--espresso);background:var(--cream-soft)}
+.m-mix-name{flex:1 1 auto;min-width:0;line-height:1.25}
+.m-mix-name b{display:block;font-weight:500;font-size:.95rem}
+.m-mix-name span{font-family:var(--ff-display);font-size:.95rem;color:var(--terracotta)}
+.m-mix-step{display:flex;align-items:center;gap:.45rem;flex:0 0 auto}
+.m-mix-step button{width:32px;height:32px;border-radius:50%;background:var(--espresso);
+  color:var(--cream);font-size:1.05rem;line-height:1;display:grid;place-items:center;
+  transition:background .2s,opacity .2s}
+.m-mix-step button:hover:not(:disabled){background:var(--terracotta)}
+.m-mix-step button:disabled{opacity:.25;cursor:default}
+.m-mix-step output{min-width:1.8ch;text-align:center;font-family:var(--ff-display);font-size:1.15rem}
+.m-mix-tally{display:flex;justify-content:space-between;align-items:baseline;
+  font-size:.82rem;margin-top:.15rem}
+.m-mix-tally b{font-family:var(--ff-display);font-weight:400;font-size:1rem}
+.m-mix-tally .short{color:var(--terracotta)}
 .field.hidden{display:none}
 .field{display:flex;flex-direction:column;gap:.35rem}
 .field label{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;opacity:.7}
@@ -1136,8 +1157,9 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <div class="field hidden" id="sizeField" style="margin-bottom:1rem">
         <label id="sizeLabel">Size</label>
         <div class="m-size" id="mSize"></div>
+        <span class="m-note hidden" id="mSizeNote"></span>
       </div>
-      <div class="field" style="margin-bottom:1rem">
+      <div class="field" id="qtyField" style="margin-bottom:1rem">
         <label>Quantity</label>
         <div class="qty">
           <button type="button" id="qMinus" aria-label="Decrease quantity">−</button>
@@ -1170,7 +1192,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <p class="m-hint" id="pickupHint" style="margin-bottom:1rem">Everything is cooked the day you collect it.<br>Pickup at 180 Fairview Mall Dr.</p>
       <div class="field" style="margin-bottom:1rem">
         <label for="fNotes">Notes <span class="m-sub">(optional)</span></label>
-        <textarea id="fNotes" rows="2" placeholder="Extra chicharron? Less spicy?"></textarea>
+        <textarea id="fNotes" rows="2" placeholder="Allergies or anything we should know?"></textarea>
       </div>
       <div class="m-total" style="margin-bottom:1rem"><span>Total</span><span id="mTotal">$16</span></div>
       <button class="m-submit" type="submit" style="width:100%">Send order</button>
@@ -1239,7 +1261,7 @@ const DISHES = [
    desc:'Rice noodles under rich shrimp gravy \u2014 loaded with prawns, boiled egg, crushed chicharron, and a whole lot of home.'},
   {name:'Tiramisu', cat:'dessert', tag:'Made to order', price:25, img:'tiramisu', shape:'natural',
    desc:'Espresso-soaked layers under a thick, even blanket of cocoa, set overnight so every slice holds its shape. Coffee-shop quality, home-kitchen heart.'},
-  {name:'Cheesecake', cat:'dessert', tag:'Three flavours', axis:'Flavour', minQty:4, img:'cheesecake', shape:'natural',
+  {name:'Cheesecake', cat:'dessert', tag:'Three flavours', axis:'Flavour', minQty:4, mix:true, img:'cheesecake', shape:'natural',
    variants:[{label:'Regular', price:15},{label:'Matcha', price:15},{label:'Pistachio', price:15}],
    desc:'Creamy, slow-set cheesecake in three flavours \u2014 Regular, Matcha, and Pistachio. $15 each, minimum 4 per order.'},
   {name:'Banana Bread Loaf', cat:'dessert', tag:'Chocolate chip', price:10, img:'banana', shape:'natural',
@@ -1636,15 +1658,55 @@ const mTitle=document.getElementById('mTitle'), mPrice=document.getElementById('
       mImg=document.getElementById('mImg'), mTotal=document.getElementById('mTotal'),
       qOut=document.getElementById('qOut');
 let curIdx=null, curVar=0, qty=1, unit=0, minQty=1, lastFocus=null;
+// mixable dishes keep a count per flavour instead of one variant + one quantity
+let mixQty={};
 function money(n){return '$'+n}
+function isMix(){ const d=DISHES[curIdx]; return !!(d && d.mix); }
+function mixCount(){ return Object.keys(mixQty).reduce((s,k)=>s+mixQty[k],0); }
+function mixSum(){
+  const d=DISHES[curIdx];
+  return d.variants.reduce((s,v)=>s+v.price*(mixQty[v.label]||0),0);
+}
+function mixParts(){
+  const d=DISHES[curIdx];
+  return d.variants.filter(v=>mixQty[v.label]>0).map(v=>({label:v.label, qty:mixQty[v.label]}));
+}
+function orderTotal(){ return isMix() ? mixSum() : unit*qty; }
+function orderCount(){ return isMix() ? mixCount() : qty; }
 function currentDishName(){
   const d=DISHES[curIdx];
+  if(d.mix) return d.name+' ('+mixParts().map(p=>p.qty+' '+p.label).join(', ')+')';
   return d.variants ? (d.name+' ('+d.variants[curVar].label+')') : d.name;
 }
 function updateTotals(){
+  if(isMix()){
+    const d=DISHES[curIdx], n=mixCount();
+    mPrice.textContent=money(d.variants[0].price);
+    mTotal.textContent=money(mixSum());
+    document.querySelectorAll('#mSize .m-mix-row').forEach(row=>{
+      const label=row.dataset.label, v=mixQty[label]||0;
+      row.classList.toggle('on', v>0);
+      row.querySelector('output').textContent=v;
+      row.querySelector('button[data-d="-1"]').disabled = v<=0;
+      row.querySelector('button[data-d="1"]').disabled = n>=20;
+    });
+    const tally=document.getElementById('mMixTally');
+    if(tally){
+      const short=minQty-n;
+      tally.innerHTML = '<span'+(short>0?' class="short"':'')+'>'+n+' of '+minQty+' minimum</span>'+
+        '<b>'+money(mixSum())+'</b>';
+    }
+    return;
+  }
   mPrice.textContent=money(unit);
   qOut.textContent=qty;
   mTotal.textContent=money(unit*qty);
+}
+function bumpMix(label, delta){
+  const n=mixCount();
+  if(delta>0 && n>=20) return;
+  mixQty[label]=Math.max(0, (mixQty[label]||0)+delta);
+  updateTotals();
 }
 function selectVariant(i){
   const d=DISHES[curIdx];
@@ -1660,9 +1722,37 @@ function openModal(idx, imgSrc){
   mTitle.textContent=d.name;
   mImg.src=imgSrc; mImg.alt=d.name;
   minQty=d.minQty||1; qty=minQty;
-  if(d.variants){
+  const qtyField=document.getElementById('qtyField'), sizeNote=document.getElementById('mSizeNote');
+  mixQty={};
+  if(d.mix){
+    // a count per flavour; the batch minimum applies across the whole order
     document.getElementById('sizeLabel').textContent = d.axis || 'Size';
-    mSize.innerHTML='';
+    mSize.className='m-mix'; mSize.innerHTML='';
+    d.variants.forEach(v=>{
+      mixQty[v.label]=0;
+      const row=document.createElement('div');
+      row.className='m-mix-row'; row.dataset.label=v.label;
+      row.innerHTML='<div class="m-mix-name"><b>'+v.label+'</b><span>'+money(v.price)+'</span></div>'+
+        '<div class="m-mix-step">'+
+        '<button type="button" data-d="-1" aria-label="One fewer '+v.label+'">−</button>'+
+        '<output aria-label="'+v.label+' quantity">0</output>'+
+        '<button type="button" data-d="1" aria-label="One more '+v.label+'">+</button></div>';
+      row.querySelectorAll('button').forEach(b=>
+        b.addEventListener('click', ()=>bumpMix(v.label, +b.dataset.d)));
+      mSize.appendChild(row);
+    });
+    const tally=document.createElement('div');
+    tally.className='m-mix-tally'; tally.id='mMixTally';
+    mSize.appendChild(tally);
+    sizeField.classList.remove('hidden');
+    qtyField.classList.add('hidden');                 // the steppers are the quantity
+    sizeNote.textContent='Mix and match — minimum '+minQty+' per order.';
+    sizeNote.classList.remove('hidden');
+    unit=d.variants[0].price;
+    updateTotals();
+  } else if(d.variants){
+    document.getElementById('sizeLabel').textContent = d.axis || 'Size';
+    mSize.className='m-size'; mSize.innerHTML='';
     d.variants.forEach((v,vi)=>{
       const b=document.createElement('button');
       b.type='button';
@@ -1671,12 +1761,16 @@ function openModal(idx, imgSrc){
       mSize.appendChild(b);
     });
     sizeField.classList.remove('hidden');
+    qtyField.classList.remove('hidden');
+    sizeNote.classList.add('hidden');
     selectVariant(0);
   } else {
     sizeField.classList.add('hidden'); mSize.innerHTML='';
+    qtyField.classList.remove('hidden');
+    sizeNote.classList.add('hidden');
     unit=d.price; updateTotals();
   }
-  if(minQty>1){ note.textContent='Minimum '+minQty+' per order'; note.classList.remove('hidden'); }
+  if(!d.mix && minQty>1){ note.textContent='Minimum '+minQty+' per order'; note.classList.remove('hidden'); }
   else { note.textContent=''; note.classList.add('hidden'); }
   modal.classList.remove('done','deposit');
   document.getElementById('orderForm').reset();
@@ -1823,6 +1917,11 @@ document.getElementById('orderForm').addEventListener('submit', async e=>{
     alert(window.NG_CLOSED_MSG || "We're currently closed for orders. Please check back soon!");
     return;
   }
+  if(isMix() && mixCount() < minQty){
+    alert('Please choose at least '+minQty+' — you can mix the flavours however you like.');
+    document.getElementById('mSize').scrollIntoView({block:'center'});
+    return;
+  }
   const date=fDate.value, time=fTime.value;
   if(!date || !time){
     (!date?fDate:fTime).classList.add('field-error');
@@ -1846,7 +1945,7 @@ document.getElementById('orderForm').addEventListener('submit', async e=>{
   const ds=document.getElementById('depShot'); if(ds) ds.value='';
   const dp=document.getElementById('depPreview'); if(dp){ dp.hidden=true; dp.src=''; }
   const dt=document.getElementById('depUploadText'); if(dt) dt.textContent='Tap to add your e-Transfer screenshot';
-  const bal=Math.max(0, unit*qty - DEPOSIT);
+  const bal=Math.max(0, orderTotal() - DEPOSIT);
   const dl=document.getElementById('depBalanceLine');
   // values are all our own formatted strings and numbers, never user input
   if(dl) dl.innerHTML='<dt>Pickup</dt><dd>'+prettyDate(date)+'<br>'+time+'</dd>'+
@@ -1881,8 +1980,12 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ order:{
-        dish: currentDishName(),
-        qty,
+        // mixable dishes send the base name plus a line per flavour; the edge
+        // function prices each line itself and builds the label it stores, so a
+        // tampered display string can't misprice or mislabel an order
+        dish: isMix() ? DISHES[curIdx].name : currentDishName(),
+        items: isMix() ? mixParts() : undefined,
+        qty: orderCount(),
         name: document.getElementById('fName').value,
         contact: document.getElementById('fPhone').value,
         email: document.getElementById('fEmail').value,

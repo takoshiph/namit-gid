@@ -39,6 +39,12 @@ const MIN_QTY: Record<string, number> = {
   'Cheesecake (Pistachio)': 4,
 }
 
+// Dishes sold as a mixed batch: the customer picks a count per flavour and the
+// minimum applies across the whole order, not per flavour.
+const MIX_MIN: Record<string, number> = {
+  'Cheesecake': 4,
+}
+
 const round2 = (n: number) => Math.round(n * 100) / 100
 
 function esc(s: unknown): string {
@@ -120,17 +126,55 @@ serve(async (req) => {
     const pickupDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : null
     const pickupTime = timeToMin(rawTime) !== null ? rawTime : null
 
-    const unit = MENU[dish]
-    const minQty = MIN_QTY[dish] || 1
-    const qty = Math.min(20, Math.max(minQty, parseInt(order?.qty, 10) || minQty))
+    // ── Pricing ───────────────────────────────────────────────────────────────
+    // Two shapes. A plain dish carries one MENU key and a quantity. A mixable
+    // dish carries a base name plus one line per flavour — each line is priced
+    // from MENU independently, and the stored label is rebuilt here rather than
+    // trusted from the browser.
+    const rawItems = Array.isArray(order?.items) ? order.items : null
+    const mixMin = MIX_MIN[dish]
+    let dishLabel = dish
+    let unit: number | undefined
+    let qty: number
+    let total: number
 
-    if (!unit || !name || !contact || qty < minQty) {
-      return new Response(JSON.stringify({ error: 'invalid_order' }), {
-        status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
-      })
+    if (rawItems && mixMin) {
+      let sum = 0, count = 0
+      const parts: string[] = []
+      for (const it of rawItems) {
+        const label = String(it?.label ?? '')
+        const price = MENU[`${dish} (${label})`]
+        const n = parseInt(it?.qty, 10) || 0
+        if (price === undefined || n < 0) {
+          return new Response(JSON.stringify({ error: 'invalid_order' }), {
+            status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+          })
+        }
+        if (n === 0) continue
+        sum += price * n; count += n
+        parts.push(`${n} ${label}`)
+      }
+      if (!name || !contact || count < mixMin || count > 20) {
+        return new Response(JSON.stringify({ error: 'invalid_order', min: mixMin }), {
+          status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+      qty = count
+      total = round2(sum)
+      unit = round2(sum / count)          // flat within a flavour set; an average if not
+      dishLabel = `${dish} (${parts.join(', ')})`
+    } else {
+      unit = MENU[dish]
+      const minQty = MIN_QTY[dish] || 1
+      qty = Math.min(20, Math.max(minQty, parseInt(order?.qty, 10) || minQty))
+      if (!unit || !name || !contact || qty < minQty) {
+        return new Response(JSON.stringify({ error: 'invalid_order' }), {
+          status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+      total = round2(unit * qty)
     }
 
-    const total = round2(unit * qty)
     const balanceDue = round2(Math.max(0, total - DEPOSIT))
 
     const supabase = createClient(
@@ -193,7 +237,7 @@ serve(async (req) => {
 
     // ── Insert (critical path) ────────────────────────────────────────────────
     const { data: inserted, error } = await supabase.from('orders').insert([{
-      dish, qty, unit_price: unit, total, balance_due: balanceDue,
+      dish: dishLabel, qty, unit_price: unit, total, balance_due: balanceDue,
       customer_name: name, contact, email, notes: notesOut, status: 'pending',
       pickup_date: pickupDate, pickup_time: pickupTime,
       deposit_screenshot_url: depositUrl,
@@ -223,7 +267,7 @@ serve(async (req) => {
   <table width="100%" style="background:#fff;border:1px solid rgba(53,40,31,0.1);border-radius:14px;">
     <tr><td style="padding:18px 20px;text-align:center;">
       <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#c4633c;font-weight:700;">Cook this</div>
-      <div style="font-size:24px;font-weight:700;color:#35281f;margin-top:6px;">${esc(dish)}</div>
+      <div style="font-size:24px;font-weight:700;color:#35281f;margin-top:6px;">${esc(dishLabel)}</div>
       <div style="font-size:16px;color:#c4633c;margin-top:2px;">Qty ${qty} · $${total}</div>
       <div style="font-size:13px;color:rgba(53,40,31,0.6);margin-top:6px;">Balance at pickup: <strong>$${balanceDue.toFixed(2)}</strong></div>
     </td></tr>
@@ -249,7 +293,7 @@ serve(async (req) => {
         body: JSON.stringify({
           from: 'Namit Gid Orders <orders@takoshi.ca>',
           to: [NOTIFY_EMAIL],
-          subject: `🍽️ Namit Gid — ${dish} x${qty} ($${total}) from ${name}`,
+          subject: `🍽️ Namit Gid — ${dishLabel} x${qty} ($${total}) from ${name}`,
           html,
         }),
       })
@@ -260,6 +304,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       orderId: inserted.id,
+      dish: dishLabel,
       total,
       balanceDue,
       deposit: DEPOSIT,

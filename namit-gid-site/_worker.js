@@ -142,7 +142,10 @@ function timeToMin(t) {
 // ── Order confirmation email (Namit Gid branded, best-effort) ─────────────────
 
 async function sendConfirmationEmail(resendApiKey, order, result) {
-  const { name, email, dish, qty, notes } = order;
+  const { name, email, qty, notes } = order;
+  // For a mixed batch the browser only sends the base name; the edge function
+  // rebuilds the real label ("Cheesecake (2 Regular, 2 Matcha)") and returns it.
+  const dish = (result && result.dish) || order.dish;
   const balance = result && result.balanceDue != null ? Number(result.balanceDue) : null;
   const pickupLine = order.pickupDate
     ? new Date(order.pickupDate + 'T00:00:00').toLocaleDateString('en-CA',
