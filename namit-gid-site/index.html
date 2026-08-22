@@ -368,7 +368,14 @@ header.hero{
 
 /* ---------- story ---------- */
 .story{background:
-    linear-gradient(180deg, var(--sage) 0, rgba(155,185,175,0) 16%, rgba(155,185,175,0) 84%, var(--sage) 100%),
+    /* Anchored in pixels, not percentages. The story expands from collapsed to open
+       over ~1.4s, and a percentage-based fade slides down the section the whole way,
+       which is what made the transition feel unsettled. A fixed 170px band at each
+       end stays put no matter how tall the section gets. */
+    linear-gradient(180deg, var(--sage) 0, rgba(155,185,175,.5) 46px, rgba(155,185,175,0) 170px)
+      top/100% 170px no-repeat,
+    linear-gradient(0deg,  var(--sage) 0, rgba(155,185,175,.5) 46px, rgba(155,185,175,0) 170px)
+      bottom/100% 170px no-repeat,
     radial-gradient(90% 130% at 50% -20%, rgba(155,185,175,.22), transparent 55%),
     radial-gradient(70% 90% at 100% 120%, rgba(196,99,60,.08), transparent 60%),
     var(--cream);
@@ -376,6 +383,9 @@ header.hero{
 .story .wrap{
   max-width:820px;margin:0 auto;
   padding:clamp(1rem,2.6vw,1.6rem) clamp(1.4rem,5vw,3rem);
+  /* the arriving vine is 58px tall and sits at the section's top edge — the
+     eyebrow has to start below it, or the stem runs straight through the type */
+  padding-top:clamp(4.2rem,7vw,5.2rem);
   display:flex;flex-direction:column;gap:1rem;text-align:center;align-items:center;
 }
 .story h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
@@ -420,7 +430,12 @@ header.hero{
 #howHoles .stub{fill:none;stroke:#6f4a2c;stroke-width:3.8;stroke-linecap:round;opacity:.82}
 /* earthy grounding at the base of the lower sections */
 .how,.reviews{position:relative}
-.how::after,.reviews::after{content:"";position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(180deg,transparent,rgba(53,40,31,.06));pointer-events:none;z-index:0}
+/* The soil shading used to run to the section's edge and stop, which leaves a hard
+   horizontal line where the alpha drops to zero. Ramp it back out before the edge
+   so it reads as ground rather than a band. */
+.how::after,.reviews::after{content:"";position:absolute;left:0;right:0;bottom:0;height:180px;
+  background:linear-gradient(180deg,transparent 0,rgba(53,40,31,.055) 58%,rgba(53,40,31,.02) 84%,transparent 100%);
+  pointer-events:none;z-index:0}
 /* small foliage tufts creeping up at a section's base */
 .earth-tuft{position:absolute;bottom:-4px;width:clamp(72px,9vw,116px);height:auto;z-index:0;pointer-events:none;opacity:.85}
 .earth-tuft.left{left:1.5%}
@@ -716,7 +731,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   .dish-btn{animation:none}
   .dish-shadow{animation:none}
   .section-head{padding-top:3rem}
-  .story .wrap,.how{padding-top:3rem;padding-bottom:3rem}
+  .how{padding-top:3rem;padding-bottom:3rem}
+  .story .wrap{padding-top:4.2rem;padding-bottom:3rem}   /* still clears the vine */
 }
 
 main{position:relative}
@@ -763,8 +779,17 @@ main{position:relative}
 @keyframes leafSway{0%,100%{transform:rotate(-9deg) translateY(0)}50%{transform:rotate(10deg) translateY(7px)}}
 
 /* ---------- earthy: soil deepening on scroll ---------- */
-.soil{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;
-  background:linear-gradient(180deg, rgba(53,40,31,0) 40%, rgba(53,40,31,.5) 100%)}
+.soil{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:var(--soil,0);
+  background:linear-gradient(180deg, rgba(53,40,31,0) 40%, rgba(53,40,31,.42) 100%)}
+/* .soil is fixed to the viewport at z-index:-1, so it shows through the plain sage
+   but is masked wherever a section paints an opaque background — leaving a crisp
+   line at that section's edge that slides as you scroll. .story is the only such
+   section, so it carries the same wash itself and the darkening stays continuous. */
+.story::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  opacity:var(--soil,0);
+  background:linear-gradient(180deg, rgba(53,40,31,0) 40%, rgba(53,40,31,.42) 100%)}
+.story .wrap{position:relative;z-index:1}
+.story-vine{z-index:1}   /* z-index only — it is already absolutely positioned above */
 
 /* ==========================================================================
    Carrying the growth off the landing page: section seams, the order modal,
@@ -993,15 +1018,6 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
   <div id="menuList"></div>
 </main>
 
-<div class="seam rise" aria-hidden="true">
-  <svg viewBox="0 0 44 88" preserveAspectRatio="xMidYMid meet" focusable="false">
-    <path class="stem" pathLength="1" d="M22,0 C16,17 29,33 21,49 C15,62 27,74 22,88"/>
-    <g class="foliage" transform="translate(21,22) rotate(-42) scale(.52)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g class="foliage" transform="translate(24,52) rotate(146) scale(.48)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g class="foliage" transform="translate(22,70) rotate(-34) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g class="foliage" transform="translate(25,37) scale(.38)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
-  </svg>
-</div>
 
 <!-- HOW -->
 <section class="how" aria-labelledby="howH">
@@ -1073,15 +1089,6 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
   </svg>
 </section>
 
-<div class="seam rise" aria-hidden="true">
-  <svg viewBox="0 0 44 88" preserveAspectRatio="xMidYMid meet" focusable="false">
-    <path class="stem" pathLength="1" d="M22,0 C16,17 29,33 21,49 C15,62 27,74 22,88"/>
-    <g class="foliage" transform="translate(21,22) rotate(-42) scale(.52)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g class="foliage" transform="translate(24,52) rotate(146) scale(.48)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g class="foliage" transform="translate(22,70) rotate(-34) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g class="foliage" transform="translate(25,37) scale(.38)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
-  </svg>
-</div>
 
 <!-- STORY (tap to expand) -->
 <section class="story" id="story">
@@ -2373,11 +2380,11 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   let tick=false;
   function draw(){
     if(!clip) return;
-    if(reduce){ clip.setAttribute('height', docH+60); if(soil) soil.style.opacity=.5; return; }
+    if(reduce){ clip.setAttribute('height', docH+60); document.documentElement.style.setProperty('--soil','.5'); return; }
     const reveal=Math.min(docH+60, scrollY + innerHeight*0.9);   // grows top-down, a bit ahead of the fold
     clip.setAttribute('height', reveal.toFixed(1));
     const max=(docH-innerHeight)||1;
-    if(soil) soil.style.opacity=(Math.min(1,scrollY/max)*0.7).toFixed(3);
+    document.documentElement.style.setProperty('--soil',(Math.min(1,scrollY/max)*0.7).toFixed(3));
     tick=false;
   }
   buildTrunk();
