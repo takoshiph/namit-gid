@@ -39,10 +39,12 @@ const MIN_QTY: Record<string, number> = {
   'Cheesecake (Pistachio)': 4,
 }
 
-// Dishes sold as a mixed batch: the customer picks a count per flavour and the
-// minimum applies across the whole order, not per flavour.
-const MIX_MIN: Record<string, number> = {
-  'Cheesecake': 4,
+// Dishes sold by the batch: a batch is a fixed count at a fixed price, and the
+// customer allocates flavours inside however many batches they order. The flavour
+// counts must add up to batches x size exactly — anything else is a mistake, not a
+// discount, so it's rejected rather than quietly repriced.
+const BATCH: Record<string, { size: number; price: number; max: number }> = {
+  'Cheesecake': { size: 4, price: 60, max: 5 },
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100
@@ -132,37 +134,39 @@ serve(async (req) => {
     // from MENU independently, and the stored label is rebuilt here rather than
     // trusted from the browser.
     const rawItems = Array.isArray(order?.items) ? order.items : null
-    const mixMin = MIX_MIN[dish]
+    const batch = BATCH[dish]
     let dishLabel = dish
     let unit: number | undefined
     let qty: number
     let total: number
 
-    if (rawItems && mixMin) {
-      let sum = 0, count = 0
+    if (rawItems && batch) {
+      const batches = parseInt(order?.batches, 10) || 0
+      let count = 0
       const parts: string[] = []
       for (const it of rawItems) {
         const label = String(it?.label ?? '')
-        const price = MENU[`${dish} (${label})`]
         const n = parseInt(it?.qty, 10) || 0
-        if (price === undefined || n < 0) {
+        // the flavour has to exist on this dish, and counts can't go negative
+        if (MENU[`${dish} (${label})`] === undefined || n < 0) {
           return new Response(JSON.stringify({ error: 'invalid_order' }), {
             status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
           })
         }
         if (n === 0) continue
-        sum += price * n; count += n
+        count += n
         parts.push(`${n} ${label}`)
       }
-      if (!name || !contact || count < mixMin || count > 20) {
-        return new Response(JSON.stringify({ error: 'invalid_order', min: mixMin }), {
-          status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
-        })
+      const expected = batches * batch.size
+      if (!name || !contact || batches < 1 || batches > batch.max || count !== expected) {
+        return new Response(JSON.stringify({
+          error: 'invalid_order', batchSize: batch.size, maxBatches: batch.max, expected,
+        }), { status: 400, headers: { 'Content-Type': 'application/json', ...CORS } })
       }
-      qty = count
-      total = round2(sum)
-      unit = round2(sum / count)          // flat within a flavour set; an average if not
-      dishLabel = `${dish} (${parts.join(', ')})`
+      qty = batches                        // one row per batch: unit x qty = total
+      unit = batch.price
+      total = round2(batch.price * batches)
+      dishLabel = `${dish} \u00d7${batches} ${batches === 1 ? 'batch' : 'batches'} (${parts.join(', ')})`
     } else {
       unit = MENU[dish]
       const minQty = MIN_QTY[dish] || 1

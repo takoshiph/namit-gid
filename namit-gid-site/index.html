@@ -142,7 +142,21 @@ header.hero{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:5rem 1rem 2rem;text-align:center;
 }
-#fx{position:absolute;inset:0;z-index:0;pointer-events:none}
+/* The motes and drifting leaves used to live inside the hero and stop at its edge.
+   As a fixed overlay they carry through the whole page. It sits ABOVE section
+   backgrounds rather than behind them — .story paints an opaque panel, and anything
+   behind it gets masked with a hard line (the bug .soil had). Below the nav (50) and
+   well below the order modal (90) so it never interferes with either. */
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;opacity:.48}
+/* fills the bare stretch of the top band between the wordmark and the nav links */
+.hero-hang{position:absolute;top:-12px;left:clamp(20%,26vw,31%);width:clamp(46px,5vw,70px);
+  height:auto;z-index:2;pointer-events:none;overflow:visible;opacity:.8;
+  transform-origin:50% 0;filter:drop-shadow(0 1px .8px rgba(45,28,15,.25))}
+.hero-hang .stem{fill:none;stroke:#6f4a2c;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.js .hero-hang{animation:heroHangSway 9s ease-in-out 1.4s infinite}
+@keyframes heroHangSway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+@media(max-width:900px){.hero-hang{left:auto;right:6%;top:-16px;width:44px;opacity:.6}}
+@media(max-width:560px){.hero-hang{display:none}}
 .hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.7rem}
 .logo-stage{position:relative;z-index:2;width:min(58vw,320px);aspect-ratio:1;margin:.4rem 0 .2rem}
 .logo-badge{position:absolute;inset:0;width:100%;height:100%;
@@ -261,8 +275,13 @@ header.hero{
 .root-uline path:first-child{stroke-width:2.4;stroke-dasharray:230;stroke-dashoffset:230;transition:stroke-dashoffset 1s ease .15s}
 .root-uline .tendril{stroke-width:1.7;opacity:.85;stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .5s ease .8s}
 .story-body.revealed .root-uline path{stroke-dashoffset:0}
-.type-caret{display:inline-block;width:2px;height:1.05em;background:var(--terracotta);margin-left:2px;vertical-align:-.16em;animation:caretBlink .8s step-end infinite}
-@keyframes caretBlink{50%{opacity:0}}
+/* Story paragraphs settle in the way the dish names do — fade, de-blur, rise — rather
+   than typing out. A typewriter made a two-paragraph story feel long, held the reader
+   at reading speed they didn't choose, and parked a caret mid-word the whole time. */
+.js .story-body.lede-reveal .lede{opacity:0;filter:blur(9px);transform:translateY(12px)}
+.js .story-body.lede-reveal.go .lede{animation:ledeIn 1s cubic-bezier(.2,.7,.2,1) forwards}
+.js .story-body.lede-reveal.go .lede:nth-of-type(2){animation-delay:.34s}
+@keyframes ledeIn{to{opacity:1;filter:blur(0);transform:none}}
 
 /* ---------- menu ---------- */
 .section-head{
@@ -437,9 +456,11 @@ header.hero{
   background:linear-gradient(180deg,transparent 0,rgba(53,40,31,.055) 58%,rgba(53,40,31,.02) 84%,transparent 100%);
   pointer-events:none;z-index:0}
 /* small foliage tufts creeping up at a section's base */
-.earth-tuft{position:absolute;bottom:-4px;width:clamp(72px,9vw,116px);height:auto;z-index:0;pointer-events:none;opacity:.85}
-.earth-tuft.left{left:1.5%}
-.earth-tuft.right{right:1.5%;transform:scaleX(-1)}
+/* Two tufts of the same plant, not one tuft and its reflection. They differ in
+   size, lean, height and weight — mirrored twins read as a decal. */
+.earth-tuft{position:absolute;height:auto;z-index:0;pointer-events:none;transform-origin:50% 100%}
+.earth-tuft.left{left:1.2%;bottom:-8px;width:clamp(118px,14.5vw,196px);opacity:.9;transform:rotate(-2.5deg)}
+.earth-tuft.right{right:.2%;bottom:-3px;width:clamp(86px,10.5vw,142px);opacity:.68;transform:scaleX(-1) rotate(-7deg)}
 .earth-tuft .stem{fill:none;stroke:#6f4a2c;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:600px){.earth-tuft{display:none}}
 /* flow/morph reveal for the step cards (JS-only, after the root draws) */
@@ -487,15 +508,48 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .modal-veil.open{opacity:1;visibility:visible}
 .modal{
   background:var(--cream);width:min(480px,100%);max-height:92svh;overflow:auto;
-  border-radius:26px 26px 0 0;padding:1.8rem 1.6rem 2rem;
+  border-radius:26px 26px 0 0;padding:0;
   transform:translateY(40px);transition:transform .4s cubic-bezier(.2,.7,.2,1);
-  display:flex;flex-direction:column;gap:1.1rem;
+  display:flex;flex-direction:column;gap:0;
   scrollbar-width:none;-ms-overflow-style:none;   /* hide scrollbar (still scrollable) */
+  /* Stacked shadows rather than one: each layer is larger, softer and fainter than
+     the last, so the card sits in the page instead of floating on a grey smudge. */
+  box-shadow:
+    0 1px 1px rgba(38,52,47,.10),
+    0 8px 12px -8px rgba(38,52,47,.14),
+    0 24px 30px -18px rgba(38,52,47,.16),
+    0 60px 60px -40px rgba(38,52,47,.18),
+    0 120px 90px -70px rgba(38,52,47,.16);
 }
+/* Sectioned like a printed order slip: a small titled bar, a hairline under it, and
+   the controls beneath. The rules do the separating, so the fields need no margins. */
+.m-sec{display:block;border-bottom:1px solid rgba(53,40,31,.13)}
+.m-sec.hidden{display:none}
+.m-sec-t{
+  display:block;padding:.72rem 1.35rem .6rem;
+  font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;font-weight:700;
+  color:rgba(53,40,31,.5);border-bottom:1px solid rgba(53,40,31,.09);
+  background:rgba(247,240,227,.5);
+}
+.m-sec-b{padding:1rem 1.35rem 1.15rem;display:flex;flex-direction:column;gap:.85rem}
+.m-sec-b > .m-note{margin-top:-.35rem}
+.m-sec-b > .m-hint{margin-top:-.3rem}
+/* the footer carries the money and the commitment, and stays put while the card scrolls */
+.m-foot{
+  position:sticky;bottom:0;z-index:2;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.85rem .95rem .85rem 1.35rem;
+  background:rgba(160,189,179,.95);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border-top:1px solid rgba(53,40,31,.16);
+}
+.m-foot-sum{display:flex;flex-direction:column;line-height:1.05}
+.m-foot-k{font-size:.6rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(53,40,31,.6);font-weight:700}
+.m-foot-v{font-family:var(--ff-display);font-size:1.5rem;color:var(--espresso);font-variant-numeric:tabular-nums}
 .modal::-webkit-scrollbar{display:none}
 @media(min-width:640px){.modal{border-radius:26px}}
 .modal-veil.open .modal{transform:none}
-.modal .m-head{display:flex;gap:1rem;align-items:center}
+.modal .m-head{display:flex;gap:1rem;align-items:center;padding:1.3rem 1.35rem 1.1rem;border-bottom:1px solid rgba(53,40,31,.13)}
 .modal .m-head img{width:78px;height:78px;border-radius:50%;object-fit:cover;box-shadow:0 10px 22px -12px var(--shadow)}
 .modal .m-head h3{font-family:var(--ff-display);font-weight:400;font-size:1.5rem}
 .modal .m-head .price{color:var(--terracotta);font-family:var(--ff-display);font-size:1.1rem}
@@ -542,13 +596,16 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .field.hidden{display:none}
 .field{display:flex;flex-direction:column;gap:.35rem}
 .field label{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;opacity:.7}
-.field input,.field textarea,.field select{
+.field input,.field textarea,.field select,
+.m-pickup input,.m-pickup select{
   font-family:inherit;font-size:1rem;padding:.8rem .95rem;border-radius:12px;
   border:1px solid rgba(53,40,31,.2);background:#fff;color:var(--espresso);
 }
-.field select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--sage-dark) 50%),linear-gradient(135deg,var(--sage-dark) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:2.2rem}
-.field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--terracotta);border-color:transparent}
-.field input.field-error,.field select.field-error{border-color:var(--terracotta);background:rgba(196,99,60,.05)}
+.field select,.m-pickup select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--sage-dark) 50%),linear-gradient(135deg,var(--sage-dark) 50%,transparent 50%);background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:2.2rem}
+.field input:focus,.field textarea:focus,.field select:focus,
+.m-pickup input:focus,.m-pickup select:focus{outline:2px solid var(--terracotta);border-color:transparent}
+.field input.field-error,.field select.field-error,
+.m-pickup input.field-error,.m-pickup select.field-error{border-color:var(--terracotta);background:rgba(196,99,60,.05)}
 /* pickup date + slot sit side by side; they stack under 380px */
 .m-pickup{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
 @media(max-width:380px){.m-pickup{grid-template-columns:1fr}}
@@ -557,12 +614,14 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .m-hint.warn{color:var(--terracotta)}
 .m-total{display:flex;justify-content:space-between;font-family:var(--ff-display);font-size:1.15rem;border-top:1px dashed rgba(53,40,31,.25);padding-top:1rem}
 .m-submit{
-  background:var(--terracotta);color:var(--cream);border-radius:99px;padding:1rem;
-  font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;
-  transition:background .25s, transform .2s;
+  background:var(--terracotta);color:var(--cream);border-radius:99px;padding:.95rem 1.6rem;
+  font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;
+  white-space:nowrap;flex:0 0 auto;
+  box-shadow:0 1px 1px rgba(38,52,47,.16), 0 6px 14px -8px rgba(196,99,60,.7);
+  transition:background .25s, transform .2s, box-shadow .25s;
 }
 .m-submit:hover{background:var(--espresso);transform:translateY(-1px)}
-.m-success{display:none;flex-direction:column;align-items:center;gap:.7rem;text-align:center;padding:1.5rem 0}
+.m-success{display:none;flex-direction:column;align-items:center;gap:.7rem;text-align:center;padding:1.8rem 1.35rem 2rem}
 .m-success h3{font-family:var(--ff-display);font-weight:400;font-size:1.8rem;color:var(--terracotta)}
 /* Order facts as a small receipt rather than one run-on sentence of middots —
    three separate things a customer checks separately. */
@@ -582,7 +641,7 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 #closedBannerClose{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--cream);font-size:1.1rem;cursor:pointer;opacity:.7}
 #closedBannerClose:hover{opacity:1}
 /* ── Deposit step ── */
-.m-deposit{display:none;flex-direction:column;gap:.8rem;padding:.4rem 0 .3rem}
+.m-deposit{display:none;flex-direction:column;gap:.85rem;padding:1.25rem 1.35rem 1.6rem}
 .modal.deposit form{display:none}
 .modal.deposit .m-deposit{display:flex}
 .m-dep-back{align-self:flex-start;background:none;border:0;color:var(--sage-dark);font:inherit;cursor:pointer;padding:0}
@@ -807,6 +866,11 @@ main{position:relative}
 .js .seam .stem{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.1s cubic-bezier(.3,.7,.3,1)}
 .js .seam.in-view .stem{stroke-dashoffset:0}
 .js .seam.in-view .foliage{opacity:1}
+/* once drawn the seam just sat there, which read as a decal rather than a growing
+   thing. It hangs from its top, so it breathes about that point. */
+@keyframes seamSway{0%,100%{transform:rotate(-1.3deg)}50%{transform:rotate(1.3deg)}}
+.js .seam.in-view svg{transform-origin:50% 0;animation:seamSway 8.5s ease-in-out 1.2s infinite}
+.seam:nth-of-type(even) svg{animation-duration:10.5s}
 .seam.on-sage .stem{stroke:#5f4326}
 /* the footer seam sits on the deep sage panel, so it needs the light-on-dark treatment */
 .seam.on-dark .stem{stroke:#cbb08a}
@@ -863,9 +927,9 @@ main{position:relative}
      rather than a tick mark — 46px of gutter left it barely legible */
   .how .steps{gap:3.6rem}
   /* tufts were hidden outright under 600px; bring them back, smaller */
-  .earth-tuft{display:block;width:clamp(52px,15vw,74px);opacity:.6}
-  .earth-tuft.left{left:-.5%}
-  .earth-tuft.right{right:-.5%}
+  .earth-tuft{display:block}
+  .earth-tuft.left{left:-1%;width:clamp(76px,21vw,104px);opacity:.62}
+  .earth-tuft.right{right:-1.5%;width:clamp(54px,15vw,76px);opacity:.45}
   .seam{height:clamp(46px,11vw,64px)}
   .seam svg{width:clamp(26px,7vw,34px)}
 }
@@ -892,6 +956,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 
 <!-- EARTHY DECOR -->
 <div class="soil" id="soil" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
 <svg class="roots" id="roots" viewBox="0 0 140 1000" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
   <clipPath id="rootsClip"><rect id="rootsClipRect" x="-40" y="-10" width="240" height="0"/></clipPath>
   <g id="trunkG" clip-path="url(#rootsClip)"></g>
@@ -968,7 +1033,15 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 
 <!-- HERO -->
 <header class="hero" id="top">
-  <canvas id="fx" aria-hidden="true"></canvas>
+  <svg class="hero-hang" aria-hidden="true" focusable="false" viewBox="0 0 70 190">
+    <path class="stem" d="M32,0 C27,26 38,48 30,74 C24,94 34,112 29,132"/>
+    <path class="stem" style="stroke-width:1.5" d="M31,58 C42,52 48,41 47,29"/>
+    <g transform="translate(29,120) rotate(-38) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(31,92) rotate(152) scale(.40)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(47,28) rotate(-58) scale(.38)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(30,60) rotate(146) scale(.36)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(33,26) rotate(-44) scale(.42)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+  </svg>
   <div class="hero-inner">
     <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><path id="badgePath" d="M50,50 m-36,0 a36,36 0 1,1 72,0 a36,36 0 1,1 -72,0"/></defs></svg>
     <span class="eyebrow">Home-cooked Filipino · Made in Toronto</span>
@@ -1081,11 +1154,13 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     <g transform="translate(38,12) scale(.4)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
   </svg>
   <svg class="earth-tuft right" viewBox="0 0 120 86" aria-hidden="true" focusable="false">
-    <path class="stem" d="M34,86 C30,66 40,50 33,32 C31,24 34,18 38,13"/>
-    <g transform="translate(35,58) rotate(-142) scale(.42)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(33,42) rotate(-38) scale(.46)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(33,28) rotate(-96) scale(.4)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(38,12) scale(.4)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
+    <path class="stem" d="M40,86 C38,70 30,58 34,44 C36,36 33,30 30,25"/>
+    <path class="stem" style="stroke-width:1.7" d="M37,64 C46,58 51,49 50,39"/>
+    <g transform="translate(38,72) rotate(-150) scale(.38)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(50,38) rotate(-52) scale(.40)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(33,46) rotate(-128) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(31,30) rotate(-70) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+    <g transform="translate(30,23) scale(.28)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
   </svg>
 </section>
 
@@ -1161,48 +1236,64 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <button class="m-close" id="mClose" aria-label="Close order form">&#10005;</button>
     </div>
     <form id="orderForm">
-      <div class="field hidden" id="sizeField" style="margin-bottom:1rem">
-        <label id="sizeLabel">Size</label>
-        <div class="m-size" id="mSize"></div>
-        <span class="m-note hidden" id="mSizeNote"></span>
-      </div>
-      <div class="field" id="qtyField" style="margin-bottom:1rem">
-        <label>Quantity</label>
-        <div class="qty">
-          <button type="button" id="qMinus" aria-label="Decrease quantity">−</button>
-          <output id="qOut">1</output>
-          <button type="button" id="qPlus" aria-label="Increase quantity">+</button>
+      <section class="m-sec hidden" id="sizeField">
+        <label class="m-sec-t" id="sizeLabel">Size</label>
+        <div class="m-sec-b">
+          <div class="m-size" id="mSize"></div>
+          <span class="m-note hidden" id="mSizeNote"></span>
         </div>
-        <span class="m-note hidden" id="mNote"></span>
-      </div>
-      <div class="field" style="margin-bottom:1rem">
-        <label for="fName">Your name</label>
-        <input id="fName" required autocomplete="name" placeholder="Juan D.">
-      </div>
-      <div class="field" style="margin-bottom:1rem">
-        <label for="fPhone">Phone or IG handle</label>
-        <input id="fPhone" required placeholder="For pickup coordination">
-      </div>
-      <div class="field" style="margin-bottom:1rem">
-        <label for="fEmail">Email <span class="m-sub">(optional — we'll send a confirmation)</span></label>
-        <input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com">
-      </div>
-      <div class="field" style="margin-bottom:.4rem">
-        <label>Pickup</label>
-        <div class="m-pickup">
-          <input id="fDate" type="date" required aria-label="Pickup date">
-          <select id="fTime" required aria-label="Pickup time">
-            <option value="" disabled selected>Pick a time</option>
-          </select>
+      </section>
+      <section class="m-sec" id="qtyField">
+        <label class="m-sec-t">Quantity</label>
+        <div class="m-sec-b">
+          <div class="qty">
+            <button type="button" id="qMinus" aria-label="Decrease quantity">−</button>
+            <output id="qOut">1</output>
+            <button type="button" id="qPlus" aria-label="Increase quantity">+</button>
+          </div>
+          <span class="m-note hidden" id="mNote"></span>
         </div>
+      </section>
+      <section class="m-sec">
+        <span class="m-sec-t">Pickup</span>
+        <div class="m-sec-b">
+          <div class="m-pickup">
+            <input id="fDate" type="date" required aria-label="Pickup date">
+            <select id="fTime" required aria-label="Pickup time">
+              <option value="" disabled selected>Pick a time</option>
+            </select>
+          </div>
+          <p class="m-hint" id="pickupHint">Everything is cooked the day you collect it.<br>Pickup at 180 Fairview Mall Dr.</p>
+        </div>
+      </section>
+      <section class="m-sec">
+        <span class="m-sec-t">Your details</span>
+        <div class="m-sec-b">
+          <div class="field">
+            <label for="fName">Your name</label>
+            <input id="fName" required autocomplete="name" placeholder="Juan D.">
+          </div>
+          <div class="field">
+            <label for="fPhone">Phone or IG handle</label>
+            <input id="fPhone" required placeholder="For pickup coordination">
+          </div>
+          <div class="field">
+            <label for="fEmail">Email <span class="m-sub">(optional — we'll send a confirmation)</span></label>
+            <input id="fEmail" type="email" autocomplete="email" placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="fNotes">Notes <span class="m-sub">(optional)</span></label>
+            <textarea id="fNotes" rows="2" placeholder="Allergies or anything we should know?"></textarea>
+          </div>
+        </div>
+      </section>
+      <div class="m-foot">
+        <div class="m-foot-sum">
+          <span class="m-foot-k">Total</span>
+          <span class="m-foot-v" id="mTotal">$16</span>
+        </div>
+        <button class="m-submit" type="submit">Send order</button>
       </div>
-      <p class="m-hint" id="pickupHint" style="margin-bottom:1rem">Everything is cooked the day you collect it.<br>Pickup at 180 Fairview Mall Dr.</p>
-      <div class="field" style="margin-bottom:1rem">
-        <label for="fNotes">Notes <span class="m-sub">(optional)</span></label>
-        <textarea id="fNotes" rows="2" placeholder="Allergies or anything we should know?"></textarea>
-      </div>
-      <div class="m-total" style="margin-bottom:1rem"><span>Total</span><span id="mTotal">$16</span></div>
-      <button class="m-submit" type="submit" style="width:100%">Send order</button>
     </form>
     <div class="m-deposit">
       <button type="button" class="m-dep-back" id="depBack">&#8592; Back</button>
@@ -1268,15 +1359,20 @@ const DISHES = [
    desc:'Rice noodles under rich shrimp gravy \u2014 loaded with prawns, boiled egg, crushed chicharron, and a whole lot of home.'},
   {name:'Tiramisu', cat:'dessert', tag:'Made to order', price:25, img:'tiramisu', shape:'natural',
    desc:'Espresso-soaked layers under a thick, even blanket of cocoa, set overnight so every slice holds its shape. Coffee-shop quality, home-kitchen heart.'},
-  {name:'Cheesecake', cat:'dessert', tag:'Three flavours', axis:'Flavour', minQty:4, mix:true, img:'cheesecake', shape:'natural',
-   variants:[{label:'Regular', price:15},{label:'Matcha', price:15},{label:'Pistachio', price:15}],
-   desc:'Creamy, slow-set cheesecake in three flavours \u2014 Regular, Matcha, and Pistachio. $15 each, minimum 4 per order.'},
+  // Sold by the batch, not the slice: a batch is 4 cheesecakes for $60, and the
+   // flavours are chosen inside whatever number of batches you order.
+   {name:'Cheesecake', cat:'dessert', tag:'Three flavours', axis:'Flavour', mix:true,
+   batch:{size:4, price:60, max:5, unit:'cheesecakes'},
+   priceLabel:'$60 / batch of 4',
+   variants:[{label:'Regular'},{label:'Matcha'},{label:'Pistachio'}],
+   img:'cheesecake', shape:'natural',
+   desc:'Creamy, slow-set cheesecake in three flavours \u2014 Regular, Matcha, and Pistachio. A batch is four cheesecakes for $60, mixed however you like.'},
   {name:'Banana Bread Loaf', cat:'dessert', tag:'Chocolate chip', price:10, img:'banana', shape:'natural',
    desc:'Small-batch banana bread studded with chocolate chips, baked in individual foil loaves. Grab one for the road or three for the week.'}
 ];
 /* helpers for single/variant pricing */
 function dishPrices(d){ return d.variants ? d.variants.map(function(v){return v.price;}) : [d.price]; }
-function dishPriceLabel(d){ var p=dishPrices(d),lo=Math.min.apply(null,p),hi=Math.max.apply(null,p); return lo===hi?('$'+lo):('$'+lo+'\u2013$'+hi); }
+function dishPriceLabel(d){ if(d.priceLabel) return d.priceLabel; var p=dishPrices(d),lo=Math.min.apply(null,p),hi=Math.max.apply(null,p); return lo===hi?('$'+lo):('$'+lo+'\u2013$'+hi); }
 
 /* ---------------- build menu ---------------- */
 const list = document.getElementById('menuList');
@@ -1669,39 +1765,67 @@ let curIdx=null, curVar=0, qty=1, unit=0, minQty=1, lastFocus=null;
 let mixQty={};
 function money(n){return '$'+n}
 function isMix(){ const d=DISHES[curIdx]; return !!(d && d.mix); }
+function batchOf(){ const d=DISHES[curIdx]; return d && d.batch; }
 function mixCount(){ return Object.keys(mixQty).reduce((s,k)=>s+mixQty[k],0); }
+// how many individual items the chosen number of batches entitles you to
+function mixAllowance(){ const b=batchOf(); return b ? qty*b.size : Infinity; }
 function mixSum(){
   const d=DISHES[curIdx];
-  return d.variants.reduce((s,v)=>s+v.price*(mixQty[v.label]||0),0);
+  if(d.batch) return qty*d.batch.price;                 // priced per batch, not per item
+  return d.variants.reduce((s,v)=>s+(v.price||0)*(mixQty[v.label]||0),0);
+}
+// Dropping a batch can strand more flavours than are now allowed. Trim from whichever
+// flavour has the most, so the customer loses the least specific part of their choice.
+function trimMixToAllowance(){
+  const allow=mixAllowance();
+  let over=mixCount()-allow;
+  while(over>0){
+    const biggest=Object.keys(mixQty).reduce((a,b)=>mixQty[b]>mixQty[a]?b:a);
+    if(!mixQty[biggest]) break;
+    mixQty[biggest]--; over--;
+  }
 }
 function mixParts(){
   const d=DISHES[curIdx];
   return d.variants.filter(v=>mixQty[v.label]>0).map(v=>({label:v.label, qty:mixQty[v.label]}));
 }
 function orderTotal(){ return isMix() ? mixSum() : unit*qty; }
-function orderCount(){ return isMix() ? mixCount() : qty; }
+function orderCount(){ return batchOf() ? qty : (isMix() ? mixCount() : qty); }
 function currentDishName(){
   const d=DISHES[curIdx];
-  if(d.mix) return d.name+' ('+mixParts().map(p=>p.qty+' '+p.label).join(', ')+')';
+  if(d.mix){
+    const parts=mixParts().map(p=>p.qty+' '+p.label).join(', ');
+    return d.batch ? d.name+' ×'+qty+(qty===1?' batch':' batches')+' ('+parts+')'
+                   : d.name+' ('+parts+')';
+  }
   return d.variants ? (d.name+' ('+d.variants[curVar].label+')') : d.name;
 }
 function updateTotals(){
   if(isMix()){
-    const d=DISHES[curIdx], n=mixCount();
-    mPrice.textContent=money(d.variants[0].price);
-    mTotal.textContent=money(mixSum());
+    const d=DISHES[curIdx], b=d.batch, n=mixCount(), allow=mixAllowance();
+    mPrice.textContent = b ? money(b.price)+' / batch' : money(d.variants[0].price||0);
+    mTotal.textContent = money(mixSum());
+    if(b){
+      qOut.textContent=qty;
+      const note=document.getElementById('mNote');
+      note.textContent = qty+(qty===1?' batch':' batches')+' \u00b7 '+allow+' '+b.unit+' \u00b7 '+money(mixSum());
+      note.classList.remove('hidden');
+      document.getElementById('qMinus').disabled = qty<=1;
+      document.getElementById('qPlus').disabled  = qty>=b.max;
+    }
     document.querySelectorAll('#mSize .m-mix-row').forEach(row=>{
       const label=row.dataset.label, v=mixQty[label]||0;
       row.classList.toggle('on', v>0);
       row.querySelector('output').textContent=v;
+      // hard limits: never below zero, never past what the batches allow
       row.querySelector('button[data-d="-1"]').disabled = v<=0;
-      row.querySelector('button[data-d="1"]').disabled = n>=20;
+      row.querySelector('button[data-d="1"]').disabled  = n>=allow;
     });
     const tally=document.getElementById('mMixTally');
     if(tally){
-      const short=minQty-n;
-      tally.innerHTML = '<span'+(short>0?' class="short"':'')+'>'+n+' of '+minQty+' minimum</span>'+
-        '<b>'+money(mixSum())+'</b>';
+      const left=allow-n;
+      tally.innerHTML = '<span'+(left!==0?' class="short"':'')+'>'+n+' of '+allow+' chosen'+
+        (left>0?' \u00b7 '+left+' to go':'')+'</span><b>'+money(mixSum())+'</b>';
     }
     return;
   }
@@ -1709,9 +1833,14 @@ function updateTotals(){
   qOut.textContent=qty;
   mTotal.textContent=money(unit*qty);
 }
+function bumpBatch(delta){
+  const b=batchOf(); if(!b) return;
+  qty=Math.max(1, Math.min(b.max, qty+delta));
+  trimMixToAllowance();
+  updateTotals();
+}
 function bumpMix(label, delta){
-  const n=mixCount();
-  if(delta>0 && n>=20) return;
+  if(delta>0 && mixCount()>=mixAllowance()) return;     // can't exceed the batches ordered
   mixQty[label]=Math.max(0, (mixQty[label]||0)+delta);
   updateTotals();
 }
@@ -1732,14 +1861,15 @@ function openModal(idx, imgSrc){
   const qtyField=document.getElementById('qtyField'), sizeNote=document.getElementById('mSizeNote');
   mixQty={};
   if(d.mix){
-    // a count per flavour; the batch minimum applies across the whole order
+    // a count per flavour, allocated inside however many batches were ordered
     document.getElementById('sizeLabel').textContent = d.axis || 'Size';
     mSize.className='m-mix'; mSize.innerHTML='';
     d.variants.forEach(v=>{
       mixQty[v.label]=0;
       const row=document.createElement('div');
       row.className='m-mix-row'; row.dataset.label=v.label;
-      row.innerHTML='<div class="m-mix-name"><b>'+v.label+'</b><span>'+money(v.price)+'</span></div>'+
+      row.innerHTML='<div class="m-mix-name"><b>'+v.label+'</b>'+
+        (v.price!=null?'<span>'+money(v.price)+'</span>':'')+'</div>'+
         '<div class="m-mix-step">'+
         '<button type="button" data-d="-1" aria-label="One fewer '+v.label+'">−</button>'+
         '<output aria-label="'+v.label+' quantity">0</output>'+
@@ -1752,10 +1882,19 @@ function openModal(idx, imgSrc){
     tally.className='m-mix-tally'; tally.id='mMixTally';
     mSize.appendChild(tally);
     sizeField.classList.remove('hidden');
-    qtyField.classList.add('hidden');                 // the steppers are the quantity
-    sizeNote.textContent='Mix and match — minimum '+minQty+' per order.';
+    if(d.batch){
+      // the quantity stepper counts batches; the flavour rows divide them up
+      qty=1;
+      qtyField.classList.remove('hidden');
+      qtyField.querySelector('label').textContent='Batches';
+      sizeNote.textContent='Choose '+d.batch.size+' per batch — any mix of flavours.';
+      unit=d.batch.price;
+    } else {
+      qtyField.classList.add('hidden');
+      sizeNote.textContent='Mix and match — minimum '+minQty+' per order.';
+      unit=d.variants[0].price||0;
+    }
     sizeNote.classList.remove('hidden');
-    unit=d.variants[0].price;
     updateTotals();
   } else if(d.variants){
     document.getElementById('sizeLabel').textContent = d.axis || 'Size';
@@ -1769,15 +1908,19 @@ function openModal(idx, imgSrc){
     });
     sizeField.classList.remove('hidden');
     qtyField.classList.remove('hidden');
+    qtyField.querySelector('label').textContent='Quantity';
     sizeNote.classList.add('hidden');
     selectVariant(0);
   } else {
     sizeField.classList.add('hidden'); mSize.innerHTML='';
     qtyField.classList.remove('hidden');
+    qtyField.querySelector('label').textContent='Quantity';
     sizeNote.classList.add('hidden');
     unit=d.price; updateTotals();
   }
-  if(!d.mix && minQty>1){ note.textContent='Minimum '+minQty+' per order'; note.classList.remove('hidden'); }
+  // batch dishes write their own note in updateTotals — don't clear it back out here
+  if(d.batch){ /* handled above */ }
+  else if(!d.mix && minQty>1){ note.textContent='Minimum '+minQty+' per order'; note.classList.remove('hidden'); }
   else { note.textContent=''; note.classList.add('hidden'); }
   modal.classList.remove('done','deposit');
   document.getElementById('orderForm').reset();
@@ -1805,8 +1948,8 @@ document.getElementById('mClose').addEventListener('click', closeModal);
 document.getElementById('mDone').addEventListener('click', closeModal);
 veil.addEventListener('click', e=>{ if(e.target===veil) closeModal(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && veil.classList.contains('open')) closeModal(); });
-document.getElementById('qMinus').addEventListener('click', ()=>{ qty=Math.max(minQty,qty-1); updateTotals(); });
-document.getElementById('qPlus').addEventListener('click', ()=>{ qty=Math.min(20,qty+1); updateTotals(); });
+document.getElementById('qMinus').addEventListener('click', ()=>{ if(batchOf()) return bumpBatch(-1); qty=Math.max(minQty,qty-1); updateTotals(); });
+document.getElementById('qPlus').addEventListener('click', ()=>{ if(batchOf()) return bumpBatch(1); qty=Math.min(20,qty+1); updateTotals(); });
 /* ---------------- pickup date + slot ----------------
    Ported from Takoshi: one order reserves a 1.5-hour prep window, so a slot is
    unavailable if any live order sits within 90 minutes of it, before or after.
@@ -1924,10 +2067,16 @@ document.getElementById('orderForm').addEventListener('submit', async e=>{
     alert(window.NG_CLOSED_MSG || "We're currently closed for orders. Please check back soon!");
     return;
   }
-  if(isMix() && mixCount() < minQty){
-    alert('Please choose at least '+minQty+' — you can mix the flavours however you like.');
-    document.getElementById('mSize').scrollIntoView({block:'center'});
-    return;
+  if(isMix()){
+    const allow=mixAllowance(), n=mixCount();
+    if(n!==allow){
+      const b=batchOf();
+      alert(n<allow
+        ? 'Choose '+(allow-n)+' more '+(b?b.unit:'item')+' — '+qty+(qty===1?' batch is ':' batches are ')+allow+'.'
+        : 'That is '+(n-allow)+' too many for '+qty+(qty===1?' batch':' batches')+'.');
+      document.getElementById('mSize').scrollIntoView({block:'center'});
+      return;
+    }
   }
   const date=fDate.value, time=fTime.value;
   if(!date || !time){
@@ -1992,6 +2141,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
         // tampered display string can't misprice or mislabel an order
         dish: isMix() ? DISHES[curIdx].name : currentDishName(),
         items: isMix() ? mixParts() : undefined,
+        batches: batchOf() ? qty : undefined,
         qty: orderCount(),
         name: document.getElementById('fName').value,
         contact: document.getElementById('fPhone').value,
@@ -2184,7 +2334,10 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     // anchor each stitch and card to an x, so they land exactly as the lace passes them
     holeEls.forEach((g,i)=> g.dataset.x = (cards[i] ? cards[i].left+HI : 0));
     steps.forEach((s,i)=>{
-      s.dataset.x = (cards[i] ? cards[i].right-HI : 0);
+      // The card has to be present the moment its FIRST stitch appears, not its last.
+      // Keyed to the right hole, every card spent its whole width as a pair of rings
+      // and stubs floating in empty sage with nothing between them to be stitched to.
+      s.dataset.x = (cards[i] ? cards[i].left+HI-10 : 0);
       // alternating lean so neighbours never swing in step, magnitude .55-1.05deg
       const t=(0.55+0.5*jit(i*41.3)) * (i%2 ? -1 : 1);
       s.style.setProperty('--tilt', t.toFixed(2)+'deg');
@@ -2426,7 +2579,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const cam=new THREE.PerspectiveCamera(60,1,0.1,100); cam.position.z=8;
 
   const MOBILE = innerWidth < 721;
-  const N=MOBILE?70:140, pos=new Float32Array(N*3), spd=new Float32Array(N), ph=new Float32Array(N);
+  const N=MOBILE?34:72, pos=new Float32Array(N*3), spd=new Float32Array(N), ph=new Float32Array(N);
   for(let i=0;i<N;i++){
     pos[i*3]=(Math.random()-0.5)*16;
     pos[i*3+1]=(Math.random()-0.5)*10;
@@ -2441,11 +2594,11 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   grad.addColorStop(0,'rgba(247,240,227,0.9)'); grad.addColorStop(0.5,'rgba(217,164,65,0.35)'); grad.addColorStop(1,'rgba(217,164,65,0)');
   g.fillStyle=grad; g.fillRect(0,0,64,64);
   const tex=new THREE.CanvasTexture(c);
-  const mat=new THREE.PointsMaterial({size:0.32,map:tex,transparent:true,opacity:0.65,depthWrite:false,blending:THREE.AdditiveBlending});
+  const mat=new THREE.PointsMaterial({size:0.30,map:tex,transparent:true,opacity:0.5,depthWrite:false,blending:THREE.AdditiveBlending});
   const pts=new THREE.Points(geo,mat); scene.add(pts);
 
   // drifting leaves (province layer)
-  const LN=MOBILE?10:22, lpos=new Float32Array(LN*3), lspd=new Float32Array(LN), lph=new Float32Array(LN);
+  const LN=MOBILE?5:11, lpos=new Float32Array(LN*3), lspd=new Float32Array(LN), lph=new Float32Array(LN);
   for(let i=0;i<LN;i++){
     lpos[i*3]=(Math.random()-0.5)*16; lpos[i*3+1]=(Math.random()-0.5)*10; lpos[i*3+2]=(Math.random()-0.5)*5;
     lspd[i]=0.22+Math.random()*0.3; lph[i]=Math.random()*Math.PI*2;
@@ -2462,21 +2615,23 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   lg2.strokeStyle='rgba(60,88,66,0.9)'; lg2.lineWidth=1.4;
   lg2.beginPath(); lg2.moveTo(-15,0); lg2.lineTo(15,0); lg2.stroke();
   const ltex=new THREE.CanvasTexture(lc);
-  const lmat=new THREE.PointsMaterial({size:0.42,map:ltex,transparent:true,opacity:0.8,depthWrite:false});
+  const lmat=new THREE.PointsMaterial({size:0.40,map:ltex,transparent:true,opacity:0.6,depthWrite:false});
   scene.add(new THREE.Points(lgeo,lmat));
 
   let mx=0,my=0;
   addEventListener('pointermove',e=>{ mx=(e.clientX/innerWidth-0.5); my=(e.clientY/innerHeight-0.5); },{passive:true});
 
-  const hero=document.querySelector('header.hero');
   function size(){
-    const w=hero.clientWidth,h=hero.clientHeight;
+    const w=innerWidth,h=innerHeight;
     renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix();
   }
-  size(); addEventListener('resize',size);
+  size(); addEventListener('resize',size,{passive:true});
 
-  let t=0, running=true;
-  new IntersectionObserver(([e])=>{running=e.isIntersecting;},{threshold:0}).observe(hero);
+  // It covers the whole page now, so there's no "scrolled past it" to pause on.
+  // Pause on a hidden tab instead — an always-on WebGL loop in a background tab is
+  // the one case where this genuinely costs the visitor something.
+  let t=0, running=!document.hidden;
+  document.addEventListener('visibilitychange',()=>{ running=!document.hidden; });
   (function loop(){
     requestAnimationFrame(loop);
     if(!running) return;
@@ -2695,20 +2850,20 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   var stToggle=document.getElementById('storyToggle'), stSec=document.getElementById('story');
   var stBody=document.getElementById('storyBody');
   var stLedes=stBody ? [].slice.call(stBody.querySelectorAll('.lede')) : [];
-  var stData=stLedes.map(function(p){ return {styled:p.innerHTML, text:p.textContent}; });
+  var stData=stLedes.map(function(p){ return {styled:p.innerHTML}; });
   var stTyped=false, REDUCE_S=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function escH(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function typeStory(){
     if(stTyped || !stLedes.length) return; stTyped=true;
-    if(REDUCE_S){ stLedes.forEach(function(p,i){ p.innerHTML=stData[i].styled; }); stBody.classList.add('revealed'); return; }
-    stLedes.forEach(function(p){ p.innerHTML=''; });
-    var pi=0, ci=0;
-    (function step(){
-      if(pi>=stLedes.length){ stLedes.forEach(function(p,i){ p.innerHTML=stData[i].styled; }); requestAnimationFrame(function(){ stBody.classList.add('revealed'); }); return; }
-      var p=stLedes[pi], t=stData[pi].text;
-      if(ci<t.length){ ci++; p.innerHTML=escH(t.slice(0,ci))+'<span class="type-caret"></span>'; setTimeout(step, 11+Math.random()*20); }
-      else { p.innerHTML=escH(t); pi++; ci=0; setTimeout(step, 240); }
-    })();
+    // the markup is always the real, styled copy — the reveal is presentation only,
+    // so the text is selectable and readable from the first frame
+    stLedes.forEach(function(p,i){ p.innerHTML=stData[i].styled; });
+    if(REDUCE_S){ stBody.classList.add('revealed'); return; }
+    stBody.classList.add('lede-reveal');
+    requestAnimationFrame(function(){
+      stBody.classList.add('go');
+      // "Namit gid" blooms and its root underline draws once the lines have settled
+      setTimeout(function(){ stBody.classList.add('revealed'); }, 1150);
+    });
   }
   function openStory(){
     if(!stSec) return;
