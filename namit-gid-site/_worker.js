@@ -333,24 +333,29 @@ export default {
       if (!s) return jsonResponse({ available: true, windows: [] }, 200, request);
       const nowTs = new Date();
       const windows = [];
-      if (s.unavailable_until && new Date(s.unavailable_until) > nowTs) {
-        windows.push({ from: s.unavailable_from || null, until: s.unavailable_until });
+      // until === null means "closed until the operator reopens" — an
+      // open-ended window, not the absence of one. Previously the null case
+      // fell through here and the closure did nothing at all.
+      if (s.unavailable_until ? new Date(s.unavailable_until) > nowTs
+                              : !!s.unavailable_from) {
+        windows.push({ from: s.unavailable_from || null, until: s.unavailable_until || null });
       }
       try {
         const cRes = await fetch(
-          `${SB}/rest/v1/closures?unavailable_until=gt.${encodeURIComponent(nowTs.toISOString())}&select=unavailable_from,unavailable_until&order=unavailable_from.asc`,
+          `${SB}/rest/v1/closures?or=(unavailable_until.is.null,unavailable_until.gt.${encodeURIComponent(nowTs.toISOString())})&select=unavailable_from,unavailable_until&order=unavailable_from.asc`,
           { headers: sbHeaders });
         if (cRes.ok) {
+          const stamp = v => (v ? new Date(v).getTime() : null);
           (await cRes.json()).forEach(c => {
             const dup = windows.some(w =>
-              new Date(w.until).getTime() === new Date(c.unavailable_until).getTime() &&
-              String(w.from || '') !== '' && c.unavailable_from &&
-              new Date(w.from).getTime() === new Date(c.unavailable_from).getTime());
-            if (!dup) windows.push({ from: c.unavailable_from, until: c.unavailable_until });
+              stamp(w.until) === stamp(c.unavailable_until) &&
+              stamp(w.from)  === stamp(c.unavailable_from));
+            if (!dup) windows.push({ from: c.unavailable_from, until: c.unavailable_until || null });
           });
         }
       } catch (e) { /* fall back to single live window */ }
-      const inWindow  = w => (!w.from || new Date(w.from) <= nowTs) && new Date(w.until) > nowTs;
+      const inWindow  = w => (!w.from || new Date(w.from) <= nowTs)
+                          && (!w.until || new Date(w.until) > nowTs);
       const activeWin = windows.find(inWindow) || null;
       const closedIndefinitely = s.is_available === false && !s.unavailable_until;
       const available = !activeWin && !closedIndefinitely;
@@ -406,13 +411,16 @@ export default {
         const cUntil = body.unavailable_until || null;
         const closingNow = body.is_available === false;
         const scheduledFuture = body.is_available === true && cFrom && new Date(cFrom) > new Date();
-        if (cUntil && (closingNow || scheduledFuture)) {
+        // cUntil may be null (open-ended). It used to gate this branch, which
+        // is why "closed from <time>, no reopen date" wrote no history row and
+        // never appeared on the Closures page.
+        if (closingNow || scheduledFuture) {
           const effFrom = cFrom || nowISO;
           await fetch(`${chUrl}?unavailable_from=eq.${encodeURIComponent(effFrom)}`, { method: 'DELETE', headers: sbWrite });
           await fetch(chUrl, { method: 'POST', headers: sbWrite,
             body: JSON.stringify({ unavailable_from: effFrom, unavailable_until: cUntil, message: body.unavailable_message || null }) });
         } else if (body.is_available === true) {
-          await fetch(`${chUrl}?unavailable_from=lte.${encodeURIComponent(nowISO)}&unavailable_until=gt.${encodeURIComponent(nowISO)}`, { method: 'DELETE', headers: sbWrite });
+          await fetch(`${chUrl}?unavailable_from=lte.${encodeURIComponent(nowISO)}&or=(unavailable_until.is.null,unavailable_until.gt.${encodeURIComponent(nowISO)})`, { method: 'DELETE', headers: sbWrite });
         }
       } catch (e) { /* best-effort */ }
       return jsonResponse({ ok: true }, 200, request);
@@ -502,8 +510,11 @@ export default {
         const s = (await availRes.json().catch(() => []))[0];
         if (s) {
           const now = new Date();
-          const liveWindow = s.unavailable_until && new Date(s.unavailable_until) > now &&
-            (!s.unavailable_from || new Date(s.unavailable_from) <= now);
+          // A window with no end date runs until the operator reopens, so the
+          // end check has to pass when unavailable_until is null.
+          const started    = !s.unavailable_from || new Date(s.unavailable_from) <= now;
+          const notEnded   = !s.unavailable_until || new Date(s.unavailable_until) > now;
+          const liveWindow = started && notEnded && !!(s.unavailable_from || s.unavailable_until);
           const closedIndefinitely = s.is_available === false && !s.unavailable_until;
           if (liveWindow || closedIndefinitely) {
             return jsonResponse({ error: 'closed', message: s.unavailable_message || "We're currently closed for orders." }, 409, request);

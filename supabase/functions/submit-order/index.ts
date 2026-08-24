@@ -191,27 +191,38 @@ serve(async (req) => {
     // request whose pickup lands inside any active closure window.
     if (pickupDate && pickupTime) {
       try {
-        const wins: { from: string | null; until: string }[] = []
+        // until === null is an open-ended closure ("until we reopen"), so a
+        // window is valid with either bound set, and a null end never expires.
+        const wins: { from: string | null; until: string | null }[] = []
         const { data: sched } = await supabase
           .from('store_schedule')
           .select('unavailable_from, unavailable_until')
           .eq('id', 1).maybeSingle()
-        if (sched?.unavailable_until) {
-          wins.push({ from: sched.unavailable_from || null, until: sched.unavailable_until })
+        if (sched?.unavailable_until || sched?.unavailable_from) {
+          wins.push({ from: sched.unavailable_from || null, until: sched.unavailable_until || null })
         }
         const { data: cls } = await supabase
           .from('closures')
           .select('unavailable_from, unavailable_until')
+        // Deliberately only bounded rows from `closures`. That table is the
+        // history log: a stale open-ended row left behind by a failed reopen
+        // would silently reject every future order forever. The live
+        // open-ended state lives in store_schedule above, which the reopen
+        // path always clears.
         ;(cls || []).forEach((c: { unavailable_from?: string; unavailable_until?: string }) => {
-          if (c.unavailable_until) wins.push({ from: c.unavailable_from || null, until: c.unavailable_until })
+          if (c.unavailable_until) {
+            wins.push({ from: c.unavailable_from || null, until: c.unavailable_until })
+          }
         })
         const pMs = pickupMs(pickupDate, pickupTime)
         const nowT = torontoNowMs()
         for (const w of wins) {
-          const untilMs = naiveMs(w.until)
+          const untilMs = w.until ? naiveMs(w.until) : null
           const fromMs = w.from ? naiveMs(w.from) : null
-          if (untilMs != null && pMs != null && untilMs > nowT &&
-              pMs < untilMs && (fromMs == null || pMs >= fromMs)) {
+          const openEnded = w.until == null
+          if (pMs != null &&
+              (openEnded || (untilMs != null && untilMs > nowT && pMs < untilMs)) &&
+              (fromMs == null || pMs >= fromMs)) {
             return new Response(JSON.stringify({ error: 'closed_slot' }), {
               status: 409, headers: { 'Content-Type': 'application/json', ...CORS },
             })
