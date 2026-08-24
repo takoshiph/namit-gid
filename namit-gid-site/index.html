@@ -717,14 +717,28 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   width:min(560px,92vw);min-height:96px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;
   padding:1.05rem 2.6rem 1.05rem 3rem;border-radius:14px;
-  background:url("images/wood.webp") repeat-x center/auto 100%, linear-gradient(#6d5136,#543d28);
-  box-shadow:inset 0 0 0 2px rgba(0,0,0,.26), inset 0 2px 0 rgba(255,255,255,.13),
-             0 12px 22px -14px rgba(0,0,0,.75);
+  background:
+    /* four screw heads, one per corner — same read as the emblem's board */
+    radial-gradient(circle at 15px 15px, rgba(0,0,0,.5) 0 2.2px, rgba(255,240,214,.16) 2.2px 3.1px, transparent 3.2px) no-repeat,
+    radial-gradient(circle at calc(100% - 15px) 15px, rgba(0,0,0,.5) 0 2.2px, rgba(255,240,214,.16) 2.2px 3.1px, transparent 3.2px) no-repeat,
+    radial-gradient(circle at 15px calc(100% - 15px), rgba(0,0,0,.5) 0 2.2px, rgba(255,240,214,.16) 2.2px 3.1px, transparent 3.2px) no-repeat,
+    radial-gradient(circle at calc(100% - 15px) calc(100% - 15px), rgba(0,0,0,.5) 0 2.2px, rgba(255,240,214,.16) 2.2px 3.1px, transparent 3.2px) no-repeat,
+    url("images/wood.webp") repeat-x center/auto 100%,
+    linear-gradient(#6d5136,#543d28);
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.34), inset 0 2px 0 rgba(255,240,214,.16),
+             inset 0 -3px 6px -3px rgba(0,0,0,.5),
+             0 14px 24px -14px rgba(0,0,0,.8);
   color:var(--cream);font-size:.92rem;line-height:1.42;text-align:center;
 }
 #closedBanner b{color:var(--gold)}
 .cb-main{font-family:var(--ff-display);font-size:1.32rem;line-height:1.15;color:var(--cream);
   text-shadow:0 1px 2px rgba(30,16,6,.5)}
+/* A routed groove inset from the edge: the single detail that reads as
+   "carved board" rather than "rounded rectangle". */
+.cb-plank::before{content:"";position:absolute;inset:8px;border-radius:9px;
+  border:1.5px solid rgba(0,0,0,.3);
+  box-shadow:inset 0 1px 0 rgba(255,240,214,.10), 0 1px 0 rgba(255,240,214,.07);
+  pointer-events:none}
 .cb-sub{font-size:.66rem;letter-spacing:.22em;color:#e8b877;opacity:.9;margin-top:-.05rem}
 .cb-line{font-size:.92rem;line-height:1.35;color:rgba(247,240,227,.88);max-width:40ch;margin-top:.3rem}
 .cb-line[hidden]{display:none}
@@ -1075,7 +1089,11 @@ main{position:relative}
    the board was both wrong and what opened the gap at the branch.
    Cord 27px at +/-6deg -> horizontal travel 27*sin(6deg) = 2.8px. */
 @keyframes swayPlank{0%,100%{translate:-2.8px 0}50%{translate:2.8px 0}}
-@keyframes swayCord{0%,100%{rotate:-6deg}50%{rotate:6deg}}
+/* Sign matters: rotate(+6deg) about the top swings the cord's LOWER end
+   LEFT (measured, not assumed). The plank starts at -2.8px, also left, so
+   the cord must start at +6deg. It was -6deg, which sent the cords one way
+   and the board the other. */
+@keyframes swayCord{0%,100%{rotate:6deg}50%{rotate:-6deg}}
 .js #closedBanner .cb-plank{animation:swayPlank 2.46s ease-in-out infinite}
 .js #closedBanner .cb-cord{animation:swayCord 2.46s ease-in-out infinite}
 .js #closedBanner .cb-branch{animation:swayBranch .82s ease-in-out infinite}
