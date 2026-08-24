@@ -757,6 +757,55 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   background:none;border:0;color:var(--cream);font-size:1.05rem;line-height:1;
   cursor:pointer;opacity:.75;padding:.35rem .4rem;border-radius:8px}
 #closedBannerClose:hover,#closedBannerClose:focus-visible{opacity:1;background:rgba(0,0,0,.18)}
+
+/* ── closed: hold the scroll once, then keep the order buttons shut ────────
+   The sign already says the kitchen is shut, but a notice at the top is easy
+   to scroll straight past. So the first scroll is caught and answered: the
+   sign rocks the way a real one would if you knocked it, and the reason comes
+   up in words. It is a hold, not a wall — one tap opens the page, because a
+   customer who cannot look at the menu today cannot plan to come back for it
+   on Thursday either. What stays shut is ordering. */
+html.ng-hold,body.ng-hold{overflow:hidden !important;overscroll-behavior:none}
+
+/* A knock, not a tantrum: the amplitude decays about 45% per swing, which is
+   roughly what a light board on two cords does. It reads as "that moved
+   because you pushed it", not as an error state. */
+@keyframes ngKnock{
+  0%,100%{translate:0 0}
+  11%{translate:-7px 0}   25%{translate:6px 0}   39%{translate:-3.9px 0}
+  53%{translate:2.6px 0}  68%{translate:-1.5px 0} 84%{translate:.7px 0}
+}
+#closedBanner.knock .cb-hang{animation:ngKnock .8s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes ngKnockBtn{
+  0%,100%{transform:translateX(0)}
+  14%{transform:translateX(-5px)} 30%{transform:translateX(4.4px)}
+  46%{transform:translateX(-2.9px)} 62%{transform:translateX(1.9px)}
+  80%{transform:translateX(-.9px)}
+}
+.ng-knock{animation:ngKnockBtn .6s cubic-bezier(.36,.07,.19,.97) both}
+
+/* Anchored just under the sign rather than parked at the bottom of the screen:
+   the thing that knocked and the thing that explains the knock should be one
+   gesture. JS sets --ng-gate-top from the sign's measured height. */
+#closedGate{position:fixed;left:50%;transform:translateX(-50%);
+  top:var(--ng-gate-top,5.5rem);z-index:80;
+  width:min(92vw,25rem);text-align:center;
+  background:#39312a;color:var(--cream);
+  border:1px solid rgba(247,240,227,.16);border-radius:15px;
+  padding:.9rem 1.05rem 1rem;
+  box-shadow:0 16px 38px rgba(20,26,23,.38);
+  animation:ngGateIn .34s cubic-bezier(.2,.7,.2,1) both}
+#closedGate[hidden]{display:none}
+@keyframes ngGateIn{from{opacity:0;transform:translate(-50%,15px)}to{opacity:1;transform:translate(-50%,0)}}
+#closedGate .cg-main{margin:0;font-family:var(--ff-display);font-size:1.05rem;line-height:1.32}
+#closedGate .cg-sub{margin:.16rem 0 0;font-size:.92rem;font-style:italic;color:var(--gold)}
+#closedGateGo{margin-top:.72rem;font:inherit;font-size:.82rem;letter-spacing:.02em;
+  cursor:pointer;color:inherit;background:rgba(247,240,227,.1);
+  border:1px solid rgba(247,240,227,.24);border-radius:999px;padding:.45rem .95rem}
+#closedGateGo:hover,#closedGateGo:focus-visible{background:rgba(247,240,227,.2)}
+/* Once the page is open the button has nothing left to offer. */
+#closedGate:not(.held) #closedGateGo{display:none}
+
 @media (max-width:520px){
   .cb-plank{width:94vw;min-height:92px;padding:.95rem 2.3rem .95rem 2.5rem}
   .cb-main{font-size:1.18rem}
@@ -1260,6 +1309,15 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <button id="closedBannerClose" aria-label="Dismiss">&#10005;</button>
     </div>
   </div>
+</div>
+
+<!-- Why the kitchen just refused: shown when a closed shop is scrolled at or an
+     order button is tapped. role=status so it is announced without stealing
+     focus mid-scroll. -->
+<div id="closedGate" role="status" hidden>
+  <p class="cg-main">You cannot order this time.</p>
+  <p class="cg-sub">Sarado anay kita.</p>
+  <button type="button" id="closedGateGo">Look at the menu anyway</button>
 </div>
 
 <div id="allergenBackdrop"></div>
@@ -3124,6 +3182,137 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 <!-- ── availability banner · allergen bubble · reviews (Worker /api) ── -->
 <script>
 (function(){
+
+  /* ── The closed gate ─────────────────────────────────────────────────────
+     Two jobs, one voice. First scroll on a closed shop is held: the sign takes
+     a knock and the reason comes up in words, so nobody scrolls past the news
+     by accident. One tap releases the page for good — browsing is not the
+     thing we are stopping. What stays stopped is ordering: every price button
+     knocks and repeats the message instead of opening the form, which catches
+     the customer at the tap rather than after they have typed a name, a phone
+     number and a pickup time. The submit handler and the edge function still
+     refuse a closed order; this is the polite layer in front of them. */
+  var NGGate = (function(){
+    var held=false, armed=false, lastKnock=0, hideTimer=0;
+    var banner, gate;
+
+    function knock(el){
+      if(!el) return;
+      var now = Date.now();
+      if(now - lastKnock < 420) return;   // one knock per push, not a rattle
+      lastKnock = now;
+      var cls = el.id === 'closedBanner' ? 'knock' : 'ng-knock';
+      el.classList.remove(cls);
+      void el.offsetWidth;                 // restart a finished animation
+      el.classList.add(cls);
+    }
+
+    // Sit the card just under the sign, or under the nav once the sign has
+    // been dismissed, and never so low that a short window pushes it off.
+    function place(){
+      banner = banner || document.getElementById('closedBanner');
+      var top = 78;
+      if(banner && banner.classList.contains('show')){
+        var r = banner.getBoundingClientRect();
+        if(r.height) top = r.bottom + 12;
+      }
+      gate.style.setProperty('--ng-gate-top', Math.max(64, Math.min(top, window.innerHeight - 190)) + 'px');
+    }
+
+    function say(){
+      gate = gate || document.getElementById('closedGate');
+      if(!gate) return;
+      place();
+      gate.classList.toggle('held', held);
+      gate.hidden = false;
+      clearTimeout(hideTimer);
+      // While the page is held the card is the way out, so it stays. Once the
+      // page is open it has said its piece and gets out of the way.
+      if(!held) hideTimer = setTimeout(function(){ gate.hidden = true; }, 5000);
+    }
+
+    function bump(){
+      banner = banner || document.getElementById('closedBanner');
+      knock(banner && banner.classList.contains('show') ? banner : null);
+      say();
+    }
+
+    // Every way a page can be scrolled, refused in one place.
+    function onWheel(e){ e.preventDefault(); bump(); }
+    function onTouch(e){ e.preventDefault(); bump(); }
+    var KEYS = {' ':1,'PageDown':1,'PageUp':1,'ArrowDown':1,'ArrowUp':1,'End':1,'Home':1,'Spacebar':1};
+    function onKey(e){
+      if(!KEYS[e.key]) return;
+      var t = e.target;
+      if(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      e.preventDefault(); bump();
+    }
+    function onScroll(){ if(window.scrollY) window.scrollTo(0,0); }
+    // A deliberate jump to a section is the same intent as the card's button,
+    // so honour it rather than knocking at someone who asked politely.
+    function onAnchor(e){
+      var a = e.target.closest && e.target.closest('a[href^="#"]');
+      if(a && a.getAttribute('href').length > 1) release();
+    }
+
+    function hold(){
+      if(held) return;
+      held = true;
+      document.documentElement.classList.add('ng-hold');
+      document.body.classList.add('ng-hold');
+      window.addEventListener('wheel', onWheel, {passive:false});
+      window.addEventListener('touchmove', onTouch, {passive:false});
+      window.addEventListener('keydown', onKey);
+      window.addEventListener('scroll', onScroll, {passive:true});
+      document.addEventListener('click', onAnchor, true);
+    }
+
+    function release(){
+      if(!held) return;
+      held = false;
+      document.documentElement.classList.remove('ng-hold');
+      document.body.classList.remove('ng-hold');
+      window.removeEventListener('wheel', onWheel, {passive:false});
+      window.removeEventListener('touchmove', onTouch, {passive:false});
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('click', onAnchor, true);
+      gate = gate || document.getElementById('closedGate');
+      if(gate){ gate.classList.remove('held'); gate.hidden = true; }
+      clearTimeout(hideTimer);
+    }
+
+    function arm(){
+      if(armed) return;
+      armed = true;
+      hold();
+      var go = document.getElementById('closedGateGo');
+      if(go) go.addEventListener('click', release);
+      window.addEventListener('resize', function(){
+        gate = gate || document.getElementById('closedGate');
+        if(gate && !gate.hidden) place();
+      });
+      // Escape lets a keyboard user out of the hold the same way it closes
+      // every other overlay on this page.
+      document.addEventListener('keydown', function(e){ if(e.key === 'Escape') release(); });
+    }
+
+    // Capture phase, so this runs before the delegated handler that opens the
+    // order modal — and stopPropagation there means the modal never hears it.
+    document.addEventListener('click', function(e){
+      if(window.NG_AVAILABLE !== false) return;
+      var b = e.target.closest && e.target.closest('[data-idx]');
+      if(!b) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if(held){ bump(); return; }
+      knock(b);
+      say();
+    }, true);
+
+    return { arm: arm, release: release };
+  })();
+
   // ── Store availability → closed banner + order gating ──
   fetch('/api/availability').then(function(r){return r.json();}).then(function(a){
     window.NG_AVAILABLE = a.available !== false;
@@ -3149,6 +3338,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
         }catch(_){ bk.hidden = true; }
       } else { bk.hidden = true; }
       b.classList.add('show');
+      NGGate.arm();
     }
   }).catch(function(){ window.NG_AVAILABLE = true; window.NG_WINDOWS = []; });
   var cbc=document.getElementById('closedBannerClose');
