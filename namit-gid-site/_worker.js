@@ -420,7 +420,24 @@ export default {
           await fetch(chUrl, { method: 'POST', headers: sbWrite,
             body: JSON.stringify({ unavailable_from: effFrom, unavailable_until: cUntil, message: body.unavailable_message || null }) });
         } else if (body.is_available === true) {
-          await fetch(`${chUrl}?unavailable_from=lte.${encodeURIComponent(nowISO)}&or=(unavailable_until.is.null,unavailable_until.gt.${encodeURIComponent(nowISO)})`, { method: 'DELETE', headers: sbWrite });
+          // Reopening ENDS the active closure; it does not erase it. This table
+          // is the history log, so a closure that actually happened has to
+          // survive as a past row — deleting it here is why the Closures page
+          // could never show anything under "Past".
+          // The exception is a mis-click: closed and reopened inside a minute
+          // never really happened, so that row is dropped instead of logged.
+          const active = `${chUrl}?unavailable_from=lte.${encodeURIComponent(nowISO)}&or=(unavailable_until.is.null,unavailable_until.gt.${encodeURIComponent(nowISO)})`;
+          const MIN_LOGGED_MS = 60000;
+          const openRes = await fetch(`${active}&select=unavailable_from`, { headers: sbHeaders });
+          const openRows = openRes.ok ? await openRes.json().catch(() => []) : [];
+          const trivial = Array.isArray(openRows) && openRows.length &&
+            openRows.every(r => Date.now() - new Date(r.unavailable_from).getTime() < MIN_LOGGED_MS);
+          if (trivial) {
+            await fetch(active, { method: 'DELETE', headers: sbWrite });
+          } else {
+            await fetch(active, { method: 'PATCH', headers: sbWrite,
+              body: JSON.stringify({ unavailable_until: nowISO }) });
+          }
         }
       } catch (e) { /* best-effort */ }
       return jsonResponse({ ok: true }, 200, request);
