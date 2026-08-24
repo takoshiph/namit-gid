@@ -551,6 +551,49 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .m-foot-sum{display:flex;flex-direction:column;line-height:1.05}
 .m-foot-k{font-size:.6rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(53,40,31,.6);font-weight:700}
 .m-foot-v{font-family:var(--ff-display);font-size:1.5rem;color:var(--espresso);font-variant-numeric:tabular-nums}
+/* an error belongs next to the thing that caused it, not in a system dialog stacked
+   on top of the card — alert() on iOS in particular fights the modal it interrupts */
+.m-alert{
+  margin:0;padding:.75rem 1.35rem;background:rgba(196,99,60,.1);
+  border-top:1px solid rgba(196,99,60,.3);border-bottom:1px solid rgba(196,99,60,.3);
+  color:#8f3f27;font-size:.9rem;line-height:1.45;
+}
+.m-alert[hidden]{display:none}
+.m-count{font-size:.72rem;color:var(--sage-dark);align-self:flex-end}
+.m-count.hidden{display:none}
+.m-count.near{color:var(--terracotta)}
+/* the address you have to retype into a banking app, one tap away */
+.m-etr{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+  background:#fff;border:1px solid rgba(53,40,31,.18);border-radius:12px;padding:.65rem .7rem .65rem .9rem}
+.m-etr-k{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(53,40,31,.5);font-weight:700}
+.m-etr-v{flex:1 1 auto;font-family:var(--ff-mono,ui-monospace,SFMono-Regular,Menlo,monospace);
+  font-size:.95rem;color:var(--espresso);word-break:break-all;-webkit-user-select:all;user-select:all}
+.m-etr-copy{flex:0 0 auto;background:var(--sage-dark);color:var(--cream);border-radius:99px;
+  padding:.45rem .9rem;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+  transition:background .2s}
+.m-etr-copy:hover{background:var(--espresso)}
+.m-etr-copy.done{background:var(--sage-deep)}
+/* one strip, used both for "discard this order?" and "that is a lot of trays" */
+.m-confirm{
+  position:sticky;bottom:0;z-index:3;padding:.9rem 1.35rem 1rem;
+  background:var(--espresso);color:var(--cream);
+  display:flex;flex-direction:column;gap:.7rem;
+}
+.m-confirm[hidden]{display:none}
+.m-confirm p{margin:0;font-size:.92rem;line-height:1.45}
+.m-confirm-btns{display:flex;gap:.6rem}
+.m-confirm-btns button{
+  flex:1 1 auto;border-radius:99px;padding:.65rem .9rem;font-size:.72rem;
+  letter-spacing:.16em;text-transform:uppercase;font-weight:700;transition:background .2s,opacity .2s;
+}
+.m-confirm-no{background:rgba(247,240,227,.15);color:var(--cream)}
+.m-confirm-no:hover{background:rgba(247,240,227,.28)}
+.m-confirm-yes{background:var(--terracotta);color:var(--cream)}
+.m-confirm-yes:hover{background:#b0512c}
+.modal.confirming .m-foot{display:none}
+/* saved details */
+.m-saved{display:flex;align-items:center;gap:.5rem;font-size:.74rem;color:var(--sage-dark)}
+.m-saved button{font:inherit;color:var(--terracotta);text-decoration:underline;padding:0}
 .modal::-webkit-scrollbar{display:none}
 @media(min-width:640px){.modal{border-radius:26px}}
 .modal-veil.open .modal{transform:none}
@@ -1296,6 +1339,10 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <section class="m-sec">
         <span class="m-sec-t">Your details</span>
         <div class="m-sec-b">
+          <div class="m-saved" id="mSaved" hidden>
+            <span>Filled in from your last order.</span>
+            <button type="button" id="mForget">Not you?</button>
+          </div>
           <div class="field">
             <label for="fName">Your name</label>
             <input id="fName" required autocomplete="name" placeholder="Juan D.">
@@ -1310,10 +1357,12 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
           </div>
           <div class="field">
             <label for="fNotes">Notes <span class="m-sub">(optional)</span></label>
-            <textarea id="fNotes" rows="2" placeholder="Allergies or anything we should know?"></textarea>
+            <textarea id="fNotes" rows="2" maxlength="500" placeholder="Allergies or anything we should know?"></textarea>
+            <span class="m-count hidden" id="fNotesCount"></span>
           </div>
         </div>
       </section>
+      <p class="m-alert" id="mAlert" role="alert" hidden></p>
       <div class="m-foot">
         <div class="m-foot-sum">
           <span class="m-foot-k">Total</span>
@@ -1325,12 +1374,25 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     <div class="m-deposit">
       <button type="button" class="m-dep-back" id="depBack">&#8592; Back</button>
       <h3>Reserve your batch</h3>
-      <p class="m-dep-lead">Send a <strong>$10 deposit</strong> by Interac e-Transfer to <strong>orders@takoshi.ca</strong> to confirm your order, then upload the screenshot below. Optional, but it gets you confirmed faster.</p>
+      <p class="m-dep-lead">Send a <strong>$10 deposit</strong> by Interac e-Transfer to confirm your order, then upload the screenshot below. Optional, but it gets you confirmed faster.</p>
+      <div class="m-etr">
+        <span class="m-etr-k">Send to</span>
+        <code class="m-etr-v" id="etrAddr">orders@takoshi.ca</code>
+        <button type="button" class="m-etr-copy" id="etrCopy" aria-label="Copy the e-Transfer address">Copy</button>
+      </div>
       <dl class="m-receipt" id="depBalanceLine"></dl>
+      <p class="m-alert" id="depAlert" role="alert" hidden></p>
       <label class="m-dep-upload" for="depShot"><span class="m-dep-ico">&#128247;</span><span id="depUploadText">Tap to add your e-Transfer screenshot</span></label>
       <input type="file" id="depShot" accept="image/*" hidden>
       <img id="depPreview" alt="" class="m-dep-preview" hidden>
       <button class="m-submit" type="button" id="placeOrderBtn" style="width:100%">Place my order</button>
+    </div>
+    <div class="m-confirm" id="mConfirm" hidden>
+      <p id="mConfirmText"></p>
+      <div class="m-confirm-btns">
+        <button type="button" class="m-confirm-no" id="mConfirmNo">Keep editing</button>
+        <button type="button" class="m-confirm-yes" id="mConfirmYes">Discard</button>
+      </div>
     </div>
     <div class="m-success">
       <svg class="sprig" viewBox="0 0 74 46" aria-hidden="true" focusable="false">
@@ -1783,6 +1845,32 @@ addEventListener('scroll', ()=> nav.classList.toggle('scrolled', scrollY > 40), 
 /* ---------------- reveals: handled by the reveal engine above ---------------- */
 
 /* ---------------- order modal ---------------- */
+/* Inline errors instead of alert(): a dialog stacked on a dialog is easy to miss,
+   impossible to style, and on iOS it fights the modal underneath it. */
+function showErr(el, msg){
+  if(!el) return;
+  el.textContent=msg; el.hidden=false;
+  el.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+function clearErr(el){ if(el){ el.hidden=true; el.textContent=''; } }
+
+/* A contact we can't reach is the most expensive bad data on this form: a deposit to
+   refund and a tray cooked for nobody. Accept a plausible phone OR a handle, since
+   the field takes both, and reject the things that are neither. */
+function validContact(v){
+  const t=String(v||'').trim();
+  if(!t) return false;
+  const digits=t.replace(/\D/g,'');
+  if(digits.length>=10 && digits.length<=15 && /^[\d()+\-.\s]+$/.test(t)) return true;
+  return /^@?[A-Za-z0-9](?:[A-Za-z0-9._]{2,29})$/.test(t) && /[A-Za-z]/.test(t);
+}
+
+/* Remembered locally so a second order is a few taps. Never leaves this browser. */
+const NG_ME='ng_customer';
+function loadMe(){ try{ return JSON.parse(localStorage.getItem(NG_ME)||'null'); }catch(_){ return null; } }
+function saveMe(me){ try{ localStorage.setItem(NG_ME, JSON.stringify(me)); }catch(_){} }
+function forgetMe(){ try{ localStorage.removeItem(NG_ME); }catch(_){} }
+
 const veil = document.getElementById('veil'), modal = document.getElementById('modal');
 const mTitle=document.getElementById('mTitle'), mPrice=document.getElementById('mPrice'),
       mImg=document.getElementById('mImg'), mTotal=document.getElementById('mTotal'),
@@ -1949,9 +2037,21 @@ function openModal(idx, imgSrc){
   if(d.batch){ /* handled above */ }
   else if(!d.mix && minQty>1){ note.textContent='Minimum '+minQty+' per order'; note.classList.remove('hidden'); }
   else { note.textContent=''; note.classList.add('hidden'); }
-  modal.classList.remove('done','deposit');
+  modal.classList.remove('done','deposit','confirming');
   document.getElementById('orderForm').reset();
   document.querySelectorAll('#orderForm .field-error').forEach(el=>el.classList.remove('field-error'));
+  clearErr(document.getElementById('mAlert')); clearErr(document.getElementById('depAlert'));
+  document.getElementById('mConfirm').hidden=true;
+  bigAck=false;
+  // prefill AFTER reset, or reset wipes it
+  const me=loadMe();
+  if(me){
+    if(me.name)    document.getElementById('fName').value=me.name;
+    if(me.contact) document.getElementById('fPhone').value=me.contact;
+    if(me.email)   document.getElementById('fEmail').value=me.email;
+  }
+  document.getElementById('mSaved').hidden=!me;
+  updateNotesCount();
   resetPickup();
   veil.classList.add('open'); veil.setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden';
@@ -1971,10 +2071,59 @@ document.addEventListener('click', e=>{
     openModal(idx, src);
   }
 });
-document.getElementById('mClose').addEventListener('click', closeModal);
+// Anything typed that a reset would destroy. The success screen is not dirty —
+// the order is already placed, so closing it costs nothing.
+function formDirty(){
+  if(modal.classList.contains('done')) return false;
+  const vals=['fName','fPhone','fEmail','fNotes'].map(id=>document.getElementById(id).value.trim());
+  if(vals.some(Boolean)) return true;
+  if(document.getElementById('fTime').value) return true;
+  if(isMix() && mixCount()>0) return true;
+  return false;
+}
+let confirmAction=null;
+function askConfirm(text, yesLabel, onYes){
+  confirmAction=onYes;
+  document.getElementById('mConfirmText').textContent=text;
+  document.getElementById('mConfirmYes').textContent=yesLabel;
+  document.getElementById('mConfirm').hidden=false;
+  modal.classList.add('confirming');
+}
+function hideConfirm(){
+  confirmAction=null;
+  document.getElementById('mConfirm').hidden=true;
+  modal.classList.remove('confirming');
+}
+document.getElementById('mConfirmNo').addEventListener('click', hideConfirm);
+document.getElementById('mConfirmYes').addEventListener('click', ()=>{
+  const fn=confirmAction; hideConfirm(); if(fn) fn();
+});
+// A backdrop tap is nearly always a misfire on a phone, so it asks before binning
+// five filled fields. The ✕ and Escape go through the same guard.
+function requestClose(){
+  if(!formDirty()) return closeModal();
+  askConfirm('Discard this order? Everything you have filled in will be lost.',
+             'Discard', closeModal);
+}
+document.getElementById('mClose').addEventListener('click', requestClose);
 document.getElementById('mDone').addEventListener('click', closeModal);
-veil.addEventListener('click', e=>{ if(e.target===veil) closeModal(); });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape' && veil.classList.contains('open')) closeModal(); });
+veil.addEventListener('click', e=>{ if(e.target===veil) requestClose(); });
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Escape' || !veil.classList.contains('open')) return;
+  if(!document.getElementById('mConfirm').hidden) return hideConfirm();
+  requestClose();
+});
+// Keyboard users could tab straight out of the card into the page behind it,
+// which is still there and still invisible.
+modal.addEventListener('keydown', e=>{
+  if(e.key!=='Tab') return;
+  const f=[...modal.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+    .filter(el=>el.offsetParent!==null);
+  if(!f.length) return;
+  const first=f[0], last=f[f.length-1];
+  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+});
 document.getElementById('qMinus').addEventListener('click', ()=>{ if(batchOf()) return bumpBatch(-1); qty=Math.max(minQty,qty-1); updateTotals(); });
 document.getElementById('qPlus').addEventListener('click', ()=>{ if(batchOf()) return bumpBatch(1); qty=Math.min(20,qty+1); updateTotals(); });
 /* ---------------- pickup date + slot ----------------
@@ -2086,35 +2235,119 @@ function resetPickup(){
 if(fDate) fDate.addEventListener('change', ()=>{ slotLoadDate=null; refreshSlots(); });
 if(fTime) fTime.addEventListener('change', ()=>fTime.classList.remove('field-error'));
 
+let bigAck=false;                 // an outsize quantity has been acknowledged once
+const BIG_QTY=10;
+
+function updateNotesCount(){
+  const t=document.getElementById('fNotes'), c=document.getElementById('fNotesCount');
+  if(!t||!c) return;
+  const n=t.value.length, max=+t.getAttribute('maxlength')||500;
+  // only speak up near the ceiling. The server truncates at 500 without a word, and
+  // an allergy note losing its tail is exactly the failure this field must not have.
+  c.classList.toggle('hidden', n < max-120);
+  c.classList.toggle('near', n > max-40);
+  c.textContent=n+' / '+max;
+}
+document.getElementById('fNotes').addEventListener('input', updateNotesCount);
+document.getElementById('mForget').addEventListener('click', ()=>{
+  forgetMe();
+  ['fName','fPhone','fEmail'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mSaved').hidden=true;
+  document.getElementById('fName').focus();
+});
+['fName','fPhone','fEmail','fTime','fDate'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('input', ()=>{
+    el.classList.remove('field-error');
+    clearErr(document.getElementById('mAlert'));
+  });
+});
+
+// one tap at the moment the customer switches over to their banking app
+document.getElementById('etrCopy').addEventListener('click', async function(){
+  const addr=document.getElementById('etrAddr').textContent.trim();
+  try{
+    if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(addr);
+    else{                                   // http, or an older Safari
+      const ta=document.createElement('textarea');
+      ta.value=addr; ta.setAttribute('readonly','');
+      ta.style.cssText='position:absolute;left:-9999px';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+    this.textContent='Copied'; this.classList.add('done');
+    setTimeout(()=>{ this.textContent='Copy'; this.classList.remove('done'); }, 2200);
+  }catch(_){
+    // clipboard blocked: at least select it, so one long-press finishes the job
+    const r=document.createRange(); r.selectNodeContents(document.getElementById('etrAddr'));
+    const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    this.textContent='Select & copy';
+  }
+});
+
+// Returns a downscaled JPEG when the browser can decode the file, the original when
+// it cannot (Safari aside, HEIC generally will not draw into a canvas).
+async function shrinkImage(file, maxPx, quality){
+  maxPx=maxPx||1600; quality=quality||0.82;
+  if(file.size < 400*1024) return {blob:file, name:file.name};
+  try{
+    const url=URL.createObjectURL(file);
+    const img=await new Promise((res,rej)=>{
+      const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url;
+    });
+    const scale=Math.min(1, maxPx/Math.max(img.width,img.height));
+    const c=document.createElement('canvas');
+    c.width=Math.round(img.width*scale); c.height=Math.round(img.height*scale);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(url);
+    const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',quality));
+    if(!blob || blob.size>=file.size) return {blob:file, name:file.name};
+    return {blob, name:'deposit.jpg'};
+  }catch(_){ return {blob:file, name:file.name}; }
+}
+
 /* ---- live order submission (via the Worker \u2192 Supabase edge function) ---- */
 // Step 1 \u2014 order form: if closed or the slot is gone, block; otherwise move on.
 document.getElementById('orderForm').addEventListener('submit', async e=>{
   e.preventDefault();
+  const alertEl=document.getElementById('mAlert');
+  clearErr(alertEl);
   if(window.NG_AVAILABLE === false){
-    alert(window.NG_CLOSED_MSG || "We're currently closed for orders. Please check back soon!");
+    showErr(alertEl, window.NG_CLOSED_MSG || "We're currently closed for orders. Please check back soon.");
     return;
   }
   if(isMix()){
     const allow=mixAllowance(), n=mixCount();
     if(n!==allow){
       const b=batchOf();
-      alert(n<allow
+      showErr(alertEl, n<allow
         ? 'Choose '+(allow-n)+' more '+(b?b.unit:'item')+' — '+qty+(qty===1?' batch is ':' batches are ')+allow+'.'
         : 'That is '+(n-allow)+' too many for '+qty+(qty===1?' batch':' batches')+'.');
       document.getElementById('mSize').scrollIntoView({block:'center'});
       return;
     }
   }
+  const nameV=document.getElementById('fName').value.trim();
+  if(!nameV){
+    document.getElementById('fName').classList.add('field-error');
+    showErr(alertEl, 'Please add your name so we know whose order it is.');
+    return;
+  }
+  if(!validContact(document.getElementById('fPhone').value)){
+    document.getElementById('fPhone').classList.add('field-error');
+    showErr(alertEl, 'That contact does not look reachable — add a phone number with area code, or an Instagram handle like @namitgid.');
+    return;
+  }
   const date=fDate.value, time=fTime.value;
   if(!date || !time){
     (!date?fDate:fTime).classList.add('field-error');
-    alert('Please choose a pickup date and time.');
+    showErr(alertEl, 'Please choose a pickup date and time.');
     return;
   }
   if(isClosedAt(date,time) || isPast(date,time)){
     fTime.classList.add('field-error');
     await refreshSlots();
-    alert("That pickup time isn't available. Please pick another.");
+    showErr(alertEl, "That pickup time isn't available any more. Please pick another.");
     return;
   }
   // Re-check capacity right before the deposit step \u2014 someone may have taken it.
@@ -2122,7 +2355,15 @@ document.getElementById('orderForm').addEventListener('submit', async e=>{
   await refreshSlots();
   if(isBlockedByLoad(slotLoad,time)){
     fTime.value=''; fTime.classList.add('field-error');
-    alert('Sorry, that pickup time was just taken. Please choose another.');
+    showErr(alertEl, 'Sorry, that pickup time was just taken. Please choose another.');
+    return;
+  }
+  // A big order is placed as easily as a small one and costs far more to get wrong,
+  // so it gets one deliberate confirmation rather than a block.
+  if(!batchOf() && qty>=BIG_QTY && !bigAck){
+    askConfirm('That is '+qty+' × '+DISHES[curIdx].name+' for '+money(orderTotal())+'. Is that right?',
+               'Yes, that is right',
+               ()=>{ bigAck=true; document.getElementById('orderForm').requestSubmit(); });
     return;
   }
   const ds=document.getElementById('depShot'); if(ds) ds.value='';
@@ -2130,9 +2371,14 @@ document.getElementById('orderForm').addEventListener('submit', async e=>{
   const dt=document.getElementById('depUploadText'); if(dt) dt.textContent='Tap to add your e-Transfer screenshot';
   const bal=Math.max(0, orderTotal() - DEPOSIT);
   const dl=document.getElementById('depBalanceLine');
-  // values are all our own formatted strings and numbers, never user input
-  if(dl) dl.innerHTML='<dt>Pickup</dt><dd>'+prettyDate(date)+'<br>'+time+'</dd>'+
-                      '<dt>Balance</dt><dd><b>$'+bal.toFixed(2)+'</b> due at pickup</dd>';
+  // The last screen before money changes hands must restate what was ordered — for a
+  // mixed batch this is the only place the flavour split can be checked.
+  const escD=t=>String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  if(dl) dl.innerHTML='<dt>Order</dt><dd>'+escD(currentDishName())+'</dd>'+
+                      '<dt>Pickup</dt><dd>'+prettyDate(date)+'<br>'+time+'</dd>'+
+                      (bal>0 ? '<dt>Balance</dt><dd><b>$'+bal.toFixed(2)+'</b> due at pickup</dd>'
+                             : '<dt>Balance</dt><dd>Nothing \u2014 the deposit covers it</dd>');
+  clearErr(document.getElementById('depAlert'));
   modal.classList.add('deposit');
 });
 document.getElementById('depBack').addEventListener('click', ()=>modal.classList.remove('deposit'));
@@ -2149,12 +2395,17 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     let depositUrl=null;
     const f=document.getElementById('depShot').files[0];
     if(f){
-      btn.textContent='Uploading screenshot\u2026';
+      btn.textContent='Preparing screenshot\u2026';
       try{
-        const fd=new FormData(); fd.append('file', f);
+        // A modern phone photo is 3-5MB; on weak mobile data that is a long silent
+        // wait, and a legible e-Transfer receipt needs nowhere near full resolution.
+        const shrunk=await shrinkImage(f);
+        btn.textContent='Uploading screenshot\u2026';
+        const fd=new FormData();
+        fd.append('file', shrunk.blob, shrunk.name);
         const up=await fetch('/api/upload-deposit', { method:'POST', body:fd });
         const ud=await up.json(); if(ud && ud.url) depositUrl=ud.url;
-      }catch(_){ /* non-fatal \u2014 order can still go through */ }
+      }catch(_){ /* non-fatal: the order still goes through without a screenshot */ }
     }
     btn.textContent='Sending\u2026';
     const pickupDate=fDate.value, pickupTime=fTime.value;
@@ -2185,9 +2436,9 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       modal.classList.remove('deposit');
       slotLoadDate=null; await refreshSlots();
       fTime.value=''; fTime.classList.add('field-error');
-      alert(data.error==='closed_slot'
+      showErr(document.getElementById('mAlert'), data.error==='closed_slot'
         ? "Sorry, we're closed at that pickup time. Please choose another."
-        : (data.message || "We're currently closed for orders. Please check back soon!"));
+        : (data.message || "We're currently closed for orders. Please check back soon."));
       return;
     }
     if(!res.ok || !data.success) throw new Error(data.error || 'failed');
@@ -2195,7 +2446,9 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     if(meta){
       let rows='';
       if(pickupDate && pickupTime) rows+='<dt>Pickup</dt><dd>'+prettyDate(pickupDate)+'<br>'+pickupTime+'</dd>';
-      if(data.balanceDue != null)  rows+='<dt>Balance</dt><dd><b>$'+Number(data.balanceDue).toFixed(2)+'</b> due at pickup</dd>';
+      if(data.balanceDue != null)  rows+= Number(data.balanceDue)>0
+        ? '<dt>Balance</dt><dd><b>$'+Number(data.balanceDue).toFixed(2)+'</b> due at pickup</dd>'
+        : '<dt>Balance</dt><dd>Nothing \u2014 the deposit covers it</dd>';
       if(data.orderId)             rows+='<dt>Order</dt><dd>#'+data.orderId+'</dd>';
       // Only claim we emailed them if the Worker says the send actually succeeded.
       if(data.confirmation==='sent' && emailVal){
@@ -2204,11 +2457,15 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       }
       meta.innerHTML = rows;
     }
+    saveMe({ name:document.getElementById('fName').value.trim(),
+             contact:document.getElementById('fPhone').value.trim(),
+             email:emailVal });
     slotLoadDate=null;
     modal.classList.remove('deposit'); modal.classList.add('done');
     document.getElementById('mDone').focus();
   }catch(err){
-    alert("Couldn't send your order just now \u2014 please try again in a moment, or reach us at takoshi.ca.");
+    showErr(document.getElementById('depAlert'),
+      "Couldn't send your order just now. Check your connection and press Place my order again \u2014 nothing has been charged.");
   }finally{
     btn.textContent = prev; btn.disabled = false;
   }
