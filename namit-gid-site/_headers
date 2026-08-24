@@ -1,0 +1,24 @@
+# Cloudflare Pages cache rules for namitgid.takoshi.ca
+
+# HTML — always revalidate, so a deploy reaches people immediately
+/*.html
+  Cache-Control: no-cache, must-revalidate
+/
+  Cache-Control: no-cache, must-revalidate
+
+# Images are content-addressed by name and never edited in place
+/images/*
+  Cache-Control: public, max-age=2592000
+
+# The admin API must never be cached anywhere
+/api/*
+  Cache-Control: no-store
+
+# Baseline security headers. No CSP yet — the page loads three.js from cdnjs
+# and fonts from Google, so a policy has to name those hosts before it can be
+# turned on without breaking the site.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()

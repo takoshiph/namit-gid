@@ -1,1 +1,4 @@
 .superpowers/
+
+# staging folder for files to remove (device bridge cannot delete)
+_to_delete/

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://namitgid.takoshi.ca/sitemap.xml

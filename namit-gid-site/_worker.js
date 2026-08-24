@@ -475,13 +475,32 @@ export default {
       try { formData = await request.formData(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
       const file = formData.get('file');
       if (!file || typeof file === 'string') return jsonResponse({ error: 'No file provided' }, 400, request);
+      // This endpoint is public by necessity (customers upload their e-Transfer
+      // screenshot before they have any credential) and it writes into a PUBLIC
+      // bucket with the service-role key. Two things therefore have to be
+      // pinned down here, because nothing downstream will do it:
+      //
+      //  1. The content type must come from the extension we just validated,
+      //     never from the client. Storage serves back whatever type it is
+      //     given, so trusting `file.type` let anyone upload `x.jpg` marked
+      //     `text/html` and get arbitrary HTML hosted on the project domain.
+      //  2. There must be a size cap, or the endpoint is free unlimited
+      //     file hosting billed to this project.
+      const TYPES = { jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', heic:'image/heic' };
+      const MAX_BYTES = 8 * 1024 * 1024;   // a phone screenshot is well under 1 MB
       const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      if (!['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext)) return jsonResponse({ error: 'Invalid file type' }, 400, request);
+      if (!TYPES[ext]) return jsonResponse({ error: 'Please upload a JPG, PNG or WEBP image.' }, 400, request);
+      if (typeof file.size === 'number' && file.size > MAX_BYTES) {
+        return jsonResponse({ error: 'That image is too large. Please send one under 8 MB.' }, 413, request);
+      }
       const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const arrayBuffer = await file.arrayBuffer();
+      if (arrayBuffer.byteLength > MAX_BYTES) {
+        return jsonResponse({ error: 'That image is too large. Please send one under 8 MB.' }, 413, request);
+      }
       const uploadRes = await fetch(`${SB}/storage/v1/object/deposits/${filename}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': file.type || 'image/jpeg', 'x-upsert': 'false' },
+        headers: { 'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': TYPES[ext], 'x-upsert': 'false' },
         body: arrayBuffer,
       });
       if (!uploadRes.ok) return jsonResponse({ error: 'Upload failed' }, 500, request);
