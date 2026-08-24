@@ -188,31 +188,6 @@ footer{position:relative;z-index:1}
 .emblem-vine .stem-hi{fill:none;stroke:#8f6038;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
 /* bottom-right leaf on top so the enlarged island runs behind it */
 .emblem-leaf{position:absolute;left:72.3%;top:90.1%;width:7.3cqw;height:auto;z-index:3;pointer-events:none}
-/* ── "Sarado po kami" tag ──────────────────────────────────────────────────
-   Sized in cqw so it tracks the emblem at every width. It hangs from the
-   bottom edge of the sign and swings on the same 2.46 s pendulum period as
-   the closed notice, so the two read as the same object in the same breeze. */
-.sarado{position:absolute;left:50%;top:97%;transform:translateX(-50%);z-index:4;
-  display:flex;justify-content:center;pointer-events:none}
-.sarado[hidden]{display:none}
-.sarado-cord{position:absolute;top:0;width:2px;height:4.4cqw;
-  background:repeating-linear-gradient(180deg,#c8ad88 0 3px,#a68a66 3px 6px)}
-.sarado-cord--l{left:14%}
-.sarado-cord--r{right:14%}
-.sarado-card{position:relative;margin-top:4.2cqw;
-  padding:2.1cqw 4.6cqw;border-radius:2.2cqw;
-  background:linear-gradient(#6d5136,#4d3724);
-  box-shadow:inset 0 0 0 .45cqw rgba(0,0,0,.3), inset 0 .3cqw 0 rgba(255,255,255,.14),
-             0 2.2cqw 3.4cqw -2cqw rgba(38,20,8,.7);
-  display:flex;flex-direction:column;align-items:center;gap:.15cqw;
-  transform-origin:50% -4.2cqw}
-.sarado-main{font-family:var(--ff-display);font-size:4.6cqw;line-height:1.05;
-  color:#f7f0e3;text-shadow:0 .25cqw .4cqw rgba(30,16,6,.6);white-space:nowrap}
-.sarado-sub{font-size:2.5cqw;letter-spacing:.16em;text-transform:lowercase;
-  color:#e8b877;opacity:.92;white-space:nowrap}
-.js .sarado-card{animation:swayPlank 2.46s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){.js .sarado-card{animation:none}}
-
 .wordmark{position:absolute;left:50%;top:82%;transform:translate(-50%,-50%);z-index:2;
   font-family:var(--ff-display);font-weight:400;margin:0;line-height:.9;font-size:11cqw;
   display:inline-flex;flex-direction:column;align-items:flex-start}
@@ -723,10 +698,17 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 #closedBanner.show{display:block}
 .cb-branch{display:block;width:100%;height:26px}
 .cb-hang{position:relative;display:flex;justify-content:center;margin-top:-4px;isolation:isolate}
-.cb-cord{position:absolute;top:-24px;width:2px;height:26px;z-index:0;
+/* The cords hang from the branch, so their TOPS are fixed there and only the
+   lower ends move. They used to live inside the plank and rotate with it,
+   which pulled their tops away from the branch on every swing — the gap. */
+/* top:-9px puts the cord's head on the branch path itself (the branch svg is
+   26px tall and .cb-hang starts 4px into it, so y=0 here was already 9px below
+   the wood). Height carries it down behind the plank's top edge. */
+.cb-cord{position:absolute;top:-9px;width:2px;height:36px;z-index:0;
+  transform-origin:50% 0;
   background:repeating-linear-gradient(180deg,#c8ad88 0 3px,#a68a66 3px 6px)}
-.cb-cord--l{left:22px}
-.cb-cord--r{right:22px}
+.cb-cord--l{left:calc(50% - 258px)}
+.cb-cord--r{left:calc(50% + 256px)}
 .cb-plank{position:relative;z-index:1;margin-top:24px;
   /* Fixed width and a floor on the height. The closure message is optional in
      the admin, so it must never decide how big this reads — a one-word note
@@ -735,11 +717,10 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   width:min(560px,92vw);min-height:96px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;
   padding:1.05rem 2.6rem 1.05rem 3rem;border-radius:14px;
-  background:linear-gradient(#6d5136,#543d28);
+  background:url("images/wood.webp") repeat-x center/auto 100%, linear-gradient(#6d5136,#543d28);
   box-shadow:inset 0 0 0 2px rgba(0,0,0,.26), inset 0 2px 0 rgba(255,255,255,.13),
              0 12px 22px -14px rgba(0,0,0,.75);
   color:var(--cream);font-size:.92rem;line-height:1.42;text-align:center;
-  transform-origin:50% -24px;   /* swings from the branch, not from itself */
 }
 #closedBanner b{color:var(--gold)}
 .cb-main{font-family:var(--ff-display);font-size:1.32rem;line-height:1.15;color:var(--cream);
@@ -769,8 +750,8 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   .cb-sub{font-size:.6rem;letter-spacing:.18em}
   .cb-sprig{width:56px;height:76px;left:-16px;top:-38px}
   .cb-fallen{width:26px;height:17px;right:9px;bottom:-5px}
-  .cb-cord--l{left:16px}
-  .cb-cord--r{right:16px}
+  .cb-cord--l{left:calc(50% - 44vw)}
+  .cb-cord--r{left:calc(50% + 43vw)}
 }
 /* ── Deposit step ── */
 .m-deposit{display:none;flex-direction:column;gap:.85rem;padding:1.25rem 1.35rem 1.6rem}
@@ -1089,10 +1070,14 @@ main{position:relative}
 
    `rotate` rather than `transform`: the leaves are placed with SVG transform
    attributes, and the two occupy the same slot. */
-@keyframes swayPlank{0%,100%{rotate:-1.1deg}50%{rotate:1.1deg}}
-@keyframes swayBranch{0%,100%{translate:0 -0.5px}50%{translate:0 0.5px}}
-@keyframes flutterLeaf{0%,100%{rotate:-5deg}50%{rotate:6deg}}
+/* A board on two parallel cords is a bifilar pendulum: the cords swing and the
+   board TRANSLATES along the arc, staying level. It does not rotate. Rotating
+   the board was both wrong and what opened the gap at the branch.
+   Cord 27px at +/-6deg -> horizontal travel 27*sin(6deg) = 2.8px. */
+@keyframes swayPlank{0%,100%{translate:-2.8px 0}50%{translate:2.8px 0}}
+@keyframes swayCord{0%,100%{rotate:-6deg}50%{rotate:6deg}}
 .js #closedBanner .cb-plank{animation:swayPlank 2.46s ease-in-out infinite}
+.js #closedBanner .cb-cord{animation:swayCord 2.46s ease-in-out infinite}
 .js #closedBanner .cb-branch{animation:swayBranch .82s ease-in-out infinite}
 .js #closedBanner .cb-sprig{transform-box:fill-box;transform-origin:75% 6%;
   animation:flutterLeaf 3.98s ease-in-out infinite}
@@ -1104,7 +1089,7 @@ main{position:relative}
 .js #closedBanner .cb-fallen{transform-box:fill-box;transform-origin:80% 50%;
   animation:flutterLeaf 7.59s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){
-  .js #closedBanner .cb-plank,.js #closedBanner .cb-branch,
+  .js #closedBanner .cb-plank,.js #closedBanner .cb-branch,.js #closedBanner .cb-cord,
   .js #closedBanner .cb-sprig,.js #closedBanner .cb-sprig ellipse,
   .js #closedBanner .cb-fallen{animation:none}
 }
@@ -1227,9 +1212,9 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
           stroke="#7a5a3c" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".55"/>
   </svg>
   <div class="cb-hang">
+    <span class="cb-cord cb-cord--l" aria-hidden="true"></span>
+    <span class="cb-cord cb-cord--r" aria-hidden="true"></span>
     <div class="cb-plank">
-      <span class="cb-cord cb-cord--l" aria-hidden="true"></span>
-      <span class="cb-cord cb-cord--r" aria-hidden="true"></span>
       <svg class="cb-sprig" viewBox="0 0 70 96" aria-hidden="true" focusable="false">
         <!-- Leaves sit at the golden angle (137.507 deg) around the stem, which
              is how real plants space them so none shades the one below. Projected
@@ -1312,24 +1297,6 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
         </g>
       </svg>
       <img class="emblem-img" src="images/emblem.png" alt="Namit gid, the cook on the sign" width="1040" height="1199">
-      <!-- Hung off the sign only while the store is closed, the way a shop hangs
-           a card on the door. The wordmark above it is untouched: the brand keeps
-           its full size, and the tag adds the state. -->
-      <div class="sarado" id="saradoTag" hidden aria-hidden="true">
-        <span class="sarado-cord sarado-cord--l"></span>
-        <span class="sarado-cord sarado-cord--r"></span>
-        <div class="sarado-card">
-          <span class="sarado-main">Sarado anay kita.</span>
-          <span class="sarado-sub">we&rsquo;re closed</span>
-        </div>
-      </div>
-      <img class="wm-island" src="images/biaringan_island_v4.png" alt="" aria-hidden="true">
-      <h1 class="wordmark" aria-label="Namit gid">
-        <span class="wm-namit" aria-hidden="true">Namit</span>
-        <span class="wm-row2" aria-hidden="true"><span class="wm-gid">gid</span></span>
-      </h1>
-      <img class="emblem-leaf" src="images/leaf.png" alt="" aria-hidden="true">
-    </div>
   </div>
 </header>
 
@@ -3157,8 +3124,6 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
         }catch(_){ bk.hidden = true; }
       } else { bk.hidden = true; }
       b.classList.add('show');
-      var tag = document.getElementById('saradoTag');
-      if(tag) tag.hidden = false;
     }
   }).catch(function(){ window.NG_AVAILABLE = true; window.NG_WINDOWS = []; });
   var cbc=document.getElementById('closedBannerClose');
