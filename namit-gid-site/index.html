@@ -689,11 +689,39 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
 .m-receipt dd{margin:0}
 .m-receipt dd b{font-family:var(--ff-display);font-weight:400;font-size:1.05rem;color:var(--terracotta)}
 /* ── Closed banner ── */
-#closedBanner{display:none;position:sticky;top:0;z-index:60;background:var(--espresso);color:var(--cream);text-align:center;padding:.6rem 2.4rem .6rem 1rem;font-size:.92rem;line-height:1.4}
+/* ── Closed notice: a plank hung from a branch ─────────────────────────────
+   Sticky, so it stays with you as you scroll, but it is in flow so it pushes
+   the page down rather than covering the nav. */
+#closedBanner{display:none;position:sticky;top:0;z-index:60;padding:0 .6rem 1.1rem;
+  background:linear-gradient(180deg,rgba(247,240,227,.97) 0 58%,rgba(247,240,227,0) 100%);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
 #closedBanner.show{display:block}
+.cb-branch{display:block;width:100%;height:26px}
+.cb-hang{position:relative;display:flex;justify-content:center;margin-top:-4px}
+.cb-cord{position:absolute;top:-24px;width:2px;height:26px;z-index:0;
+  background:repeating-linear-gradient(180deg,#c8ad88 0 3px,#a68a66 3px 6px)}
+.cb-cord--l{left:22px}
+.cb-cord--r{right:22px}
+.cb-plank{position:relative;margin-top:24px;max-width:min(680px,92vw);
+  padding:.62rem 2.5rem .62rem 2.9rem;border-radius:12px;
+  background:linear-gradient(#6d5136,#543d28);
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.26), inset 0 2px 0 rgba(255,255,255,.13),
+             0 12px 22px -14px rgba(0,0,0,.75);
+  color:var(--cream);font-size:.92rem;line-height:1.42;text-align:center;
+  transform-origin:50% -24px;   /* swings from the branch, not from itself */
+}
 #closedBanner b{color:var(--gold)}
-#closedBannerClose{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--cream);font-size:1.1rem;cursor:pointer;opacity:.7}
-#closedBannerClose:hover{opacity:1}
+.cb-sprig{position:absolute;left:-11px;top:-15px;width:40px;height:48px;pointer-events:none}
+#closedBannerClose{position:absolute;right:.45rem;top:50%;transform:translateY(-50%);
+  background:none;border:0;color:var(--cream);font-size:1.05rem;line-height:1;
+  cursor:pointer;opacity:.75;padding:.35rem .4rem;border-radius:8px}
+#closedBannerClose:hover,#closedBannerClose:focus-visible{opacity:1;background:rgba(0,0,0,.18)}
+@media (max-width:520px){
+  .cb-plank{padding:.58rem 2.2rem .58rem 2.4rem;font-size:.86rem;max-width:94vw}
+  .cb-cord--l{left:16px}
+  .cb-cord--r{right:16px}
+  .cb-sprig{width:32px;height:38px;left:-8px;top:-12px}
+}
 /* ── Deposit step ── */
 .m-deposit{display:none;flex-direction:column;gap:.85rem;padding:1.25rem 1.35rem 1.6rem}
 .modal.deposit form{display:none}
@@ -950,12 +978,7 @@ main{position:relative}
 @keyframes sprigOpen{from{opacity:0;scale:.35}to{opacity:1;scale:1}}
 
 /* ── closed banner + allergen panel: same vocabulary as everything else ──── */
-#closedBanner{padding-left:2.6rem}
-#closedBanner .banner-leaf{position:absolute;left:.7rem;top:50%;width:22px;height:22px;
-  transform:translateY(-50%);opacity:.9;pointer-events:none;overflow:visible}
 /* the shared leaf is sage-on-cream; on the espresso banner it needs to be light-on-dark */
-#closedBanner .banner-leaf path:nth-child(1){fill:#9bb9af}
-#closedBanner .banner-leaf path:nth-child(2){stroke:#5f8177;opacity:.7}
 /* overflow only — NOT position. #allergenPanel is already position:fixed above, and
    re-declaring position here at equal specificity would drop the centred overlay
    back into normal flow. */
@@ -996,6 +1019,20 @@ main{position:relative}
    Every one gets its own period so nothing moves in unison. */
 @keyframes swayRooted{0%,100%{rotate:-1.5deg}50%{rotate:1.5deg}}
 @keyframes swayHung{0%,100%{rotate:-1.1deg}50%{rotate:1.1deg}}
+/* The plank sways from its cords. Animating the `rotate` property rather than
+   `transform` matters here: the sprig's leaves are positioned by SVG transform
+   attributes, and a CSS transform on an ancestor is fine, but keeping the two
+   in separate slots is what stops the same clash that flattened the success
+   sprig earlier. Also: transform-origin sits above the plank, at the cords. */
+@keyframes swayPlank{0%,100%{rotate:-.9deg}50%{rotate:.9deg}}
+@keyframes swayCbSprig{0%,100%{rotate:-4deg}50%{rotate:5deg}}
+.js #closedBanner .cb-plank{animation:swayPlank 6.5s ease-in-out infinite}
+.js #closedBanner .cb-sprig{transform-box:fill-box;transform-origin:60% 6%;
+  animation:swayCbSprig 5.2s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+  .js #closedBanner .cb-plank,.js #closedBanner .cb-sprig{animation:none}
+}
+
 @keyframes swayLeaf{0%,100%{rotate:-4deg}50%{rotate:5deg}}
 .js .earth-tuft{transform-origin:50% 100%}
 .js .earth-tuft.left{animation:swayRooted 9s ease-in-out infinite}
@@ -1003,7 +1040,6 @@ main{position:relative}
 .js .story-vine{transform-origin:50% 0;animation:swayHung 8.2s ease-in-out .5s infinite}
 .js .modal-vine{transform-origin:50% 100%;animation:swayRooted 10.5s ease-in-out infinite}
 .js #allergenPanel .panel-tuft{transform-origin:50% 100%;animation:swayRooted 9.6s ease-in-out .3s infinite}
-.js #closedBanner .banner-leaf{transform-origin:10% 60%;animation:swayLeaf 7s ease-in-out infinite}
 /* the leaves strung along the how-it-works thread breathe with the cards they hang beside */
 .js #howRoot .foliage{transform-box:fill-box;transform-origin:0 50%}
 .js #howRoot .foliage{animation:swayLeaf 6.4s ease-in-out infinite}
@@ -1104,11 +1140,29 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 
 <!-- NAV -->
 <div id="closedBanner" role="status">
-  <svg class="banner-leaf" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
-    <g transform="translate(2,16) rotate(-32) scale(.85)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
+  <!-- A branch across the top with the notice hung from it on two cords. The
+       old version was Takoshi's flat strip in Namit colours; this is the sign
+       from the emblem, which is the motif the rest of the page already uses. -->
+  <svg class="cb-branch" viewBox="0 0 1200 26" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <path d="M0,13 C160,7 300,18 470,12 C640,6 780,19 950,12 C1060,7 1140,15 1200,11"
+          stroke="#5b432e" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M0,13 C160,7 300,18 470,12 C640,6 780,19 950,12 C1060,7 1140,15 1200,11"
+          stroke="#7a5a3c" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".55"/>
   </svg>
-  <span id="closedBannerText"></span>
-  <button id="closedBannerClose" aria-label="Dismiss">&#10005;</button>
+  <div class="cb-hang">
+    <div class="cb-plank">
+      <span class="cb-cord cb-cord--l" aria-hidden="true"></span>
+      <span class="cb-cord cb-cord--r" aria-hidden="true"></span>
+      <svg class="cb-sprig" viewBox="0 0 40 48" aria-hidden="true" focusable="false">
+        <path d="M20,2 C15,14 11,26 13,46" stroke="#7d9c85" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+        <ellipse cx="9"  cy="15" rx="7"   ry="3.8" fill="#93b39a" transform="rotate(-30 9 15)"/>
+        <ellipse cx="24" cy="21" rx="6.4" ry="3.5" fill="#7d9c85" transform="rotate(26 24 21)"/>
+        <ellipse cx="10" cy="30" rx="6.4" ry="3.5" fill="#8aa992" transform="rotate(-22 10 30)"/>
+      </svg>
+      <span id="closedBannerText"></span>
+      <button id="closedBannerClose" aria-label="Dismiss">&#10005;</button>
+    </div>
+  </div>
 </div>
 
 <div id="allergenBackdrop"></div>
