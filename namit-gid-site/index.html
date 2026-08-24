@@ -188,6 +188,31 @@ footer{position:relative;z-index:1}
 .emblem-vine .stem-hi{fill:none;stroke:#8f6038;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
 /* bottom-right leaf on top so the enlarged island runs behind it */
 .emblem-leaf{position:absolute;left:72.3%;top:90.1%;width:7.3cqw;height:auto;z-index:3;pointer-events:none}
+/* ── "Sarado po kami" tag ──────────────────────────────────────────────────
+   Sized in cqw so it tracks the emblem at every width. It hangs from the
+   bottom edge of the sign and swings on the same 2.46 s pendulum period as
+   the closed notice, so the two read as the same object in the same breeze. */
+.sarado{position:absolute;left:50%;top:97%;transform:translateX(-50%);z-index:4;
+  display:flex;justify-content:center;pointer-events:none}
+.sarado[hidden]{display:none}
+.sarado-cord{position:absolute;top:0;width:2px;height:4.4cqw;
+  background:repeating-linear-gradient(180deg,#c8ad88 0 3px,#a68a66 3px 6px)}
+.sarado-cord--l{left:14%}
+.sarado-cord--r{right:14%}
+.sarado-card{position:relative;margin-top:4.2cqw;
+  padding:2.1cqw 4.6cqw;border-radius:2.2cqw;
+  background:linear-gradient(#6d5136,#4d3724);
+  box-shadow:inset 0 0 0 .45cqw rgba(0,0,0,.3), inset 0 .3cqw 0 rgba(255,255,255,.14),
+             0 2.2cqw 3.4cqw -2cqw rgba(38,20,8,.7);
+  display:flex;flex-direction:column;align-items:center;gap:.15cqw;
+  transform-origin:50% -4.2cqw}
+.sarado-main{font-family:var(--ff-display);font-size:4.6cqw;line-height:1.05;
+  color:#f7f0e3;text-shadow:0 .25cqw .4cqw rgba(30,16,6,.6);white-space:nowrap}
+.sarado-sub{font-size:2.5cqw;letter-spacing:.16em;text-transform:lowercase;
+  color:#e8b877;opacity:.92;white-space:nowrap}
+.js .sarado-card{animation:swayPlank 2.46s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.js .sarado-card{animation:none}}
+
 .wordmark{position:absolute;left:50%;top:82%;transform:translate(-50%,-50%);z-index:2;
   font-family:var(--ff-display);font-weight:400;margin:0;line-height:.9;font-size:11cqw;
   display:inline-flex;flex-direction:column;align-items:flex-start}
@@ -697,13 +722,19 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
 #closedBanner.show{display:block}
 .cb-branch{display:block;width:100%;height:26px}
-.cb-hang{position:relative;display:flex;justify-content:center;margin-top:-4px}
+.cb-hang{position:relative;display:flex;justify-content:center;margin-top:-4px;isolation:isolate}
 .cb-cord{position:absolute;top:-24px;width:2px;height:26px;z-index:0;
   background:repeating-linear-gradient(180deg,#c8ad88 0 3px,#a68a66 3px 6px)}
 .cb-cord--l{left:22px}
 .cb-cord--r{right:22px}
-.cb-plank{position:relative;margin-top:24px;max-width:min(680px,92vw);
-  padding:.62rem 2.5rem .62rem 2.9rem;border-radius:12px;
+.cb-plank{position:relative;z-index:1;margin-top:24px;
+  /* Fixed width and a floor on the height. The closure message is optional in
+     the admin, so it must never decide how big this reads — a one-word note
+     and a full sentence both have to look like a closure announcement, not a
+     sticky note. */
+  width:min(560px,92vw);min-height:96px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;
+  padding:1.05rem 2.6rem 1.05rem 3rem;border-radius:14px;
   background:linear-gradient(#6d5136,#543d28);
   box-shadow:inset 0 0 0 2px rgba(0,0,0,.26), inset 0 2px 0 rgba(255,255,255,.13),
              0 12px 22px -14px rgba(0,0,0,.75);
@@ -711,16 +742,35 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   transform-origin:50% -24px;   /* swings from the branch, not from itself */
 }
 #closedBanner b{color:var(--gold)}
-.cb-sprig{position:absolute;left:-11px;top:-15px;width:40px;height:48px;pointer-events:none}
-#closedBannerClose{position:absolute;right:.45rem;top:50%;transform:translateY(-50%);
+.cb-main{font-family:var(--ff-display);font-size:1.32rem;line-height:1.15;color:var(--cream);
+  text-shadow:0 1px 2px rgba(30,16,6,.5)}
+.cb-sub{font-size:.66rem;letter-spacing:.22em;color:#e8b877;opacity:.9;margin-top:-.05rem}
+.cb-line{font-size:.92rem;line-height:1.35;color:rgba(247,240,227,.88);max-width:40ch;margin-top:.3rem}
+.cb-line[hidden]{display:none}
+.cb-back{font-size:.86rem;color:rgba(247,240,227,.78);margin-top:.28rem}
+.cb-back b{color:var(--gold);font-weight:600}
+.cb-back[hidden]{display:none}
+/* Draped over the corner rather than down the face: the leaves are mid-green
+   and the plank is dark brown, so anything sitting on the board disappears. */
+.cb-sprig{position:absolute;left:-22px;top:-48px;width:70px;height:94px;pointer-events:none;
+  rotate:-14deg;transform-origin:78% 6%;z-index:2}
+.cb-fallen{position:absolute;right:12px;bottom:-7px;width:34px;height:22px;pointer-events:none;
+  opacity:.9;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+/* She stands behind the sign. The image is desaturated rather than redrawn —
+   her expression is unchanged, so this reads as subdued, not as a new pose. */
+#closedBannerClose{position:absolute;right:.4rem;top:.35rem;
   background:none;border:0;color:var(--cream);font-size:1.05rem;line-height:1;
   cursor:pointer;opacity:.75;padding:.35rem .4rem;border-radius:8px}
 #closedBannerClose:hover,#closedBannerClose:focus-visible{opacity:1;background:rgba(0,0,0,.18)}
 @media (max-width:520px){
-  .cb-plank{padding:.58rem 2.2rem .58rem 2.4rem;font-size:.86rem;max-width:94vw}
+  .cb-plank{width:94vw;min-height:92px;padding:.95rem 2.3rem .95rem 2.5rem}
+  .cb-main{font-size:1.18rem}
+  .cb-line{font-size:.86rem}
+  .cb-sub{font-size:.6rem;letter-spacing:.18em}
+  .cb-sprig{width:56px;height:76px;left:-16px;top:-38px}
+  .cb-fallen{width:26px;height:17px;right:9px;bottom:-5px}
   .cb-cord--l{left:16px}
   .cb-cord--r{right:16px}
-  .cb-sprig{width:32px;height:38px;left:-8px;top:-12px}
 }
 /* ── Deposit step ── */
 .m-deposit{display:none;flex-direction:column;gap:.85rem;padding:1.25rem 1.35rem 1.6rem}
@@ -1019,19 +1069,46 @@ main{position:relative}
    Every one gets its own period so nothing moves in unison. */
 @keyframes swayRooted{0%,100%{rotate:-1.5deg}50%{rotate:1.5deg}}
 @keyframes swayHung{0%,100%{rotate:-1.1deg}50%{rotate:1.1deg}}
-/* The plank sways from its cords. Animating the `rotate` property rather than
-   `transform` matters here: the sprig's leaves are positioned by SVG transform
-   attributes, and a CSS transform on an ancestor is fine, but keeping the two
-   in separate slots is what stops the same clash that flattened the success
-   sprig earlier. Also: transform-origin sits above the plank, at the cords. */
-@keyframes swayPlank{0%,100%{rotate:-.9deg}50%{rotate:.9deg}}
-@keyframes swayCbSprig{0%,100%{rotate:-4deg}50%{rotate:5deg}}
-.js #closedBanner .cb-plank{animation:swayPlank 6.5s ease-in-out infinite}
-.js #closedBanner .cb-sprig{transform-box:fill-box;transform-origin:60% 6%;
-  animation:swayCbSprig 5.2s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){
-  .js #closedBanner .cb-plank,.js #closedBanner .cb-sprig{animation:none}
+/* ── Motion ────────────────────────────────────────────────────────────────
+   The plank hangs on two parallel cords, which is a bifilar pendulum: it
+   swings with the period of a simple pendulum of the cord length,
+       T = 2*pi*sqrt(L/g)
+   Taking the sign at the size the drawing implies (L ~ 1.5 m):
+       T = 2*pi*sqrt(1.5 / 9.81) = 2.46 s
+   Literal cord length (0.30 m) gives 1.10 s, which is correct physics but
+   reads as jitter on a UI element, so the sign is treated as a large one.
+
+   The branch is a cantilever, not a pendulum — its first bending mode is far
+   stiffer, so it moves ~3x faster at a fraction of the amplitude.
+
+   Leaf periods are T_n = 3.2s * (1 + frac(n*phi)) -> 5.18, 3.96, 5.93, 4.71,
+   3.49, 5.47, 4.24 s. frac(n*phi) is equidistributed in [0,1) and never
+   repeats, so no two leaves share a common multiple and the composite never
+   visibly loops. Stepping by phi^n instead was the obvious move and the wrong
+   one: it reached 84 s by the seventh leaf, which is not motion.
+
+   `rotate` rather than `transform`: the leaves are placed with SVG transform
+   attributes, and the two occupy the same slot. */
+@keyframes swayPlank{0%,100%{rotate:-1.1deg}50%{rotate:1.1deg}}
+@keyframes swayBranch{0%,100%{translate:0 -0.5px}50%{translate:0 0.5px}}
+@keyframes flutterLeaf{0%,100%{rotate:-5deg}50%{rotate:6deg}}
+.js #closedBanner .cb-plank{animation:swayPlank 2.46s ease-in-out infinite}
+.js #closedBanner .cb-branch{animation:swayBranch .82s ease-in-out infinite}
+.js #closedBanner .cb-sprig{transform-box:fill-box;transform-origin:75% 6%;
+  animation:flutterLeaf 3.98s ease-in-out infinite}
+.js #closedBanner .cb-sprig ellipse{
+  transform-box:fill-box;transform-origin:50% 50%;
+  animation:flutterLeaf var(--d,4.4s) ease-in-out infinite;
+  animation-delay:calc(var(--fl) * -0.618s);
 }
+.js #closedBanner .cb-fallen{transform-box:fill-box;transform-origin:80% 50%;
+  animation:flutterLeaf 7.59s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){
+  .js #closedBanner .cb-plank,.js #closedBanner .cb-branch,
+  .js #closedBanner .cb-sprig,.js #closedBanner .cb-sprig ellipse,
+  .js #closedBanner .cb-fallen{animation:none}
+}
+
 
 @keyframes swayLeaf{0%,100%{rotate:-4deg}50%{rotate:5deg}}
 .js .earth-tuft{transform-origin:50% 100%}
@@ -1153,13 +1230,30 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     <div class="cb-plank">
       <span class="cb-cord cb-cord--l" aria-hidden="true"></span>
       <span class="cb-cord cb-cord--r" aria-hidden="true"></span>
-      <svg class="cb-sprig" viewBox="0 0 40 48" aria-hidden="true" focusable="false">
-        <path d="M20,2 C15,14 11,26 13,46" stroke="#7d9c85" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-        <ellipse cx="9"  cy="15" rx="7"   ry="3.8" fill="#93b39a" transform="rotate(-30 9 15)"/>
-        <ellipse cx="24" cy="21" rx="6.4" ry="3.5" fill="#7d9c85" transform="rotate(26 24 21)"/>
-        <ellipse cx="10" cy="30" rx="6.4" ry="3.5" fill="#8aa992" transform="rotate(-22 10 30)"/>
+      <svg class="cb-sprig" viewBox="0 0 70 96" aria-hidden="true" focusable="false">
+        <!-- Leaves sit at the golden angle (137.507 deg) around the stem, which
+             is how real plants space them so none shades the one below. Projected
+             onto a flat drawing it gives uneven, non-alternating offsets — the
+             thing that stops a drawn vine looking like a ladder. -->
+        <path d="M46,3 C40,16 34,30 29,44 C25,57 22,70 20,84" stroke="#6f8f78" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+        <path d="M40,18 C34,22 29,27 25,34" stroke="#6f8f78" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <path d="M29,44 C35,47 40,52 43,59" stroke="#6f8f78" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+         cx="59.5" cy="7.5" rx="8.2" ry="4.3" fill="#a3c0a8" transform="rotate(22 59.5 7.5)" style="--d:5.18s;--fl:1"/>
+        <ellipse cx="20.1" cy="19.5" rx="7.8" ry="4.0" fill="#8bab92" transform="rotate(-26 20.1 19.5)" style="--d:3.96s;--fl:2"/>
+        <ellipse cx="49.9" cy="32.5" rx="7.3" ry="3.8" fill="#98b89e" transform="rotate(22 49.9 32.5)" style="--d:5.93s;--fl:3"/>
+        <ellipse cx="23.0" cy="45.5" rx="6.9" ry="3.6" fill="#84a58c" transform="rotate(-26 23.0 45.5)" style="--d:4.71s;--fl:4"/>
+        <ellipse cx="14.3" cy="58.5" rx="6.5" ry="3.4" fill="#9dbca3" transform="rotate(-26 14.3 58.5)" style="--d:3.49s;--fl:5"/>
+        <ellipse cx="41.3" cy="71.5" rx="6.1" ry="3.2" fill="#8aa992" transform="rotate(22 41.3 71.5)" style="--d:5.47s;--fl:6"/>
+        <ellipse cx="2.3" cy="84.5" rx="5.7" ry="2.9" fill="#93b39a" transform="rotate(-26 2.3 84.5)" style="--d:4.24s;--fl:7"/>
       </svg>
-      <span id="closedBannerText"></span>
+      <svg class="cb-fallen" viewBox="0 0 34 22" aria-hidden="true" focusable="false">
+        <ellipse cx="17" cy="11" rx="15" ry="7.4" fill="#7d9c85" transform="rotate(-16 17 11)"/>
+        <path d="M4,14 C11,9 22,7 30,8" stroke="#546b58" stroke-width="1" fill="none" opacity=".55"/>
+      </svg>
+      <span class="cb-main">Sarado anay kita.</span>
+      <span class="cb-sub">we&rsquo;re closed</span>
+      <span class="cb-line" id="closedBannerText" hidden></span>
+      <span class="cb-back" id="closedBannerBack" hidden></span>
       <button id="closedBannerClose" aria-label="Dismiss">&#10005;</button>
     </div>
   </div>
@@ -1218,6 +1312,17 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
         </g>
       </svg>
       <img class="emblem-img" src="images/emblem.png" alt="Namit gid, the cook on the sign" width="1040" height="1199">
+      <!-- Hung off the sign only while the store is closed, the way a shop hangs
+           a card on the door. The wordmark above it is untouched: the brand keeps
+           its full size, and the tag adds the state. -->
+      <div class="sarado" id="saradoTag" hidden aria-hidden="true">
+        <span class="sarado-cord sarado-cord--l"></span>
+        <span class="sarado-cord sarado-cord--r"></span>
+        <div class="sarado-card">
+          <span class="sarado-main">Sarado anay kita.</span>
+          <span class="sarado-sub">we&rsquo;re closed</span>
+        </div>
+      </div>
       <img class="wm-island" src="images/biaringan_island_v4.png" alt="" aria-hidden="true">
       <h1 class="wordmark" aria-label="Namit gid">
         <span class="wm-namit" aria-hidden="true">Namit</span>
@@ -1287,7 +1392,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     <div class="rev-dots" id="revDots" aria-hidden="true"></div>
   </div>
   <div class="rev-add">
-    <p class="rev-add-lead">Namit gid? Sugiri ako.<br>Tell me how it was. I read every one.</p>
+    <p class="rev-add-lead">Namít gid? Hambayi ako.<br>Tell me how it was. I read every one.</p>
     <button type="button" class="rev-add-btn" id="revAddToggle" aria-expanded="false" aria-controls="revForm">＋ Leave a review</button>
     <form class="rev-form" id="revForm" hidden>
       <div class="rev-form-row">
@@ -3035,13 +3140,30 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     // inside one even while the store is open for the rest of the week.
     window.NG_WINDOWS = Array.isArray(a.windows) ? a.windows.filter(function(w){ return w && w.until; }) : [];
     if(a.available === false){
-      var b=document.getElementById('closedBanner'), t=document.getElementById('closedBannerText');
-      var msg = a.message || "The kitchen is closed right now.";
-      if(a.until){ try{ var d=new Date(a.until); msg += ' Back <b>'+d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'})+'</b>.'; }catch(_){} }
-      t.innerHTML = msg; b.classList.add('show');
+      var b=document.getElementById('closedBanner'),
+          t=document.getElementById('closedBannerText'),
+          bk=document.getElementById('closedBannerBack');
+      // "Sarado anay kita." is always on the sign, so there is no empty state to
+      // paper over — the admin's closing note is genuinely optional and simply
+      // hides when Leny has not written one.
+      var note = (a.message || '').trim();
+      t.textContent = note;
+      t.hidden = !note;
+      if(a.until){
+        try{
+          var d = new Date(a.until);
+          bk.innerHTML = 'Mabalik kami sa: <b>' + d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'}) + '</b>';
+          bk.hidden = false;
+        }catch(_){ bk.hidden = true; }
+      } else { bk.hidden = true; }
+      b.classList.add('show');
+      var tag = document.getElementById('saradoTag');
+      if(tag) tag.hidden = false;
     }
   }).catch(function(){ window.NG_AVAILABLE = true; window.NG_WINDOWS = []; });
   var cbc=document.getElementById('closedBannerClose');
+  // Dismissing the notice hides the notice, not the closure — the tag on the
+  // sign stays up, so someone who taps the x still sees the shop is shut.
   if(cbc) cbc.addEventListener('click', function(){ document.getElementById('closedBanner').classList.remove('show'); });
 
   // ── Allergen bubble ──
