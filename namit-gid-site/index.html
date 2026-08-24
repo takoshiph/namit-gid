@@ -143,11 +143,16 @@ header.hero{
   padding:5rem 1rem 2rem;text-align:center;
 }
 /* The motes and drifting leaves used to live inside the hero and stop at its edge.
-   As a fixed overlay they carry through the whole page. It sits ABOVE section
-   backgrounds rather than behind them — .story paints an opaque panel, and anything
-   behind it gets masked with a hard line (the bug .soil had). Below the nav (50) and
-   well below the order modal (90) so it never interferes with either. */
-#fx{position:fixed;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;opacity:.48}
+   Fixed to the viewport, they carry through the whole page instead — but BEHIND the
+   content, which is where they belong. Sitting above it made every card look
+   translucent, motes crawling across the copy.
+   z-index:0 on a fixed element painted early in the DOM means every positioned
+   section that follows paints over it: the menu, how-it-works, reviews and the story
+   panel all sit in front, and the motes drift in the open sage between them. */
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+/* footer was unpositioned, so its background sat below the fixed canvas and motes
+   crawled over the solid ground. Positioned, it paints above like the rest. */
+footer{position:relative;z-index:1}
 /* fills the bare stretch of the top band between the wordmark and the nav links */
 .hero-hang{position:absolute;top:-12px;left:clamp(20%,26vw,31%);width:clamp(46px,5vw,70px);
   height:auto;z-index:2;pointer-events:none;overflow:visible;opacity:.8;
@@ -933,6 +938,28 @@ main{position:relative}
   .seam{height:clamp(46px,11vw,64px)}
   .seam svg{width:clamp(26px,7vw,34px)}
 }
+
+/* ── idle sway for the vines that were drawn once and then stood still ───────
+   Animating the `rotate` property, never `transform`. In SVG and CSS alike the
+   transform attribute and the transform property are the same slot, so a keyframe
+   setting `transform:rotate()` would wipe .earth-tuft.right's scaleX(-1) mirror and
+   .story-vine's translateX(-50%) centring. `rotate` composes on top of both.
+   Every one gets its own period so nothing moves in unison. */
+@keyframes swayRooted{0%,100%{rotate:-1.5deg}50%{rotate:1.5deg}}
+@keyframes swayHung{0%,100%{rotate:-1.1deg}50%{rotate:1.1deg}}
+@keyframes swayLeaf{0%,100%{rotate:-4deg}50%{rotate:5deg}}
+.js .earth-tuft{transform-origin:50% 100%}
+.js .earth-tuft.left{animation:swayRooted 9s ease-in-out infinite}
+.js .earth-tuft.right{animation:swayRooted 11.5s ease-in-out .8s infinite}
+.js .story-vine{transform-origin:50% 0;animation:swayHung 8.2s ease-in-out .5s infinite}
+.js .modal-vine{transform-origin:50% 100%;animation:swayRooted 10.5s ease-in-out infinite}
+.js #allergenPanel .panel-tuft{transform-origin:50% 100%;animation:swayRooted 9.6s ease-in-out .3s infinite}
+.js #closedBanner .banner-leaf{transform-origin:10% 60%;animation:swayLeaf 7s ease-in-out infinite}
+/* the leaves strung along the how-it-works thread breathe with the cards they hang beside */
+.js #howRoot .foliage{transform-box:fill-box;transform-origin:0 50%}
+.js #howRoot .foliage{animation:swayLeaf 6.4s ease-in-out infinite}
+.js #howRoot .foliage:nth-of-type(3n){animation-duration:8.1s;animation-delay:.7s}
+.js #howRoot .foliage:nth-of-type(3n+1){animation-duration:7.2s;animation-delay:1.3s}
 
 /* ---------- motion safety ---------- */
 @media (prefers-reduced-motion: reduce){
@@ -2579,7 +2606,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const cam=new THREE.PerspectiveCamera(60,1,0.1,100); cam.position.z=8;
 
   const MOBILE = innerWidth < 721;
-  const N=MOBILE?34:72, pos=new Float32Array(N*3), spd=new Float32Array(N), ph=new Float32Array(N);
+  const N=MOBILE?70:140, pos=new Float32Array(N*3), spd=new Float32Array(N), ph=new Float32Array(N);
   for(let i=0;i<N;i++){
     pos[i*3]=(Math.random()-0.5)*16;
     pos[i*3+1]=(Math.random()-0.5)*10;
@@ -2594,11 +2621,11 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   grad.addColorStop(0,'rgba(247,240,227,0.9)'); grad.addColorStop(0.5,'rgba(217,164,65,0.35)'); grad.addColorStop(1,'rgba(217,164,65,0)');
   g.fillStyle=grad; g.fillRect(0,0,64,64);
   const tex=new THREE.CanvasTexture(c);
-  const mat=new THREE.PointsMaterial({size:0.30,map:tex,transparent:true,opacity:0.5,depthWrite:false,blending:THREE.AdditiveBlending});
+  const mat=new THREE.PointsMaterial({size:0.32,map:tex,transparent:true,opacity:0.65,depthWrite:false,blending:THREE.AdditiveBlending});
   const pts=new THREE.Points(geo,mat); scene.add(pts);
 
   // drifting leaves (province layer)
-  const LN=MOBILE?5:11, lpos=new Float32Array(LN*3), lspd=new Float32Array(LN), lph=new Float32Array(LN);
+  const LN=MOBILE?10:22, lpos=new Float32Array(LN*3), lspd=new Float32Array(LN), lph=new Float32Array(LN);
   for(let i=0;i<LN;i++){
     lpos[i*3]=(Math.random()-0.5)*16; lpos[i*3+1]=(Math.random()-0.5)*10; lpos[i*3+2]=(Math.random()-0.5)*5;
     lspd[i]=0.22+Math.random()*0.3; lph[i]=Math.random()*Math.PI*2;
@@ -2615,7 +2642,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   lg2.strokeStyle='rgba(60,88,66,0.9)'; lg2.lineWidth=1.4;
   lg2.beginPath(); lg2.moveTo(-15,0); lg2.lineTo(15,0); lg2.stroke();
   const ltex=new THREE.CanvasTexture(lc);
-  const lmat=new THREE.PointsMaterial({size:0.40,map:ltex,transparent:true,opacity:0.6,depthWrite:false});
+  const lmat=new THREE.PointsMaterial({size:0.42,map:ltex,transparent:true,opacity:0.8,depthWrite:false});
   scene.add(new THREE.Points(lgeo,lmat));
 
   let mx=0,my=0;
