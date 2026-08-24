@@ -753,10 +753,9 @@ footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-
   opacity:.9;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
 /* She stands behind the sign. The image is desaturated rather than redrawn —
    her expression is unchanged, so this reads as subdued, not as a new pose. */
-#closedBannerClose{position:absolute;right:.4rem;top:.35rem;
-  background:none;border:0;color:var(--cream);font-size:1.05rem;line-height:1;
-  cursor:pointer;opacity:.75;padding:.35rem .4rem;border-radius:8px}
-#closedBannerClose:hover,#closedBannerClose:focus-visible{opacity:1;background:rgba(0,0,0,.18)}
+/* The sign has no dismiss. A closed kitchen is not a notice to be waved away,
+   and the order buttons refuse for as long as it hangs — a customer who put
+   it away would only meet the same answer at the first dish they tapped. */
 
 /* ── closed: hold the scroll once, then keep the order buttons shut ────────
    The sign already says the kitchen is shut, but a notice at the top is easy
@@ -1252,16 +1251,22 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 
 <!-- SPLASH -->
 <div id="splash" role="dialog" aria-label="Namit gid intro">
+  <!-- Intrinsic sizes matter more here than anywhere else on the page. The
+       island, the wordmark and the leaf are positioned in percentages of this
+       box, so until the sign has a height they are laid out against a collapsed
+       strip and scatter across the empty cream — leaves apparently floating in
+       holes. width/height give the box its aspect ratio on the first frame,
+       before a single byte of the sign has arrived. -->
   <div class="s-emblem emblem" aria-hidden="true">
-    <img class="emblem-img" src="images/emblem.png" alt="">
-    <img class="wm-island" src="images/biaringan_island_v4.png" alt="">
+    <img class="emblem-img" src="images/emblem.png" alt="" width="1040" height="1199" fetchpriority="high" decoding="sync">
+    <img class="wm-island" src="images/biaringan_island_v4.png" alt="" width="1216" height="454">
     <div class="wordmark">
       <span class="wm-namit">Namit</span>
       <span class="wm-row2"><span class="wm-gid">gid</span></span>
     </div>
-    <img class="emblem-leaf" src="images/leaf.png" alt="">
+    <img class="emblem-leaf" src="images/leaf.png" alt="" width="76" height="77">
   </div>
-  <div class="splash-sub">so delicious · filipino home cooking</div>
+  <div class="splash-sub">Taste of home for Filipinos</div>
   <div class="splash-bar" aria-hidden="true"><i></i></div>
   <div class="splash-cook" aria-hidden="true"><span class="cook-caption" id="cookCaption">Preparing menu&hellip;</span></div>
   <button class="splash-skip" id="skipSplash">Skip intro</button>
@@ -1306,7 +1311,6 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <span class="cb-sub">we&rsquo;re closed</span>
       <span class="cb-line" id="closedBannerText" hidden></span>
       <span class="cb-back" id="closedBannerBack" hidden></span>
-      <button id="closedBannerClose" aria-label="Dismiss">&#10005;</button>
     </div>
   </div>
 </div>
@@ -1356,7 +1360,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
   </svg>
   <div class="hero-inner">
     <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><path id="badgePath" d="M50,50 m-36,0 a36,36 0 1,1 72,0 a36,36 0 1,1 -72,0"/></defs></svg>
-    <span class="eyebrow">Filipino home cooking · North York</span>
+    <span class="eyebrow">Someday, we&rsquo;ll be in Taste of Manila</span>
     <div class="emblem">
       <svg class="emblem-vine" viewBox="0 0 104 120" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
         <clipPath id="emblemVineClip"><rect id="emblemVineClipRect" x="-24" y="-24" width="160" height="0"/></clipPath>
@@ -1373,12 +1377,12 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
         </g>
       </svg>
       <img class="emblem-img" src="images/emblem.png" alt="Namit gid, the cook on the sign" width="1040" height="1199">
-      <img class="wm-island" src="images/biaringan_island_v4.png" alt="" aria-hidden="true">
+      <img class="wm-island" src="images/biaringan_island_v4.png" alt="" aria-hidden="true" width="1216" height="454">
       <h1 class="wordmark" aria-label="Namit gid">
         <span class="wm-namit" aria-hidden="true">Namit</span>
         <span class="wm-row2" aria-hidden="true"><span class="wm-gid">gid</span></span>
       </h1>
-      <img class="emblem-leaf" src="images/leaf.png" alt="" aria-hidden="true">
+      <img class="emblem-leaf" src="images/leaf.png" alt="" aria-hidden="true" width="76" height="77">
     </div>
   </div>
 </header>
@@ -3341,10 +3345,6 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       NGGate.arm();
     }
   }).catch(function(){ window.NG_AVAILABLE = true; window.NG_WINDOWS = []; });
-  var cbc=document.getElementById('closedBannerClose');
-  // Dismissing the notice hides the notice, not the closure — the tag on the
-  // sign stays up, so someone who taps the x still sees the shop is shut.
-  if(cbc) cbc.addEventListener('click', function(){ document.getElementById('closedBanner').classList.remove('show'); });
 
   // ── Allergen bubble ──
   var ab=document.getElementById('allergenBtn'), ap=document.getElementById('allergenPanel'), ac=document.getElementById('allergenClose'), abd=document.getElementById('allergenBackdrop');
@@ -3518,13 +3518,14 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   var stToggle=document.getElementById('storyToggle'), stSec=document.getElementById('story');
   var stBody=document.getElementById('storyBody');
   var stLedes=stBody ? [].slice.call(stBody.querySelectorAll('.lede')) : [];
-  var stData=stLedes.map(function(p){ return {styled:p.innerHTML}; });
   var stTyped=false, REDUCE_S=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function typeStory(){
     if(stTyped || !stLedes.length) return; stTyped=true;
-    // the markup is always the real, styled copy — the reveal is presentation only,
-    // so the text is selectable and readable from the first frame
-    stLedes.forEach(function(p,i){ p.innerHTML=stData[i].styled; });
+    // The paragraphs are left exactly as the server sent them. An earlier
+    // version of this cached innerHTML and wrote it straight back — a no-op
+    // that still tore down and rebuilt every node in both paragraphs, which
+    // restarted the root underline's draw and read as the section refreshing
+    // under you. The reveal is presentation only; it does not touch the DOM.
     if(REDUCE_S){ stBody.classList.add('revealed'); return; }
     stBody.classList.add('lede-reveal');
     requestAnimationFrame(function(){
