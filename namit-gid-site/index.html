@@ -429,15 +429,20 @@ footer{position:relative;z-index:1}
 .word-card span{font-size:.85rem;opacity:.75}
 
 /* ---------- how ---------- */
-.how{padding:clamp(2.8rem,6vw,4.4rem) clamp(1.4rem,5vw,3rem)}
+/* Four short steps do not need a full screen. The band was carrying ~70px of
+   section padding, a 35px margin and a 64px runway for the thread above the
+   cards, which left the row marooned in the middle of a lot of empty sage. */
+.how{padding:clamp(2.2rem,4.2vw,3.2rem) clamp(1.4rem,5vw,3rem)}
 /* wider gutters than the old 1.2rem: the thread has to have a visible span to sag across */
-.how .steps{max-width:1060px;margin:2.2rem auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:2.9rem}
+.how .steps{max-width:1060px;margin:1.4rem auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:2.9rem}
 .how .steps{position:relative}
-@media(min-width:1000px){.how .steps{padding-top:64px}}  /* room for the sewing branch to enter */
+/* The thread enters at topY+14 and its lead-in rises 16px above that, so 44px
+   of runway clears it. The old 64 was guesswork with 20px to spare. */
+@media(min-width:1000px){.how .steps{padding-top:44px}}
 .step{
   position:relative;z-index:1;
   background:rgba(247,240,227,.55);border:1px solid rgba(53,40,31,.1);border-radius:20px;
-  padding:1.8rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;
+  padding:1.45rem 1.35rem;display:flex;flex-direction:column;gap:.55rem;
   backdrop-filter:blur(4px);
 }
 .step .step-head{display:flex;flex-wrap:nowrap;align-items:center;gap:.7rem}
@@ -1170,9 +1175,8 @@ main{position:relative}
 .js #allergenPanel .panel-tuft{transform-origin:50% 100%;animation:swayRooted 9.6s ease-in-out .3s infinite}
 /* the leaves strung along the how-it-works thread breathe with the cards they hang beside */
 .js #howRoot .foliage{transform-box:fill-box;transform-origin:0 50%}
+/* Duration and delay come from the emitter, per sprig — see FOL(). */
 .js #howRoot .foliage{animation:swayLeaf 6.4s ease-in-out infinite}
-.js #howRoot .foliage:nth-of-type(3n){animation-duration:8.1s;animation-delay:.7s}
-.js #howRoot .foliage:nth-of-type(3n+1){animation-duration:7.2s;animation-delay:1.3s}
 
 /* ---------- motion safety ---------- */
 @media (prefers-reduced-motion: reduce){
@@ -2736,6 +2740,26 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   if(!section || !wrap || steps.length<2) return;
   const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
   const BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
+  const jitG=n=>{const x=Math.sin(n*127.1+11.7)*43758.5453; return x-Math.floor(x);};
+  /* Every sprig on this thread is emitted through here, and the nesting is the
+     point. The sway is a CSS `rotate` on .foliage, and a CSS transform composes
+     AFTER the element's own SVG transform attribute while transform-origin is
+     resolved against the untransformed fill box — which sits at the element's
+     local origin, not where the attribute has moved it to. A leaf written as
+     <g class="foliage" transform="translate(830,72) rotate(..) scale(..)">
+     therefore swung on an 830-pixel arm anchored near the left edge of the SVG.
+     I measured it: leaves in the first gutter were off by 15px, the second by
+     32px, the third by 50px — drift growing linearly with x, which is the
+     signature of a rotation about a distant origin, not of bad placement.
+     Splitting the translate onto an outer <g> leaves .foliage sitting at its own
+     origin, so the sway pivots on the leaf's stem where the arm is 8px long.
+     Duration and delay are per-sprig and deterministic, which also retires the
+     :nth-of-type rules that used to supply the variation. */
+  const FOL=(x,y,inner,content,seed)=>
+    '<g transform="translate('+(+x).toFixed(1)+','+(+y).toFixed(1)+')">'+
+    '<g class="foliage" style="animation-duration:'+(5.9+2.6*jitG(seed*3.7)).toFixed(2)+'s;'+
+    'animation-delay:'+(jitG(seed*11.3)*2.4).toFixed(2)+'s"'+
+    (inner?' transform="'+inner+'"':'')+'>'+content+'</g></g>';
   let svg, holesSvg, branchPath, tailPath, foliageEls=[], holeEls=[], played=false;
   let wipeRect=null, wipeFrom=-200, wipeTo=0;
   // When the cards stack (phones, narrow tablets) the lace can't run left-to-right,
@@ -2792,10 +2816,14 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
         const j=jit(i*3.1), j2=jit(i*7.7);
         const sag=Math.max(11, Math.min(34, gap*0.34)) * (0.78+0.44*j);  // no two spans alike
         const lean=(j2-0.5)*gap*0.16;                                    // asymmetric droop
-        gapMids.push({x:mid+lean*0.5, y:holeY+sag*0.92, sag:sag, gap:gap, i:i});
-        d+=' C '+(hR+gap*0.24+lean).toFixed(1)+','+(holeY+sag).toFixed(1)+
+        const arc=' C '+(hR+gap*0.24+lean).toFixed(1)+','+(holeY+sag).toFixed(1)+
            ' '+(nL-gap*0.24+lean).toFixed(1)+','+(holeY+sag).toFixed(1)+
-           ' '+nL.toFixed(1)+','+holeY.toFixed(1); }
+           ' '+nL.toFixed(1)+','+holeY.toFixed(1);
+        // Keep each span's own curve. Foliage is then sampled on THIS path and can
+        // only ever land on this span — see the placement loop below for why that
+        // matters.
+        gapMids.push({d:'M '+hR.toFixed(1)+','+holeY.toFixed(1)+arc, sag:sag, gap:gap, i:i});
+        d+=arc; }
       px=hR;
     });
     const endX=px+38;
@@ -2810,39 +2838,52 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     // real tangent so leaves sit ON the curve, with gravity biasing them downward. Tendrils
     // hang from the low point of each droop — the strongest "this is alive" cue.
     const TENDRIL=(dir,s)=>'<path class="tdl" d="M0,0 c'+(3*dir)+',5 '+(-4*dir)+',7 '+(-1*dir)+',12 c'+(3*dir)+',4 '+(5*dir)+',2 '+(4*dir)+',6 c0,3 '+(-3*dir)+',4 '+(-5*dir)+',2" transform="scale('+s+')"/>';
-    const probe=document.createElementNS(NS,'path'); probe.setAttribute('d',d); svg.appendChild(probe);
-    const PL=probe.getTotalLength();
     let fol='';
-    // 3–4 leaves per span, placed by arc-length with jitter, rotated to the local tangent
+    /* Everything below hangs off ONE rule: ask the span's own curve where it is,
+       and put the leaf there.
+
+       The previous version measured against the whole thread — lead-in, every
+       span, every jump — then searched 120 samples for the point closest in x to
+       a guessed target, keeping any sample whose y was within 1.5·sag of a
+       precomputed midpoint. That precomputed midpoint was itself wrong: a cubic
+       with both control points at holeY+sag passes through holeY+0.75·sag, not
+       the 0.92·sag it assumed. And since every span sits at nearly the same
+       height, the y filter admitted points from neighbouring spans and from the
+       flat runs at the holes, so a leaf could anchor to another gap entirely or
+       to a piece of straight thread. That is what left leaves floating above and
+       below the line with nothing under them.
+
+       Sampling this span alone removes the search, the guess and the filter —
+       a point on the curve is on the curve by construction. */
     gapMids.forEach((g,i)=>{
+      const sp=document.createElementNS(NS,'path'); sp.setAttribute('d',g.d); svg.appendChild(sp);
+      const L=sp.getTotalLength();
+      const at=u=>sp.getPointAtLength(L*Math.max(0,Math.min(1,u)));
       const n=3+Math.round(jit(i*5.3));
       for(let k=0;k<n;k++){
         const jf=jit(i*13.3+k*2.7), ja=jit(i*3.9+k*8.1), js=jit(i*17.1+k*4.4);
-        // find the arc-length position nearest this span's x, then offset along the curve
-        const targetX=g.x + (jf-0.5)*g.gap*0.8;   // keep leaves inside the gutter
-        let best=0,bd=1e9;
-        for(let t=0;t<=120;t++){const q=probe.getPointAtLength(PL*t/120);
-          if(Math.abs(q.y-g.y)<g.sag*1.5){const dd=Math.abs(q.x-targetX); if(dd<bd){bd=dd;best=PL*t/120;}}}
-        if(bd>g.gap) continue;
-        const p0=probe.getPointAtLength(Math.max(0,best-2)), p1=probe.getPointAtLength(Math.min(PL,best+2));
-        const p=probe.getPointAtLength(best);
+        // spread along the span, jittered inside its own slot, clear of both holes
+        const u=0.15+0.70*((k+0.15+0.7*jf)/n);
+        const p=at(u), p0=at(u-0.05), p1=at(u+0.05);
         const tang=Math.atan2(p1.y-p0.y,p1.x-p0.x)*180/Math.PI;
         const up=(ja>0.62)?-1:1;                                  // mostly hanging, some reaching up
         const ang=(tang + up*(58+ja*44)).toFixed(1);
         const sc=(0.24+0.16*js).toFixed(2);
-        fol+='<g class="foliage" transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+') rotate('+ang+') scale('+sc+')">'+LEAF+'</g>';
+        fol+=FOL(p.x, p.y, 'rotate('+ang+') scale('+sc+')', LEAF, i*10+k+1);
       }
-      // one tendril curling down out of the lowest point of the droop
-      const td=jit(i*23.7);
-      fol+='<g class="foliage" transform="translate('+(g.x+(td-0.5)*g.gap*0.42).toFixed(1)+','+(g.y+2).toFixed(1)+') rotate('+((td-0.5)*26).toFixed(1)+')">'+TENDRIL(td>0.5?1:-1,(0.85+td*0.5).toFixed(2))+'</g>';
+      // one tendril curling down out of the low point of the droop
+      const td=jit(i*23.7), lp=at(0.42+0.16*td);
+      fol+=FOL(lp.x, lp.y-1, 'rotate('+((td-0.5)*26).toFixed(1)+')', TENDRIL(td>0.5?1:-1,(0.85+td*0.5).toFixed(2)), i*7+3);
       // a bloom on roughly every other span, chosen by jitter rather than hardcoded
-      if(jit(i*31.4)>0.45)
-        fol+='<g class="foliage" transform="translate('+(g.x+(jit(i*9.1)-0.5)*g.gap*0.5).toFixed(1)+','+(g.y-6).toFixed(1)+') scale('+(0.26+0.1*jit(i*6.2)).toFixed(2)+')">'+BLOOM+'</g>';
+      if(jit(i*31.4)>0.45){
+        const bp=at(0.26+0.46*jit(i*9.1));
+        fol+=FOL(bp.x, bp.y-5, 'scale('+(0.26+0.1*jit(i*6.2)).toFixed(2)+')', BLOOM, i*13+5);
+      }
+      svg.removeChild(sp);
     });
     // a leaf and a tendril where the thread first arrives, so the left edge isn't bare
-    fol+='<g class="foliage" transform="translate('+(hL0-16).toFixed(1)+','+(holeY-9).toFixed(1)+') rotate(-142) scale(.3)">'+LEAF+'</g>';
-    fol+='<g class="foliage" transform="translate('+(hL0-52).toFixed(1)+','+(holeY+3).toFixed(1)+')">'+TENDRIL(-1,'1')+'</g>';
-    svg.removeChild(probe);
+    fol+=FOL(hL0-16, holeY-9, 'rotate(-142) scale(.3)', LEAF, 91);
+    fol+=FOL(hL0-52, holeY+3, '', TENDRIL(-1,'1'), 97);
     // Reveal with a left→right wipe, NOT stroke-dashoffset. The branch deliberately
     // contains M jumps (the passes under each card aren't drawn), and SVG restarts the
     // dash pattern at every subpath — so a dash reveal made all four gap-arcs draw at
@@ -2910,13 +2951,13 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       for(let k=0;k<n;k++){
         const ja=jit(i*3.9+k*8.1), js=jit(i*17.1+k*4.4);
         const side=(k%2===0)?1:-1;
-        fol+='<g class="foliage" transform="translate('+(g.x+side*6).toFixed(1)+','+(g.y+(ja-0.5)*g.gap*0.44).toFixed(1)+') '
-           +'rotate('+(side>0?(-32-ja*34):(148+ja*34)).toFixed(1)+') scale('+(0.40+0.16*js).toFixed(2)+')">'+LEAF+'</g>';
+        fol+=FOL(g.x+side*6, g.y+(ja-0.5)*g.gap*0.44,
+          'rotate('+(side>0?(-32-ja*34):(148+ja*34)).toFixed(1)+') scale('+(0.40+0.16*js).toFixed(2)+')', LEAF, i*10+k+1);
       }
       if(jit(i*31.4)>0.5)
-        fol+='<g class="foliage" transform="translate('+(g.x-8).toFixed(1)+','+(g.y+8).toFixed(1)+') scale(.26)">'+BLOOM+'</g>';
+        fol+=FOL(g.x-8, g.y+8, 'scale(.26)', BLOOM, i*13+5);
       const td=jit(i*23.7);
-      fol+='<g class="foliage" transform="translate('+(g.x+(td-0.5)*10).toFixed(1)+','+(g.y-6).toFixed(1)+')">'+TENDRIL(td>0.5?1:-1,(0.7+td*0.4).toFixed(2))+'</g>';
+      fol+=FOL(g.x+(td-0.5)*10, g.y-6, '', TENDRIL(td>0.5?1:-1,(0.7+td*0.4).toFixed(2)), i*7+3);
     });
 
     wipeFrom=first.top-70; wipeTo=tailEnd+40;
