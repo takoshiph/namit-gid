@@ -3114,10 +3114,20 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const cam=new THREE.PerspectiveCamera(60,1,0.1,100); cam.position.z=8;
 
   const MOBILE = innerWidth < 721;
+
+  /* The field has to be taller than one screen and it has to wrap around the
+     camera, because the camera now travels with the scroll. VIS is how many
+     world units of height the camera sees at z=0: with a 60° lens 8 units back
+     that is 2·8·tan(30°). Particles sit between z=-3 and z=+3, and the near
+     ones see less height than the far ones, so HALF is set generously past VIS
+     to keep anything from popping in at the edge of frame. */
+  const VIS = 2 * Math.tan(30 * Math.PI/180) * 8;   // ≈ 9.24 units ≈ one viewport
+  const HALF = 7, SPAN = HALF * 2;
+
   const N=MOBILE?70:140, pos=new Float32Array(N*3), spd=new Float32Array(N), ph=new Float32Array(N);
   for(let i=0;i<N;i++){
     pos[i*3]=(Math.random()-0.5)*16;
-    pos[i*3+1]=(Math.random()-0.5)*10;
+    pos[i*3+1]=(Math.random()-0.5)*SPAN;
     pos[i*3+2]=(Math.random()-0.5)*6;
     spd[i]=0.15+Math.random()*0.35; ph[i]=Math.random()*Math.PI*2;
   }
@@ -3135,7 +3145,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   // drifting leaves (province layer)
   const LN=MOBILE?10:22, lpos=new Float32Array(LN*3), lspd=new Float32Array(LN), lph=new Float32Array(LN);
   for(let i=0;i<LN;i++){
-    lpos[i*3]=(Math.random()-0.5)*16; lpos[i*3+1]=(Math.random()-0.5)*10; lpos[i*3+2]=(Math.random()-0.5)*5;
+    lpos[i*3]=(Math.random()-0.5)*16; lpos[i*3+1]=(Math.random()-0.5)*SPAN; lpos[i*3+2]=(Math.random()-0.5)*5;
     lspd[i]=0.22+Math.random()*0.3; lph[i]=Math.random()*Math.PI*2;
   }
   const lgeo=new THREE.BufferGeometry();
@@ -3156,6 +3166,19 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   let mx=0,my=0;
   addEventListener('pointermove',e=>{ mx=(e.clientX/innerWidth-0.5); my=(e.clientY/innerHeight-0.5); },{passive:true});
 
+  /* Scroll moves the camera down through the field instead of leaving the field
+     pinned to the glass. PARALLAX is the fraction of the page's speed the layer
+     travels at — at 1 it would be wallpaper glued to the page, at 0 it is the
+     window sticker it was before. Just under a half reads as air the page is
+     moving through. The depth spread does the rest for free: this is a
+     perspective camera, so a mote at z=+3 slides past faster than one at z=-3
+     without a line of code asking it to. */
+  const PARALLAX = 0.45;
+  let baseY = 0;
+  function onFxScroll(){ baseY = -(window.scrollY / innerHeight) * VIS * PARALLAX; }
+  addEventListener('scroll', onFxScroll, {passive:true});
+  onFxScroll();
+
   function size(){
     const w=innerWidth,h=innerHeight;
     renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix();
@@ -3165,29 +3188,37 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   // It covers the whole page now, so there's no "scrolled past it" to pause on.
   // Pause on a hidden tab instead — an always-on WebGL loop in a background tab is
   // the one case where this genuinely costs the visitor something.
-  let t=0, running=!document.hidden;
+  let t=0, mxl=0, myl=0, running=!document.hidden;
   document.addEventListener('visibilitychange',()=>{ running=!document.hidden; });
   (function loop(){
     requestAnimationFrame(loop);
     if(!running) return;
     t+=0.008;
+    // Wrapping is relative to where the camera is now, not to a fixed band, or
+    // scrolling two screens down would leave the camera staring at empty world.
     const p=geo.attributes.position.array;
     for(let i=0;i<N;i++){
       p[i*3+1]+=spd[i]*0.008;                 // slow rise, like steam
       p[i*3]+=Math.sin(t*2+ph[i])*0.0015;     // gentle sway
-      if(p[i*3+1]>5.2) p[i*3+1]=-5.2;
+      if(p[i*3+1]>baseY+HALF) p[i*3+1]-=SPAN;
+      else if(p[i*3+1]<baseY-HALF) p[i*3+1]+=SPAN;
     }
     geo.attributes.position.needsUpdate=true;
     const lp=lgeo.attributes.position.array;
     for(let i=0;i<LN;i++){
       lp[i*3+1]-=lspd[i]*0.0085;                 // leaves fall
       lp[i*3]+=Math.sin(t*1.6+lph[i])*0.004;     // swaying descent
-      if(lp[i*3+1]<-5.4){ lp[i*3+1]=5.4; lp[i*3]=(Math.random()-0.5)*16; }
+      if(lp[i*3+1]<baseY-HALF){ lp[i*3+1]+=SPAN; lp[i*3]=(Math.random()-0.5)*16; }
+      else if(lp[i*3+1]>baseY+HALF){ lp[i*3+1]-=SPAN; }
     }
     lgeo.attributes.position.needsUpdate=true;
-    cam.position.x+=(mx*0.9-cam.position.x)*0.04;   // mouse parallax
-    cam.position.y+=(-my*0.6-cam.position.y)*0.04;
-    cam.lookAt(0,0,0);
+    // Scroll is followed exactly — easing it would make the layer feel like it
+    // was sliding on the page. Only the mouse tilt is smoothed.
+    mxl+=(mx*0.9-mxl)*0.04;
+    myl+=(-my*0.6-myl)*0.04;
+    cam.position.x=mxl;
+    cam.position.y=baseY+myl;
+    cam.lookAt(0,baseY,0);
     renderer.render(scene,cam);
   })();
   }
