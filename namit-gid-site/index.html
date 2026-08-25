@@ -3096,6 +3096,16 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 
 /* ---------------- three.js ambient particles ---------------- */
 (function(){
+  // three.js is loaded with `defer`, and a deferred script does not run until the
+  // whole document has been parsed — while THIS inline script runs during parsing,
+  // a few lines after the tag that requests it. So `typeof THREE` was always
+  // 'undefined' here and the guard below returned on every single page load. The
+  // motes and the drifting leaves have never once rendered.
+  // Every deferred script finishes before DOMContentLoaded fires, so that event is
+  // the earliest point where THREE is guaranteed to exist. The guard stays: if the
+  // CDN is blocked or slow to the point of failing, THREE is still undefined and we
+  // simply skip the effect rather than throwing.
+  function start(){
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || typeof THREE==='undefined') return;
   const canvas=document.getElementById('fx');
   const renderer=new THREE.WebGLRenderer({canvas, alpha:true, antialias:false});
@@ -3180,6 +3190,9 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     cam.lookAt(0,0,0);
     renderer.render(scene,cam);
   })();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
 })();
 </script>
 
