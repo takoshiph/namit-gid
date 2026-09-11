@@ -371,27 +371,39 @@ footer{position:relative;z-index:1}
 .reveal-r{transform:translateX(90px)}
 .in .reveal-l,.in .reveal-r{opacity:1;transform:none}
 @media(max-width:720px){
+  /* One column: the dish whole and centred with its name ghosted behind it, the
+     copy underneath at a measure you can actually read. The rule this replaces
+     kept the desktop's two columns by making the photo 58vw and dragging it
+     --peek vw past the screen edge to buy the copy some width. On the rows with
+     the longer descriptions (peek 23 => -86px) the food itself ended up under
+     the text, and the bleed put 79px of horizontal overflow on the document
+     which only `body{overflow-x:hidden}` was holding back.
+     The vertical padding here is load-bearing: it is the gap the vine segment
+     between dishes is drawn into (see the 760px block), so the two move
+     together. */
   .menu-item{
-    display:flex;align-items:center;text-align:left;
-    padding:1.8rem 0;gap:0;max-width:100%;
+    display:flex;flex-direction:column;align-items:center;
+    text-align:center;gap:0;
+    padding:3rem 1.25rem;max-width:100%;
   }
   .menu-item .dish-stage{
-    flex:0 0 auto;width:58vw;
-    margin-left:calc(-1 * var(--peek, 20) * 1vw);
+    flex:0 0 auto;width:min(62vw,248px);
+    margin:.2rem auto 1.7rem;   /* clears .dish-shadow, which hangs 9% below the stage */
   }
   .menu-item .info{
-    flex:1 1 auto;min-width:0;max-width:none;
-    padding-right:1.1rem;text-align:left;align-items:flex-start;
+    flex:0 1 auto;min-width:0;max-width:34ch;
+    align-self:center;align-items:center;text-align:center;gap:.55rem;
   }
-  .menu-item:nth-child(even) .dish-stage{
-    order:2;
-    margin-left:0;margin-right:calc(-1 * var(--peek, 20) * 1vw);
-  }
-  .menu-item:nth-child(even) .info{
-    order:1;
-    padding-right:0;padding-left:1.1rem;
-    text-align:left;align-items:flex-start;
-  }
+  /* the left-right alternation now lives in the badge and the vine sway, not in
+     the alignment — ragged-left copy at 34ch on a phone is a worse trade */
+  .menu-item:nth-child(even) .dish-stage{order:0;margin-left:auto;margin-right:auto}
+  .menu-item:nth-child(even) .info{order:0;align-self:center;text-align:center;align-items:center}
+  .menu-item:nth-child(even) .price-btn{flex-direction:row}
+  .menu-item:nth-child(even) .price-btn:hover .arr{transform:translateX(3px)}
+  /* the ±90px entrance slide is a third of a phone screen wide, and transforms
+     count toward scrollWidth while they run */
+  .reveal-l{transform:translateX(-34px)}
+  .reveal-r{transform:translateX(34px)}
 }
 
 /* ---------- story ---------- */
@@ -956,19 +968,35 @@ html.ng-hold,body.ng-hold{overflow:hidden !important;overscroll-behavior:none}
   .back-type{white-space:normal;text-align:center;width:118%;
     font-size:clamp(2.4rem,12.5vw,4rem);line-height:.95}
   .back-type.two{width:130%;font-size:clamp(2rem,10vw,3.2rem)}
-  .menu-item .back-type{display:none}
+  /* the ghosted dish name was switched off outright on phones — it is the one
+     piece of editorial type in the section and the stacked photo finally has
+     room for it. Sized to the 248px stage rather than the viewport, and the
+     stroke thinned so it stays a watermark instead of an outline. */
+  .menu-item .back-type{
+    display:block;width:134%;line-height:.92;
+    font-size:clamp(1.9rem,9.4vw,2.9rem);
+    -webkit-text-stroke-width:.9px;
+  }
+  .menu-item .back-type.two{width:142%;font-size:clamp(1.6rem,7.8vw,2.4rem)}
 
-  /* badge scales down with the dishes */
+  /* badge scales down with the dishes — though nothing in the page carries
+     class="badge" any more, so this and the .badge block it overrides (plus
+     @keyframes orbit) are all dead; left in place rather than widening this
+     change into a cleanup */
   .badge{width:62px;height:62px;right:-2%;bottom:0}
-  .menu-item:nth-child(even) .badge{right:auto;left:-2%}
+  .menu-item:nth-child(even) .badge{right:auto;left:-4%}
 
-  /* tighter menu rhythm, lighter shadows for scroll perf */
-  .menu-item h3{font-size:1.55rem}
-  .menu-item .desc{font-size:.92rem}
+  /* tighter menu rhythm */
+  .menu-item h3{font-size:1.62rem}
+  .menu-item .desc{font-size:.95rem;line-height:1.62}
+  .menu-item .info .num{font-size:.66rem;letter-spacing:.3em}
   .menu-item:not(:last-child){border-bottom:1px solid rgba(53,40,31,.12)}
-  .dish-btn.natural img{filter:drop-shadow(0 10px 12px rgba(38,52,47,.26))}
-  .dish-btn{animation:none}
-  .dish-shadow{animation:none}
+  .dish-btn.natural img{filter:drop-shadow(0 12px 16px rgba(38,52,47,.26))}
+  /* bob and shadow-breathe were switched off for scroll perf back when seven
+     photos sat in a cramped two-column grid. Both animate `translate` and
+     `transform` only, so they run on the compositor; the floating dish is the
+     signature of the desktop page and it costs no layout to keep it. */
+  .dish-shadow{width:46%;height:22px}
   .section-head{padding-top:3rem}
   .how{padding-top:3rem;padding-bottom:3rem}
   .story .wrap{padding-top:4.2rem;padding-bottom:3rem}   /* still clears the vine */
@@ -1091,13 +1119,24 @@ main{position:relative}
 
 /* ── phones: the motif the desktop spine used to carry alone ─────────────── */
 @media (max-width:760px){
-  /* the plain hairline between dishes becomes a length of vine */
+  /* The spine between dishes. This was a 54px stub that read as a tick mark
+     rather than as the vine the desktop page runs down the gutter; now it fills
+     the whole 96px gap the stacked rows leave (3rem of padding either side of
+     the boundary), at the stroke weight the how-it-works vine uses, so the eye
+     carries it from one dish to the next. Mirrored on alternate rows so the
+     sway changes direction the way the desktop spine does. */
   .menu-item:not(:last-child){border-bottom:none}
   .menu-item:not(:last-child)::after{
-    content:"";position:absolute;left:50%;bottom:-27px;width:26px;height:54px;
-    transform:translateX(-50%);pointer-events:none;opacity:.75;z-index:0;
-    background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 54'%3E%3Cpath d='M13,0 C9,12 17,22 13,32 C10,40 15,47 13,54' fill='none' stroke='%236f4a2c' stroke-width='2.1' stroke-linecap='round'/%3E%3Cg transform='translate(13,15) rotate(-38) scale(.42)'%3E%3Cpath d='M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z' fill='%235f8177'/%3E%3C/g%3E%3Cg transform='translate(13,38) rotate(152) scale(.38)'%3E%3Cpath d='M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z' fill='%235f8177'/%3E%3C/g%3E%3C/svg%3E");
+    content:"";position:absolute;left:50%;bottom:-48px;width:34px;height:96px;
+    transform:translateX(-50%);pointer-events:none;opacity:.8;z-index:0;
+    background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 96'%3E%3Cpath d='M17,0 C11,20 24,34 17,52 C11,66 21,80 17,96' fill='none' stroke='%236f4a2c' stroke-width='2.4' stroke-linecap='round'/%3E%3Cg transform='translate(17,22) rotate(-42) scale(.52)'%3E%3Cpath d='M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z' fill='%235f8177'/%3E%3C/g%3E%3Cg transform='translate(19,48) rotate(18) scale(.34)'%3E%3Cpath d='M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z' fill='%235f8177'/%3E%3C/g%3E%3Cg transform='translate(17,72) rotate(150) scale(.46)'%3E%3Cpath d='M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z' fill='%235f8177'/%3E%3C/g%3E%3C/svg%3E");
   }
+  .menu-item:nth-child(even):not(:last-child)::after{transform:translateX(-50%) scaleX(-1)}
+  /* :last-child is not the last dish on screen — the category tabs hide the
+     other half of the list, so the last main had a length of vine trailing off
+     into the gap above the next section. Suppress the segment whenever the row
+     it would reach toward is hidden. */
+  .menu-item:has(+ .menu-item.hidden)::after{display:none}
   /* the stacked vine needs a taller gap than the desktop lace to read as a spine
      rather than a tick mark — 46px of gutter left it barely legible */
   .how .steps{gap:3.6rem}
@@ -1710,20 +1749,18 @@ function dishPriceLabel(d){ if(d.priceLabel) return d.priceLabel; var p=dishPric
 
 /* ---------------- build menu ---------------- */
 const list = document.getElementById('menuList');
-function peekTier(desc){
-  if(desc.length < 130) return 17;
-  if(desc.length <= 145) return 20;
-  return 23;
-}
+/* peekTier() lived here: it graded each description by length and handed the
+   phone stylesheet a --peek, the number of vw to drag the photo off the screen
+   edge by so the copy beside it had room. The phone layout stacks now, so
+   nothing reads it. */
 DISHES.forEach((d,i)=>{
   const sec = document.createElement('section');
   sec.className = 'menu-item';
   sec.dataset.cat = d.cat;
   const fromL = i % 2 === 0;
-  const peek = peekTier(d.desc);
   const pl = dishPriceLabel(d);
   sec.innerHTML = `
-    <div class="dish-stage ${fromL?'reveal-l':'reveal-r'}" style="--peek:${peek}">
+    <div class="dish-stage ${fromL?'reveal-l':'reveal-r'}">
       <span class="back-type ${d.name.split(' ').length>2?'two':''}" aria-hidden="true" data-parallax>${d.name}</span>
       <button class="dish-btn ${d.shape==='natural'?'natural':''}" data-idx="${i}" data-img="${d.img||''}" aria-label="Order ${d.name}">
         <img src="${IMGS[d.img]}" alt="${d.name}" loading="lazy" width="640" height="640">
