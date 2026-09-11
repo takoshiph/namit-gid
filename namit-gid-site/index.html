@@ -385,19 +385,35 @@ footer{position:relative;z-index:1}
     display:flex;flex-direction:column;align-items:center;
     text-align:center;gap:0;
     padding:3rem 1.25rem;max-width:100%;
+    /* how far the dish hangs off the screen edge. The old --peek was 17-23vw
+       (64-86px at 375) and graded by description length, because it was buying
+       width for copy sitting beside the photo. Nothing sits beside the photo
+       now, so this only has to swallow the transparent margin the cutout PNGs
+       carry and a sliver of the tray — past ~70px it starts eating food. */
+    --bleed:clamp(34px,13vw,62px);
   }
+  /* The dish swings off the spine, alternating, the way the desktop rows do —
+     the copy stays centred under it. The stage is wider than the centred
+     version was (308 vs 248) so that what the edge takes is made back. */
   .menu-item .dish-stage{
-    flex:0 0 auto;width:min(62vw,248px);
-    margin:.2rem auto 1.7rem;   /* clears .dish-shadow, which hangs 9% below the stage */
+    flex:0 0 auto;width:min(76vw,308px);
+    align-self:flex-start;
+    margin:.2rem 0 1.7rem calc(-1 * var(--bleed));  /* .dish-shadow hangs 9% below the stage */
   }
   .menu-item .info{
     flex:0 1 auto;min-width:0;max-width:34ch;
     align-self:center;align-items:center;text-align:center;gap:.55rem;
   }
-  /* the left-right alternation now lives in the badge and the vine sway, not in
-     the alignment — ragged-left copy at 34ch on a phone is a worse trade */
-  .menu-item:nth-child(even) .dish-stage{order:0;margin-left:auto;margin-right:auto}
+  .menu-item:nth-child(even) .dish-stage{
+    order:0;align-self:flex-end;
+    margin-left:0;margin-right:calc(-1 * var(--bleed));
+  }
   .menu-item:nth-child(even) .info{order:0;align-self:center;text-align:center;align-items:center}
+  /* the bleed is deliberate overflow, so clip it here rather than leaving it to
+     body{overflow-x:hidden} to catch — `clip` on one axis keeps the other
+     visible, which `hidden` would not, and the vine segments overflow the rows
+     vertically by 48px */
+  #menuList{overflow:clip visible}
   .menu-item:nth-child(even) .price-btn{flex-direction:row}
   .menu-item:nth-child(even) .price-btn:hover .arr{transform:translateX(3px)}
   /* the ±90px entrance slide is a third of a phone screen wide, and transforms
@@ -1132,6 +1148,22 @@ main{position:relative}
     background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 96'%3E%3Cpath d='M17,0 C11,20 24,34 17,52 C11,66 21,80 17,96' fill='none' stroke='%236f4a2c' stroke-width='2.4' stroke-linecap='round'/%3E%3Cg transform='translate(17,22) rotate(-42) scale(.52)'%3E%3Cpath d='M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z' fill='%235f8177'/%3E%3C/g%3E%3Cg transform='translate(19,48) rotate(18) scale(.34)'%3E%3Cpath d='M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z' fill='%235f8177'/%3E%3C/g%3E%3Cg transform='translate(17,72) rotate(150) scale(.46)'%3E%3Cpath d='M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z' fill='%235f8177'/%3E%3C/g%3E%3C/svg%3E");
   }
   .menu-item:nth-child(even):not(:last-child)::after{transform:translateX(-50%) scaleX(-1)}
+  /* It hangs from the row above, so it sways from its top like .story-vine does,
+     not about its middle. `rotate` rather than `transform`: the two are the same
+     slot, and a transform keyframe here would wipe the translateX(-50%) that
+     centres it and the scaleX(-1) that mirrors alternate rows.
+     Periods are 8.2s * (1 + frac(n*phi)) -> 13.3, 9.6, 14.4, 11.6, 8.9s, so no
+     two segments share a common multiple and the column never pulses in unison
+     — the same reason the closed-banner leaves are spaced that way. */
+  .js .menu-item:not(:last-child)::after{
+    transform-origin:50% 0;
+    animation:swayHung 13.3s ease-in-out infinite;
+  }
+  .js .menu-item:nth-child(2):not(:last-child)::after{animation-duration:9.6s;animation-delay:-2.1s}
+  .js .menu-item:nth-child(3):not(:last-child)::after{animation-duration:14.4s;animation-delay:-5.4s}
+  .js .menu-item:nth-child(4):not(:last-child)::after{animation-duration:11.6s;animation-delay:-1.3s}
+  .js .menu-item:nth-child(5):not(:last-child)::after{animation-duration:8.9s;animation-delay:-4.7s}
+  .js .menu-item:nth-child(6):not(:last-child)::after{animation-duration:12.7s;animation-delay:-3.2s}
   /* :last-child is not the last dish on screen — the category tabs hide the
      other half of the list, so the last main had a length of vine trailing off
      into the gap above the next section. Suppress the segment whenever the row
@@ -1220,6 +1252,7 @@ main{position:relative}
 /* ---------- motion safety ---------- */
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important;transition:none !important}
+  .menu-item::after{animation:none !important}   /* `*` does not match pseudo-elements */
   .reveal-l,.reveal-r{opacity:1;transform:none}
   .js .rise{opacity:1;transform:none}
   .js .seam .stem{stroke-dashoffset:0}
