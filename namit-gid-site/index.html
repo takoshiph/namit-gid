@@ -52,6 +52,11 @@
    last line holding a single word. Both degrade to normal wrapping where unsupported. */
 h1,h2,h3,h4,.k,.splash-word,.eyebrow,.head-tr,.tag{text-wrap:balance}
 p,.desc,.lede,.menu-note,.m-hint,.m-dep-lead,.rev-add-lead,.step p,.m-sub{text-wrap:pretty}
+/* overflow-x:hidden on <body> alone does not stop the page scrolling sideways —
+   <html> is the scrolling element, so it happily grows. At 320px the menu photos'
+   pre-reveal offset pushed 20px of sideways scroll. `clip` rather than `hidden`
+   because hidden here would make <html> a scroll container and kill the sticky
+   closed-kitchen banner. */
 html{scroll-behavior:smooth;touch-action:pan-y}
 body{
   font-family:var(--ff-body);
@@ -517,14 +522,9 @@ footer{position:relative;z-index:1}
 .how::after,.reviews::after{content:"";position:absolute;left:0;right:0;bottom:0;height:180px;
   background:linear-gradient(180deg,transparent 0,rgba(53,40,31,.055) 58%,rgba(53,40,31,.02) 84%,transparent 100%);
   pointer-events:none;z-index:0}
-/* small foliage tufts creeping up at a section's base */
-/* Two tufts of the same plant, not one tuft and its reflection. They differ in
-   size, lean, height and weight — mirrored twins read as a decal. */
-.earth-tuft{position:absolute;height:auto;z-index:0;pointer-events:none;transform-origin:50% 100%}
-.earth-tuft.left{left:1.2%;bottom:-8px;width:clamp(118px,14.5vw,196px);opacity:.9;transform:rotate(-2.5deg)}
-.earth-tuft.right{right:.2%;bottom:-3px;width:clamp(86px,10.5vw,142px);opacity:.68;transform:scaleX(-1) rotate(-7deg)}
-.earth-tuft .stem{fill:none;stroke:#6f4a2c;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-@media(max-width:600px){.earth-tuft{display:none}}
+/* The two tufts that used to stand either side of the review plank are gone.
+   They were free-floating stems rooted in nothing, and once the plank hung from
+   a branch they competed with it for the same job. */
 /* flow/morph reveal for the step cards (JS-only, after the root draws) */
 /* The card hangs off the thread, so it pivots about the stitch line (14px below its
    top edge), not its centre. --tilt is set per card in JS: alternating sign with a
@@ -571,10 +571,34 @@ footer::before{
    hovering over the soil rather than going into it */
 .seam + footer{margin-top:0}
 .foot-roots{position:absolute;top:-1px;left:50%;transform:translateX(-50%);
-  width:clamp(266px,42vw,500px);height:auto;z-index:0;pointer-events:none;opacity:.5}
+  width:clamp(266px,42vw,500px);height:auto;z-index:0;pointer-events:none;opacity:.5;
+  /* light roots on dark soil: the shadow is what puts them IN the earth rather
+     than printed on it, and it is what makes the overlaps read as depth */
+  filter:drop-shadow(0 2px 3px rgba(16,10,4,.55))}
 footer .wrap{position:relative;z-index:1}
 .foot-roots .rt{fill:#cbb08a}
 .foot-roots .rt-fine{fill:none;stroke:#cbb08a;stroke-width:1.1;stroke-linecap:round}
+/* ── the fine web ──────────────────────────────────────────────────────────
+   The root mass is drawn at the taproot's scale, so it can only ever be as wide
+   as that scale allows — it stopped 400px short of the link columns, which is
+   why the filaments above them looked like they started from nothing. Hair
+   roots have no fixed width to honour, so they get their own layer that spans
+   the whole footer and carries the mass out to the copy. */
+.foot-web{position:absolute;left:0;right:0;top:0;height:190px;width:100%;
+  z-index:0;pointer-events:none;opacity:.34;
+  /* the outermost laterals reach the viewport edge; without this they stop dead
+     against it, which reads as a cropped drawing rather than as roots carrying on */
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 91%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 91%,transparent 100%)}
+.foot-web .wb{fill:#cbb08a;stroke:none}
+.foot-web .wh{fill:none;stroke:#cbb08a;stroke-linecap:round}
+/* the laterals are fills, so they reveal by the same spreading circle as the
+   mass they grow out of; only the hairs have a stroke to draw along */
+.js .foot-web{clip-path:circle(0% at 50% 0);transition:clip-path 2.1s cubic-bezier(.25,.7,.3,1)}
+.js footer.in-view .foot-web{clip-path:circle(140% at 50% 0)}
+.js .foot-web .wh{stroke-dasharray:1;stroke-dashoffset:1;
+  transition:stroke-dashoffset 1.3s cubic-bezier(.3,.7,.3,1) var(--d,0s)}
+.js footer.in-view .foot-web .wh{stroke-dashoffset:0}
 /* Roots do not draw top-down like a stem — they spread out from where the stem
    enters the ground, so the reveal is a circle growing from the planting point.
    Everything nearer the stem appears first, which is the ordering roots actually
@@ -601,17 +625,28 @@ footer .fm-word em{font-style:normal;color:var(--gold)}
   footer .wrap{padding-top:5.2rem;gap:1.6rem}
 }
 footer .cols{display:flex;gap:3rem;font-size:.85rem}
-/* The root mass ends above the copy; these are where it comes back up — one
-   filament feeding each group, so the links are planted rather than listed. */
+/* Each group is fed by a root that runs the whole height of the column, past the
+   heading and both links, and puts out side hairs as it goes.
+   It replaces a 26px stub that sat above each heading: the stub began nowhere
+   and ended nowhere, which is why it read as a sticker. Two things fix that —
+   length, and a top edge that FADES rather than stops, so the filament reads as
+   continuing up into the web behind it instead of terminating in mid-air. */
+footer .cols{padding-top:.2rem}
+/* The filament lives in the gutter BETWEEN columns, not inside them. Indenting
+   each column by 15px to make room added 45px to the row, which at 320px was
+   20px more than the footer had and put the whole page into sideways scroll.
+   The gap is 48px wide and empty — that is where it belongs. */
 footer .cols > div{position:relative}
 footer .cols > div::before{
-  content:"";display:block;width:30px;height:26px;margin:0 0 .5rem -6px;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M18,0 C13,9 20,16 16,30' fill='none' stroke='%23cbb08a' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M16,12 C11,15 9,19 10,23' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.75'/%3E%3C/svg%3E") no-repeat left top/contain;
-  opacity:0;transform:translateY(-7px);
-  transition:opacity .7s ease, transform .7s cubic-bezier(.25,.7,.3,1);
+  content:"";position:absolute;left:-19px;top:-64px;bottom:-26px;width:26px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 190' preserveAspectRatio='none'%3E%3Cpath d='M14,0 C10,26 17,48 13,72 C9,98 16,124 12,152 C10,170 13,180 11,190' fill='none' stroke='%23cbb08a' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M13,72 C19,79 22,88 21,99' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.7'/%3E%3Cpath d='M12,124 C6,131 4,140 5,150' fill='none' stroke='%23cbb08a' stroke-width='.9' stroke-linecap='round' opacity='.6'/%3E%3Cpath d='M11,168 C16,174 18,181 17,190' fill='none' stroke='%23cbb08a' stroke-width='.8' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E") no-repeat center/100% 100%;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 30%,#000 84%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0,#000 30%,#000 84%,transparent 100%);
+  opacity:0;transform:translateY(-9px);
+  transition:opacity .8s ease, transform .8s cubic-bezier(.25,.7,.3,1);
 }
-footer .cols > div:nth-child(2)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M15,0 C21,10 12,17 17,30' fill='none' stroke='%23cbb08a' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M18,14 C23,17 25,21 24,25' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.75'/%3E%3C/svg%3E")}
-footer .cols > div:nth-child(3)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M17,0 C14,8 21,17 15,30' fill='none' stroke='%23cbb08a' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M18,11 C23,13 25,17 24,21' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.75'/%3E%3C/svg%3E")}
+footer .cols > div:nth-child(2)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 190' preserveAspectRatio='none'%3E%3Cpath d='M12,0 C17,28 9,50 14,76 C18,100 10,126 14,154 C16,172 12,182 14,190' fill='none' stroke='%23cbb08a' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M14,76 C8,84 5,94 6,106' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.7'/%3E%3Cpath d='M13,130 C19,137 22,146 21,157' fill='none' stroke='%23cbb08a' stroke-width='.9' stroke-linecap='round' opacity='.6'/%3E%3Cpath d='M14,170 C9,176 7,183 8,190' fill='none' stroke='%23cbb08a' stroke-width='.8' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E")}
+footer .cols > div:nth-child(3)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 190' preserveAspectRatio='none'%3E%3Cpath d='M13,0 C9,24 16,44 12,68 C8,94 15,118 13,146 C12,166 15,178 12,190' fill='none' stroke='%23cbb08a' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M12,68 C18,74 21,83 20,94' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.7'/%3E%3Cpath d='M14,112 C8,119 5,128 6,139' fill='none' stroke='%23cbb08a' stroke-width='.9' stroke-linecap='round' opacity='.6'/%3E%3Cpath d='M13,162 C18,169 20,178 19,190' fill='none' stroke='%23cbb08a' stroke-width='.8' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E")}
 .js footer.in-view .cols > div::before{opacity:.62;transform:none}
 /* they arrive after the root mass has spread, in reading order */
 .js footer.in-view .cols > div:nth-child(1)::before{transition-delay:1.15s}
@@ -1022,26 +1057,83 @@ html.ng-hold,body.ng-hold{overflow:hidden !important;overscroll-behavior:none}
 .reviews .rev-text{font-size:.98rem;line-height:1.6;color:var(--espresso)}
 .reviews .rev-name{margin-top:.8rem;font-family:var(--ff-display);color:var(--sage-dark)}
 .reviews .rev-photo{width:100%;height:150px;object-fit:cover;border-radius:12px;margin-bottom:.8rem}
-/* ── Add-review form ── */
-.rev-add{max-width:520px;margin:2.2rem auto 0;padding:1.9rem 1.7rem;text-align:center;position:relative;overflow:hidden;z-index:1;
-  background:var(--cream);border:1px solid rgba(53,40,31,.1);border-radius:22px;
-  box-shadow:0 22px 46px -26px rgba(38,52,47,.4)}
-.rev-add::before{content:'';position:absolute;inset:0;background:radial-gradient(120% 90% at 0% 0%,rgba(196,99,60,.06),transparent 55%);pointer-events:none}
+/* ── Add-review plank ──────────────────────────────────────────────────────
+   This was a cream rounded card with a stem propped either side of it. The
+   card said nothing about the place and the stems grew out of nothing, so
+   both are gone. It is now the emblem's board — the same wood, screws and
+   routed groove as the closed-kitchen sign, hung from its own branch. One
+   sign vocabulary for the whole page instead of two. */
+/* width:min() rather than max-width: the section has no side padding on a phone,
+   so max-width let the board run edge to edge and push 2px of horizontal scroll */
+.rev-hang{position:relative;width:min(640px,100% - 2.4rem);margin:3.2rem auto 0;z-index:1;isolation:isolate}
+.rev-bough{display:block;width:100%;height:24px}
+/* twine: the bands were 3px of light on 3px of dark, which at this size reads as
+   an orange dotted line rather than as rope. Tighter and lower-contrast. */
+.rev-cord{position:absolute;top:15px;width:2px;height:40px;z-index:0;
+  transform-origin:50% 0;
+  background:repeating-linear-gradient(166deg,#9a8262 0 2px,#7d6749 2px 4px)}
+.rev-cord--l{left:14%}
+.rev-cord--r{right:14%}
+.rev-add{
+  position:relative;z-index:1;max-width:560px;margin:26px auto 0;
+  padding:1.7rem 2.1rem 1.8rem;text-align:center;border-radius:14px;
+  color:var(--cream);
+  background:
+    radial-gradient(circle at 15px 15px, rgba(0,0,0,.5) 0 2.2px, rgba(255,240,214,.16) 2.2px 3.1px, transparent 3.2px) no-repeat,
+    radial-gradient(circle at calc(100% - 15px) 15px, rgba(0,0,0,.5) 0 2.2px, rgba(255,240,214,.16) 2.2px 3.1px, transparent 3.2px) no-repeat,
+    radial-gradient(circle at 15px calc(100% - 15px), rgba(0,0,0,.5) 0 2.2px, rgba(255,240,214,.16) 2.2px 3.1px, transparent 3.2px) no-repeat,
+    radial-gradient(circle at calc(100% - 15px) calc(100% - 15px), rgba(0,0,0,.5) 0 2.2px, rgba(255,240,214,.16) 2.2px 3.1px, transparent 3.2px) no-repeat,
+    url("images/wood.webp") repeat-x center/auto 100%,
+    linear-gradient(#6d5136,#543d28);
+  box-shadow:inset 0 0 0 2px rgba(0,0,0,.34), inset 0 2px 0 rgba(255,240,214,.16),
+             inset 0 -3px 6px -3px rgba(0,0,0,.5),
+             0 18px 30px -16px rgba(0,0,0,.62);
+}
+/* the routed groove — the one detail that reads as carved board */
+.rev-add::before{content:"";position:absolute;inset:8px;border-radius:9px;
+  border:1.5px solid rgba(0,0,0,.3);
+  box-shadow:inset 0 1px 0 rgba(255,240,214,.10), 0 1px 0 rgba(255,240,214,.07);
+  pointer-events:none}
 .rev-add>*{position:relative}
-.rev-add-lead{font-family:var(--ff-display);font-size:1.18rem;color:var(--espresso);margin-bottom:1rem;line-height:1.4}
+.rev-add-lead{font-family:var(--ff-display);font-size:1.3rem;color:var(--cream);
+  margin-bottom:1.05rem;line-height:1.35;text-shadow:0 1px 2px rgba(30,16,6,.55)}
+.rev-add-lead .tr{display:block;font-family:var(--ff-body);font-size:.82rem;
+  letter-spacing:.02em;color:rgba(247,240,227,.82);margin-top:.3rem}
 .rev-form{text-align:left}
-.rev-add-btn{background:var(--cream);border:1px solid rgba(53,40,31,.18);color:var(--espresso);font:inherit;font-size:.95rem;padding:.75rem 1.4rem;border-radius:999px;cursor:pointer;transition:background .2s,border-color .2s,transform .2s;box-shadow:0 10px 22px -16px rgba(38,52,47,.5)}
+/* a brass plate screwed to the board, not a cream pill floating on it */
+.rev-add-btn{background:linear-gradient(#d8a45f,#bd8440);border:0;color:#3a2413;font:inherit;
+  font-size:.95rem;font-weight:600;letter-spacing:.02em;padding:.72rem 1.5rem;border-radius:999px;
+  cursor:pointer;transition:filter .2s,transform .2s;
+  box-shadow:inset 0 1px 0 rgba(255,244,222,.55), inset 0 -2px 3px -1px rgba(70,40,10,.45),
+             0 6px 14px -8px rgba(0,0,0,.8)}
 .rev-add-btn:active{transform:scale(.97)}
-.rev-add-btn:hover{background:var(--cream-soft);border-color:var(--terracotta)}
-.rev-form{margin-top:1rem;display:flex;flex-direction:column;gap:.7rem}
+.rev-add-btn:hover{filter:brightness(1.07)}
+.rev-add-btn:focus-visible{outline:2px solid var(--cream);outline-offset:4px}
+.rev-form{margin-top:1.1rem;display:flex;flex-direction:column;gap:.7rem}
 .rev-form[hidden]{display:none}
 .rev-form-row{display:flex;gap:.6rem}
-.rev-form input,.rev-form select,.rev-form textarea{font:inherit;padding:.7rem .9rem;border:1px solid rgba(53,40,31,.2);border-radius:12px;background:var(--cream);color:var(--espresso);width:100%}
+/* fields are recessed into the wood rather than laid on top of it */
+.rev-form input,.rev-form select,.rev-form textarea{font:inherit;padding:.7rem .9rem;
+  border:1px solid rgba(0,0,0,.4);border-radius:10px;
+  background:rgba(30,19,9,.34);color:var(--cream);width:100%;
+  box-shadow:inset 0 2px 4px -2px rgba(0,0,0,.7)}
+.rev-form input::placeholder,.rev-form textarea::placeholder{color:rgba(247,240,227,.5)}
+.rev-form input:focus,.rev-form select:focus,.rev-form textarea:focus{
+  outline:2px solid var(--gold);outline-offset:1px;border-color:transparent}
 .rev-form select{flex:0 0 auto;width:auto;color:var(--gold)}
+.rev-form select option{color:var(--espresso);background:var(--cream)}
 .rev-form textarea{resize:vertical}
-.rev-form-send{background:var(--espresso);color:var(--cream);border:0;font:inherit;padding:.8rem;border-radius:12px;cursor:pointer;transition:background .2s,transform .2s}
-.rev-form-send:hover{background:var(--sage-dark);transform:translateY(-1px)}
-.rev-form-note{font-size:.82rem;color:var(--sage-dark);text-align:center}
+.rev-form-send{background:linear-gradient(#d8a45f,#bd8440);color:#3a2413;border:0;font:inherit;
+  font-weight:600;padding:.8rem;border-radius:10px;cursor:pointer;transition:filter .2s,transform .2s;
+  box-shadow:inset 0 1px 0 rgba(255,244,222,.55), 0 6px 14px -9px rgba(0,0,0,.8)}
+.rev-form-send:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.rev-form-note{font-size:.82rem;color:rgba(247,240,227,.84);text-align:center}
+@media(max-width:600px){
+  .rev-hang{margin-top:2.4rem}
+  .rev-add{padding:1.4rem 1.2rem 1.5rem}
+  .rev-add-lead{font-size:1.12rem}
+  .rev-cord--l{left:9%} .rev-cord--r{right:9%}
+}
 /* ── Story expander ── */
 /* story intro now uses the same eyebrow language as every other section */
 /* vine arriving into the story — the page vine continuing on */
@@ -1158,6 +1250,17 @@ main{position:relative}
    so the motif thins with scale instead of changing species halfway down the page. */
 .seam .vine-fill{fill:#6f4a2c;opacity:.95}
 .seam .vine-mid{fill:none;stroke:#3f280f;stroke-width:1;opacity:.45;stroke-linecap:round;stroke-linejoin:round}
+/* Where the thick part starts: it is a grade, not a step. The stem leaves the
+   menu at its thinnest, widens once through the seam above the reviews, then
+   arrives at the soil at 9.6 units — which is the taproot's own width at the
+   same rendered scale, so the trunk and the root below it are one drawing.
+   Before this the seam ended at 3.4px and the root began at 9.8px. */
+.seam.trunk{height:clamp(66px,9vw,104px)}
+.seam.trunk svg{width:clamp(46px,6.6vw,68px)}
+.seam.trunk .vine-mid{stroke-width:1.5}
+/* the stem stands in front of the ground it is going into */
+.seam svg{filter:drop-shadow(0 3px 5px rgba(38,28,18,.28))}
+.seam.trunk svg{filter:drop-shadow(0 4px 7px rgba(38,28,18,.34))}
 .seam .foliage{opacity:0;transition:opacity .5s ease .45s}
 /* a fill has no stroke to dash, so it is revealed by clip, as #menuVine is */
 .js .seam svg{clip-path:inset(0 -60% 100% -60%);transition:clip-path 1.1s cubic-bezier(.3,.7,.3,1)}
@@ -1198,22 +1301,42 @@ main{position:relative}
    top edge at any size. */
 .bloom{
   --bl-w:clamp(58px,8vw,86px);
-  position:absolute;left:calc(50% + 58px);top:calc(var(--bl-w) * -0.472);
+  /* Lifted from -0.472 to -1.15 of its own width. At -0.472 the head sat 7px
+     below the soil line — a flower buried in the ground. The plant is rooted in
+     the soil and the flower belongs in the air above it, so it now breaks the
+     surface: head ~50px clear on desktop, root junction ~29px down in the
+     earth. It overlaps the section above, which is the point. */
+  position:absolute;left:calc(50% + 58px);top:calc(var(--bl-w) * -1.15);
   display:flex;flex-direction:column;align-items:center;gap:.15rem;
   background:none;border:0;padding:.3rem;cursor:pointer;z-index:2;
   -webkit-tap-highlight-color:transparent;
 }
+/* Two shadows, not one: a tight contact shadow that pins the stem to the ground
+   and a wide soft one that throws it forward of the soil. Overlaps read as depth
+   once the thing on top casts. */
 .bloom-svg{width:var(--bl-w);height:auto;display:block;overflow:visible;
-  filter:drop-shadow(0 2px 2px rgba(30,22,14,.35))}
-.bl-stem{fill:none;stroke:#5f8177;stroke-width:3.4;stroke-linecap:round}
-.bl-root{fill:none;stroke:#cbb08a;stroke-width:1.6;stroke-linecap:round;opacity:.55}
+  filter:drop-shadow(0 1px 1px rgba(30,22,14,.45))
+         drop-shadow(0 9px 12px rgba(22,15,8,.45))}
+/* thicker and a shade deeper than the leaf green: at 3.4 against the trunk beside
+   it the shoot read as a weed that had wandered in, not as the same plant */
+.bl-stem{fill:none;stroke:#587a6e;stroke-width:4.4;stroke-linecap:round}
+.bl-root{fill:none;stroke:#cbb08a;stroke-width:2;stroke-linecap:round;opacity:.8}
+/* the feeder points at the taproot, and the shoot changes sides at 721px, so
+   the feeder has to change with it */
+.bl-feed{stroke-width:2.4}
+.bl-feed--r{display:none}
+@media(min-width:721px){
+  .bl-feed--r{display:block}
+  .bl-feed--l{display:none}
+}
 .bl-leaf path{fill:#5f8177}
 .petal:nth-child(odd){fill:#c4633c}
 .petal:nth-child(even){fill:#b9572f}
 .bl-core{fill:#e08a42}
 .bl-core2{fill:#f6ac66}
 .bloom-label{display:flex;flex-direction:column;align-items:center;line-height:1.25;
-  font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--cream);opacity:.75;
+  font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--cream);opacity:.85;
+  text-shadow:0 1px 3px rgba(18,11,4,.85), 0 0 8px rgba(18,11,4,.6);
   transition:opacity .25s}
 .bloom-label .rom{font-family:var(--ff-display);letter-spacing:.06em;text-transform:none;
   font-size:1.15em;color:var(--gold)}
@@ -1225,7 +1348,11 @@ main{position:relative}
    from 721px the columns are right-aligned, so it moves to the empty left instead —
    measured, it clears the first column by 185px there and collided by 15px on the right. */
 @media(min-width:721px){
-  .bloom{left:calc(50% - clamp(60px,9vw,112px))}
+  /* 112px put the label straight over the thickest part of the root crown, where
+     small cream type is unreadable. 201px lands it in the sparse ground to the
+     left; the feeder root below is lengthened to match so the shoot still reads
+     as joined to the taproot rather than exiled. */
+  .bloom{left:calc(50% - clamp(96px,14vw,201px))}
 }
 
 /* closed until the ground is in view, then it opens petal by petal */
@@ -1233,7 +1360,9 @@ main{position:relative}
 .js .bl-core,.js .bl-core2{transform-box:fill-box;transform-origin:50% 50%;scale:.2;opacity:0}
 .js .bl-leaf{transform-box:fill-box;transform-origin:0 50%;scale:.1;opacity:0}
 .js .bl-stem{stroke-dasharray:90;stroke-dashoffset:90}
-.js .bl-root{stroke-dasharray:34;stroke-dashoffset:34}
+/* pathLength normalises it: the feeder is 150 units long and the short roots 34,
+   so one dasharray in user units would have left the feeder half drawn */
+.js .bl-root{stroke-dasharray:1;stroke-dashoffset:1}
 .js footer.in-view .bl-root{stroke-dashoffset:0;transition:stroke-dashoffset .8s ease .15s}
 .js .bloom-label{opacity:0;transform:translateY(4px)}
 .js footer.in-view .bl-stem{stroke-dashoffset:0;transition:stroke-dashoffset 1s ease .35s}
@@ -1245,7 +1374,7 @@ main{position:relative}
 .js footer.in-view .bl-leaf{scale:1;opacity:1;
   transition:scale .6s cubic-bezier(.2,1.4,.4,1) calc(.7s + var(--i)*.06s),
              opacity .4s ease calc(.7s + var(--i)*.06s)}
-.js footer.in-view .bloom-label{opacity:.75;transform:none;transition:opacity .6s ease 2.1s, transform .6s ease 2.1s}
+.js footer.in-view .bloom-label{opacity:.85;transform:none;transition:opacity .6s ease 2.1s, transform .6s ease 2.1s}
 /* focus can arrive before the observer has fired; an invisible focused control is
    not acceptable, so focus opens it immediately */
 .js .bloom:focus-visible .petal,.js .bloom:focus-visible .bl-core,
@@ -1335,13 +1464,6 @@ main{position:relative}
   /* the stacked vine needs a taller gap than the desktop lace to read as a spine
      rather than a tick mark — 46px of gutter left it barely legible */
   .how .steps{gap:3.6rem}
-  /* tufts were hidden outright under 600px; bring them back, smaller — and fully
-     on screen. At -1% / -1.5% they hung 8px and 10px past the edges of a 390px
-     viewport, so each was sliced through a leaf and read as debris rather than
-     decoration. They keep their bleed on desktop, where there is margin for it. */
-  .earth-tuft{display:block}
-  .earth-tuft.left{left:1.5%;width:clamp(70px,19vw,96px);opacity:.62}
-  .earth-tuft.right{right:1.5%;width:clamp(50px,14vw,70px);opacity:.45}
   /* a touch more room, so the tapered stem reads as a branch and not a hair */
   .seam{height:clamp(56px,14vw,72px)}
   .seam svg{width:clamp(30px,8.5vw,38px)}
@@ -1350,7 +1472,7 @@ main{position:relative}
 /* ── idle sway for the vines that were drawn once and then stood still ───────
    Animating the `rotate` property, never `transform`. In SVG and CSS alike the
    transform attribute and the transform property are the same slot, so a keyframe
-   setting `transform:rotate()` would wipe .earth-tuft.right's scaleX(-1) mirror and
+   setting `transform:rotate()` would wipe a mirrored element's scaleX(-1) and
    an SVG's own translate/rotate. `rotate` composes on top instead.
    Every one gets its own period so nothing moves in unison. */
 @keyframes swayRooted{0%,100%{rotate:-1.5deg}50%{rotate:1.5deg}}
@@ -1388,6 +1510,28 @@ main{position:relative}
 .js #closedBanner .cb-plank{animation:swayPlank 2.46s ease-in-out infinite}
 .js #closedBanner .cb-cord{animation:swayCord 2.46s ease-in-out infinite}
 .js #closedBanner .cb-branch{animation:swayBranch .82s ease-in-out infinite}
+/* The review board hangs the same way, but it must not swing forever: it carries
+   a button and a form, and a control that never stops moving is a control you
+   have to chase. So it takes one nudge as it arrives and damps out — which is
+   also what a real sign does. Amplitude falls ~30% a swing.
+   Same bifilar rule as the closed notice: the board translates, it does not
+   rotate, and the cord's rotation starts on the same side as the board's
+   travel (+rotate about the top sends the lower end left). */
+@keyframes swaySettle{
+  0%{translate:-4px 0}   18%{translate:3.2px 0} 36%{translate:-2.2px 0}
+  54%{translate:1.5px 0} 72%{translate:-.9px 0} 86%{translate:.5px 0}
+  100%{translate:0 0}
+}
+@keyframes cordSettle{
+  0%{rotate:8deg}    18%{rotate:-6.4deg} 36%{rotate:4.4deg}
+  54%{rotate:-3deg}  72%{rotate:1.8deg}  86%{rotate:-1deg}
+  100%{rotate:0deg}
+}
+.js .rev-hang.in-view .rev-add{animation:swaySettle 7s cubic-bezier(.4,0,.5,1) both}
+.js .rev-hang.in-view .rev-cord{animation:cordSettle 7s cubic-bezier(.4,0,.5,1) both}
+@media (prefers-reduced-motion:reduce){
+  .js .rev-hang.in-view .rev-add,.js .rev-hang.in-view .rev-cord{animation:none}
+}
 .js #closedBanner .cb-sprig{transform-box:fill-box;transform-origin:75% 6%;
   animation:flutterLeaf 3.98s ease-in-out infinite}
 .js #closedBanner .cb-sprig ellipse{
@@ -1405,9 +1549,6 @@ main{position:relative}
 
 
 @keyframes swayLeaf{0%,100%{rotate:-4deg}50%{rotate:5deg}}
-.js .earth-tuft{transform-origin:50% 100%}
-.js .earth-tuft.left{animation:swayRooted 9s ease-in-out infinite}
-.js .earth-tuft.right{animation:swayRooted 11.5s ease-in-out .8s infinite}
 .js .modal-vine{transform-origin:50% 100%;animation:swayRooted 10.5s ease-in-out infinite}
 .js #allergenPanel .panel-tuft{transform-origin:50% 100%;animation:swayRooted 9.6s ease-in-out .3s infinite}
 /* the leaves strung along the how-it-works thread breathe with the cards they hang beside */
@@ -1422,7 +1563,8 @@ main{position:relative}
   .js .rise{opacity:1;transform:none}
   .js .seam svg,.js .foot-roots{clip-path:none}
   footer .cols > div::before{opacity:.62;transform:none}
-  .js .foot-roots .rt-fine{stroke-dashoffset:0}
+  .js .foot-roots .rt-fine,.js .foot-web .wh{stroke-dashoffset:0}
+  .js .foot-web{clip-path:none}
   /* drawn, not drawing — *{animation:none} misses a transition */
   .js .vine-link svg{clip-path:none}
   .seam .foliage,.m-success .sprig .foliage{opacity:1}
@@ -1645,7 +1787,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 
 <div class="seam rise" aria-hidden="true">
   <svg viewBox="0 0 44 88" preserveAspectRatio="xMidYMid meet" focusable="false">
-    <path class="vine-fill" d="M 19.4,-0.9 L 18.7,0.6 L 18.1,2.1 L 17.7,3.8 L 17.6,5.4 L 17.5,7.1 L 17.5,8.7 L 17.6,10.3 L 17.7,11.9 L 17.8,13.5 L 17.9,15.0 L 18.2,16.6 L 18.6,18.1 L 19.0,19.6 L 19.4,21.0 L 19.7,22.5 L 19.9,24.0 L 20.1,25.5 L 20.2,27.0 L 20.3,28.4 L 20.4,29.9 L 20.6,31.3 L 20.8,32.7 L 21.0,34.1 L 21.2,35.5 L 21.2,36.9 L 21.2,38.3 L 21.1,39.7 L 20.9,41.0 L 20.8,42.4 L 20.7,43.7 L 20.4,45.1 L 20.1,46.4 L 19.6,47.7 L 18.9,49.2 L 18.3,50.7 L 17.7,52.3 L 17.3,53.9 L 17.1,55.5 L 17.1,57.2 L 17.2,58.8 L 17.3,60.4 L 17.6,62.0 L 17.8,63.5 L 18.1,65.1 L 18.4,66.5 L 18.8,68.0 L 19.3,69.4 L 19.8,70.8 L 20.4,72.2 L 20.8,73.6 L 21.1,75.0 L 21.3,76.4 L 21.5,77.9 L 21.5,79.3 L 21.5,80.7 L 21.4,82.1 L 21.3,83.4 L 21.1,84.8 L 20.8,86.1 L 20.3,87.4 L 23.7,88.6 L 24.1,87.0 L 24.5,85.5 L 24.8,83.9 L 25.0,82.3 L 25.0,80.7 L 24.9,79.1 L 24.7,77.5 L 24.5,76.0 L 24.2,74.5 L 24.0,72.9 L 23.7,71.4 L 23.5,69.9 L 23.3,68.4 L 23.1,66.9 L 22.8,65.5 L 22.4,64.1 L 22.1,62.7 L 21.8,61.3 L 21.6,59.9 L 21.5,58.5 L 21.5,57.2 L 21.5,55.8 L 21.6,54.5 L 21.7,53.2 L 22.0,51.9 L 22.3,50.6 L 22.9,49.3 L 23.6,47.8 L 24.3,46.4 L 24.9,44.9 L 25.4,43.3 L 25.8,41.7 L 26.1,40.1 L 26.2,38.5 L 26.2,36.9 L 26.2,35.3 L 26.1,33.7 L 26.0,32.2 L 25.9,30.6 L 25.7,29.1 L 25.3,27.6 L 24.9,26.1 L 24.5,24.7 L 24.1,23.2 L 23.8,21.8 L 23.6,20.3 L 23.5,18.8 L 23.4,17.3 L 23.4,15.9 L 23.3,14.5 L 23.2,13.1 L 23.1,11.7 L 23.1,10.3 L 23.2,8.9 L 23.4,7.5 L 23.7,6.2 L 24.0,4.9 L 24.2,3.6 L 24.4,2.3 L 24.6,0.9 Z"/>
+    <path class="vine-fill" d="M 19.4,-0.9 L 18.7,0.6 L 18.1,2.1 L 17.7,3.8 L 17.5,5.4 L 17.4,7.0 L 17.4,8.7 L 17.4,10.3 L 17.4,11.9 L 17.5,13.5 L 17.6,15.1 L 17.8,16.6 L 18.1,18.1 L 18.5,19.6 L 18.9,21.1 L 19.2,22.6 L 19.4,24.1 L 19.5,25.6 L 19.6,27.1 L 19.6,28.5 L 19.7,30.0 L 19.9,31.4 L 20.1,32.8 L 20.3,34.2 L 20.4,35.6 L 20.4,36.9 L 20.3,38.3 L 20.1,39.6 L 20.0,40.9 L 19.8,42.2 L 19.7,43.5 L 19.5,44.8 L 19.2,46.1 L 18.7,47.3 L 17.9,48.8 L 17.2,50.4 L 16.6,52.0 L 16.1,53.7 L 15.8,55.5 L 15.8,57.2 L 15.8,58.9 L 16.0,60.6 L 16.2,62.2 L 16.4,63.8 L 16.6,65.4 L 16.9,66.9 L 17.2,68.4 L 17.7,69.8 L 18.3,71.2 L 18.8,72.6 L 19.3,73.9 L 19.6,75.3 L 19.8,76.7 L 19.8,78.0 L 19.7,79.4 L 19.7,80.7 L 19.6,81.9 L 19.5,83.2 L 19.2,84.4 L 18.9,85.6 L 18.4,86.7 L 25.6,89.3 L 26.0,87.6 L 26.4,85.9 L 26.7,84.1 L 26.8,82.4 L 26.8,80.7 L 26.7,79.0 L 26.4,77.3 L 26.1,75.7 L 25.7,74.2 L 25.5,72.6 L 25.3,71.1 L 25.1,69.5 L 24.9,68.0 L 24.7,66.5 L 24.3,65.1 L 23.9,63.7 L 23.5,62.4 L 23.2,61.1 L 23.0,59.7 L 22.8,58.4 L 22.8,57.2 L 22.8,55.9 L 22.9,54.7 L 22.9,53.4 L 23.0,52.2 L 23.3,51.0 L 23.8,49.7 L 24.5,48.2 L 25.2,46.7 L 25.9,45.1 L 26.4,43.5 L 26.8,41.9 L 27.0,40.2 L 27.0,38.6 L 27.0,36.9 L 26.9,35.3 L 26.9,33.7 L 26.8,32.1 L 26.6,30.5 L 26.3,29.0 L 26.0,27.5 L 25.5,26.0 L 25.1,24.6 L 24.6,23.1 L 24.3,21.7 L 24.1,20.2 L 24.0,18.7 L 23.9,17.3 L 23.8,15.9 L 23.6,14.4 L 23.5,13.0 L 23.4,11.6 L 23.3,10.3 L 23.4,8.9 L 23.5,7.5 L 23.7,6.2 L 24.0,4.9 L 24.2,3.6 L 24.4,2.3 L 24.6,0.9 Z"/>
     <path class="vine-mid" d="M22,0 C16,17 29,33 21,49 C15,62 27,74 22,88"/>
     <g class="foliage" transform="translate(21,22) rotate(-42) scale(.52)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g class="foliage" transform="translate(24,52) rotate(146) scale(.48)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
@@ -1667,8 +1809,19 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     <button type="button" class="rev-arrow next" id="revNext" aria-label="Next review">&#8250;</button>
     <div class="rev-dots" id="revDots" aria-hidden="true"></div>
   </div>
+  <!-- A branch, two cords, a carved board. Same sign as the closed notice up top,
+       so the page has one way of saying something out loud. -->
+  <div class="rev-hang rise">
+    <svg class="rev-bough" viewBox="0 0 1200 24" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <path d="M0,12 C170,6 320,17 500,11 C670,5 810,18 980,11 C1080,6 1150,14 1200,10"
+            stroke="#5b432e" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M0,12 C170,6 320,17 500,11 C670,5 810,18 980,11 C1080,6 1150,14 1200,10"
+            stroke="#7a5a3c" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".55"/>
+    </svg>
+    <span class="rev-cord rev-cord--l" aria-hidden="true"></span>
+    <span class="rev-cord rev-cord--r" aria-hidden="true"></span>
   <div class="rev-add">
-    <p class="rev-add-lead">Namít gid? Hambayi ako.<br>Tell me how it was. I read every one.</p>
+    <p class="rev-add-lead">Namít gid? Hambayi ako.<span class="tr">Tell me how it was. I read every one.</span></p>
     <button type="button" class="rev-add-btn" id="revAddToggle" aria-expanded="false" aria-controls="revForm">＋ Leave a review</button>
     <form class="rev-form" id="revForm" hidden>
       <div class="rev-form-row">
@@ -1684,29 +1837,14 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <p class="rev-form-note" id="revFormNote">I read them before they go up. Salamat gid!</p>
     </form>
   </div>
-  <svg class="earth-tuft left" viewBox="0 0 120 86" aria-hidden="true" focusable="false">
-    <path class="stem" d="M34,86 C30,66 40,50 33,32 C31,24 34,18 38,13"/>
-    <g transform="translate(35,58) rotate(-142) scale(.42)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(33,42) rotate(-38) scale(.46)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(33,28) rotate(-96) scale(.4)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(38,12) scale(.4)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
-  </svg>
-  <svg class="earth-tuft right" viewBox="0 0 120 86" aria-hidden="true" focusable="false">
-    <path class="stem" d="M40,86 C38,70 30,58 34,44 C36,36 33,30 30,25"/>
-    <path class="stem" style="stroke-width:1.7" d="M37,64 C46,58 51,49 50,39"/>
-    <g transform="translate(38,72) rotate(-150) scale(.38)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(50,38) rotate(-52) scale(.40)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(33,46) rotate(-128) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(31,30) rotate(-70) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(30,23) scale(.28)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
-  </svg>
+  </div>
 </section>
 
 
 
-<div class="seam rise" aria-hidden="true">
+<div class="seam trunk rise" aria-hidden="true">
   <svg viewBox="0 0 44 88" preserveAspectRatio="xMidYMid meet" focusable="false">
-    <path class="vine-fill" d="M 19.4,-0.9 L 18.7,0.6 L 18.1,2.1 L 17.7,3.8 L 17.6,5.4 L 17.5,7.1 L 17.5,8.7 L 17.6,10.3 L 17.7,11.9 L 17.8,13.5 L 17.9,15.0 L 18.2,16.6 L 18.6,18.1 L 19.0,19.6 L 19.4,21.0 L 19.7,22.5 L 19.9,24.0 L 20.1,25.5 L 20.2,27.0 L 20.3,28.4 L 20.4,29.9 L 20.6,31.3 L 20.8,32.7 L 21.0,34.1 L 21.2,35.5 L 21.2,36.9 L 21.2,38.3 L 21.1,39.7 L 20.9,41.0 L 20.8,42.4 L 20.7,43.7 L 20.4,45.1 L 20.1,46.4 L 19.6,47.7 L 18.9,49.2 L 18.3,50.7 L 17.7,52.3 L 17.3,53.9 L 17.1,55.5 L 17.1,57.2 L 17.2,58.8 L 17.3,60.4 L 17.6,62.0 L 17.8,63.5 L 18.1,65.1 L 18.4,66.5 L 18.8,68.0 L 19.3,69.4 L 19.8,70.8 L 20.4,72.2 L 20.8,73.6 L 21.1,75.0 L 21.3,76.4 L 21.5,77.9 L 21.5,79.3 L 21.5,80.7 L 21.4,82.1 L 21.3,83.4 L 21.1,84.8 L 20.8,86.1 L 20.3,87.4 L 23.7,88.6 L 24.1,87.0 L 24.5,85.5 L 24.8,83.9 L 25.0,82.3 L 25.0,80.7 L 24.9,79.1 L 24.7,77.5 L 24.5,76.0 L 24.2,74.5 L 24.0,72.9 L 23.7,71.4 L 23.5,69.9 L 23.3,68.4 L 23.1,66.9 L 22.8,65.5 L 22.4,64.1 L 22.1,62.7 L 21.8,61.3 L 21.6,59.9 L 21.5,58.5 L 21.5,57.2 L 21.5,55.8 L 21.6,54.5 L 21.7,53.2 L 22.0,51.9 L 22.3,50.6 L 22.9,49.3 L 23.6,47.8 L 24.3,46.4 L 24.9,44.9 L 25.4,43.3 L 25.8,41.7 L 26.1,40.1 L 26.2,38.5 L 26.2,36.9 L 26.2,35.3 L 26.1,33.7 L 26.0,32.2 L 25.9,30.6 L 25.7,29.1 L 25.3,27.6 L 24.9,26.1 L 24.5,24.7 L 24.1,23.2 L 23.8,21.8 L 23.6,20.3 L 23.5,18.8 L 23.4,17.3 L 23.4,15.9 L 23.3,14.5 L 23.2,13.1 L 23.1,11.7 L 23.1,10.3 L 23.2,8.9 L 23.4,7.5 L 23.7,6.2 L 24.0,4.9 L 24.2,3.6 L 24.4,2.3 L 24.6,0.9 Z"/>
+    <path class="vine-fill" d="M 18.5,-1.2 L 17.8,0.3 L 17.1,1.9 L 16.7,3.6 L 16.5,5.3 L 16.4,7.0 L 16.4,8.6 L 16.5,10.3 L 16.5,11.9 L 16.5,13.6 L 16.7,15.2 L 16.9,16.7 L 17.2,18.3 L 17.6,19.8 L 18.0,21.3 L 18.4,22.7 L 18.6,24.2 L 18.6,25.7 L 18.6,27.2 L 18.6,28.7 L 18.7,30.1 L 18.9,31.5 L 19.1,32.9 L 19.2,34.3 L 19.4,35.6 L 19.3,36.9 L 19.2,38.2 L 19.1,39.5 L 18.9,40.7 L 18.8,42.0 L 18.7,43.2 L 18.6,44.5 L 18.3,45.7 L 17.9,46.9 L 17.1,48.5 L 16.3,50.1 L 15.6,51.8 L 15.1,53.6 L 14.8,55.4 L 14.7,57.2 L 14.8,59.0 L 14.9,60.7 L 15.1,62.4 L 15.3,64.0 L 15.5,65.6 L 15.7,67.2 L 16.1,68.7 L 16.7,70.1 L 17.3,71.5 L 17.9,72.8 L 18.4,74.1 L 18.7,75.5 L 18.8,76.8 L 18.8,78.1 L 18.7,79.4 L 18.6,80.7 L 18.5,81.9 L 18.4,83.0 L 18.2,84.2 L 17.8,85.3 L 17.3,86.4 L 26.7,89.6 L 27.1,87.9 L 27.4,86.1 L 27.7,84.3 L 27.9,82.5 L 27.9,80.7 L 27.7,78.9 L 27.4,77.2 L 27.0,75.6 L 26.6,74.0 L 26.4,72.4 L 26.2,70.8 L 26.1,69.3 L 26.0,67.7 L 25.8,66.2 L 25.5,64.8 L 25.1,63.5 L 24.6,62.2 L 24.3,60.9 L 24.0,59.6 L 23.9,58.4 L 23.9,57.1 L 23.9,56.0 L 23.9,54.8 L 23.9,53.6 L 23.9,52.5 L 24.1,51.3 L 24.6,50.1 L 25.3,48.5 L 26.1,47.0 L 26.8,45.4 L 27.4,43.7 L 27.8,42.0 L 28.0,40.3 L 28.1,38.6 L 28.0,36.9 L 28.0,35.2 L 27.9,33.6 L 27.8,32.0 L 27.6,30.4 L 27.4,28.8 L 27.0,27.3 L 26.5,25.8 L 25.9,24.4 L 25.5,23.0 L 25.1,21.5 L 24.9,20.1 L 24.8,18.6 L 24.8,17.2 L 24.7,15.7 L 24.6,14.3 L 24.4,13.0 L 24.3,11.6 L 24.3,10.3 L 24.3,8.9 L 24.5,7.6 L 24.7,6.3 L 25.0,5.1 L 25.2,3.8 L 25.3,2.5 L 25.5,1.2 Z"/>
     <path class="vine-mid" d="M22,0 C16,17 29,33 21,49 C15,62 27,74 22,88"/>
     <g class="foliage" transform="translate(21,22) rotate(-42) scale(.52)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     <g class="foliage" transform="translate(24,52) rotate(146) scale(.48)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
@@ -1721,10 +1859,15 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
        and one shoot comes back up to flower — the flower holds the story. -->
   <button type="button" class="bloom" id="storyBloom" aria-haspopup="dialog" aria-controls="storyDialog">
     <svg class="bloom-svg" viewBox="0 0 92 158" aria-hidden="true" focusable="false">
-      <path class="bl-root" d="M46,128 C44,136 38,142 31,147"/>
-      <path class="bl-root" d="M46,128 C49,137 56,143 63,146"/>
-      <path class="bl-root" d="M46,128 C46,138 45,146 44,154"/>
-      <path class="bl-stem" d="M46,132 C43,112 49,90 46,64"/>
+      <!-- overflow is visible on this svg, so the feeder runs well past the viewBox
+           and off toward the taproot: the shoot is a second stem off the same root
+           plate, not a flower that happened to land nearby. -->
+      <path pathLength="1" class="bl-root bl-feed bl-feed--r" d="M46,114 C62,122 84,129 112,133 C146,137 176,145 206,159"/>
+      <path pathLength="1" class="bl-root bl-feed bl-feed--l" d="M46,114 C30,122 8,129 -20,133 C-54,137 -84,145 -114,159"/>
+      <path pathLength="1" class="bl-root" d="M46,114 C42,126 34,136 25,144"/>
+      <path pathLength="1" class="bl-root" d="M46,114 C46,128 45,142 43,155"/>
+      <path pathLength="1" class="bl-root" style="stroke-width:1.4;opacity:.6" d="M74,127 C72,139 73,149 77,159"/>
+      <path class="bl-stem" d="M46,116 C43,100 49,86 46,64"/>
       <g class="bl-leaf" style="--i:7" transform="translate(46,86) rotate(-40) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
       <g class="bl-leaf" style="--i:8" transform="translate(46,104) rotate(146) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
       <g class="bl-head" transform="translate(46,46)">
@@ -1741,6 +1884,28 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     </svg>
     <span class="bloom-label"><span class="rom">Ari ang aton istorya</span><em>our story</em></span>
   </button>
+  <!-- The hair roots. Drawn mostly across rather than down, because this layer is
+       stretched to the footer's width (preserveAspectRatio="none") and a horizontal
+       stroke keeps its weight under that stretch while a vertical one loses it.
+       They carry the mass out to the link columns, which the mass itself cannot
+       reach without drawing the taproot three times too thick. -->
+  <svg class="foot-web" viewBox="0 0 1200 190" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+    <!-- Lateral roots as tapered fills, not strokes: a stroke has one width for its
+         whole length, which is what made the first pass read as guy-wires strung
+         across the footer. These thin fast off the crown and trail to a hair.
+         Four of unequal reach — a root plate is never symmetrical. -->
+    <path class="wb" pathLength="1" style="--d:.12s" d="M 599.6,11.4 L 589.5,12.9 L 579.4,14.6 L 569.4,16.4 L 559.3,18.4 L 549.4,20.6 L 539.4,22.8 L 529.5,25.1 L 519.5,27.4 L 509.6,29.7 L 499.7,32.1 L 489.8,34.5 L 479.9,37.1 L 470.0,39.6 L 460.2,42.2 L 450.3,44.8 L 440.4,47.3 L 430.5,49.7 L 420.6,52.0 L 410.7,54.2 L 400.7,56.3 L 390.7,58.3 L 380.8,60.3 L 370.8,62.3 L 360.8,64.2 L 350.8,66.0 L 340.7,67.8 L 330.7,69.6 L 320.7,71.3 L 310.6,73.0 L 300.6,74.6 L 290.5,76.3 L 280.5,77.9 L 270.4,79.6 L 260.4,81.3 L 250.3,82.9 L 240.2,84.5 L 230.2,86.1 L 220.1,87.7 L 210.0,89.2 L 200.0,90.8 L 189.9,92.4 L 179.9,94.1 L 169.8,95.8 L 159.8,97.7 L 149.8,99.7 L 139.8,101.9 L 129.9,104.2 L 120.0,106.7 L 110.2,109.4 L 100.4,112.2 L 90.7,115.3 L 81.0,118.6 L 71.4,122.1 L 61.9,125.7 L 62.1,126.3 L 71.6,122.7 L 81.3,119.3 L 90.9,116.1 L 100.6,113.1 L 110.4,110.3 L 120.2,107.6 L 130.1,105.1 L 140.0,102.8 L 150.0,100.7 L 160.0,98.7 L 170.0,96.9 L 180.0,95.3 L 190.1,93.6 L 200.2,92.0 L 210.2,90.4 L 220.3,88.8 L 230.4,87.3 L 240.4,85.7 L 250.5,84.2 L 260.6,82.7 L 270.7,81.3 L 280.8,79.8 L 290.8,78.3 L 300.9,76.8 L 311.0,75.2 L 321.0,73.6 L 331.1,72.0 L 341.2,70.3 L 351.2,68.6 L 361.3,66.9 L 371.3,65.1 L 381.3,63.3 L 391.3,61.2 L 401.3,59.1 L 411.3,56.8 L 421.2,54.5 L 431.1,52.2 L 441.0,49.8 L 451.0,47.5 L 460.9,45.3 L 470.8,43.0 L 480.8,40.7 L 490.7,38.4 L 500.6,36.1 L 510.5,33.9 L 520.5,31.7 L 530.4,29.5 L 540.4,27.5 L 550.4,25.6 L 560.4,23.8 L 570.4,22.0 L 580.4,20.2 L 590.4,18.4 L 600.4,16.6 Z"/>
+    <path class="wb" pathLength="1" style="--d:.30s" d="M 599.3,18.3 L 593.9,20.5 L 588.6,22.8 L 583.2,25.2 L 578.0,27.6 L 572.7,30.2 L 567.5,32.7 L 562.3,35.3 L 557.1,37.9 L 551.9,40.5 L 546.7,43.1 L 541.5,45.7 L 536.4,48.3 L 531.2,51.0 L 526.1,53.7 L 520.9,56.4 L 515.8,59.1 L 510.6,61.7 L 505.4,64.2 L 500.2,66.7 L 494.9,69.2 L 489.7,71.7 L 484.5,74.2 L 479.2,76.7 L 474.0,79.1 L 468.7,81.6 L 463.5,84.0 L 458.2,86.4 L 452.9,88.7 L 447.5,91.0 L 442.2,93.2 L 436.9,95.5 L 431.5,97.8 L 426.2,100.1 L 420.9,102.5 L 415.6,104.8 L 410.3,107.1 L 405.0,109.4 L 399.6,111.7 L 394.3,114.1 L 389.0,116.4 L 383.7,118.8 L 378.4,121.2 L 373.2,123.6 L 367.9,126.0 L 362.6,128.5 L 357.4,131.0 L 352.1,133.5 L 346.9,136.0 L 341.7,138.5 L 336.5,141.1 L 331.3,143.7 L 326.2,146.4 L 321.0,149.1 L 315.9,151.8 L 316.1,152.2 L 321.3,149.6 L 326.5,147.0 L 331.7,144.4 L 336.8,141.8 L 342.1,139.3 L 347.3,136.7 L 352.5,134.2 L 357.7,131.7 L 363.0,129.2 L 368.2,126.8 L 373.5,124.4 L 378.8,122.0 L 384.1,119.6 L 389.4,117.3 L 394.7,114.9 L 400.0,112.6 L 405.3,110.3 L 410.6,108.0 L 416.0,105.7 L 421.3,103.5 L 426.7,101.3 L 432.1,99.1 L 437.5,96.9 L 442.8,94.7 L 448.2,92.5 L 453.5,90.3 L 458.9,88.0 L 464.2,85.6 L 469.5,83.3 L 474.8,80.9 L 480.1,78.5 L 485.4,76.1 L 490.6,73.6 L 495.8,71.0 L 501.0,68.5 L 506.2,65.9 L 511.4,63.3 L 516.6,60.7 L 521.8,58.2 L 527.1,55.7 L 532.3,53.2 L 537.6,50.7 L 542.8,48.2 L 548.0,45.7 L 553.2,43.1 L 558.4,40.6 L 563.7,38.2 L 569.0,35.8 L 574.3,33.4 L 579.6,31.1 L 584.9,28.8 L 590.1,26.4 L 595.4,24.0 L 600.7,21.7 Z"/>
+    <path class="wb" pathLength="1" style="--d:.22s" d="M 599.4,23.6 L 604.7,25.9 L 610.1,28.3 L 615.5,30.6 L 620.9,33.0 L 626.2,35.3 L 631.6,37.7 L 636.9,40.2 L 642.2,42.7 L 647.5,45.3 L 652.7,47.9 L 658.0,50.6 L 663.2,53.2 L 668.5,55.9 L 673.7,58.5 L 679.0,61.2 L 684.2,63.9 L 689.4,66.7 L 694.5,69.5 L 699.7,72.3 L 704.9,75.1 L 710.1,77.9 L 715.3,80.6 L 720.5,83.3 L 725.8,86.0 L 731.0,88.6 L 736.3,91.2 L 741.6,93.8 L 746.9,96.4 L 752.2,98.9 L 757.5,101.4 L 762.9,103.9 L 768.2,106.4 L 773.6,108.8 L 778.9,111.3 L 784.3,113.7 L 789.6,116.2 L 794.9,118.6 L 800.3,121.1 L 805.6,123.6 L 810.9,126.1 L 816.3,128.6 L 821.6,131.0 L 827.0,133.4 L 832.3,135.9 L 837.7,138.3 L 843.0,140.8 L 848.4,143.2 L 853.7,145.7 L 859.1,148.1 L 864.4,150.6 L 869.8,153.0 L 875.2,155.4 L 880.5,157.8 L 885.9,160.2 L 886.1,159.8 L 880.8,157.3 L 875.4,154.8 L 870.1,152.3 L 864.8,149.9 L 859.4,147.4 L 854.1,144.9 L 848.7,142.5 L 843.4,140.1 L 838.0,137.6 L 832.7,135.1 L 827.3,132.7 L 822.0,130.2 L 816.7,127.7 L 811.3,125.3 L 806.0,122.8 L 800.6,120.3 L 795.3,117.9 L 790.0,115.4 L 784.7,112.8 L 779.4,110.3 L 774.1,107.7 L 768.8,105.1 L 763.5,102.6 L 758.2,100.0 L 752.9,97.4 L 747.6,94.9 L 742.3,92.3 L 737.1,89.7 L 731.8,87.0 L 726.6,84.3 L 721.4,81.6 L 716.2,78.8 L 711.0,76.1 L 705.8,73.4 L 700.6,70.7 L 695.4,67.9 L 690.2,65.2 L 685.0,62.4 L 679.9,59.5 L 674.7,56.7 L 669.6,53.8 L 664.4,51.0 L 659.2,48.2 L 654.0,45.5 L 648.8,42.8 L 643.5,40.1 L 638.2,37.5 L 633.0,34.8 L 627.7,32.2 L 622.3,29.7 L 617.0,27.2 L 611.6,24.8 L 606.1,22.6 L 600.6,20.4 Z"/>
+    <path class="wb" pathLength="1" style="--d:.10s" d="M 599.6,18.5 L 609.8,20.5 L 620.0,22.5 L 630.2,24.5 L 640.3,26.6 L 650.5,28.7 L 660.7,30.8 L 670.9,33.1 L 681.0,35.4 L 691.1,37.9 L 701.2,40.4 L 711.3,43.0 L 721.4,45.5 L 731.5,48.1 L 741.6,50.6 L 751.7,53.1 L 761.8,55.7 L 771.9,58.3 L 782.0,60.9 L 792.1,63.5 L 802.3,66.0 L 812.4,68.4 L 822.6,70.7 L 832.8,72.9 L 843.0,75.1 L 853.2,77.2 L 863.4,79.2 L 873.6,81.3 L 883.9,83.3 L 894.1,85.4 L 904.3,87.3 L 914.6,89.3 L 924.8,91.2 L 935.1,93.1 L 945.3,94.9 L 955.6,96.8 L 965.8,98.7 L 976.0,100.6 L 986.3,102.6 L 996.5,104.5 L 1006.7,106.5 L 1017.0,108.5 L 1027.2,110.4 L 1037.4,112.4 L 1047.7,114.5 L 1057.8,116.6 L 1068.0,118.9 L 1078.2,121.2 L 1088.3,123.7 L 1098.3,126.4 L 1108.4,129.2 L 1118.4,132.1 L 1128.3,135.3 L 1138.1,138.7 L 1147.9,142.3 L 1148.1,141.7 L 1138.4,138.0 L 1128.5,134.6 L 1118.6,131.3 L 1108.6,128.3 L 1098.6,125.4 L 1088.5,122.8 L 1078.4,120.3 L 1068.2,117.9 L 1058.1,115.7 L 1047.9,113.5 L 1037.7,111.4 L 1027.4,109.3 L 1017.2,107.3 L 1007.0,105.3 L 996.7,103.4 L 986.5,101.4 L 976.3,99.5 L 966.0,97.5 L 955.8,95.5 L 945.6,93.5 L 935.4,91.4 L 925.2,89.4 L 914.9,87.3 L 904.7,85.2 L 894.5,83.2 L 884.3,81.1 L 874.1,79.0 L 863.9,76.9 L 853.7,74.7 L 843.5,72.4 L 833.4,70.2 L 823.2,67.9 L 813.1,65.6 L 802.9,63.3 L 792.8,60.9 L 782.7,58.5 L 772.6,55.9 L 762.5,53.2 L 752.5,50.5 L 742.4,47.6 L 732.4,44.8 L 722.4,42.0 L 712.3,39.2 L 702.2,36.6 L 692.1,33.9 L 682.0,31.4 L 671.9,28.8 L 661.8,26.3 L 651.6,23.8 L 641.5,21.5 L 631.2,19.2 L 621.0,17.2 L 610.7,15.3 L 600.4,13.5 Z"/>
+    <!-- hairs dropping off the laterals, into and past the copy -->
+    <path class="wh" pathLength="1" style="--d:.62s" stroke-width="1"  opacity=".75" d="M380,62 C356,86 348,110 356,136"/>
+    <path class="wh" pathLength="1" style="--d:.72s" stroke-width=".9" opacity=".65" d="M172,96 C154,118 150,140 158,164"/>
+    <path class="wh" pathLength="1" style="--d:.66s" stroke-width="1"  opacity=".75" d="M826,70 C848,94 856,118 848,144"/>
+    <path class="wh" pathLength="1" style="--d:.78s" stroke-width=".9" opacity=".65" d="M1028,110 C1046,132 1050,152 1042,174"/>
+    <path class="wh" pathLength="1" style="--d:.86s" stroke-width=".8" opacity=".55" d="M452,90 C434,112 430,132 438,154"/>
+    <path class="wh" pathLength="1" style="--d:.92s" stroke-width=".8" opacity=".55" d="M748,96 C766,118 770,138 762,160"/>
+  </svg>
   <!-- Where the last vine meets the ground. The stem above ends on the footer's top
        edge and the roots take over below it: same plant, same tapered drawing, in the
        light-on-dark tone the soil needs. -->
