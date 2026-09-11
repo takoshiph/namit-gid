@@ -4,14 +4,8 @@
 //  both brands. Place at the root of the Cloudflare Pages project (namit-gid-site).
 //
 //  Cloudflare Pages → Settings → Environment variables (Encrypt the secrets):
-//    SUPABASE_URL               https://onsqgimrczxenmxbabgy.supabase.co
-//    SUPABASE_KEY               Supabase anon key (TakoshiCA project) — used as the
-//                               bearer when calling the namit-submit-order function
-//
-//  Namit Gid shares the Takoshi project but not its tables: everything here reads
-//  and writes namit_* (namit_orders, namit_reviews, namit_store_schedule,
-//  namit_closures, namit_referrals) and the namit-deposits / namit-reviews buckets,
-//  so neither brand can see the other's orders, reviews or opening hours.
+//    SUPABASE_URL               https://ktgclbvdkhvfvebajtao.supabase.co
+//    SUPABASE_KEY               Supabase anon key (namit-gid-by-leni)
 //    SUPABASE_SERVICE_ROLE_KEY  Supabase service-role key — REQUIRED. Every table
 //                               in this project has RLS on with no policies, so
 //                               anything but the service role reads back empty and
@@ -300,7 +294,7 @@ export default {
     // ── GET /api/orders (admin) ───────────────────────────────────────────────
     if (url.pathname === '/api/orders' && request.method === 'GET') {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
-      const res = await fetch(`${SB}/rest/v1/namit_orders?select=*&order=created_at.desc`, { headers: sbHeaders });
+      const res = await fetch(`${SB}/rest/v1/orders?select=*&order=created_at.desc`, { headers: sbHeaders });
       if (!res.ok) return jsonResponse({ error: 'Failed to load' }, res.status, request);
       const rows = await res.json().catch(() => []);
       return jsonResponse(Array.isArray(rows) ? rows.map(toAdminOrder) : rows, 200, request);
@@ -317,7 +311,7 @@ export default {
       const status = STATUS_IN[body.status] || body.status;
       const allowed = ['pending', 'confirmed', 'ready', 'picked_up', 'cancelled'];
       if (!allowed.includes(status)) return jsonResponse({ error: 'Invalid status' }, 400, request);
-      const res = await fetch(`${SB}/rest/v1/namit_orders?id=eq.${encodeURIComponent(id)}`, {
+      const res = await fetch(`${SB}/rest/v1/orders?id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
         body: JSON.stringify({ status }),
@@ -333,7 +327,7 @@ export default {
 
     // ── GET /api/availability (public) ────────────────────────────────────────
     if (url.pathname === '/api/availability' && request.method === 'GET') {
-      const res = await fetch(`${SB}/rest/v1/namit_store_schedule?id=eq.1&select=*`, { headers: sbHeaders });
+      const res = await fetch(`${SB}/rest/v1/store_schedule?id=eq.1&select=*`, { headers: sbHeaders });
       const rows = await res.json();
       const s = rows[0];
       if (!s) return jsonResponse({ available: true, windows: [] }, 200, request);
@@ -348,7 +342,7 @@ export default {
       }
       try {
         const cRes = await fetch(
-          `${SB}/rest/v1/namit_closures?or=(unavailable_until.is.null,unavailable_until.gt.${encodeURIComponent(nowTs.toISOString())})&select=unavailable_from,unavailable_until&order=unavailable_from.asc`,
+          `${SB}/rest/v1/closures?or=(unavailable_until.is.null,unavailable_until.gt.${encodeURIComponent(nowTs.toISOString())})&select=unavailable_from,unavailable_until&order=unavailable_from.asc`,
           { headers: sbHeaders });
         if (cRes.ok) {
           const stamp = v => (v ? new Date(v).getTime() : null);
@@ -382,7 +376,7 @@ export default {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
       let body;
       try { body = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
-      const res = await fetch(`${SB}/rest/v1/namit_store_schedule?id=eq.1`, {
+      const res = await fetch(`${SB}/rest/v1/store_schedule?id=eq.1`, {
         method: 'PATCH',
         headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
         body: JSON.stringify({
@@ -397,7 +391,7 @@ export default {
       const saved = await res.json().catch(() => []);
       if (!Array.isArray(saved) || !saved.length) {
         // No row id=1 yet — create it rather than reporting a phantom success.
-        const ins = await fetch(`${SB}/rest/v1/namit_store_schedule`, {
+        const ins = await fetch(`${SB}/rest/v1/store_schedule`, {
           method: 'POST', headers: sbWrite,
           body: JSON.stringify({
             id: 1,
@@ -411,7 +405,7 @@ export default {
         if (!ins.ok) return jsonResponse({ error: 'Failed to save' }, 500, request);
       }
       try {
-        const chUrl = `${SB}/rest/v1/namit_closures`;
+        const chUrl = `${SB}/rest/v1/closures`;
         const nowISO = new Date().toISOString();
         const cFrom = body.unavailable_from || null;
         const cUntil = body.unavailable_until || null;
@@ -452,7 +446,7 @@ export default {
     // ── GET /api/closures (admin) ─────────────────────────────────────────────
     if (url.pathname === '/api/closures' && request.method === 'GET') {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
-      const res = await fetch(`${SB}/rest/v1/namit_closures?select=unavailable_from,unavailable_until,message&order=unavailable_from.desc`, { headers: sbHeaders });
+      const res = await fetch(`${SB}/rest/v1/closures?select=unavailable_from,unavailable_until,message&order=unavailable_from.desc`, { headers: sbHeaders });
       if (!res.ok) return jsonResponse({ error: 'Failed to load' }, 500, request);
       return jsonResponse(await res.json(), 200, request);
     }
@@ -462,13 +456,13 @@ export default {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
       const from = url.searchParams.get('from') || '';
       if (!from) return jsonResponse({ error: 'Missing from' }, 400, request);
-      const res = await fetch(`${SB}/rest/v1/namit_closures?unavailable_from=eq.${encodeURIComponent(from)}`, { method: 'DELETE', headers: sbWrite });
+      const res = await fetch(`${SB}/rest/v1/closures?unavailable_from=eq.${encodeURIComponent(from)}`, { method: 'DELETE', headers: sbWrite });
       if (!res.ok) return jsonResponse({ error: 'Failed to delete' }, 500, request);
       try {
-        const sRes = await fetch(`${SB}/rest/v1/namit_store_schedule?id=eq.1&select=unavailable_from`, { headers: sbHeaders });
+        const sRes = await fetch(`${SB}/rest/v1/store_schedule?id=eq.1&select=unavailable_from`, { headers: sbHeaders });
         const sRow = (await sRes.json())[0];
         if (sRow && sRow.unavailable_from && new Date(sRow.unavailable_from).getTime() === new Date(from).getTime()) {
-          await fetch(`${SB}/rest/v1/namit_store_schedule?id=eq.1`, { method: 'PATCH', headers: sbWrite,
+          await fetch(`${SB}/rest/v1/store_schedule?id=eq.1`, { method: 'PATCH', headers: sbWrite,
             body: JSON.stringify({ is_available: true, unavailable_from: null, unavailable_until: null, updated_at: new Date().toISOString() }) });
         }
       } catch (e) { /* non-fatal */ }
@@ -504,13 +498,13 @@ export default {
       if (arrayBuffer.byteLength > MAX_BYTES) {
         return jsonResponse({ error: 'That image is too large. Please send one under 8 MB.' }, 413, request);
       }
-      const uploadRes = await fetch(`${SB}/storage/v1/object/namit-deposits/${filename}`, {
+      const uploadRes = await fetch(`${SB}/storage/v1/object/deposits/${filename}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': TYPES[ext], 'x-upsert': 'false' },
         body: arrayBuffer,
       });
       if (!uploadRes.ok) return jsonResponse({ error: 'Upload failed' }, 500, request);
-      return jsonResponse({ url: `${SB}/storage/v1/object/public/namit-deposits/${filename}` }, 200, request);
+      return jsonResponse({ url: `${SB}/storage/v1/object/public/deposits/${filename}` }, 200, request);
     }
 
     // ── POST /api/upload-review-photo (admin) ─────────────────────────────────
@@ -524,13 +518,13 @@ export default {
       if (!['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext)) return jsonResponse({ error: 'Invalid file type' }, 400, request);
       const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const arrayBuffer = await file.arrayBuffer();
-      const uploadRes = await fetch(`${SB}/storage/v1/object/namit-reviews/${filename}`, {
+      const uploadRes = await fetch(`${SB}/storage/v1/object/reviews/${filename}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': file.type || 'image/jpeg', 'x-upsert': 'false' },
         body: arrayBuffer,
       });
       if (!uploadRes.ok) return jsonResponse({ error: 'Upload failed' }, 500, request);
-      return jsonResponse({ url: `${SB}/storage/v1/object/public/namit-reviews/${filename}` }, 200, request);
+      return jsonResponse({ url: `${SB}/storage/v1/object/public/reviews/${filename}` }, 200, request);
     }
 
     // ── POST /api/submit-order (public) — proxy to the Supabase edge function ──
@@ -548,7 +542,7 @@ export default {
       // Refuse orders while the store is closed. The storefront also gates this,
       // but a stale tab or a direct POST must not slip through.
       try {
-        const availRes = await fetch(`${SB}/rest/v1/namit_store_schedule?id=eq.1&select=*`, { headers: sbHeaders });
+        const availRes = await fetch(`${SB}/rest/v1/store_schedule?id=eq.1&select=*`, { headers: sbHeaders });
         const s = (await availRes.json().catch(() => []))[0];
         if (s) {
           const now = new Date();
@@ -564,7 +558,7 @@ export default {
         }
       } catch (e) { /* never block a real order on a schedule lookup failure */ }
 
-      const res = await fetch(`${SB}/functions/v1/namit-submit-order`, {
+      const res = await fetch(`${SB}/functions/v1/submit-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.SUPABASE_KEY}`, 'apikey': env.SUPABASE_KEY },
         body: JSON.stringify(body),
@@ -616,7 +610,7 @@ export default {
 
     // ── GET /api/reviews (public) ─────────────────────────────────────────────
     if (url.pathname === '/api/reviews' && request.method === 'GET') {
-      const res = await fetch(`${SB}/rest/v1/namit_reviews?visible=eq.true&order=display_order.asc`, { headers: sbHeaders });
+      const res = await fetch(`${SB}/rest/v1/reviews?visible=eq.true&order=display_order.asc`, { headers: sbHeaders });
       const data = await res.json().catch(() => []);
       return jsonResponse(data, res.ok ? 200 : 500, request);
     }
@@ -626,7 +620,7 @@ export default {
       let body;
       try { body = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
       if (!body.name || !body.text) return jsonResponse({ error: 'name and text required' }, 400, request);
-      const res = await fetch(`${SB}/rest/v1/namit_reviews`, {
+      const res = await fetch(`${SB}/rest/v1/reviews`, {
         method: 'POST', headers: sbWrite,
         body: JSON.stringify({
           name: String(body.name).slice(0, 60),
@@ -642,7 +636,7 @@ export default {
     // ── GET /api/reviews/all (admin) ──────────────────────────────────────────
     if (url.pathname === '/api/reviews/all' && request.method === 'GET') {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
-      const res = await fetch(`${SB}/rest/v1/namit_reviews?order=display_order.asc`, { headers: sbHeaders });
+      const res = await fetch(`${SB}/rest/v1/reviews?order=display_order.asc`, { headers: sbHeaders });
       return jsonResponse(await res.json().catch(() => []), res.ok ? 200 : 500, request);
     }
 
@@ -651,7 +645,7 @@ export default {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
       let body;
       try { body = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
-      const res = await fetch(`${SB}/rest/v1/namit_reviews`, {
+      const res = await fetch(`${SB}/rest/v1/reviews`, {
         method: 'POST', headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
         body: JSON.stringify(body),
       });
@@ -665,7 +659,7 @@ export default {
       if (!/^\d+$/.test(id)) return jsonResponse({ error: 'Bad id' }, 400, request);
       let body;
       try { body = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
-      const res = await fetch(`${SB}/rest/v1/namit_reviews?id=eq.${id}`, {
+      const res = await fetch(`${SB}/rest/v1/reviews?id=eq.${id}`, {
         method: 'PATCH', headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
         body: JSON.stringify(body),
       });
@@ -677,7 +671,7 @@ export default {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
       const id = url.pathname.split('/api/reviews/')[1];
       if (!/^\d+$/.test(id)) return jsonResponse({ error: 'Bad id' }, 400, request);
-      const res = await fetch(`${SB}/rest/v1/namit_reviews?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders });
+      const res = await fetch(`${SB}/rest/v1/reviews?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders });
       return jsonResponse({ ok: res.ok }, res.ok ? 200 : 500, request);
     }
 
@@ -686,7 +680,7 @@ export default {
     // than leaving the shared admin's referral page spinning.
     if (url.pathname === '/api/referral-stats' && request.method === 'GET') {
       if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
-      const res = await fetch(`${SB}/rest/v1/namit_referrals?select=referrer_phone,reward_status,created_at`, { headers: sbHeaders });
+      const res = await fetch(`${SB}/rest/v1/referrals?select=referrer_phone,reward_status,created_at`, { headers: sbHeaders });
       if (!res.ok) return jsonResponse({ total: 0, pending: 0, redeemed: 0, top: [], monthly: [] }, 200, request);
       const rows = await res.json().catch(() => []);
       let pending = 0, redeemed = 0; const counts = {}, monthCounts = {};
@@ -712,7 +706,7 @@ export default {
       const date = url.searchParams.get('date') || '';
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return jsonResponse({ load: {} }, 200, request);
       const res = await fetch(
-        `${SB}/rest/v1/namit_orders?pickup_date=eq.${date}&select=pickup_time,status`,
+        `${SB}/rest/v1/orders?pickup_date=eq.${date}&select=pickup_time,status`,
         { headers: sbHeaders });
       if (!res.ok) return jsonResponse({ load: {} }, 200, request);
       const rows = await res.json().catch(() => []);
