@@ -322,6 +322,10 @@ footer{position:relative;z-index:1}
 }
 .menu-item .dish-stage{width:min(64vw,360px);justify-self:center}
 .menu-item .info{display:flex;flex-direction:column;gap:.9rem;max-width:40ch}
+/* .sub groups tag+desc so the phone grid can treat them as one row. Transparent
+   here: same direction, same gap, and align-items:inherit so the right-aligned
+   even rows keep working. */
+.menu-item .info .sub{display:flex;flex-direction:column;gap:.9rem;align-items:inherit}
 .menu-item .info .num{font-size:.72rem;letter-spacing:.35em;color:var(--sage-dark);text-transform:uppercase}
 .menu-item h3{font-family:var(--ff-display);font-size:clamp(1.7rem,4vw,2.4rem);font-weight:400}
 .menu-item .tag{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--terracotta)}
@@ -377,39 +381,52 @@ footer{position:relative;z-index:1}
   .menu-item{
     display:grid;
     grid-template-columns:auto minmax(0,1fr);
+    /* The photo spans only two rows. It used to span num/tag/desc separately, and
+       since a grid whose height is auto gives `fr` tracks nothing to absorb, the
+       photo's spare height landed on those three rows and pushed the copy ~46px
+       apart. Now it spans at most one row that holds copy — .sub, which is a flex
+       column, so a taller row leaves space under it instead of stretching its
+       gaps. The eyebrow sits in a row of its own that the photo does not touch. */
     grid-template-areas:
       "photo num"
-      "photo tag"
-      "photo desc"
+      "photo sub"
+      "photo ."
       "name  name"
       "price price";
     align-items:start;
-    column-gap:clamp(10px,3vw,16px);
+    /* row-gap too: the desktop rule sets `gap` as a shorthand, so overriding only
+       column-gap left a 24px row gap in force between every row of this grid. */
+    column-gap:clamp(10px,3vw,16px);row-gap:0;
     text-align:center;
-    padding:3rem .9rem;max-width:100%;   /* side padding comes out of the copy column */
-    --bleed:clamp(96px,38vw,168px);      /* how far the photo hangs off-screen */
+    padding:3.6rem .9rem;max-width:100%; /* side padding comes out of the copy column;
+       the vertical half is the gap the vine crosses — keep it ahead of the vine's
+       own height so it has room to wander rather than just bridging the join */
+    /* a third off the edge, so about two thirds of the dish is on screen. Half was
+       too much — the cutouts carry ~1% transparent margin, so every pixel of bleed
+       eats food, and square ones like the sushi tray lost their whole left side. */
+    --stage:min(64vw,252px);
+    --bleed:calc(var(--stage) * .33 + .9rem);   /* + the page gutter, which is on-screen */
   }
   .menu-item .dish-stage{
     grid-area:photo;align-self:center;
-    width:min(74vw,300px);
+    width:var(--stage);aspect-ratio:var(--ar,1);
     margin:.2rem 0 0 calc(-1 * var(--bleed));
   }
   /* no box, so the children become the grid items — lets the name sit below the
      description visually while staying above it in the markup */
   .menu-item .info{display:contents}
   .menu-item .info .num{grid-area:num}
-  .menu-item .tag{grid-area:tag;margin-top:.3rem}
-  .menu-item .desc{grid-area:desc;margin-top:.5rem}
+  .menu-item .info .sub{grid-area:sub;gap:.55rem;margin-top:.55rem}
   .menu-item h3{grid-area:name;text-align:center;margin-top:1.5rem}
   .menu-item .row{grid-area:price;justify-content:center;margin-top:.9rem}
-  /* flush edge faces the photo, as on desktop */
-  .menu-item .info .num,.menu-item .tag,.menu-item .desc{text-align:left}
+  /* flush edge is the screen margin, ragged edge faces the photo */
+  .menu-item .info .num,.menu-item .tag,.menu-item .desc{text-align:right}
   .menu-item:nth-child(even){
     grid-template-columns:minmax(0,1fr) auto;
     grid-template-areas:
       "num  photo"
-      "tag  photo"
-      "desc photo"
+      "sub  photo"
+      ".    photo"
       "name name"
       "price price";
   }
@@ -418,7 +435,7 @@ footer{position:relative;z-index:1}
   }
   .menu-item:nth-child(even) .info .num,
   .menu-item:nth-child(even) .tag,
-  .menu-item:nth-child(even) .desc{text-align:right}
+  .menu-item:nth-child(even) .desc{text-align:left}
   .menu-item:nth-child(even) .price-btn{flex-direction:row}
   .menu-item:nth-child(even) .price-btn:hover .arr{transform:translateX(3px)}
   /* display:contents leaves no box to transform, so the entrance moves to the
@@ -1027,6 +1044,9 @@ html.ng-hold,body.ng-hold{overflow:hidden !important;overscroll-behavior:none}
   .menu-item h3{font-size:1.62rem}
   .menu-item .desc{font-size:.95rem;line-height:1.62}
   .menu-item .info .num{font-size:.66rem;letter-spacing:.3em}
+  /* .28em tracking wrapped "THE CROWD FAVOURITE" onto two lines here, which is
+     what a tracked all-caps label must never do */
+  .menu-item .tag{letter-spacing:.16em}
   .menu-item:not(:last-child){border-bottom:1px solid rgba(53,40,31,.12)}
   .dish-btn.natural img{filter:drop-shadow(0 12px 16px rgba(38,52,47,.26))}
   /* bob and shadow-breathe were switched off for scroll perf back when seven
@@ -1161,7 +1181,7 @@ main{position:relative}
      rule draws it without measuring; .in-view comes from the shared observer. */
   .menu-item:not(:last-child){border-bottom:none}
   .menu-item:not(:last-child) .vine-link{
-    display:block;position:absolute;left:50%;bottom:-48px;width:34px;height:96px;
+    display:block;position:absolute;left:50%;bottom:-58px;width:38px;height:116px;
     transform:translateX(-50%);pointer-events:none;opacity:.8;z-index:0;
   }
   .menu-item:nth-child(even):not(:last-child) .vine-link{transform:translateX(-50%) scaleX(-1)}
@@ -1761,6 +1781,11 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
    cost scroll responsiveness on every touch. */
 
 /* ---------------- data ---------------- */
+/* Intrinsic w/h of each cutout. The stage was a hard square, so `contain`
+   letterboxed the wide ones — banana is 620x423, which left a third of the box
+   empty and floated .dish-shadow well below the loaf. */
+const AR = {palabok:0.868, sushi:1.015, shawarma:1.021, lumpia:0.979,
+            tiramisu:1.412, cheesecake:1.097, banana:1.466};
 const IMGS = {
   palabok:'images/palabok.webp',
   sushi:'images/sushi.webp',
@@ -1810,7 +1835,7 @@ DISHES.forEach((d,i)=>{
   const fromL = i % 2 === 0;
   const pl = dishPriceLabel(d);
   sec.innerHTML = `
-    <div class="dish-stage ${fromL?'reveal-l':'reveal-r'}">
+    <div class="dish-stage ${fromL?'reveal-l':'reveal-r'}" style="--ar:${AR[d.img]||1}">
       <span class="back-type ${d.name.split(' ').length>2?'two':''}" aria-hidden="true" data-parallax>${d.name}</span>
       <button class="dish-btn ${d.shape==='natural'?'natural':''}" data-idx="${i}" data-img="${d.img||''}" aria-label="Order ${d.name}">
         <img src="${IMGS[d.img]}" alt="${d.name}" loading="lazy" width="640" height="640">
@@ -1820,18 +1845,21 @@ DISHES.forEach((d,i)=>{
     <div class="info ${fromL?'reveal-r':'reveal-l'}">
       <span class="num">${d.cat==='dessert'?'Dessert':'Main dish'}</span>
       <h3>${d.name}</h3>
-      <span class="tag">${d.tag}</span>
-      <p class="desc">${d.desc}</p>
+      <div class="sub">
+        <span class="tag">${d.tag}</span>
+        <p class="desc">${d.desc}</p>
+      </div>
       <div class="row">
         <button class="price-btn" data-idx="${i}" data-img="${d.img||''}" aria-label="Order ${d.name}, ${pl}">${pl}<span class="arr" aria-hidden="true">&#8594;</span></button>
       </div>
     </div>
-    <span class="vine-link" aria-hidden="true"><svg viewBox="0 0 34 96" preserveAspectRatio="xMidYMid meet">
-      <path class="stem" pathLength="1" d="M17,0 C11,20 24,34 17,52 C11,66 21,80 17,96"/>
+    <span class="vine-link" aria-hidden="true"><svg viewBox="0 0 38 116" preserveAspectRatio="xMidYMid meet">
+      <path class="stem" pathLength="1" d="M19,0 C12,18 28,32 20,50 C12,68 27,80 19,98 C15,106 20,110 19,116"/>
       <g class="foliage">
-        <g transform="translate(17,22) rotate(-42) scale(.52)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
-        <g transform="translate(19,48) rotate(18) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
-        <g transform="translate(17,72) rotate(150) scale(.46)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
+        <g transform="translate(19,20) rotate(-44) scale(.54)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
+        <g transform="translate(23,44) rotate(14) scale(.36)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
+        <g transform="translate(18,66) rotate(152) scale(.48)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
+        <g transform="translate(22,92) rotate(26) scale(.32)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
       </g>
     </svg></span>`;
   list.appendChild(sec);
