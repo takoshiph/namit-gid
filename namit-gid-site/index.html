@@ -356,10 +356,7 @@ footer{position:relative;z-index:1}
 }
 .menu-tabs button.active{background:var(--cream);opacity:1;color:var(--terracotta);font-weight:700;box-shadow:0 3px 10px -4px var(--shadow)}
 .menu-item.hidden{display:none}
-/* The vine segment between stacked rows is a phone-only element, but it is in the
-   markup at every width — and .menu-item is a two-column grid up here, so left
-   visible it would become a third grid item and break every row. Off by default;
-   the 760px block turns it on. */
+/* phone-only; visible here it would be a third item in the 2-col grid */
 .vine-link{display:none}
 .order-btn{
   background:var(--espresso);color:var(--cream);padding:.75rem 1.6rem;border-radius:99px;
@@ -376,48 +373,67 @@ footer{position:relative;z-index:1}
 .reveal-r{transform:translateX(90px)}
 .in .reveal-l,.in .reveal-r{opacity:1;transform:none}
 @media(max-width:720px){
-  /* One column: the dish whole and centred with its name ghosted behind it, the
-     copy underneath at a measure you can actually read. The rule this replaces
-     kept the desktop's two columns by making the photo 58vw and dragging it
-     --peek vw past the screen edge to buy the copy some width. On the rows with
-     the longer descriptions (peek 23 => -86px) the food itself ended up under
-     the text, and the bleed put 79px of horizontal overflow on the document
-     which only `body{overflow-x:hidden}` was holding back.
-     The vertical padding here is load-bearing: it is the gap the vine segment
-     between dishes is drawn into (see the 760px block), so the two move
-     together. */
+  /* Photo indented to one side, copy beside it, name and price centred below. */
   .menu-item{
-    display:flex;flex-direction:column;align-items:center;
-    text-align:center;gap:0;
-    padding:3rem 1.25rem;max-width:100%;
-    /* how far the dish hangs off the screen edge. The old --peek was 17-23vw
-       (64-86px at 375) and graded by description length, because it was buying
-       width for copy sitting beside the photo. Nothing sits beside the photo
-       now, so this only has to swallow the transparent margin the cutout PNGs
-       carry and a sliver of the tray — past ~70px it starts eating food. */
-    --bleed:clamp(34px,13vw,62px);
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    grid-template-areas:
+      "photo num"
+      "photo tag"
+      "photo desc"
+      "name  name"
+      "price price";
+    align-items:start;
+    column-gap:clamp(10px,3vw,16px);
+    text-align:center;
+    padding:3rem .9rem;max-width:100%;   /* side padding comes out of the copy column */
+    --bleed:clamp(96px,38vw,168px);      /* how far the photo hangs off-screen */
   }
-  /* The dish swings off the spine, alternating, the way the desktop rows do —
-     the copy stays centred under it. The stage is wider than the centred
-     version was (308 vs 248) so that what the edge takes is made back. */
   .menu-item .dish-stage{
-    flex:0 0 auto;width:min(76vw,308px);
-    align-self:flex-start;
-    margin:.2rem 0 1.7rem calc(-1 * var(--bleed));  /* .dish-shadow hangs 9% below the stage */
+    grid-area:photo;align-self:center;
+    width:min(74vw,300px);
+    margin:.2rem 0 0 calc(-1 * var(--bleed));
   }
-  .menu-item .info{
-    flex:0 1 auto;min-width:0;max-width:34ch;
-    align-self:center;align-items:center;text-align:center;gap:.55rem;
+  /* no box, so the children become the grid items — lets the name sit below the
+     description visually while staying above it in the markup */
+  .menu-item .info{display:contents}
+  .menu-item .info .num{grid-area:num}
+  .menu-item .tag{grid-area:tag;margin-top:.3rem}
+  .menu-item .desc{grid-area:desc;margin-top:.5rem}
+  .menu-item h3{grid-area:name;text-align:center;margin-top:1.5rem}
+  .menu-item .row{grid-area:price;justify-content:center;margin-top:.9rem}
+  /* flush edge faces the photo, as on desktop */
+  .menu-item .info .num,.menu-item .tag,.menu-item .desc{text-align:left}
+  .menu-item:nth-child(even){
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:
+      "num  photo"
+      "tag  photo"
+      "desc photo"
+      "name name"
+      "price price";
   }
   .menu-item:nth-child(even) .dish-stage{
-    order:0;align-self:flex-end;
     margin-left:0;margin-right:calc(-1 * var(--bleed));
   }
-  .menu-item:nth-child(even) .info{order:0;align-self:center;text-align:center;align-items:center}
-  /* the bleed is deliberate overflow, so clip it here rather than leaving it to
-     body{overflow-x:hidden} to catch — `clip` on one axis keeps the other
-     visible, which `hidden` would not, and the vine segments overflow the rows
-     vertically by 48px */
+  .menu-item:nth-child(even) .info .num,
+  .menu-item:nth-child(even) .tag,
+  .menu-item:nth-child(even) .desc{text-align:right}
+  .menu-item:nth-child(even) .price-btn{flex-direction:row}
+  .menu-item:nth-child(even) .price-btn:hover .arr{transform:translateX(3px)}
+  /* display:contents leaves no box to transform, so the entrance moves to the
+     children. h3 is left out — it runs its own nameDissolve. */
+  .menu-item .info.reveal-l,.menu-item .info.reveal-r{opacity:1;transform:none}
+  .js .menu-item .info > *:not(h3){opacity:0;transform:translateY(14px);
+    transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1)}
+  .js .menu-item.in .info > *:not(h3){opacity:1;transform:none}
+  .js .menu-item.in .tag{transition-delay:.06s}
+  .js .menu-item.in .desc{transition-delay:.12s}
+  .js .menu-item.in .row{transition-delay:.18s}
+  .reveal-l{transform:translateX(-34px)}
+  .reveal-r{transform:translateX(34px)}
+  /* clips the bleed. `clip` not `hidden`: the vine segments still need to
+     overflow vertically by 48px */
   #menuList{overflow:clip visible}
   .menu-item:nth-child(even) .price-btn{flex-direction:row}
   .menu-item:nth-child(even) .price-btn:hover .arr{transform:translateX(3px)}
@@ -1140,15 +1156,9 @@ main{position:relative}
 
 /* ── phones: the motif the desktop spine used to carry alone ─────────────── */
 @media (max-width:760px){
-  /* The spine between dishes. It began as a 54px background-image stub that read
-     as a tick mark; it is now a real inline SVG filling the whole 96px gap the
-     stacked rows leave (3rem of padding either side of the boundary), at the
-     stroke weight the how-it-works vine uses.
-     It is inline rather than a background so it can DRAW ITSELF IN — the desktop
-     spine grows as you scroll, and a background-image has no stroke to animate.
-     pathLength="1" is the same trick .seam uses: it normalises the path so one
-     dash rule draws any of these without measuring. The .in-view class comes from
-     the shared observer that already drives .rise and .seam. */
+  /* The spine between dishes. Inline SVG, not a background image, so it can draw
+     itself in like the desktop one. pathLength="1" (as .seam does) means one dash
+     rule draws it without measuring; .in-view comes from the shared observer. */
   .menu-item:not(:last-child){border-bottom:none}
   .menu-item:not(:last-child) .vine-link{
     display:block;position:absolute;left:50%;bottom:-48px;width:34px;height:96px;
@@ -1164,15 +1174,9 @@ main{position:relative}
   .js .vine-link.in-view .stem{stroke-dashoffset:0}
   .vine-link .foliage{opacity:0;transition:opacity .5s ease .5s}
   .js .vine-link.in-view .foliage{opacity:1}
-  /* It hangs from the row above, so it sways from its top like .story-vine does,
-     not about its middle — and only once it has drawn, so nothing swings a line
-     that is not there yet. `rotate` rather than `transform`: the two are the same
-     slot, and a transform keyframe on the span would wipe the translateX(-50%)
-     that centres it and the scaleX(-1) that mirrors alternate rows, which is why
-     the animation sits on the inner <svg> and the positioning on the span.
-     Periods are 8.2s * (1 + frac(n*phi)) -> 13.3, 9.6, 14.4, 11.6, 8.9s, so no
-     two segments share a common multiple and the column never pulses in unison
-     — the same reason the closed-banner leaves are spaced that way. */
+  /* Sways from its top, like .story-vine, once it has drawn. The animation is on
+     the inner <svg> because the span's transform is already holding the centring
+     and the mirror. Periods are 8.2s * (1 + frac(n*phi)) so they never sync. */
   .js .vine-link.in-view svg{
     transform-origin:50% 0;
     animation:swayHung 13.3s ease-in-out infinite;
@@ -1182,10 +1186,7 @@ main{position:relative}
   .js .menu-item:nth-child(4) .vine-link.in-view svg{animation-duration:11.6s;animation-delay:-1.3s}
   .js .menu-item:nth-child(5) .vine-link.in-view svg{animation-duration:8.9s;animation-delay:-4.7s}
   .js .menu-item:nth-child(6) .vine-link.in-view svg{animation-duration:12.7s;animation-delay:-3.2s}
-  /* :last-child is not the last dish on screen — the category tabs hide the
-     other half of the list, so the last main had a length of vine trailing off
-     into the gap above the next section. Suppress the segment whenever the row
-     it would reach toward is hidden. */
+  /* :last-child is not the last dish on screen — the tabs hide half the list */
   .menu-item:has(+ .menu-item.hidden) .vine-link{display:none}
   /* the stacked vine needs a taller gap than the desktop lace to read as a spine
      rather than a tick mark — 46px of gutter left it barely legible */
@@ -1273,8 +1274,7 @@ main{position:relative}
   .reveal-l,.reveal-r{opacity:1;transform:none}
   .js .rise{opacity:1;transform:none}
   .js .seam .stem{stroke-dashoffset:0}
-  /* drawn, not drawing — without this the dash offset stays at 1 and the segment
-     between dishes never appears at all for a reduced-motion visitor */
+  /* drawn, not drawing — *{animation:none} misses a transition */
   .js .vine-link .stem{stroke-dashoffset:0}
   .seam .foliage,.m-success .sprig .foliage,.vine-link .foliage{opacity:1}
   .js .how .step{opacity:1;transform:none;animation:none !important}
@@ -1802,10 +1802,7 @@ function dishPriceLabel(d){ if(d.priceLabel) return d.priceLabel; var p=dishPric
 
 /* ---------------- build menu ---------------- */
 const list = document.getElementById('menuList');
-/* peekTier() lived here: it graded each description by length and handed the
-   phone stylesheet a --peek, the number of vw to drag the photo off the screen
-   edge by so the copy beside it had room. The phone layout stacks now, so
-   nothing reads it. */
+/* peekTier() lived here — it sized the old phone photo bleed. Nothing reads it now. */
 DISHES.forEach((d,i)=>{
   const sec = document.createElement('section');
   sec.className = 'menu-item';
@@ -2825,9 +2822,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const io2 = new IntersectionObserver(es=>{
     es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in-view'); io2.unobserve(e.target); } });
   }, {threshold:.16, rootMargin:'0px 0px -6% 0px'});
-  /* .vine-link rides the same observer rather than carrying .rise, because .rise
-     also applies a 30px translateY the segment must not have — it is positioned
-     against the row boundary it spans. It only needs the .in-view class. */
+  /* .vine-link wants .in-view but not .rise's 30px translateY */
   document.querySelectorAll('.rise, .vine-link').forEach(el=>io2.observe(el));
 })();
 
@@ -3161,13 +3156,9 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 
 /* ---------------- earthy: drifting leaves ---------------- */
 (function(){
-  /* The width gate here used to be `innerWidth < 820`, which meant no phone and no
-     tablet ever saw a leaf. That threshold does not survive comparison with the rest
-     of the page: the three.js field gates at 721 and runs on phones at 70 particles,
-     and six spans running one CSS transform keyframe cost a fraction of a WebGL
-     canvas. So the gate is gone and the count is what scales instead — three leaves
-     on a phone, six above it, because six in a 390px column reads as clutter and the
-     two `.reviews` spots would land on top of each other. */
+  /* No width gate: this is six spans running one transform keyframe, far cheaper
+     than the three.js field that already runs on phones. The count scales instead —
+     six would crowd a 390px column. */
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const LEAF='<svg viewBox="0 0 24 24"><path d="M12 2C6 6 4 14 12 22C20 14 18 6 12 2Z"/></svg>';
   const all=[
