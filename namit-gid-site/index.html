@@ -917,6 +917,14 @@ html.ng-hold,body.ng-hold{overflow:hidden !important;overscroll-behavior:none}
 .reviews .rev-track{position:relative;min-height:248px;padding:3.4rem 0 1.4rem;
   display:grid;place-items:start center;scrollbar-width:none}
 .reviews .rev-track::-webkit-scrollbar{display:none}
+/* No reviews yet. The track is sized for a stack of notes, so an empty one left
+   ~220px of blank ground, and its placeholder line repeated the invitation in the
+   card directly below it. Collapse the apparatus and let that card be the empty
+   state — including the strung line, which has nothing to peg a note to. */
+.reviews .rev-carousel.is-empty .rev-track{min-height:0;padding:0}
+.reviews .rev-carousel.is-empty #revLine,
+.reviews .rev-carousel.is-empty .rev-dots,
+.reviews .rev-carousel.is-empty .rev-arrow{display:none}
 .reviews .rev-card{grid-area:1/1;width:min(78%,400px);
   background:var(--cream);border:1px solid rgba(53,40,31,.1);border-radius:18px;padding:1.5rem 1.6rem;
   box-shadow:0 12px 30px -20px var(--shadow);
@@ -3612,15 +3620,18 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     paint(0);
   }
 
+  var revCar=document.querySelector('.rev-carousel');
+  function revEmpty(t){ if(t) t.innerHTML=''; if(revCar) revCar.classList.add('is-empty'); }
   fetch('/api/reviews').then(function(r){return r.json();}).then(function(rows){
     var t=document.getElementById('revTrack');
-    if(!Array.isArray(rows) || !rows.length){ t.innerHTML='<p style="padding:0 6vw;color:var(--sage-dark)">Be the first to leave a review. Namit gid?</p>'; initRevCarousel(); return; }
+    if(!Array.isArray(rows) || !rows.length){ revEmpty(t); return; }
+    if(revCar) revCar.classList.remove('is-empty');
     t.innerHTML = rows.map(function(rv){
       var photo = rv.photo_url ? '<img class="rev-photo" src="'+escR(rv.photo_url)+'" alt="" loading="lazy">' : '';
       return '<div class="rev-card">'+photo+'<div class="rev-stars">'+stars(Number(rv.stars)||5)+'</div><p class="rev-text">'+escR(rv.review_text)+'</p><div class="rev-name">\u2013 '+escR(rv.name)+'</div></div>';
     }).join('');
     initRevCarousel();
-  }).catch(function(){ var t=document.getElementById('revTrack'); if(t) t.innerHTML=''; });
+  }).catch(function(){ revEmpty(document.getElementById('revTrack')); });   // was: blank track, no empty state at all
 
   // ── Add a review (saved hidden until approved in the admin) ──
   var raToggle=document.getElementById('revAddToggle'), raForm=document.getElementById('revForm');
