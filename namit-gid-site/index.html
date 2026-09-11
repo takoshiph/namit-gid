@@ -389,9 +389,9 @@ footer{position:relative;z-index:1}
        gaps. The eyebrow sits in a row of its own that the photo does not touch. */
     grid-template-areas:
       "photo num"
+      "photo name"
       "photo sub"
       "photo ."
-      "name  name"
       "price price";
     align-items:start;
     /* row-gap too: the desktop rule sets `gap` as a shorthand, so overriding only
@@ -416,24 +416,25 @@ footer{position:relative;z-index:1}
      description visually while staying above it in the markup */
   .menu-item .info{display:contents}
   .menu-item .info .num{grid-area:num}
-  .menu-item .info .sub{grid-area:sub;gap:.55rem;margin-top:.55rem}
-  .menu-item h3{grid-area:name;text-align:center;margin-top:1.5rem}
+  .menu-item .info .sub{grid-area:sub;gap:.55rem;margin-top:.5rem}
+  .menu-item h3{grid-area:name;text-align:inherit;margin-top:.25rem;font-size:1.5rem;line-height:1.12}
   .menu-item .row{grid-area:price;justify-content:center;margin-top:.9rem}
   /* flush edge is the screen margin, ragged edge faces the photo */
-  .menu-item .info .num,.menu-item .tag,.menu-item .desc{text-align:right}
+  .menu-item .info .num,.menu-item h3,.menu-item .tag,.menu-item .desc{text-align:right}
   .menu-item:nth-child(even){
     grid-template-columns:minmax(0,1fr) auto;
     grid-template-areas:
       "num  photo"
+      "name photo"
       "sub  photo"
       ".    photo"
-      "name name"
       "price price";
   }
   .menu-item:nth-child(even) .dish-stage{
     margin-left:0;margin-right:calc(-1 * var(--bleed));
   }
   .menu-item:nth-child(even) .info .num,
+  .menu-item:nth-child(even) h3,
   .menu-item:nth-child(even) .tag,
   .menu-item:nth-child(even) .desc{text-align:left}
   .menu-item:nth-child(even) .price-btn{flex-direction:row}
@@ -1186,14 +1187,16 @@ main{position:relative}
   }
   .menu-item:nth-child(even):not(:last-child) .vine-link{transform:translateX(-50%) scaleX(-1)}
   .vine-link svg{display:block;width:100%;height:100%;overflow:visible;
-    filter:drop-shadow(0 1px .8px rgba(45,28,15,.25))}
-  .vine-link .stem{fill:none;stroke:#6f4a2c;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-  .vine-link .foliage path{fill:#5f8177}
-  .js .vine-link .stem{stroke-dasharray:1;stroke-dashoffset:1;
-    transition:stroke-dashoffset 1.05s cubic-bezier(.3,.7,.3,1)}
-  .js .vine-link.in-view .stem{stroke-dashoffset:0}
-  .vine-link .foliage{opacity:0;transition:opacity .5s ease .5s}
-  .js .vine-link.in-view .foliage{opacity:1}
+    filter:drop-shadow(0 1.4px 1px rgba(45,28,15,.3))}
+  /* same classes and colours as #menuVine, so the phone grows the same plant */
+  .vine-link .vine-fill{fill:#6f4a2c;opacity:.94}
+  .vine-link .vine-mid{fill:none;stroke:#3f280f;stroke-width:1.1;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
+  .vine-link .vine-hi{fill:none;stroke:#9a6b40;stroke-width:.8;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
+  /* a tapered ribbon is a fill, and a fill has no stroke to dash — so it is
+     revealed top-down by clip, which is how #menuVine grows on the desktop */
+  .js .vine-link svg{clip-path:inset(0 -60% 100% -60%);
+    transition:clip-path 1.05s cubic-bezier(.3,.7,.3,1)}
+  .js .vine-link.in-view svg{clip-path:inset(0 -60% 0 -60%)}
   /* Sways from its top, like .story-vine, once it has drawn. The animation is on
      the inner <svg> because the span's transform is already holding the centring
      and the mirror. Periods are 8.2s * (1 + frac(n*phi)) so they never sync. */
@@ -1295,8 +1298,8 @@ main{position:relative}
   .js .rise{opacity:1;transform:none}
   .js .seam .stem{stroke-dashoffset:0}
   /* drawn, not drawing — *{animation:none} misses a transition */
-  .js .vine-link .stem{stroke-dashoffset:0}
-  .seam .foliage,.m-success .sprig .foliage,.vine-link .foliage{opacity:1}
+  .js .vine-link svg{clip-path:none}
+  .seam .foliage,.m-success .sprig .foliage{opacity:1}
   .js .how .step{opacity:1;transform:none;animation:none !important}
   #howRoot .how-node{opacity:.9}
   .leaf,.soil{display:none}
@@ -1854,13 +1857,10 @@ DISHES.forEach((d,i)=>{
       </div>
     </div>
     <span class="vine-link" aria-hidden="true"><svg viewBox="0 0 38 116" preserveAspectRatio="xMidYMid meet">
-      <path class="stem" pathLength="1" d="M19,0 C12,18 28,32 20,50 C12,68 27,80 19,98 C15,106 20,110 19,116"/>
-      <g class="foliage">
-        <g transform="translate(19,20) rotate(-44) scale(.54)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
-        <g transform="translate(23,44) rotate(14) scale(.36)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
-        <g transform="translate(18,66) rotate(152) scale(.48)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
-        <g transform="translate(22,92) rotate(26) scale(.32)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
-      </g>
+      <path class="vine-fill" d="M 16.4,1.0 L 15.5,2.8 L 14.9,4.8 L 14.4,6.8 L 14.3,8.8 L 14.3,10.9 L 14.4,12.9 L 14.7,14.9 L 15.0,16.8 L 15.4,18.7 L 15.8,20.6 L 16.4,22.4 L 17.0,24.2 L 17.6,25.9 L 18.3,27.6 L 18.9,29.3 L 19.5,31.0 L 19.9,32.7 L 20.2,34.5 L 20.3,36.2 L 20.4,37.9 L 20.5,39.6 L 20.5,41.2 L 20.5,42.9 L 20.4,44.5 L 20.2,46.2 L 19.8,47.8 L 19.3,49.4 L 18.7,50.9 L 18.0,52.7 L 17.4,54.6 L 17.0,56.6 L 16.8,58.5 L 16.7,60.5 L 16.7,62.4 L 16.8,64.4 L 16.8,66.3 L 16.9,68.2 L 17.0,70.1 L 17.2,72.0 L 17.5,73.8 L 17.9,75.6 L 18.3,77.4 L 18.7,79.2 L 19.1,80.9 L 19.3,82.7 L 19.6,84.4 L 19.7,86.1 L 19.7,87.8 L 19.7,89.5 L 19.7,91.1 L 19.6,92.8 L 19.3,94.5 L 18.9,96.1 L 18.3,97.8 L 17.6,99.3 L 16.7,101.1 L 16.1,103.1 L 15.7,105.2 L 15.7,107.3 L 16.1,109.3 L 16.7,111.1 L 17.2,112.8 L 17.4,114.3 L 17.2,115.7 L 20.8,116.3 L 20.9,114.1 L 20.5,112.0 L 20.0,110.1 L 19.5,108.5 L 19.2,106.9 L 19.2,105.4 L 19.4,103.8 L 19.8,102.3 L 20.4,100.8 L 21.2,99.1 L 22.0,97.3 L 22.8,95.5 L 23.4,93.6 L 23.9,91.7 L 24.1,89.7 L 24.2,87.7 L 24.1,85.8 L 23.9,83.9 L 23.6,82.0 L 23.3,80.1 L 22.9,78.3 L 22.6,76.5 L 22.2,74.7 L 21.8,72.9 L 21.4,71.2 L 21.0,69.5 L 20.7,67.8 L 20.4,66.0 L 20.4,64.3 L 20.5,62.6 L 20.7,60.9 L 21.1,59.2 L 21.6,57.6 L 22.2,56.0 L 22.7,54.5 L 23.4,52.9 L 24.0,51.0 L 24.6,49.1 L 25.1,47.2 L 25.5,45.2 L 25.8,43.2 L 25.9,41.2 L 25.8,39.2 L 25.5,37.3 L 25.1,35.4 L 24.5,33.5 L 24.0,31.7 L 23.5,29.9 L 23.1,28.1 L 22.7,26.3 L 22.3,24.5 L 21.9,22.7 L 21.5,21.0 L 21.1,19.3 L 20.7,17.6 L 20.4,15.9 L 20.2,14.2 L 20.2,12.6 L 20.3,10.9 L 20.5,9.3 L 20.7,7.8 L 21.0,6.2 L 21.3,4.6 L 21.6,3.0 Z"/>
+      <path class="vine-mid" d="M19,2 C12,20 29,33 21,52 C13,71 28,83 19,100 C15,108 20,111 19,116"/>
+      <path class="vine-hi" d="M 16.4,1.0 L 15.5,2.8 L 14.9,4.8 L 14.4,6.8 L 14.3,8.8 L 14.3,10.9 L 14.4,12.9 L 14.7,14.9 L 15.0,16.8 L 15.4,18.7 L 15.8,20.6 L 16.4,22.4 L 17.0,24.2 L 17.6,25.9 L 18.3,27.6 L 18.9,29.3 L 19.5,31.0 L 19.9,32.7 L 20.2,34.5 L 20.3,36.2 L 20.4,37.9 L 20.5,39.6 L 20.5,41.2 L 20.5,42.9 L 20.4,44.5 L 20.2,46.2 L 19.8,47.8 L 19.3,49.4 L 18.7,50.9 L 18.0,52.7 L 17.4,54.6 L 17.0,56.6 L 16.8,58.5 L 16.7,60.5 L 16.7,62.4 L 16.8,64.4 L 16.8,66.3 L 16.9,68.2 L 17.0,70.1 L 17.2,72.0 L 17.5,73.8 L 17.9,75.6 L 18.3,77.4 L 18.7,79.2 L 19.1,80.9 L 19.3,82.7 L 19.6,84.4 L 19.7,86.1 L 19.7,87.8 L 19.7,89.5 L 19.7,91.1 L 19.6,92.8 L 19.3,94.5 L 18.9,96.1 L 18.3,97.8 L 17.6,99.3 L 16.7,101.1 L 16.1,103.1 L 15.7,105.2 L 15.7,107.3 L 16.1,109.3 L 16.7,111.1 L 17.2,112.8 L 17.4,114.3 L 17.2,115.7"/>
+      <g transform="translate(22.3,24.5) rotate(-32.8) scale(0.80)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g><g transform="translate(19.8,47.8) rotate(-148.6) scale(0.80)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g><g transform="translate(21.4,71.2) rotate(-28.2) scale(1.05)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g><g transform="translate(19.3,94.5) rotate(-148.0) scale(0.80)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
     </svg></span>`;
   list.appendChild(sec);
 });
@@ -1924,6 +1924,10 @@ function buildVine(){
   // lace measures its cards with offset*.)
   const gutterOf=el=>{
     const kids=[...el.children]
+      // width>0 only. .vine-link is display:none up here, so it reports 0x0 at
+      // offsetLeft 0, sorted first, and the "gutter" became the whole left margin —
+      // which is what dragged the spine to the edge of the page.
+      .filter(k=>k.offsetWidth>0)
       .map(k=>({l:el.offsetLeft+k.offsetLeft, r:el.offsetLeft+k.offsetLeft+k.offsetWidth}))
       .sort((a,b)=>a.l-b.l);
     if(kids.length<2) return null;
