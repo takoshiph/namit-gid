@@ -38,6 +38,11 @@
   --gold:#d9a441;
   --ring: rgba(53,40,31,.85);
   --shadow: rgba(38,52,47,.35);
+  /* the ground, as a cross-section: the surface where the sage meets it, then
+     topsoil, then the deep subsoil the taproot reaches */
+  --soil-line:#5b5f45;
+  --soil-top:#4a3b2a;
+  --soil-deep:#2e2418;
   --ff-display:'Young Serif', Georgia, serif;
   --ff-body:'Karla', 'Helvetica Neue', sans-serif;
 }
@@ -462,30 +467,6 @@ footer{position:relative;z-index:1}
 }
 
 /* ---------- story ---------- */
-.story{background:
-    /* Anchored in pixels, not percentages. The story expands from collapsed to open
-       over ~1.4s, and a percentage-based fade slides down the section the whole way,
-       which is what made the transition feel unsettled. A fixed 170px band at each
-       end stays put no matter how tall the section gets. */
-    linear-gradient(180deg, var(--sage) 0, rgba(155,185,175,.5) 46px, rgba(155,185,175,0) 170px)
-      top/100% 170px no-repeat,
-    linear-gradient(0deg,  var(--sage) 0, rgba(155,185,175,.5) 46px, rgba(155,185,175,0) 170px)
-      bottom/100% 170px no-repeat,
-    radial-gradient(90% 130% at 50% -20%, rgba(155,185,175,.22), transparent 55%),
-    radial-gradient(70% 90% at 100% 120%, rgba(196,99,60,.08), transparent 60%),
-    var(--cream);
-  position:relative;overflow:hidden}
-.story .wrap{
-  max-width:820px;margin:0 auto;
-  padding:clamp(1rem,2.6vw,1.6rem) clamp(1.4rem,5vw,3rem);
-  /* the arriving vine is 58px tall and sits at the section's top edge — the
-     eyebrow has to start below it, or the stem runs straight through the type */
-  padding-top:clamp(4.2rem,7vw,5.2rem);
-  display:flex;flex-direction:column;gap:1rem;text-align:center;align-items:center;
-}
-.story h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
-.story p{max-width:58ch;font-size:1.05rem;opacity:.88}
-.story .word-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;width:100%;margin-top:1.4rem}
 .word-card{
   background:var(--cream-soft);border:1px solid rgba(53,40,31,.08);border-radius:18px;
   padding:1.3rem 1rem;display:flex;flex-direction:column;gap:.35rem;
@@ -566,8 +547,26 @@ footer{position:relative;z-index:1}
 }
 
 /* ---------- footer ---------- */
-footer{background:var(--sage-deep);color:var(--cream);margin-top:clamp(2rem,6vw,4rem);
-  position:relative;overflow:hidden}
+/* The footer is ground, not a panel. A thin surface line where the stem goes in,
+   then earth deepening downward — so the roots are in soil rather than drawn on sage. */
+footer{
+  background:
+    linear-gradient(180deg,
+      var(--soil-line) 0, var(--soil-line) 3px,
+      var(--soil-top) 3px, var(--soil-top) 34%,
+      var(--soil-deep) 100%);
+  color:var(--cream);margin-top:clamp(2rem,6vw,4rem);
+  position:relative}
+/* grain: two barely-there speckle layers, offset so the repeat never lines up.
+   Without it a 350px band of flat brown reads as a swatch, not as earth. */
+footer::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:
+    radial-gradient(rgba(247,240,227,.055) 1px, transparent 1.2px),
+    radial-gradient(rgba(0,0,0,.10) 1px, transparent 1.2px);
+  background-size:23px 23px, 31px 31px;
+  background-position:0 0, 11px 17px;
+}
 /* the seam above is the stem arriving; with a gap between them the plant would be
    hovering over the soil rather than going into it */
 .seam + footer{margin-top:0}
@@ -602,6 +601,22 @@ footer .fm-word em{font-style:normal;color:var(--gold)}
   footer .wrap{padding-top:5.2rem;gap:1.6rem}
 }
 footer .cols{display:flex;gap:3rem;font-size:.85rem}
+/* The root mass ends above the copy; these are where it comes back up — one
+   filament feeding each group, so the links are planted rather than listed. */
+footer .cols > div{position:relative}
+footer .cols > div::before{
+  content:"";display:block;width:30px;height:26px;margin:0 0 .5rem -6px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M18,0 C13,9 20,16 16,30' fill='none' stroke='%23cbb08a' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M16,12 C11,15 9,19 10,23' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.75'/%3E%3C/svg%3E") no-repeat left top/contain;
+  opacity:0;transform:translateY(-7px);
+  transition:opacity .7s ease, transform .7s cubic-bezier(.25,.7,.3,1);
+}
+footer .cols > div:nth-child(2)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M15,0 C21,10 12,17 17,30' fill='none' stroke='%23cbb08a' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M18,14 C23,17 25,21 24,25' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.75'/%3E%3C/svg%3E")}
+footer .cols > div:nth-child(3)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 30'%3E%3Cpath d='M17,0 C14,8 21,17 15,30' fill='none' stroke='%23cbb08a' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M18,11 C23,13 25,17 24,21' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.75'/%3E%3C/svg%3E")}
+.js footer.in-view .cols > div::before{opacity:.62;transform:none}
+/* they arrive after the root mass has spread, in reading order */
+.js footer.in-view .cols > div:nth-child(1)::before{transition-delay:1.15s}
+.js footer.in-view .cols > div:nth-child(2)::before{transition-delay:1.35s}
+.js footer.in-view .cols > div:nth-child(3)::before{transition-delay:1.55s}
 footer .cols b{display:block;font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;opacity:.7;margin-bottom:.5rem}
 footer a{opacity:.9}
 footer a:hover{text-decoration:underline}
@@ -1029,27 +1044,8 @@ html.ng-hold,body.ng-hold{overflow:hidden !important;overscroll-behavior:none}
 .rev-form-note{font-size:.82rem;color:var(--sage-dark);text-align:center}
 /* ── Story expander ── */
 /* story intro now uses the same eyebrow language as every other section */
-.story-h{font-family:var(--ff-display);font-weight:400;line-height:1.1;
-  font-size:clamp(1.75rem,5vw,2.8rem);color:var(--espresso);
-  display:inline-flex;align-items:baseline;gap:.5rem}
-.story-toggle{display:inline-flex;flex-direction:column;align-items:center;gap:.5rem;background:transparent;border:0;cursor:pointer;padding:.25rem .4rem;transition:opacity .2s}
-.story-toggle .eyebrow{cursor:pointer}
-.story-toggle .rom{font-size:1.02em}
-.story-caret{font-size:.66rem;color:var(--sage-dark);opacity:.65;transition:transform .35s ease,opacity .2s}
-.story-toggle:hover .story-caret{opacity:1}
-.story-toggle:hover{opacity:.82}
-.story.open .story-caret{transform:rotate(180deg)}
 /* vine arriving into the story — the page vine continuing on */
-.story-vine{position:absolute;left:50%;top:-4px;transform:translateX(-50%);height:58px;z-index:0;pointer-events:none;overflow:visible;filter:drop-shadow(0 1px .7px rgba(45,28,15,.28))}
-.story-vine .vine-fill{fill:#6f4a2c;opacity:.95}
-.story-vine .vine-mid{fill:none;stroke:#3f280f;stroke-width:1;opacity:.45;stroke-linecap:round;stroke-linejoin:round}
 /* revealed by clip, like the seams and #menuVine — a fill has no stroke to dash */
-.js .story-vine{clip-path:inset(0 -60% 100% -60%);transition:clip-path 1.15s ease}
-.js .story.invine .story-vine{clip-path:inset(0 -60% 0 -60%)}
-.story-vine .foliage{opacity:0;transition:opacity .6s ease .55s}
-.story.invine .story-vine .foliage{opacity:1}
-.story-body{max-height:0;overflow:hidden;opacity:0;transition:max-height .55s ease,opacity .4s ease}
-.story.open .story-body{max-height:1400px;opacity:1;margin-top:1rem}
 .modal.done form{display:none}
 .modal.done .m-success{display:flex}
 
@@ -1099,7 +1095,6 @@ html.ng-hold,body.ng-hold{overflow:hidden !important;overscroll-behavior:none}
   .dish-shadow{width:46%;height:22px}
   .section-head{padding-top:3rem}
   .how{padding-top:3rem;padding-bottom:3rem}
-  .story .wrap{padding-top:4.2rem;padding-bottom:3rem}   /* still clears the vine */
 }
 
 main{position:relative}
@@ -1130,13 +1125,6 @@ main{position:relative}
 .js .rise.d4{transition-delay:.40s}
 
 /* ---------- earthy: growing leafy vine (wide screens) ---------- */
-.roots{position:absolute;top:0;left:0;width:100%;z-index:-1;pointer-events:none;opacity:.85;display:none;overflow:visible;
-  filter:drop-shadow(0 1.5px 1.2px rgba(45,28,15,.3))}
-.roots .stem{fill:none;stroke:#6f4a2c;stroke-linecap:round;stroke-linejoin:round}
-.roots .tk-fill{fill:#6f4a2c}
-.roots .tk-mid{fill:none;stroke:#3f280f;stroke-width:1.4;opacity:.4;stroke-linecap:round;stroke-linejoin:round}
-.roots .tk-hi{fill:none;stroke:#9a6b40;stroke-width:1;opacity:.5;stroke-linecap:round;stroke-linejoin:round}
-@media(min-width:1180px){.roots{display:block}}
 
 /* ---------- earthy: drifting leaves ---------- */
 .leaf{position:absolute;width:40px;height:40px;opacity:.15;pointer-events:none;z-index:-1;
@@ -1155,8 +1143,6 @@ main{position:relative}
 .story::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
   opacity:var(--soil,0);
   background:linear-gradient(180deg, rgba(53,40,31,0) 40%, rgba(53,40,31,.42) 100%)}
-.story .wrap{position:relative;z-index:1}
-.story-vine{z-index:1}   /* z-index only — it is already absolutely positioned above */
 
 /* ==========================================================================
    Carrying the growth off the landing page: section seams, the order modal,
@@ -1206,6 +1192,96 @@ main{position:relative}
 .modal.done .m-success .sprig .foliage:nth-of-type(4){animation-delay:.27s}
 @keyframes sprigOpen{from{opacity:0;scale:.35}to{opacity:1;scale:1}}
 
+/* ── the bloom in the soil, and the story it holds ───────────────────────── */
+/* --bl-w drives everything: the artwork is 92x132 with the soil surface at y=52,
+   so lifting the button by 0.565 x its width lands that surface on the footer's
+   top edge at any size. */
+.bloom{
+  --bl-w:clamp(58px,8vw,86px);
+  position:absolute;left:calc(50% + 58px);top:calc(var(--bl-w) * -0.472);
+  display:flex;flex-direction:column;align-items:center;gap:.15rem;
+  background:none;border:0;padding:.3rem;cursor:pointer;z-index:2;
+  -webkit-tap-highlight-color:transparent;
+}
+.bloom-svg{width:var(--bl-w);height:auto;display:block;overflow:visible;
+  filter:drop-shadow(0 2px 2px rgba(30,22,14,.35))}
+.bl-stem{fill:none;stroke:#5f8177;stroke-width:3.4;stroke-linecap:round}
+.bl-root{fill:none;stroke:#cbb08a;stroke-width:1.6;stroke-linecap:round;opacity:.55}
+.bl-leaf path{fill:#5f8177}
+.petal:nth-child(odd){fill:#c4633c}
+.petal:nth-child(even){fill:#b9572f}
+.bl-core{fill:#e08a42}
+.bl-core2{fill:#f6ac66}
+.bloom-label{display:flex;flex-direction:column;align-items:center;line-height:1.25;
+  font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--cream);opacity:.75;
+  transition:opacity .25s}
+.bloom-label .rom{font-family:var(--ff-display);letter-spacing:.06em;text-transform:none;
+  font-size:1.15em;color:var(--gold)}
+.bloom-label em{font-style:normal;font-size:.92em}
+.bloom:hover .bloom-label,.bloom:focus-visible .bloom-label{opacity:1}
+.bloom:focus-visible{outline:2px solid var(--gold);outline-offset:6px;border-radius:10px}
+/* Which side the shoot comes up depends on where the footer's copy is. On a phone the
+   link columns run full width underneath, so it sits clear to the right of the crown;
+   from 721px the columns are right-aligned, so it moves to the empty left instead —
+   measured, it clears the first column by 185px there and collided by 15px on the right. */
+@media(min-width:721px){
+  .bloom{left:calc(50% - clamp(60px,9vw,112px))}
+}
+
+/* closed until the ground is in view, then it opens petal by petal */
+.js .petal{transform-box:fill-box;transform-origin:50% 100%;scale:.06;opacity:0}
+.js .bl-core,.js .bl-core2{transform-box:fill-box;transform-origin:50% 50%;scale:.2;opacity:0}
+.js .bl-leaf{transform-box:fill-box;transform-origin:0 50%;scale:.1;opacity:0}
+.js .bl-stem{stroke-dasharray:90;stroke-dashoffset:90}
+.js .bl-root{stroke-dasharray:34;stroke-dashoffset:34}
+.js footer.in-view .bl-root{stroke-dashoffset:0;transition:stroke-dashoffset .8s ease .15s}
+.js .bloom-label{opacity:0;transform:translateY(4px)}
+.js footer.in-view .bl-stem{stroke-dashoffset:0;transition:stroke-dashoffset 1s ease .35s}
+.js footer.in-view .petal{scale:1;opacity:1;
+  transition:scale .75s cubic-bezier(.2,1.6,.45,1) calc(1.25s + var(--i)*.07s),
+             opacity .4s ease calc(1.25s + var(--i)*.07s)}
+.js footer.in-view .bl-core,.js footer.in-view .bl-core2{scale:1;opacity:1;
+  transition:scale .5s cubic-bezier(.2,1.5,.4,1) 1.85s, opacity .4s ease 1.85s}
+.js footer.in-view .bl-leaf{scale:1;opacity:1;
+  transition:scale .6s cubic-bezier(.2,1.4,.4,1) calc(.7s + var(--i)*.06s),
+             opacity .4s ease calc(.7s + var(--i)*.06s)}
+.js footer.in-view .bloom-label{opacity:.75;transform:none;transition:opacity .6s ease 2.1s, transform .6s ease 2.1s}
+/* focus can arrive before the observer has fired; an invisible focused control is
+   not acceptable, so focus opens it immediately */
+.js .bloom:focus-visible .petal,.js .bloom:focus-visible .bl-core,
+.js .bloom:focus-visible .bl-core2,.js .bloom:focus-visible .bl-leaf{scale:1;opacity:1;transition-delay:0s}
+.js .bloom:focus-visible .bl-stem,.js .bloom:focus-visible .bl-root{stroke-dashoffset:0;transition-delay:0s}
+.js .bloom:focus-visible .bloom-label{opacity:1;transform:none;transition-delay:0s}
+
+/* the story, in a native dialog: Escape, focus trapping and focus restore come
+   with showModal(), which hand-rolled modals usually get wrong */
+.story-dialog:not([open]){display:none}
+.story-dialog{
+  border:0;padding:0;background:transparent;color:var(--espresso);
+  max-width:min(640px,92vw);width:100%;margin:auto;overflow:visible;
+}
+.story-dialog::backdrop{background:rgba(30,22,14,.58);backdrop-filter:blur(3px)}
+.sd-inner{
+  position:relative;background:var(--cream);border-radius:22px;
+  padding:clamp(2rem,5vw,2.8rem) clamp(1.3rem,4.5vw,2.6rem) clamp(1.6rem,4vw,2.2rem);
+  box-shadow:0 30px 70px -30px rgba(30,22,14,.7);
+  display:flex;flex-direction:column;align-items:center;gap:.55rem;text-align:center;
+}
+.sd-h{font-family:var(--ff-display);font-weight:400;line-height:1.1;
+  font-size:clamp(1.7rem,5vw,2.5rem);margin-bottom:.4rem}
+.sd-close{position:absolute;top:.5rem;right:.7rem;width:44px;height:44px;
+  background:none;border:0;cursor:pointer;font-size:1.5rem;line-height:1;
+  color:var(--espresso);opacity:.45;transition:opacity .2s}
+.sd-close:hover,.sd-close:focus-visible{opacity:1}
+/* .story-body was a collapsible panel in the old section; in here it is simply open */
+.story-dialog .story-body{max-height:none;overflow:visible;opacity:1;margin-top:0;text-align:left}
+.story-dialog .lede + .lede{margin-top:.9rem}
+@media(prefers-reduced-motion:reduce){
+  .js .petal,.js .bl-core,.js .bl-core2,.js .bl-leaf{scale:1;opacity:1}
+  .js .bl-stem{stroke-dashoffset:0}
+  .js .bloom-label{opacity:.75;transform:none}
+}
+
 /* ── closed banner + allergen panel: same vocabulary as everything else ──── */
 /* the shared leaf is sage-on-cream; on the espresso banner it needs to be light-on-dark */
 /* overflow only — NOT position. #allergenPanel is already position:fixed above, and
@@ -1242,7 +1318,7 @@ main{position:relative}
   .js .vine-link svg{clip-path:inset(0 -60% 100% -60%);
     transition:clip-path 1.05s cubic-bezier(.3,.7,.3,1)}
   .js .vine-link.in-view svg{clip-path:inset(0 -60% 0 -60%)}
-  /* Sways from its top, like .story-vine, once it has drawn. The animation is on
+  /* Sways from its top once it has drawn. The animation is on
      the inner <svg> because the span's transform is already holding the centring
      and the mirror. Periods are 8.2s * (1 + frac(n*phi)) so they never sync. */
   .js .vine-link.in-view svg{
@@ -1275,7 +1351,7 @@ main{position:relative}
    Animating the `rotate` property, never `transform`. In SVG and CSS alike the
    transform attribute and the transform property are the same slot, so a keyframe
    setting `transform:rotate()` would wipe .earth-tuft.right's scaleX(-1) mirror and
-   .story-vine's translateX(-50%) centring. `rotate` composes on top of both.
+   an SVG's own translate/rotate. `rotate` composes on top instead.
    Every one gets its own period so nothing moves in unison. */
 @keyframes swayRooted{0%,100%{rotate:-1.5deg}50%{rotate:1.5deg}}
 @keyframes swayHung{0%,100%{rotate:-1.1deg}50%{rotate:1.1deg}}
@@ -1332,7 +1408,6 @@ main{position:relative}
 .js .earth-tuft{transform-origin:50% 100%}
 .js .earth-tuft.left{animation:swayRooted 9s ease-in-out infinite}
 .js .earth-tuft.right{animation:swayRooted 11.5s ease-in-out .8s infinite}
-.js .story-vine{transform-origin:50% 0;animation:swayHung 8.2s ease-in-out .5s infinite}
 .js .modal-vine{transform-origin:50% 100%;animation:swayRooted 10.5s ease-in-out infinite}
 .js #allergenPanel .panel-tuft{transform-origin:50% 100%;animation:swayRooted 9.6s ease-in-out .3s infinite}
 /* the leaves strung along the how-it-works thread breathe with the cards they hang beside */
@@ -1345,7 +1420,8 @@ main{position:relative}
   *{animation:none !important;transition:none !important}
   .reveal-l,.reveal-r{opacity:1;transform:none}
   .js .rise{opacity:1;transform:none}
-  .js .seam svg,.js .story-vine,.js .foot-roots{clip-path:none}
+  .js .seam svg,.js .foot-roots{clip-path:none}
+  footer .cols > div::before{opacity:.62;transform:none}
   .js .foot-roots .rt-fine{stroke-dashoffset:0}
   /* drawn, not drawing — *{animation:none} misses a transition */
   .js .vine-link svg{clip-path:none}
@@ -1393,30 +1469,6 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 <!-- EARTHY DECOR -->
 <div class="soil" id="soil" aria-hidden="true"></div>
 <canvas id="fx" aria-hidden="true"></canvas>
-<svg class="roots" id="roots" viewBox="0 0 140 1000" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
-  <clipPath id="rootsClip"><rect id="rootsClipRect" x="-40" y="-10" width="240" height="0"/></clipPath>
-  <g id="trunkG" clip-path="url(#rootsClip)"></g>
-  <g style="display:none">
-    <path class="stem" style="stroke-width:3.2" d="M70,92 C60,180 92,280 78,400 C66,500 44,620 64,760 C80,880 66,940 74,1000"/>
-    <path class="stem" style="stroke-width:1.7" d="M78,380 C104,398 120,430 124,470"/>
-    <path class="stem" style="stroke-width:1.7" d="M64,760 C40,776 30,806 27,846"/>
-    <g transform="translate(80,150) rotate(-38) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(60,300) rotate(158) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(84,430) rotate(-30) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(52,560) rotate(160) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(90,690) rotate(-30) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(56,820) rotate(160) scale(.55)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(82,930) rotate(-32) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(88,232) scale(.5)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
-    <g transform="translate(48,555) scale(.5)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
-    <g transform="translate(70,98) rotate(-150) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(70,98) rotate(-118) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(70,98) rotate(-90) scale(.62)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(70,98) rotate(-62) scale(.58)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(70,98) rotate(-30) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g transform="translate(70,90) scale(.5)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
-  </g>
-</svg>
 
 <!-- SPLASH -->
 <div id="splash" role="dialog" aria-label="Namit gid intro">
@@ -1651,27 +1703,6 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 </section>
 
 
-<!-- STORY (tap to expand) -->
-<section class="story" id="story">
-  <svg class="story-vine" viewBox="0 0 60 120" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
-    <path class="vine-fill" d="M 27.0,-0.5 L 26.5,1.5 L 26.1,3.6 L 25.9,5.7 L 25.9,7.8 L 26.0,9.8 L 26.2,11.9 L 26.3,14.0 L 26.5,16.0 L 26.7,18.0 L 26.9,20.0 L 27.3,22.0 L 27.7,24.0 L 28.1,25.9 L 28.6,27.9 L 28.9,29.8 L 29.2,31.8 L 29.4,33.8 L 29.5,35.7 L 29.6,37.7 L 29.7,39.6 L 29.9,41.6 L 30.2,43.5 L 30.4,45.4 L 30.6,47.3 L 30.7,49.2 L 30.7,51.1 L 30.6,53.0 L 30.5,54.9 L 30.5,56.8 L 30.4,58.7 L 30.3,60.6 L 30.0,62.5 L 29.6,64.3 L 29.0,66.4 L 28.5,68.3 L 28.1,70.4 L 27.8,72.4 L 27.6,74.4 L 27.5,76.4 L 27.4,78.5 L 27.4,80.5 L 27.5,82.5 L 27.5,84.5 L 27.5,86.5 L 27.6,88.5 L 27.8,90.5 L 28.1,92.5 L 28.4,94.5 L 28.7,96.4 L 29.0,98.4 L 29.1,100.3 L 29.2,102.3 L 29.2,104.2 L 29.2,106.2 L 29.2,108.1 L 29.1,110.1 L 29.1,112.0 L 28.9,113.9 L 28.7,115.8 L 28.3,117.7 L 31.7,118.3 L 31.9,116.3 L 32.2,114.2 L 32.4,112.2 L 32.5,110.2 L 32.6,108.2 L 32.5,106.2 L 32.4,104.2 L 32.3,102.2 L 32.2,100.2 L 32.1,98.2 L 32.1,96.2 L 32.1,94.2 L 32.2,92.2 L 32.1,90.2 L 32.1,88.3 L 32.0,86.3 L 31.8,84.4 L 31.7,82.4 L 31.7,80.5 L 31.8,78.6 L 31.9,76.6 L 32.0,74.7 L 32.1,72.8 L 32.2,70.9 L 32.4,69.0 L 32.7,67.1 L 33.1,65.3 L 33.7,63.4 L 34.3,61.4 L 34.8,59.4 L 35.3,57.3 L 35.6,55.3 L 35.8,53.2 L 35.8,51.2 L 35.8,49.1 L 35.7,47.1 L 35.7,45.0 L 35.6,43.0 L 35.5,41.0 L 35.2,39.0 L 34.9,37.0 L 34.5,35.0 L 34.0,33.1 L 33.6,31.1 L 33.3,29.2 L 33.0,27.2 L 32.9,25.3 L 32.8,23.3 L 32.7,21.3 L 32.6,19.4 L 32.4,17.5 L 32.3,15.6 L 32.2,13.6 L 32.2,11.7 L 32.3,9.8 L 32.5,8.0 L 32.7,6.1 L 32.8,4.3 L 32.9,2.4 L 33.0,0.5 Z"/>
-    <path class="vine-mid" d="M30,0 C26,22 38,44 31,66 C27,84 33,101 30,118"/>
-    <g class="foliage" transform="translate(30,34) rotate(202) scale(.3)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g class="foliage" transform="translate(33,60) rotate(-22) scale(.32)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g class="foliage" transform="translate(28,87) rotate(206) scale(.28)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/></g>
-    <g class="foliage" transform="translate(30,114) scale(.32)"><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/></g>
-  </svg>
-  <div class="wrap">
-    <button type="button" class="story-toggle" id="storyToggle" aria-expanded="false" aria-controls="storyBody">
-      <span class="eyebrow"><span class="rom">Ari ang aton istorya</span></span>
-      <span class="story-h">Here&#8217;s our story<span class="story-caret" aria-hidden="true">&#9662;</span></span>
-    </button>
-    <div class="story-body" id="storyBody">
-      <p class="lede">At my husband's family table in Romblon, a good dish started a chain: one bite, one "<span class="hl">Namit gid</span>," then everyone turning to each other, nodding, saying it again. So good you say it twice. One day I caught myself doing it too.</p>
-      <p class="lede">It stuck, and it's the only review I cook for. So now I cook hoping somebody at your table says it. So don't be shy, say it out loud, "<span class="hl root">Namit gid<svg class="root-uline" viewBox="0 0 200 22" preserveAspectRatio="none" aria-hidden="true"><path d="M3,9 C34,3 55,17 92,10 C120,5 150,16 197,8"/><path class="tendril" d="M64,12 C60,17 63,20 58,21"/><path class="tendril" d="M150,11 C154,16 151,19 156,20"/></svg></span>." You never know, the one beside you might know it too.</p>
-    </div>
-  </div>
-</section>
 
 <div class="seam rise" aria-hidden="true">
   <svg viewBox="0 0 44 88" preserveAspectRatio="xMidYMid meet" focusable="false">
@@ -1686,6 +1717,30 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 
 <!-- FOOTER -->
 <footer>
+  <!-- The plant finishes here. The page's vine arrives at the soil, roots spread,
+       and one shoot comes back up to flower — the flower holds the story. -->
+  <button type="button" class="bloom" id="storyBloom" aria-haspopup="dialog" aria-controls="storyDialog">
+    <svg class="bloom-svg" viewBox="0 0 92 158" aria-hidden="true" focusable="false">
+      <path class="bl-root" d="M46,128 C44,136 38,142 31,147"/>
+      <path class="bl-root" d="M46,128 C49,137 56,143 63,146"/>
+      <path class="bl-root" d="M46,128 C46,138 45,146 44,154"/>
+      <path class="bl-stem" d="M46,132 C43,112 49,90 46,64"/>
+      <g class="bl-leaf" style="--i:7" transform="translate(46,86) rotate(-40) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
+      <g class="bl-leaf" style="--i:8" transform="translate(46,104) rotate(146) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
+      <g class="bl-head" transform="translate(46,46)">
+      <ellipse class="petal" style="--i:0" transform="rotate(0.0)" rx="6.4" ry="13" cy="-13"/>
+      <ellipse class="petal" style="--i:1" transform="rotate(51.4)" rx="6.4" ry="13" cy="-13"/>
+      <ellipse class="petal" style="--i:2" transform="rotate(102.9)" rx="6.4" ry="13" cy="-13"/>
+      <ellipse class="petal" style="--i:3" transform="rotate(154.3)" rx="6.4" ry="13" cy="-13"/>
+      <ellipse class="petal" style="--i:4" transform="rotate(205.7)" rx="6.4" ry="13" cy="-13"/>
+      <ellipse class="petal" style="--i:5" transform="rotate(257.1)" rx="6.4" ry="13" cy="-13"/>
+      <ellipse class="petal" style="--i:6" transform="rotate(308.6)" rx="6.4" ry="13" cy="-13"/>
+        <circle class="bl-core"  r="5.4"/>
+        <circle class="bl-core2" r="3.1"/>
+      </g>
+    </svg>
+    <span class="bloom-label"><span class="rom">Ari ang aton istorya</span><em>our story</em></span>
+  </button>
   <!-- Where the last vine meets the ground. The stem above ends on the footer's top
        edge and the roots take over below it: same plant, same tapered drawing, in the
        light-on-dark tone the soil needs. -->
@@ -1715,6 +1770,18 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
     <div class="tiny"><span>© 2026 Namit Gid · abang <span class="rom" style="color:var(--gold)">kalipay</span> gid a</span><span>namit gid, so delicious</span></div>
   </div>
 </footer>
+
+<dialog id="storyDialog" class="story-dialog" aria-labelledby="storyDialogH">
+  <div class="sd-inner">
+    <button type="button" class="sd-close" id="storyClose" aria-label="Close">&#215;</button>
+    <span class="eyebrow"><span class="rom">Ari ang aton istorya</span></span>
+    <h2 class="sd-h" id="storyDialogH">Here&#8217;s our story</h2>
+    <div class="story-body" id="storyBody">
+      <p class="lede">At my husband's family table in Romblon, a good dish started a chain: one bite, one "<span class="hl">Namit gid</span>," then everyone turning to each other, nodding, saying it again. So good you say it twice. One day I caught myself doing it too.</p>
+      <p class="lede">It stuck, and it's the only review I cook for. So now I cook hoping somebody at your table says it. So don't be shy, say it out loud, "<span class="hl root">Namit gid<svg class="root-uline" viewBox="0 0 200 22" preserveAspectRatio="none" aria-hidden="true"><path d="M3,9 C34,3 55,17 92,10 C120,5 150,16 197,8"/><path class="tendril" d="M64,12 C60,17 63,20 58,21"/><path class="tendril" d="M150,11 C154,16 151,19 156,20"/></svg></span>." You never know, the one beside you might know it too.</p>
+    </div>
+  </div>
+</dialog>
 
 <!-- ORDER MODAL -->
 <div class="modal-veil" id="veil" aria-hidden="true">
@@ -2916,7 +2983,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 /* ---------------- staged scroll reveals ---------------- */
 (function(){
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  document.querySelectorAll('main > .section-head, .menu-tabs, .story .wrap > .eyebrow, .story .wrap > h2, .story .wrap > p, .how .section-head').forEach(el=>el.classList.add('rise'));
+  document.querySelectorAll('main > .section-head, .menu-tabs, .how .section-head').forEach(el=>el.classList.add('rise'));
   const stagger = nodes => nodes.forEach((el,i)=>el.classList.add('rise','d'+Math.min(i+1,4)));
   stagger([...document.querySelectorAll('.word-card')]);
   /* .how .step cards are handled by the root-then-flow engine below */
@@ -3217,42 +3284,23 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   let rt; addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ build(); play(); },140); }, {passive:true});
 })();
 
-/* ---------------- the trunk: a full-height tree down the left of the page that the
-   sections branch off of, growing top-down as you scroll ---------------- */
+/* ---------------- soil: the ground deepens as you descend ----------------
+   This used to be the trunk engine — a full-height tree drawn down the page. The
+   trunk was retired in August and its draw loop was left running for one reason:
+   it also set --soil, which .soil reads for its opacity. The tree is gone now, so
+   this is only that one job. */
 (function(){
-  const roots=document.getElementById('roots'), soil=document.getElementById('soil');
-  const g=document.getElementById('trunkG');
-  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const clip= roots ? roots.querySelector('#rootsClipRect') : null;
-  const NS='http://www.w3.org/2000/svg';
-  const LEAF='<path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z" fill="#5f8177"/><path d="M4,0 L23,0" stroke="#33473f" stroke-width="0.9" opacity=".5" fill="none"/>';
-  const BLOOM='<ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#b9572f" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" fill="#c4633c" transform="rotate(288)"/><circle r="2.4" fill="#e08a42"/><circle r="1.5" fill="#f6ac66"/><circle cx="-0.7" cy="-0.8" r="0.85" fill="#fce9cf" opacity="0.7"/>';
-  let docH=0;
-  function smooth(p){ let d='M '+p[0][0].toFixed(1)+','+p[0][1].toFixed(1);
-    for(let i=0;i<p.length-1;i++){ const a=p[i-1]||p[i],b=p[i],c=p[i+1],e=p[i+2]||c;
-      d+=' C '+(b[0]+(c[0]-a[0])/6).toFixed(1)+','+(b[1]+(c[1]-a[1])/6).toFixed(1)+' '+(c[0]-(e[0]-b[0])/6).toFixed(1)+','+(c[1]-(e[1]-b[1])/6).toFixed(1)+' '+c[0].toFixed(1)+','+c[1].toFixed(1); }
-    return d; }
-  function dpt(el){ const r=el.getBoundingClientRect(); return {l:r.left+scrollX,t:r.top+scrollY,r:r.right+scrollX,b:r.bottom+scrollY,w:r.width,h:r.height}; }
-  function buildTrunk(){
-    if(!g||!roots) return;
-    // trunk retired — the sections now carry one continuous vine instead of a separate tree
-    roots.style.display='none'; g.innerHTML=''; docH=document.documentElement.scrollHeight; draw();
-  }
+  const root=document.documentElement;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ root.style.setProperty('--soil','.5'); return; }
   let tick=false;
   function draw(){
-    if(!clip) return;
-    if(reduce){ clip.setAttribute('height', docH+60); document.documentElement.style.setProperty('--soil','.5'); return; }
-    const reveal=Math.min(docH+60, scrollY + innerHeight*0.9);   // grows top-down, a bit ahead of the fold
-    clip.setAttribute('height', reveal.toFixed(1));
-    const max=(docH-innerHeight)||1;
-    document.documentElement.style.setProperty('--soil',(Math.min(1,scrollY/max)*0.7).toFixed(3));
+    const max=(root.scrollHeight-innerHeight)||1;
+    root.style.setProperty('--soil',(Math.min(1,scrollY/max)*0.7).toFixed(3));
     tick=false;
   }
-  buildTrunk();
-  addEventListener('load', ()=>setTimeout(buildTrunk,60));
-  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>setTimeout(buildTrunk,60));
-  setTimeout(buildTrunk,1400);                                    // catch late layout (images, injected menu)
-  let rt; addEventListener('resize', ()=>{ clearTimeout(rt); rt=setTimeout(buildTrunk,140); }, {passive:true});
+  draw();
+  addEventListener('load', draw);
+  addEventListener('resize', draw, {passive:true});
   addEventListener('scroll', ()=>{ if(!tick){ tick=true; requestAnimationFrame(draw); } }, {passive:true});
 })();
 
@@ -3266,7 +3314,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
   const all=[
     {sel:'main',   css:{top:'14%', left:'5%'}},
     {sel:'main',   css:{top:'64%', right:'6%'}},
-    {sel:'.story', css:{top:'18%', right:'7%'}},
+    {sel:'.how',   css:{top:'64%', right:'7%'}},   /* was .story, which the bloom replaced */
     {sel:'.how',   css:{top:'26%', left:'6%'}},
     {sel:'.reviews', css:{top:'22%', left:'4%'}},
     {sel:'.reviews', css:{top:'60%', right:'4%'}}
@@ -3748,51 +3796,43 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
     addEventListener('resize', all, {passive:true});
   })();
 
-  // ── Story: opens under the pill, types out, then blooms "Namit gid" + the root underline ──
-  var stToggle=document.getElementById('storyToggle'), stSec=document.getElementById('story');
+  // ── Story: it lives in the bloom now. The section it used to sit in is gone;
+  //    the nav and footer "Our story" links open the same dialog. ──
+  var stDlg=document.getElementById('storyDialog');
   var stBody=document.getElementById('storyBody');
+  var stBloom=document.getElementById('storyBloom');
+  var stClose=document.getElementById('storyClose');
   var stLedes=stBody ? [].slice.call(stBody.querySelectorAll('.lede')) : [];
   var stTyped=false, REDUCE_S=matchMedia('(prefers-reduced-motion: reduce)').matches;
   function typeStory(){
     if(stTyped || !stLedes.length) return; stTyped=true;
-    // The paragraphs are left exactly as the server sent them. An earlier
-    // version of this cached innerHTML and wrote it straight back — a no-op
-    // that still tore down and rebuilt every node in both paragraphs, which
-    // restarted the root underline's draw and read as the section refreshing
-    // under you. The reveal is presentation only; it does not touch the DOM.
+    // Presentation only — the paragraphs are never rebuilt. An earlier version
+    // wrote innerHTML back over itself, which restarted the root underline's draw.
     if(REDUCE_S){ stBody.classList.add('revealed'); return; }
     stBody.classList.add('lede-reveal');
     requestAnimationFrame(function(){
       stBody.classList.add('go');
-      // "Namit gid" blooms and its root underline draws once the lines have settled
       setTimeout(function(){ stBody.classList.add('revealed'); }, 1150);
     });
   }
   function openStory(){
-    if(!stSec) return;
-    stSec.classList.add('open');
-    if(stToggle) stToggle.setAttribute('aria-expanded','true');
-    document.querySelectorAll('#storyBody .rise').forEach(function(el){ el.classList.add('in-view'); });
-    setTimeout(typeStory, 380);
+    if(!stDlg) return;
+    if(typeof stDlg.showModal==='function'){ if(!stDlg.open) stDlg.showModal(); }
+    else stDlg.setAttribute('open','');          // no <dialog> support: still readable
+    setTimeout(typeStory, 240);
   }
-  if(stToggle && stSec){
-    stToggle.addEventListener('click', function(){
-      var open = stSec.classList.toggle('open');
-      stToggle.setAttribute('aria-expanded', open?'true':'false');
-      if(open){ document.querySelectorAll('#storyBody .rise').forEach(function(el){ el.classList.add('in-view'); }); setTimeout(typeStory, 380); }
-    });
+  function closeStory(){
+    if(!stDlg) return;
+    if(typeof stDlg.close==='function') stDlg.close(); else stDlg.removeAttribute('open');
   }
+  if(stBloom) stBloom.addEventListener('click', openStory);
+  if(stClose) stClose.addEventListener('click', closeStory);
+  // Tap outside to close: a click that lands on the <dialog> element itself is the
+  // backdrop — anything on the card hits .sd-inner and never reaches here.
+  if(stDlg) stDlg.addEventListener('click', function(e){ if(e.target===stDlg) closeStory(); });
   document.querySelectorAll('a[href="#story"]').forEach(function(a){
-    a.addEventListener('click', function(){ setTimeout(openStory, 60); });
+    a.addEventListener('click', function(e){ e.preventDefault(); openStory(); });
   });
-
-  // ── story vine grows in as the section arrives (continuation of the page vine) ──
-  (function(){
-    if(!stSec) return;
-    if(matchMedia('(prefers-reduced-motion: reduce)').matches){ stSec.classList.add('invine'); return; }
-    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ stSec.classList.add('invine'); io.disconnect(); } }); }, {threshold:.35});
-    io.observe(stSec);
-  })();
 })();
 </script>
 </body>
