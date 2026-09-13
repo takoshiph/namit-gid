@@ -200,7 +200,16 @@ footer{position:relative;z-index:1}
   filter:drop-shadow(0 10px 18px rgba(38,52,47,.35))}
 @keyframes girlBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-9px)}}
 /* hanging wooden sign holding the wordmark; live text overlaid on the inner panel */
-.emblem{position:relative;width:min(90vw,430px);margin:.1rem auto 0;container-type:inline-size;
+/* The 430px cap was a phone measurement that never grew. On a 390px screen the
+   emblem fills 52.7% of the hero; at 1440 the same cap left it at 20.1%, with
+   505px of empty sage on each side — the mark sized for the smallest screen and
+   then shown on the largest. It grows with the viewport now, from 430 at 1024 up
+   to a 560 ceiling (the artwork is 1040px wide, so that is still ~1.9x).
+   min(90vw, ...) on the outside keeps the phone behaviour exactly as it was.
+   The wordmark rides along on its own: it is sized in cqw against this box. */
+.emblem{position:relative;
+  width:min(90vw, clamp(430px, calc(430px + (100vw - 1024px) * 0.30), 660px));
+  margin:.1rem auto 0;container-type:inline-size;
   animation:emblemFloat 6.5s ease-in-out infinite}
 @keyframes emblemFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .emblem-img{display:block;width:100%;height:auto;position:relative;z-index:2;filter:drop-shadow(0 18px 22px rgba(38,52,47,.24))}
@@ -1547,13 +1556,22 @@ main{position:relative}
          drop-shadow(0 9px 12px rgba(22,15,8,.45))}
 /* thicker and a shade deeper than the leaf green: at 3.4 against the trunk beside
    it the shoot read as a weed that had wandered in, not as the same plant */
-.bl-stem{fill:none;stroke:#587a6e;stroke-width:4.4;stroke-linecap:round}
+.bl-stem{fill:none;stroke:#4b6c5e;stroke-width:6.2;stroke-linecap:round}
 .bl-root{fill:none;stroke:#cbb08a;stroke-width:3.4;stroke-linecap:round;opacity:.42}
-.bl-leaf path{fill:#5f8177}
-.petal:nth-child(odd){fill:#c4633c}
-.petal:nth-child(even){fill:#b9572f}
-.bl-core{fill:#e08a42}
-.bl-core2{fill:#f6ac66}
+.bl-leaf path{fill:#3d5f4e}
+/* A sunflower, not a daisy: two rings of narrow pointed ray florets, the back
+   ring longer and offset half a step so the outline is a star rather than a
+   cog, and a big seeded disc. The back ring is a shade deeper because it is
+   behind — that is what stops 32 identical petals reading as a gear. */
+.petal{fill:#e3a93a}
+.pet-b{fill:#c98c2c}
+.pet-f{fill:#f0c256}
+.bl-core{fill:#5a4226}
+.bl-core2{fill:#3c2a17}
+.bl-seed{fill:#6d5330;opacity:.85}
+.bl-leaf path{fill:#3d5f4e}
+.bl-leaf .bl-vein{fill:none;stroke:#23382e;stroke-width:1.5;opacity:.5;stroke-linecap:round}
+.bl-leaf{filter:drop-shadow(0 1px 1.5px rgba(22,34,28,.45))}
 /* the cue: a drawn arrow pointing back up at the flower */
 /* Beside the flower head, not below the plant. In flow it landed under the soil
    line pointing at the root crown — the one reading we were trying to avoid.
@@ -1596,7 +1614,7 @@ main{position:relative}
 
 /* closed until the ground is in view, then it opens petal by petal */
 .js .petal{transform-box:fill-box;transform-origin:50% 100%;scale:.06;opacity:0}
-.js .bl-core,.js .bl-core2{transform-box:fill-box;transform-origin:50% 50%;scale:.2;opacity:0}
+.js .bl-core,.js .bl-core2,.js .bl-seeds{transform-box:fill-box;transform-origin:50% 50%;scale:.2;opacity:0}
 .js .bl-leaf{transform-box:fill-box;transform-origin:0 50%;scale:.1;opacity:0}
 /* pathLength normalised: the stem got longer and a fixed 90-unit dash left it
    part-drawn */
@@ -1610,7 +1628,7 @@ main{position:relative}
 .js footer.in-view .petal{scale:1;opacity:1;
   transition:scale .75s cubic-bezier(.2,1.6,.45,1) calc(1.25s + var(--i)*.07s),
              opacity .4s ease calc(1.25s + var(--i)*.07s)}
-.js footer.in-view .bl-core,.js footer.in-view .bl-core2{scale:1;opacity:1;
+.js footer.in-view .bl-core,.js footer.in-view .bl-core2,.js footer.in-view .bl-seeds{scale:1;opacity:1;
   transition:scale .5s cubic-bezier(.2,1.5,.4,1) 1.85s, opacity .4s ease 1.85s}
 .js footer.in-view .bl-leaf{scale:1;opacity:1;
   transition:scale .6s cubic-bezier(.2,1.4,.4,1) calc(.7s + var(--i)*.06s),
@@ -1619,7 +1637,8 @@ main{position:relative}
 /* focus can arrive before the observer has fired; an invisible focused control is
    not acceptable, so focus opens it immediately */
 .js .bloom:focus-visible .petal,.js .bloom:focus-visible .bl-core,
-.js .bloom:focus-visible .bl-core2,.js .bloom:focus-visible .bl-leaf{scale:1;opacity:1;transition-delay:0s}
+.js .bloom:focus-visible .bl-core2,.js .bloom:focus-visible .bl-seeds,
+.js .bloom:focus-visible .bl-leaf{scale:1;opacity:1;transition-delay:0s}
 .js .bloom:focus-visible .bl-stem,.js .bloom:focus-visible .bl-root{stroke-dashoffset:0;transition-delay:0s}
 .js .bloom:focus-visible .bloom-cue{opacity:1;translate:0 0;transition-delay:0s}
 
@@ -1647,8 +1666,8 @@ main{position:relative}
 .story-dialog .story-body{max-height:none;overflow:visible;opacity:1;margin-top:0;text-align:left}
 .story-dialog .lede + .lede{margin-top:.9rem}
 @media(prefers-reduced-motion:reduce){
-  .js .petal,.js .bl-core,.js .bl-core2,.js .bl-leaf{scale:1;opacity:1}
-  .js .bl-stem{stroke-dashoffset:0}
+  .js .petal,.js .bl-core,.js .bl-core2,.js .bl-seeds,.js .bl-leaf{scale:1;opacity:1}
+  .js .bl-stem,.js .bl-root{stroke-dashoffset:0}
   .js .bloom-cue{opacity:.9;translate:none}
   .js .head-mark .hm-line,.js .head-mark .hm-tendril{stroke-dashoffset:0}
   .js .head-mark .hm-leaf,.js .head-mark .hm-bloom{scale:1}
@@ -2094,19 +2113,39 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <path pathLength="1" class="bl-root" style="stroke-width:2.2" d="M46,170 C40,179 33,185 26,189"/>
       <path pathLength="1" class="bl-root" style="stroke-width:1.9" d="M46,172 C52,181 59,186 66,189"/>
       <path pathLength="1" class="bl-root" style="stroke-width:1.5;opacity:.34" d="M34,184 C32,192 32,199 34,206"/>
-      <path pathLength="1" class="bl-stem" d="M46,168 C42,142 50,116 45,92 C43,84 45,80 46,76"/>
-      <g class="bl-leaf" style="--i:7" transform="translate(45,116) rotate(-40) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
-      <g class="bl-leaf" style="--i:8" transform="translate(47,142) rotate(146) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
-      <g class="bl-head" transform="translate(46,58)">
-      <ellipse class="petal" style="--i:0" transform="rotate(0.0)" rx="6.4" ry="13" cy="-13"/>
-      <ellipse class="petal" style="--i:1" transform="rotate(51.4)" rx="6.4" ry="13" cy="-13"/>
-      <ellipse class="petal" style="--i:2" transform="rotate(102.9)" rx="6.4" ry="13" cy="-13"/>
-      <ellipse class="petal" style="--i:3" transform="rotate(154.3)" rx="6.4" ry="13" cy="-13"/>
-      <ellipse class="petal" style="--i:4" transform="rotate(205.7)" rx="6.4" ry="13" cy="-13"/>
-      <ellipse class="petal" style="--i:5" transform="rotate(257.1)" rx="6.4" ry="13" cy="-13"/>
-      <ellipse class="petal" style="--i:6" transform="rotate(308.6)" rx="6.4" ry="13" cy="-13"/>
-        <circle class="bl-core"  r="5.4"/>
-        <circle class="bl-core2" r="3.1"/>
+      <path pathLength="1" class="bl-stem" d="M46,168 C42,142 50,114 45,90 C43,78 45,68 46,62"/>
+      <g class="bl-leaf" style="--i:7" transform="translate(45,96) rotate(-30) scale(.70)"><path d="M0,0 C2,-6 6,-11 11,-13 C13.5,-16.5 17,-17.5 19,-15.2 C23,-17.4 28,-17.2 31,-14 C35,-15 39,-11.8 41,-8 C43,-5.6 44.6,-2.8 45.6,0 C43.4,3.6 40.4,7.6 36.4,10 C33.4,13 29.4,13.2 27,11 C23,13.4 18,13.4 15,10.4 C10,9.4 4.6,6 0,0 Z"/><path class="bl-vein" d="M2.4,0.2 C15,-0.6 30,-0.4 42,-0.6"/><path class="bl-vein" d="M12,0 C17,-4.6 23,-8 29,-10.2"/><path class="bl-vein" d="M14,0.6 C18,4.4 23,7.2 28,8.8"/></g>
+      <g class="bl-leaf" style="--i:8" transform="translate(47,126) rotate(201) scale(.60)"><path d="M0,0 C2,-6 6,-11 11,-13 C13.5,-16.5 17,-17.5 19,-15.2 C23,-17.4 28,-17.2 31,-14 C35,-15 39,-11.8 41,-8 C43,-5.6 44.6,-2.8 45.6,0 C43.4,3.6 40.4,7.6 36.4,10 C33.4,13 29.4,13.2 27,11 C23,13.4 18,13.4 15,10.4 C10,9.4 4.6,6 0,0 Z"/><path class="bl-vein" d="M2.4,0.2 C15,-0.6 30,-0.4 42,-0.6"/><path class="bl-vein" d="M12,0 C17,-4.6 23,-8 29,-10.2"/><path class="bl-vein" d="M14,0.6 C18,4.4 23,7.2 28,8.8"/></g>
+      <g class="bl-head" transform="translate(46,44)">
+        <path class="petal pet-b" style="--i:0" transform="rotate(13.8)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:1" transform="rotate(41.5)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:2" transform="rotate(69.2)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:3" transform="rotate(96.9)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:4" transform="rotate(124.6)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:5" transform="rotate(152.3)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:6" transform="rotate(180.0)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:0" transform="rotate(207.7)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:1" transform="rotate(235.4)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:2" transform="rotate(263.1)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:3" transform="rotate(290.8)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:4" transform="rotate(318.5)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-b" style="--i:5" transform="rotate(346.2)" d="M0,0 C4.9,-6.8 6.0,-19.8 0,-38.0 C-6.0,-19.8 -4.9,-6.8 0,0 Z"/>
+        <path class="petal pet-f" style="--i:3" transform="rotate(0.0)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:4" transform="rotate(27.7)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:5" transform="rotate(55.4)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:6" transform="rotate(83.1)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:7" transform="rotate(110.8)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:8" transform="rotate(138.5)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:9" transform="rotate(166.2)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:3" transform="rotate(193.8)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:4" transform="rotate(221.5)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:5" transform="rotate(249.2)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:6" transform="rotate(276.9)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:7" transform="rotate(304.6)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <path class="petal pet-f" style="--i:8" transform="rotate(332.3)" d="M0,0 C5.7,-5.9 7.0,-17.2 0,-33.0 C-7.0,-17.2 -5.7,-5.9 0,0 Z"/>
+        <circle class="bl-core"  r="14.2"/>
+        <circle class="bl-core2" r="11.5"/>
+        <g class="bl-seeds"><circle class="bl-seed" cx="0.9" cy="0.0" r="0.95"/><circle class="bl-seed" cx="-1.2" cy="1.1" r="0.96"/><circle class="bl-seed" cx="0.2" cy="-2.1" r="0.97"/><circle class="bl-seed" cx="1.5" cy="2.0" r="0.98"/><circle class="bl-seed" cx="-2.8" cy="-0.5" r="0.98"/><circle class="bl-seed" cx="2.6" cy="-1.7" r="0.99"/><circle class="bl-seed" cx="-0.9" cy="3.3" r="1.00"/><circle class="bl-seed" cx="-1.7" cy="-3.2" r="1.01"/><circle class="bl-seed" cx="3.6" cy="1.3" r="1.02"/><circle class="bl-seed" cx="-3.8" cy="1.6" r="1.02"/><circle class="bl-seed" cx="1.8" cy="-3.9" r="1.03"/><circle class="bl-seed" cx="1.3" cy="4.3" r="1.04"/><circle class="bl-seed" cx="-4.1" cy="-2.4" r="1.05"/><circle class="bl-seed" cx="4.8" cy="-1.0" r="1.05"/><circle class="bl-seed" cx="-2.9" cy="4.1" r="1.06"/><circle class="bl-seed" cx="-0.7" cy="-5.2" r="1.07"/><circle class="bl-seed" cx="4.1" cy="3.5" r="1.08"/><circle class="bl-seed" cx="-5.5" cy="0.2" r="1.09"/><circle class="bl-seed" cx="4.0" cy="-4.0" r="1.09"/><circle class="bl-seed" cx="-0.3" cy="5.9" r="1.10"/><circle class="bl-seed" cx="-3.8" cy="-4.6" r="1.11"/><circle class="bl-seed" cx="6.1" cy="0.8" r="1.12"/><circle class="bl-seed" cx="-5.2" cy="3.6" r="1.12"/><circle class="bl-seed" cx="1.4" cy="-6.3" r="1.13"/><circle class="bl-seed" cx="3.3" cy="5.7" r="1.14"/><circle class="bl-seed" cx="-6.4" cy="-2.0" r="1.15"/><circle class="bl-seed" cx="6.2" cy="-2.9" r="1.16"/><circle class="bl-seed" cx="-2.7" cy="6.4" r="1.16"/><circle class="bl-seed" cx="-2.4" cy="-6.7" r="1.17"/><circle class="bl-seed" cx="6.4" cy="3.4" r="1.18"/><circle class="bl-seed" cx="-7.1" cy="1.9" r="1.19"/><circle class="bl-seed" cx="4.0" cy="-6.3" r="1.19"/><circle class="bl-seed" cx="1.3" cy="7.5" r="1.20"/><circle class="bl-seed" cx="-6.1" cy="-4.7" r="1.21"/><circle class="bl-seed" cx="7.8" cy="-0.6" r="1.22"/><circle class="bl-seed" cx="-5.4" cy="5.8" r="1.23"/><circle class="bl-seed" cx="0.0" cy="-8.0" r="1.23"/><circle class="bl-seed" cx="5.5" cy="6.0" r="1.24"/><circle class="bl-seed" cx="-8.2" cy="-0.8" r="1.25"/><circle class="bl-seed" cx="6.6" cy="-5.0" r="1.26"/><circle class="bl-seed" cx="-1.5" cy="8.3" r="1.26"/><circle class="bl-seed" cx="-4.6" cy="-7.2" r="1.27"/><circle class="bl-seed" cx="8.3" cy="2.3" r="1.28"/><circle class="bl-seed" cx="-7.8" cy="4.0" r="1.29"/><circle class="bl-seed" cx="3.1" cy="-8.3" r="1.30"/><circle class="bl-seed" cx="3.4" cy="8.3" r="1.30"/><circle class="bl-seed" cx="-8.2" cy="-3.9" r="1.31"/><circle class="bl-seed" cx="8.7" cy="-2.7" r="1.32"/><circle class="bl-seed" cx="-4.7" cy="8.0" r="1.33"/><circle class="bl-seed" cx="-2.0" cy="-9.1" r="1.33"/><circle class="bl-seed" cx="7.7" cy="5.5" r="1.34"/><circle class="bl-seed" cx="-9.4" cy="1.2" r="1.35"/><circle class="bl-seed" cx="6.2" cy="-7.3" r="1.36"/><circle class="bl-seed" cx="0.4" cy="9.7" r="1.37"/><circle class="bl-seed" cx="-6.9" cy="-7.0" r="1.37"/><circle class="bl-seed" cx="9.9" cy="0.5" r="1.38"/><circle class="bl-seed" cx="-7.7" cy="6.3" r="1.39"/><circle class="bl-seed" cx="1.4" cy="-10.0" r="1.40"/></g>
       </g>
     </svg>
     <!-- A cue, not a caption. The words sat in the soil competing with the root
