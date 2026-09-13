@@ -224,16 +224,33 @@ footer{position:relative;z-index:1}
 .emblem-vine .stem-edge{fill:none;stroke:#9a6b40;stroke-width:.42;opacity:.55;
   stroke-linecap:round;stroke-linejoin:round}
 /* bottom-right leaf on top so the enlarged island runs behind it */
-.emblem-leaf{position:absolute;left:72.3%;top:90.1%;width:7.3cqw;height:auto;z-index:3;pointer-events:none}
-.wordmark{position:absolute;left:50%;top:82%;transform:translate(-50%,-50%);z-index:2;
-  font-family:var(--ff-display);font-weight:400;margin:0;line-height:.9;font-size:11cqw;
+.emblem-leaf{position:absolute;left:72.3%;top:90.1%;width:7.3cqw;height:auto;z-index:4;pointer-events:none}
+/* Measured off emblem.png: the plank's clear face (inside the carved rim, clear
+   of the four bolts) runs 25.0%-78.8% across and 71.3%-93.4% down. Its centre is
+   51.9%/82.3%, not 50%/82% - the sign is not centred in the artwork. At 11cqw the
+   type covered ~60% of that face, which is the empty plank you could see. */
+.wordmark{position:absolute;left:51.9%;top:81.8%;transform:translate(-50%,-50%);z-index:3;
+  font-family:var(--ff-display);font-weight:400;margin:0;line-height:.9;font-size:13cqw;
   display:inline-flex;flex-direction:column;align-items:flex-start}
 .wordmark em{font-style:normal}
 .wm-namit{color:#f7f0e3;text-shadow:0 2px 3px rgba(38,20,8,.5)}
 /* gid aligned under Namit (g under N); island trails right as an overflow layer, tail over the d */
 .wm-row2{position:relative;display:inline-block;margin-top:.03em;margin-left:.55em}
-.wm-gid{position:relative;z-index:2;color:#f6ac66;text-shadow:0 1px 1px rgba(30,16,6,.75),0 4px 9px rgba(30,16,6,.5)}
-.wm-island{position:absolute;left:44%;top:74%;width:36%;height:auto;z-index:3;
+/* #f6ac66 measured 1.19:1 over the palest grain - the least readable word in the
+   mark. With the shade below doing the work the colour barely has to move: same
+   hue (29 deg), same lightness, just taken to full saturation. Worst case over
+   every pixel of the letters goes 1.19 -> 3.12, median 4.20. */
+.wm-gid{position:relative;z-index:2;color:#ffaf62;text-shadow:0 1px 1px rgba(30,16,6,.75),0 4px 9px rgba(30,16,6,.5)}
+/* The sign is a photo of wood: its own grain swings from luminance .035 to .40,
+   so no flat ink can hold 3:1 across all of it. A soft shade under the lettering
+   compresses that range - and reads as the board being recessed where it is painted. */
+.wm-bed{position:absolute;left:18.5%;right:14.5%;top:65.2%;bottom:1.2%;z-index:1;display:block;
+  pointer-events:none;
+  background:radial-gradient(ellipse 52.5% 50.5% at 50% 50%,
+    rgba(38,22,10,.50) 0%, rgba(38,22,10,.44) 66%, rgba(38,22,10,.141) 80%, rgba(38,22,10,0) 100%)}
+/* Behind the type, not over it: the island used to cover three quarters of "gid".
+   Tucked behind, a small overlap on the d reads as depth instead of damage. */
+.wm-island{position:absolute;left:53.5%;top:85%;width:25%;height:auto;z-index:2;
   pointer-events:none;filter:drop-shadow(0 3px 6px rgba(38,20,8,.5))}
 .wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
 .eyebrow{
@@ -306,10 +323,11 @@ footer{position:relative;z-index:1}
 .menu-item:nth-child(odd) .dish-shadow{animation-delay:-2.7s}
 .menu-item:nth-child(3n) .badge{animation-delay:-6s}
 .menu-item:nth-child(3n+1) .badge{animation-delay:-12s}
-.hero h1{font-family:var(--ff-display);font-size:clamp(2.1rem,6vw,3.4rem);font-weight:400;letter-spacing:.01em}
-.hero .price{font-family:var(--ff-display);color:var(--terracotta);font-size:1.35rem}
-.hero p.lede{max-width:34ch;font-size:1rem;opacity:.85}
-.hero p.lede + p.lede{margin-top:.7rem}
+/* Left over from the old text hero (headline + price + lede), all of which is
+   gone. .hero .price and .hero p.lede now match nothing, and `.hero h1` (0,1,1)
+   was outranking `.wordmark` (0,1,0) - so the logo was sized by a viewport clamp
+   capped at 3.4rem, not by the sign. Past 1280 the plank kept growing while the
+   lettering stopped: that is where the empty board came from. */
 /* story panel: left-aligned readable column; "Namit gid" blooms + root grows after typing */
 .story-body .lede{opacity:1;min-height:1em;max-width:min(90vw,32rem);margin:0 auto;text-align:left}
 .story-body .lede + .lede{margin-top:.85rem}
@@ -1877,7 +1895,8 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
        before a single byte of the sign has arrived. -->
   <div class="s-emblem emblem" aria-hidden="true">
     <img class="emblem-img" src="images/emblem.png" alt="" width="1040" height="1199" fetchpriority="high" decoding="sync">
-    <img class="wm-island" src="images/biaringan_island_v4.png" alt="" width="1216" height="454">
+    <i class="wm-bed" aria-hidden="true"></i>
+      <img class="wm-island" src="images/biaringan_island_v4.png" alt="" width="1216" height="454">
     <div class="wordmark">
       <span class="wm-namit">Namit</span>
       <span class="wm-row2"><span class="wm-gid">gid</span></span>
@@ -1997,6 +2016,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
         </g>
       </svg>
       <img class="emblem-img" src="images/emblem.png" alt="Namit gid, the cook on the sign" width="1040" height="1199">
+      <i class="wm-bed" aria-hidden="true"></i>
       <img class="wm-island" src="images/biaringan_island_v4.png" alt="" aria-hidden="true" width="1216" height="454">
       <h1 class="wordmark" aria-label="Namit gid">
         <span class="wm-namit" aria-hidden="true">Namit</span>
@@ -3944,7 +3964,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
       function place(){
         var e=em.getBoundingClientRect(), g=gidEl.getBoundingClientRect(), nm=namitEl.getBoundingClientRect();
         var ih=island.offsetHeight||1;
-        island.style.left=((nm.left-e.left)+g.width*0.62).toFixed(1)+'px';   // anchored to Namit (fixed)
+        island.style.left=((nm.left-e.left)+g.width*1.19).toFixed(1)+'px';   // anchored to Namit, clear of the d
         island.style.top=((g.top-e.top)+g.height*0.80-ih*0.84).toFixed(1)+'px'; // waterline on baseline
       }
       placers.push(place); place();
