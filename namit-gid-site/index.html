@@ -248,10 +248,16 @@ footer{position:relative;z-index:1}
   pointer-events:none;
   background:radial-gradient(ellipse 52.5% 50.5% at 50% 50%,
     rgba(38,22,10,.50) 0%, rgba(38,22,10,.44) 66%, rgba(38,22,10,.141) 80%, rgba(38,22,10,0) 100%)}
-/* Behind the type, not over it: the island used to cover three quarters of "gid".
-   Tucked behind, a small overlap on the d reads as depth instead of damage. */
-.wm-island{position:absolute;left:53.5%;top:85%;width:25%;height:auto;z-index:2;
-  pointer-events:none;filter:drop-shadow(0 3px 6px rgba(38,20,8,.5))}
+/* Behind the type, not over it: the island used to cover three quarters of "gid"
+   and was drawn in front, so the d was unreadable. Tucked behind, the overlap
+   reads as depth instead of damage - which is what lets it be this big.
+   The artwork ends in a straight vertical cut on its left; at this size that edge
+   showed between the g and the i, so the left third is masked to a fade. It also
+   reads better - a coastline receding into haze rather than a pasted rectangle. */
+.wm-island{position:absolute;left:40.5%;top:81.3%;width:38%;height:auto;z-index:2;
+  pointer-events:none;filter:drop-shadow(0 3px 6px rgba(38,20,8,.5));
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 34%,#000 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 34%,#000 100%)}
 .wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
 .eyebrow{
   font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--espresso);
@@ -3955,25 +3961,11 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 
   // (hero story removed — it now lives in the "Ari ang aton istorya" section below)
 
-  // ── Anchor the Biaringan island to the real "gid": tail on the d, waterline on the baseline ──
-  (function(){
-    var placers=[];
-    document.querySelectorAll('.emblem').forEach(function(em){
-      var namitEl=em.querySelector('.wm-namit'), gidEl=em.querySelector('.wm-gid'), island=em.querySelector('.wm-island');
-      if(!namitEl||!gidEl||!island) return;
-      function place(){
-        var e=em.getBoundingClientRect(), g=gidEl.getBoundingClientRect(), nm=namitEl.getBoundingClientRect();
-        var ih=island.offsetHeight||1;
-        island.style.left=((nm.left-e.left)+g.width*1.19).toFixed(1)+'px';   // anchored to Namit, clear of the d
-        island.style.top=((g.top-e.top)+g.height*0.80-ih*0.84).toFixed(1)+'px'; // waterline on baseline
-      }
-      placers.push(place); place();
-    });
-    function all(){ placers.forEach(function(p){ p(); }); }
-    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(all); }
-    addEventListener('load', all);
-    addEventListener('resize', all, {passive:true});
-  })();
+  // The island used to be placed from live text metrics, because the wordmark was
+  // sized by a viewport clamp and its width did not track the sign. It is 13cqw now,
+  // so every piece of the emblem is a fixed proportion of the same box and the island
+  // can sit in plain percentages. That also stops it drifting over the carved rim
+  // when Young Serif has not loaded and the fallback metrics are narrower.
 
   // ── Story: it lives in the bloom now. The section it used to sit in is gone;
   //    the nav and footer "Our story" links open the same dialog. ──
