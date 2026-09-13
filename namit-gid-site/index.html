@@ -326,20 +326,46 @@ footer{position:relative;z-index:1}
   display:flex;flex-direction:column;align-items:center;gap:.7rem;
 }
 .section-head h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
-/* ── the sprig on "From order to pickup" ─────────────────────────────────────
-   The eyebrow above this heading is gone; a small sprig growing off the end of
-   the line does the same job of marking the section without repeating a label
-   the heading already is. Baseline-anchored like the menu leaf. */
 .how-head{padding-top:0}
-.head-sprig{display:inline-block;vertical-align:baseline;width:1.02em;height:auto;
-  margin-left:.16em;margin-right:-.1em;translate:0 .06em}
-.head-sprig svg{display:block;width:100%;height:auto;overflow:visible}
-.head-sprig .hs-stem{fill:none;stroke:#6f4a2c;stroke-width:2.6;stroke-linecap:round;opacity:.9}
-.head-sprig .hs-leaf path{fill:var(--sage-dark)}
-.head-sprig .hs-bloom ellipse{fill:var(--terracotta)}
-.head-sprig .hs-bloom ellipse:nth-of-type(even){fill:#b9572f}
-.head-sprig .hs-core{fill:#e08a42}
-.head-sprig .hs-core2{fill:#f6ac66}
+/* ── the mark under every section heading ────────────────────────────────────
+   The three sections had three different ideas — a leaf on a letter, a sprig
+   after the line, nothing at all. This is the one they now share: a drawn
+   underline that grows in when the section arrives, reusing the tendril
+   underline already under "Namit gid" in the story, so it is the page's own
+   vocabulary rather than a fourth idea.
+   The line stretches (preserveAspectRatio="none") but its weight does not: it
+   runs horizontally, and only x is scaled, so a horizontal stroke keeps its
+   thickness. Each section's line is drawn differently — that is the variation
+   inside the system. */
+.section-head h2{position:relative;display:inline-block}
+.head-mark{position:absolute;left:50%;translate:-50% 0;bottom:-.44em;
+  width:100%;height:.42em;overflow:visible;pointer-events:none}
+.head-mark .hm-rule{display:block;width:100%;height:100%;overflow:visible}
+/* The ornament is NOT inside the stretched svg. At x-scale ~1.5 on "The menu"
+   and ~2.8 on "From order to pickup" a curl flattens into a square bracket, and
+   differently per heading. Fixed aspect, parked at the line's right end. */
+.head-mark .hm-tip{position:absolute;right:-.08em;bottom:-.46em;width:.62em;display:block}
+.head-mark .hm-tip svg{display:block;width:100%;height:auto;overflow:visible}
+.head-mark .hm-leaf path{fill:var(--sage-dark)}
+.head-mark .hm-bloom ellipse{fill:var(--terracotta)}
+.head-mark .hm-bloom ellipse:nth-of-type(even){fill:#b9572f}
+.head-mark .hm-core{fill:#e08a42}
+.head-mark .hm-line{fill:none;stroke:var(--terra-deep);stroke-width:2.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.head-mark .hm-tendril{fill:none;stroke:var(--terra-deep);stroke-width:1.9;
+  stroke-linecap:round;opacity:.8}
+.head-mark .hm-dot{fill:var(--terra-deep);opacity:.85}
+/* drawn, not faded: the line arrives the way every other stem on this page does */
+.js .head-mark .hm-line{stroke-dasharray:1;stroke-dashoffset:1;
+  transition:stroke-dashoffset 1.05s cubic-bezier(.3,.7,.3,1) .12s}
+.js .head-mark .hm-tendril{stroke-dasharray:1;stroke-dashoffset:1;
+  transition:stroke-dashoffset .5s ease .82s}
+.js .head-mark .hm-leaf,.js .head-mark .hm-bloom{scale:0;transform-box:fill-box;
+  transform-origin:50% 50%;transition:scale .5s cubic-bezier(.2,1.5,.4,1) 1s}
+.js .section-head.in-view .head-mark .hm-line,
+.js .section-head.in-view .head-mark .hm-tendril{stroke-dashoffset:0}
+.js .section-head.in-view .head-mark .hm-leaf,
+.js .section-head.in-view .head-mark .hm-bloom{scale:1}
 
 /* ── the leaf the "u" sits on ────────────────────────────────────────────────
    Sized in em so it tracks the heading at every viewport, and behind the glyph
@@ -368,7 +394,9 @@ footer{position:relative;z-index:1}
 .leaf-u .rib{fill:none;stroke:#33473f;stroke-width:.7;opacity:.45;stroke-linecap:round}
 .leaf-u .rib.v{stroke-width:.55;opacity:.34}
 .section-head p{max-width:44ch;opacity:.8}
-.section-head .head-tr{font-size:.95rem;font-style:italic;letter-spacing:.02em;color:var(--ink-sage);margin-top:-.35rem}
+/* the underline lives in the gap the old -.35rem pull used up */
+.section-head .head-tr{font-size:.95rem;font-style:italic;letter-spacing:.02em;color:var(--ink-sage);margin-top:.6rem}
+.section-head .head-tr .rom{font-style:normal;color:var(--ink-terra);font-size:1.12em}
 /* menu toggle + quiet practical caption (made-to-order, pickup, allergens) */
 .menu-toggle{display:flex;flex-direction:column;align-items:center;width:max-content;max-width:92%;margin:0 auto 2.6rem}
 .menu-note{margin:1.1rem auto 0;max-width:54ch;text-align:center;font-size:.9rem;line-height:1.6;color:var(--espresso);opacity:.86}
@@ -1503,7 +1531,10 @@ main{position:relative}
      the soil and the flower belongs in the air above it, so it now breaks the
      surface: head ~50px clear on desktop, root junction ~29px down in the
      earth. It overlaps the section above, which is the point. */
-  position:absolute;left:calc(50% + 58px);top:calc(var(--bl-w) * -1.15);
+  /* The head sat 51px above the soil line — but the grass rises 52px, so the
+     blades were swallowing the lower petals and it read as half-buried. Lifted
+     clear of the grass, and nudged toward the trunk it grew from. */
+  position:absolute;left:calc(50% + 74px);top:calc(var(--bl-w) * -1.765);
   display:flex;flex-direction:column;align-items:center;gap:.15rem;
   background:none;border:0;padding:.3rem;cursor:pointer;z-index:2;
   -webkit-tap-highlight-color:transparent;
@@ -1560,14 +1591,16 @@ main{position:relative}
      small cream type is unreadable. 201px lands it in the sparse ground to the
      left; the feeder root below is lengthened to match so the shoot still reads
      as joined to the taproot rather than exiled. */
-  .bloom{left:calc(50% + var(--tk-x,0px) - clamp(84px,9.4vw,136px))}
+  .bloom{left:calc(50% + var(--tk-x,0px) - clamp(70px,8.2vw,118px))}
 }
 
 /* closed until the ground is in view, then it opens petal by petal */
 .js .petal{transform-box:fill-box;transform-origin:50% 100%;scale:.06;opacity:0}
 .js .bl-core,.js .bl-core2{transform-box:fill-box;transform-origin:50% 50%;scale:.2;opacity:0}
 .js .bl-leaf{transform-box:fill-box;transform-origin:0 50%;scale:.1;opacity:0}
-.js .bl-stem{stroke-dasharray:90;stroke-dashoffset:90}
+/* pathLength normalised: the stem got longer and a fixed 90-unit dash left it
+   part-drawn */
+.js .bl-stem{stroke-dasharray:1;stroke-dashoffset:1}
 /* pathLength normalises it: the feeder is 150 units long and the short roots 34,
    so one dasharray in user units would have left the feeder half drawn */
 .js .bl-root{stroke-dasharray:1;stroke-dashoffset:1}
@@ -1617,6 +1650,8 @@ main{position:relative}
   .js .petal,.js .bl-core,.js .bl-core2,.js .bl-leaf{scale:1;opacity:1}
   .js .bl-stem{stroke-dashoffset:0}
   .js .bloom-cue{opacity:.9;translate:none}
+  .js .head-mark .hm-line,.js .head-mark .hm-tendril{stroke-dashoffset:0}
+  .js .head-mark .hm-leaf,.js .head-mark .hm-bloom{scale:1}
 }
 
 /* ── closed banner + allergen panel: same vocabulary as everything else ──── */
@@ -1956,7 +1991,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 <!-- MENU -->
 <main>
   <div class="section-head" id="menu">
-    <h2>The men<span class="leaf-u">u<svg class="u-leaf" viewBox="0 0 34 16" aria-hidden="true" focusable="false"><path class="lf" d="M1,8.6 C6,0.4 20,-1.4 31,3.4 C26.4,12 12.6,14.6 1,8.6 Z"/><path class="rib" d="M3.6,8.4 C11,6.2 21,4.6 29.4,4.2"/><path class="rib v" d="M11,7.2 L10,10.4"/><path class="rib v" d="M17.4,6 L17,9.6"/><path class="rib v" d="M23.6,5 L23.8,8.2"/></svg></span></h2>
+    <h2>The men<span class="leaf-u">u<svg class="u-leaf" viewBox="0 0 34 16" aria-hidden="true" focusable="false"><path class="lf" d="M1,8.6 C6,0.4 20,-1.4 31,3.4 C26.4,12 12.6,14.6 1,8.6 Z"/><path class="rib" d="M3.6,8.4 C11,6.2 21,4.6 29.4,4.2"/><path class="rib v" d="M11,7.2 L10,10.4"/><path class="rib v" d="M17.4,6 L17,9.6"/><path class="rib v" d="M23.6,5 L23.8,8.2"/></svg></span><span class="head-mark" aria-hidden="true"><svg class="hm-rule" viewBox="0 0 200 22" preserveAspectRatio="none" focusable="false"><path class="hm-line" pathLength="1" d="M4,11 C38,4 66,16 100,10 C130,5 160,15 196,8"/></svg><span class="hm-tip"><svg viewBox="0 0 28 20" focusable="false"><path class="hm-tendril" pathLength="1" d="M2,3 C3,10 7,14 13,15"/><g class="hm-leaf" transform="translate(12,14.5) rotate(-16) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g></svg></span></span></h2>
     <div class="menu-badge-row"><button type="button" class="menu-allergen" id="allergenBtn" aria-expanded="false" aria-controls="allergenPanel" aria-label="Allergen and kitchen info"><span class="aller-i" aria-hidden="true">&#9432;</span>Allergens</button></div>
   </div>
 
@@ -1985,7 +2020,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
      have a plain, honest top edge instead of a fade, and the vine's terminal tip
      from the last dish has clear air above it. -->
 <div class="section-head how-head">
-  <h2 id="howH">From order to pickup<span class="head-sprig" aria-hidden="true"><svg viewBox="0 0 46 40" focusable="false"><path class="hs-stem" d="M6,38 C9,28 14,20 23,14"/><g class="hs-leaf" transform="translate(11.5,28.5) rotate(-146) scale(.42)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g><g class="hs-leaf" transform="translate(17,21) rotate(-24) scale(.38)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g><g class="hs-bloom" transform="translate(24,12.5) scale(.9)"><ellipse rx="2.3" ry="4" cy="-4.4"/><ellipse rx="2.3" ry="4" cy="-4.4" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" transform="rotate(288)"/><circle class="hs-core" r="2.4"/><circle class="hs-core2" r="1.5"/></g></svg></span></h2>
+  <h2 id="howH">From order to pickup<span class="head-mark" aria-hidden="true"><svg class="hm-rule" viewBox="0 0 200 22" preserveAspectRatio="none" focusable="false"><path class="hm-line" pathLength="1" d="M4,9 C40,16 70,4 104,11 C134,17 164,6 196,12"/></svg><span class="hm-tip"><svg viewBox="0 0 28 20" focusable="false"><path class="hm-tendril" pathLength="1" d="M2,16 C3,9 7,5 13,4"/><g class="hm-bloom" transform="translate(18,5) scale(.62)"><ellipse rx="2.3" ry="4" cy="-4.4"/><ellipse rx="2.3" ry="4" cy="-4.4" transform="rotate(72)"/><ellipse rx="2.3" ry="4" cy="-4.4" transform="rotate(144)"/><ellipse rx="2.3" ry="4" cy="-4.4" transform="rotate(216)"/><ellipse rx="2.3" ry="4" cy="-4.4" transform="rotate(288)"/><circle class="hm-core" r="2.4"/></g></svg></span></span></h2>
 </div>
 
 <div id="trunkZone">
@@ -2003,8 +2038,8 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 <!-- REVIEWS -->
 <section class="reviews" id="reviews" aria-labelledby="revH">
   <div class="section-head" style="padding-top:0">
-    <h2 id="revH">Ano ang Aton <span class="rom">Kalīpay</span></h2>
-    <span class="head-tr">What brings us joy</span>
+    <h2 id="revH">What brings us joy<span class="head-mark" aria-hidden="true"><svg class="hm-rule" viewBox="0 0 200 22" preserveAspectRatio="none" focusable="false"><path class="hm-line" pathLength="1" d="M5,12 C36,6 64,15 98,9 C132,3 162,14 195,9"/></svg><span class="hm-tip"><svg viewBox="0 0 28 20" focusable="false"><path class="hm-tendril" pathLength="1" d="M1.5,3.5 C7,2.6 12,5.4 12.6,9.4"/><g class="hm-leaf" transform="translate(11.5,9) rotate(24) scale(.46)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g><g class="hm-leaf" transform="translate(10.5,10.5) rotate(86) scale(.34)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g></svg></span></span></h2>
+    <span class="head-tr">Ano ang aton <span class="rom">Kalīpay</span></span>
   </div>
   <div class="rev-carousel">
     <button type="button" class="rev-arrow prev" id="revPrev" aria-label="Previous review">&#8249;</button>
@@ -2050,17 +2085,19 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
   <!-- The plant finishes here. The page's vine arrives at the soil, roots spread,
        and one shoot comes back up to flower — the flower holds the story. -->
   <button type="button" class="bloom" id="storyBloom" aria-haspopup="dialog" aria-controls="storyDialog" aria-label="Read our story" title="Read our story">
-    <svg class="bloom-svg" viewBox="0 0 92 158" aria-hidden="true" focusable="false">
-      <!-- One root, in the plate's exact colour and opacity, so it belongs to the
-           same drawing. Three thin ones at full strength read as scratches. -->
-      <path pathLength="1" class="bl-root" d="M46,114 C47,127 45,139 46,153"/>
-      <path pathLength="1" class="bl-root" style="stroke-width:2.2" d="M46,118 C40,127 33,133 26,137"/>
-      <path pathLength="1" class="bl-root" style="stroke-width:1.9" d="M46,120 C52,129 59,134 66,137"/>
-      <path pathLength="1" class="bl-root" style="stroke-width:1.5;opacity:.34" d="M34,132 C32,140 32,147 34,154"/>
-      <path class="bl-stem" d="M46,116 C43,100 49,86 46,64"/>
-      <g class="bl-leaf" style="--i:7" transform="translate(46,86) rotate(-40) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
-      <g class="bl-leaf" style="--i:8" transform="translate(46,104) rotate(146) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
-      <g class="bl-head" transform="translate(46,46)">
+    <svg class="bloom-svg" viewBox="0 0 92 210" aria-hidden="true" focusable="false">
+      <!-- Taller than it was. The grass rises 52px and the old shoot put its head
+           54px up, so the blades ate the lower petals; lifting it instead pulled
+           the stem out of the ground. A flower standing in grass has to be tall
+           enough to stand in it. -->
+      <path pathLength="1" class="bl-root" d="M46,166 C47,179 45,191 46,205"/>
+      <path pathLength="1" class="bl-root" style="stroke-width:2.2" d="M46,170 C40,179 33,185 26,189"/>
+      <path pathLength="1" class="bl-root" style="stroke-width:1.9" d="M46,172 C52,181 59,186 66,189"/>
+      <path pathLength="1" class="bl-root" style="stroke-width:1.5;opacity:.34" d="M34,184 C32,192 32,199 34,206"/>
+      <path pathLength="1" class="bl-stem" d="M46,168 C42,142 50,116 45,92 C43,84 45,80 46,76"/>
+      <g class="bl-leaf" style="--i:7" transform="translate(45,116) rotate(-40) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
+      <g class="bl-leaf" style="--i:8" transform="translate(47,142) rotate(146) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
+      <g class="bl-head" transform="translate(46,58)">
       <ellipse class="petal" style="--i:0" transform="rotate(0.0)" rx="6.4" ry="13" cy="-13"/>
       <ellipse class="petal" style="--i:1" transform="rotate(51.4)" rx="6.4" ry="13" cy="-13"/>
       <ellipse class="petal" style="--i:2" transform="rotate(102.9)" rx="6.4" ry="13" cy="-13"/>
@@ -3327,7 +3364,7 @@ document.getElementById('placeOrderBtn').addEventListener('click', async ()=>{
 /* ---------------- staged scroll reveals ---------------- */
 (function(){
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  document.querySelectorAll('main > .section-head, .menu-tabs, .how .section-head').forEach(el=>el.classList.add('rise'));
+  document.querySelectorAll('.section-head, .menu-tabs').forEach(el=>el.classList.add('rise'));
   const stagger = nodes => nodes.forEach((el,i)=>el.classList.add('rise','d'+Math.min(i+1,4)));
   stagger([...document.querySelectorAll('.word-card')]);
   /* .how .step cards are handled by the root-then-flow engine below */
