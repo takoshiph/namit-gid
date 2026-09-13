@@ -36,6 +36,18 @@
   --cream-soft:#efe6d4;
   --terracotta:#c4633c;
   --gold:#d9a441;
+  /* Contrast-safe relatives of the brand colours, measured against the sage
+     ground (#9bb9af). The brights stay for fills, badges and large display;
+     these carry TEXT. Terracotta on sage is 1.91:1 — no opacity fixes that,
+     the colour itself has to come down.
+       --ink-terra  4.85:1 on sage, 9.03 on cream — small text
+       --terra-deep 3.35:1 on sage, 6.24 on cream — display type (>=24px)
+       --ink-sage   4.85:1 on sage — small text that was --sage-dark
+     Targets are set above the 4.5/3.0 line, not on it: rounding the solved
+     colour to a hex knocks about .02 off and lands you back under. */
+  --ink-terra:#65331f;
+  --terra-deep:#8a452a;
+  --ink-sage:#33453f;
   --ring: rgba(53,40,31,.85);
   --shadow: rgba(38,52,47,.35);
   /* the ground, as a cross-section: the surface where the sage meets it, then
@@ -138,9 +150,9 @@ nav{
 }
 nav.scrolled{background:rgba(155,185,175,.88);backdrop-filter:blur(10px);box-shadow:0 1px 0 rgba(53,40,31,.08);padding:.7rem clamp(1.2rem,4vw,3rem)}
 .nav-logo{font-family:var(--ff-display);font-size:1.15rem;letter-spacing:.04em;display:flex;align-items:baseline;gap:.45rem}
-.nav-logo em{font-style:normal;color:var(--terracotta)}
+.nav-logo em{font-style:normal;color:var(--ink-terra)}
 .nav-links{display:flex;align-items:center;gap:clamp(1rem,3vw,2.2rem);font-size:.78rem;letter-spacing:.22em;text-transform:uppercase}
-.nav-links a{opacity:.75;transition:opacity .2s}
+.nav-links a{opacity:.86;transition:opacity .2s}
 .nav-links a:hover{opacity:1}
 .nav-cta{
   background:var(--espresso);color:var(--cream);
@@ -211,7 +223,7 @@ footer{position:relative;z-index:1}
 .wordmark:focus-visible{outline:3px solid var(--cream);outline-offset:6px;border-radius:8px}
 .eyebrow{
   font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;color:var(--espresso);
-  opacity:.65;display:inline-flex;align-items:center;gap:.7rem;
+  opacity:.84;display:inline-flex;align-items:center;gap:.7rem;
 }
 .eyebrow::before,.eyebrow::after{content:"";width:26px;height:1px;background:currentColor;opacity:.5}
 
@@ -309,20 +321,21 @@ footer{position:relative;z-index:1}
 }
 .section-head h2{font-family:var(--ff-display);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:400}
 .section-head p{max-width:44ch;opacity:.8}
-.section-head .head-tr{font-size:.95rem;font-style:italic;letter-spacing:.02em;color:var(--sage-dark);opacity:.82;margin-top:-.35rem}
+.section-head .head-tr{font-size:.95rem;font-style:italic;letter-spacing:.02em;color:var(--ink-sage);margin-top:-.35rem}
 /* menu toggle + quiet practical caption (made-to-order, pickup, allergens) */
 .menu-toggle{display:flex;flex-direction:column;align-items:center;width:max-content;max-width:92%;margin:0 auto 2.6rem}
-.menu-note{margin:1.1rem auto 0;max-width:54ch;text-align:center;font-size:.9rem;line-height:1.6;color:var(--espresso);opacity:.78}
-.menu-note .place{color:var(--espresso);font-weight:700;opacity:.95}
+.menu-note{margin:1.1rem auto 0;max-width:54ch;text-align:center;font-size:.9rem;line-height:1.6;color:var(--espresso);opacity:.86}
+.menu-note .place{color:var(--espresso);font-weight:700;opacity:1}
 /* allergens: a small, calm, neutral badge — distinct from the terracotta category accent */
 .menu-allergen{margin-top:.7rem;display:inline-flex;align-items:center;gap:.32rem;font:inherit;font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;font-weight:600;
-  color:var(--sage-dark);background:transparent;border:1px solid rgba(95,129,119,.4);border-radius:999px;
-  padding:.26rem .7rem;cursor:pointer;opacity:.85;transition:background .2s,opacity .2s,border-color .2s,color .2s}
-.menu-allergen .aller-i{font-size:.6rem;line-height:1;opacity:.85}
+  color:var(--ink-sage);background:transparent;border:1px solid rgba(54,74,68,.55);border-radius:999px;
+  padding:.26rem .7rem;cursor:pointer;transition:background .2s,opacity .2s,border-color .2s,color .2s}
+.menu-allergen .aller-i{font-size:.6rem;line-height:1}
 .menu-allergen:hover{opacity:1;background:rgba(95,129,119,.12);border-color:var(--sage-dark);color:var(--espresso)}
 .menu-badge-row{margin-top:.7rem;text-align:center}
 .menu-badge-row .menu-allergen{margin-top:0}
-.rom{font-family:var(--ff-display);color:var(--terracotta);letter-spacing:.06em}
+/* display-size Hiligaynon; small .rom is overridden per context below */
+.rom{font-family:var(--ff-display);color:var(--terra-deep);letter-spacing:.06em}
 
 .menu-item{
   display:grid;grid-template-columns:1fr 1fr;align-items:center;
@@ -336,9 +349,9 @@ footer{position:relative;z-index:1}
    here: same direction, same gap, and align-items:inherit so the right-aligned
    even rows keep working. */
 .menu-item .info .sub{display:flex;flex-direction:column;gap:.9rem;align-items:inherit}
-.menu-item .info .num{font-size:.72rem;letter-spacing:.35em;color:var(--sage-dark);text-transform:uppercase}
+.menu-item .info .num{font-size:.72rem;letter-spacing:.35em;color:var(--ink-sage);text-transform:uppercase}
 .menu-item h3{font-family:var(--ff-display);font-size:clamp(1.7rem,4vw,2.4rem);font-weight:400}
-.menu-item .tag{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--terracotta)}
+.menu-item .tag{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-terra)}
 .menu-item .desc{opacity:.85}
 .menu-item .row{display:flex;align-items:center;gap:1.2rem;margin-top:.3rem}
 .menu-item .price{font-family:var(--ff-display);font-size:1.5rem}
@@ -366,9 +379,9 @@ footer{position:relative;z-index:1}
 }
 .menu-tabs button{
   min-height:44px;padding:.55rem 1.6rem;border-radius:99px;font-size:.76rem;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--espresso);opacity:.72;font-weight:500;transition:opacity .25s, background .25s, color .25s, box-shadow .25s;
+  color:var(--espresso);opacity:.87;font-weight:500;transition:opacity .25s, background .25s, color .25s, box-shadow .25s;
 }
-.menu-tabs button.active{background:var(--cream);opacity:1;color:var(--terracotta);font-weight:700;box-shadow:0 3px 10px -4px var(--shadow)}
+.menu-tabs button.active{background:var(--cream);opacity:1;color:var(--terra-deep);font-weight:700;box-shadow:0 3px 10px -4px var(--shadow)}
 .menu-item.hidden{display:none}
 /* phone-only; visible here it would be a third item in the 2-col grid */
 .vine-link{display:none}
@@ -499,20 +512,25 @@ footer{position:relative;z-index:1}
    two meet without a step at any viewport. */
 #trunkZone{
   position:relative;
-  --rootW:clamp(700px,112vw,1600px);
+  --rootW:clamp(760px,132vw,1900px);
   --tk-base:calc(var(--rootW) * 0.0445);   /* width where it enters the ground */
+  --tk-x:clamp(-62px, (900px - 100vw) * 0.115, 0px);
 }
 .trunk{
-  position:absolute;left:50%;top:0;bottom:-22px;   /* overshoots into the soil */
+  /* Starts above the section, not at it. Fading brown out over sage can only
+     pass through grey — that is the honest midpoint of the two — so the trick is
+     not to make the fade prettier but to put it where there is nothing to read.
+     At top:0 it washed straight across the "How it works" eyebrow. */
+  position:absolute;left:calc(50% + var(--tk-x));top:-96px;bottom:-22px;   /* into the soil */
   width:var(--tk-base);transform:translateX(-50%);
   z-index:0;pointer-events:none;
   /* bark tiles; the silhouette stretches. A stretched bitmap would smear the
      grain over 1,500px, and a tiled one could not taper — masking separates the
      two so each does only what it is good at. */
   background:url("images/bark-tile.webp") repeat-y center top;
-  background-size:188% auto;
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='0'/%3E%3Cstop offset='.085' stop-color='%23fff' stop-opacity='1'/%3E%3C/linearGradient%3E%3Cpath fill='url(%23f)' d='M25,0 C24,110 26,220 22,330 C20,430 22,520 19,620 C17,700 18,760 16.5,820 C14,865 12,895 9,930 C6,960 3,982 0,1000 L100,1000 C97,982 94,960 91,930 C88,895 86,865 83.5,820 C82,760 83,700 81,620 C78,520 80,430 78,330 C74,220 76,110 75,0 Z'/%3E%3C/svg%3E");
-  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='0'/%3E%3Cstop offset='.085' stop-color='%23fff' stop-opacity='1'/%3E%3C/linearGradient%3E%3Cpath fill='url(%23f)' d='M25,0 C24,110 26,220 22,330 C20,430 22,520 19,620 C17,700 18,760 16.5,820 C14,865 12,895 9,930 C6,960 3,982 0,1000 L100,1000 C97,982 94,960 91,930 C88,895 86,865 83.5,820 C82,760 83,700 81,620 C78,520 80,430 78,330 C74,220 76,110 75,0 Z'/%3E%3C/svg%3E");
+  background-size:300% auto;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='0'/%3E%3Cstop offset='.045' stop-color='%23fff' stop-opacity='1'/%3E%3C/linearGradient%3E%3Cpath fill='url(%23f)' d='M20.85,0 L20.79,8.3 L20.72,16.7 L20.65,25 L20.56,33.3 L20.48,41.7 L20.41,50 L20.34,58.3 L20.28,66.7 L20.24,75 L20.21,83.3 L20.19,91.7 L20.18,100 L20.19,108.3 L20.21,116.7 L20.23,125 L20.25,133.3 L20.28,141.7 L20.3,150 L20.31,158.3 L20.32,166.7 L20.31,175 L20.28,183.3 L20.25,191.7 L20.19,200 L20.11,208.3 L20.02,216.7 L19.92,225 L19.79,233.3 L19.66,241.7 L19.52,250 L19.38,258.3 L19.24,266.7 L19.1,275 L18.96,283.3 L18.84,291.7 L18.73,300 L18.64,308.3 L18.56,316.7 L18.51,325 L18.47,333.3 L18.45,341.7 L18.44,350 L18.45,358.3 L18.47,366.7 L18.5,375 L18.53,383.3 L18.55,391.7 L18.57,400 L18.57,408.3 L18.56,416.7 L18.52,425 L18.45,433.3 L18.36,441.7 L18.23,450 L18.06,458.3 L17.86,466.7 L17.62,475 L17.35,483.3 L17.04,491.7 L16.71,500 L16.35,508.3 L15.97,516.7 L15.58,525 L15.18,533.3 L14.77,541.7 L14.37,550 L13.98,558.3 L13.61,566.7 L13.26,575 L12.93,583.3 L12.64,591.7 L12.37,600 L12.14,608.3 L11.94,616.7 L11.77,625 L11.64,633.3 L11.54,641.7 L11.47,650 L11.42,658.3 L11.39,666.7 L11.38,675 L11.38,683.3 L11.39,691.7 L11.4,700 L11.41,708.3 L11.41,716.7 L11.41,725 L11.4,733.3 L11.37,741.7 L11.34,750 L11.3,758.3 L11.24,766.7 L11.18,775 L11.11,783.3 L11.04,791.7 L10.96,800 L10.89,808.3 L10.82,816.7 L10.76,825 L10.7,833.3 L10.65,841.7 L10.53,850 L10.27,858.3 L9.86,866.7 L9.3,875 L8.58,883.3 L7.69,891.7 L6.63,900 L5.39,908.3 L3.97,916.7 L2.35,925 L0.53,933.3 L-1.5,941.7 L-3.74,950 L-6.19,958.3 L-8.87,966.7 L-11.77,975 L-14.9,983.3 L-18.27,991.7 L0,1000 L100,1000 L121.27,991.7 L117.94,983.3 L114.8,975 L111.85,966.7 L109.09,958.3 L106.54,950 L104.18,941.7 L102.03,933.3 L100.08,925 L98.33,916.7 L96.78,908.3 L95.44,900 L94.29,891.7 L93.34,883.3 L92.59,875 L92.02,866.7 L91.63,858.3 L91.41,850 L91.36,841.7 L91.4,833.3 L91.44,825 L91.5,816.7 L91.55,808.3 L91.6,800 L91.64,791.7 L91.67,783.3 L91.69,775 L91.7,766.7 L91.69,758.3 L91.66,750 L91.62,741.7 L91.55,733.3 L91.47,725 L91.38,716.7 L91.27,708.3 L91.14,700 L91,691.7 L90.85,683.3 L90.69,675 L90.53,666.7 L90.36,658.3 L90.19,650 L90.03,641.7 L89.86,633.3 L89.69,625 L89.53,616.7 L89.38,608.3 L89.23,600 L89.08,591.7 L88.94,583.3 L88.8,575 L88.67,566.7 L88.53,558.3 L88.39,550 L88.25,541.7 L88.1,533.3 L87.95,525 L87.78,516.7 L87.61,508.3 L87.42,500 L87.22,491.7 L87.01,483.3 L86.78,475 L86.54,466.7 L86.28,458.3 L86.02,450 L85.74,441.7 L85.45,433.3 L85.16,425 L84.87,416.7 L84.57,408.3 L84.29,400 L84.01,391.7 L83.74,383.3 L83.49,375 L83.25,366.7 L83.04,358.3 L82.86,350 L82.7,341.7 L82.57,333.3 L82.47,325 L82.41,316.7 L82.37,308.3 L82.37,300 L82.4,291.7 L82.46,283.3 L82.54,275 L82.65,266.7 L82.78,258.3 L82.93,250 L83.08,241.7 L83.25,233.3 L83.42,225 L83.59,216.7 L83.76,208.3 L83.91,200 L84.06,191.7 L84.19,183.3 L84.3,175 L84.4,166.7 L84.47,158.3 L84.52,150 L84.54,141.7 L84.54,133.3 L84.51,125 L84.47,116.7 L84.4,108.3 L84.32,100 L84.21,91.7 L84.09,83.3 L83.97,75 L83.83,66.7 L83.68,58.3 L83.53,50 L83.38,41.7 L83.23,33.3 L83.08,25 L82.94,16.7 L82.79,8.3 L82.66,0 Z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='0'/%3E%3Cstop offset='.045' stop-color='%23fff' stop-opacity='1'/%3E%3C/linearGradient%3E%3Cpath fill='url(%23f)' d='M20.85,0 L20.79,8.3 L20.72,16.7 L20.65,25 L20.56,33.3 L20.48,41.7 L20.41,50 L20.34,58.3 L20.28,66.7 L20.24,75 L20.21,83.3 L20.19,91.7 L20.18,100 L20.19,108.3 L20.21,116.7 L20.23,125 L20.25,133.3 L20.28,141.7 L20.3,150 L20.31,158.3 L20.32,166.7 L20.31,175 L20.28,183.3 L20.25,191.7 L20.19,200 L20.11,208.3 L20.02,216.7 L19.92,225 L19.79,233.3 L19.66,241.7 L19.52,250 L19.38,258.3 L19.24,266.7 L19.1,275 L18.96,283.3 L18.84,291.7 L18.73,300 L18.64,308.3 L18.56,316.7 L18.51,325 L18.47,333.3 L18.45,341.7 L18.44,350 L18.45,358.3 L18.47,366.7 L18.5,375 L18.53,383.3 L18.55,391.7 L18.57,400 L18.57,408.3 L18.56,416.7 L18.52,425 L18.45,433.3 L18.36,441.7 L18.23,450 L18.06,458.3 L17.86,466.7 L17.62,475 L17.35,483.3 L17.04,491.7 L16.71,500 L16.35,508.3 L15.97,516.7 L15.58,525 L15.18,533.3 L14.77,541.7 L14.37,550 L13.98,558.3 L13.61,566.7 L13.26,575 L12.93,583.3 L12.64,591.7 L12.37,600 L12.14,608.3 L11.94,616.7 L11.77,625 L11.64,633.3 L11.54,641.7 L11.47,650 L11.42,658.3 L11.39,666.7 L11.38,675 L11.38,683.3 L11.39,691.7 L11.4,700 L11.41,708.3 L11.41,716.7 L11.41,725 L11.4,733.3 L11.37,741.7 L11.34,750 L11.3,758.3 L11.24,766.7 L11.18,775 L11.11,783.3 L11.04,791.7 L10.96,800 L10.89,808.3 L10.82,816.7 L10.76,825 L10.7,833.3 L10.65,841.7 L10.53,850 L10.27,858.3 L9.86,866.7 L9.3,875 L8.58,883.3 L7.69,891.7 L6.63,900 L5.39,908.3 L3.97,916.7 L2.35,925 L0.53,933.3 L-1.5,941.7 L-3.74,950 L-6.19,958.3 L-8.87,966.7 L-11.77,975 L-14.9,983.3 L-18.27,991.7 L0,1000 L100,1000 L121.27,991.7 L117.94,983.3 L114.8,975 L111.85,966.7 L109.09,958.3 L106.54,950 L104.18,941.7 L102.03,933.3 L100.08,925 L98.33,916.7 L96.78,908.3 L95.44,900 L94.29,891.7 L93.34,883.3 L92.59,875 L92.02,866.7 L91.63,858.3 L91.41,850 L91.36,841.7 L91.4,833.3 L91.44,825 L91.5,816.7 L91.55,808.3 L91.6,800 L91.64,791.7 L91.67,783.3 L91.69,775 L91.7,766.7 L91.69,758.3 L91.66,750 L91.62,741.7 L91.55,733.3 L91.47,725 L91.38,716.7 L91.27,708.3 L91.14,700 L91,691.7 L90.85,683.3 L90.69,675 L90.53,666.7 L90.36,658.3 L90.19,650 L90.03,641.7 L89.86,633.3 L89.69,625 L89.53,616.7 L89.38,608.3 L89.23,600 L89.08,591.7 L88.94,583.3 L88.8,575 L88.67,566.7 L88.53,558.3 L88.39,550 L88.25,541.7 L88.1,533.3 L87.95,525 L87.78,516.7 L87.61,508.3 L87.42,500 L87.22,491.7 L87.01,483.3 L86.78,475 L86.54,466.7 L86.28,458.3 L86.02,450 L85.74,441.7 L85.45,433.3 L85.16,425 L84.87,416.7 L84.57,408.3 L84.29,400 L84.01,391.7 L83.74,383.3 L83.49,375 L83.25,366.7 L83.04,358.3 L82.86,350 L82.7,341.7 L82.57,333.3 L82.47,325 L82.41,316.7 L82.37,308.3 L82.37,300 L82.4,291.7 L82.46,283.3 L82.54,275 L82.65,266.7 L82.78,258.3 L82.93,250 L83.08,241.7 L83.25,233.3 L83.42,225 L83.59,216.7 L83.76,208.3 L83.91,200 L84.06,191.7 L84.19,183.3 L84.3,175 L84.4,166.7 L84.47,158.3 L84.52,150 L84.54,141.7 L84.54,133.3 L84.51,125 L84.47,116.7 L84.4,108.3 L84.32,100 L84.21,91.7 L84.09,83.3 L83.97,75 L83.83,66.7 L83.68,58.3 L83.53,50 L83.38,41.7 L83.23,33.3 L83.08,25 L82.94,16.7 L82.79,8.3 L82.66,0 Z'/%3E%3C/svg%3E");
   -webkit-mask-size:100% 100%;mask-size:100% 100%;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   filter:saturate(.82) brightness(.9)
@@ -520,20 +538,41 @@ footer{position:relative;z-index:1}
 }
 /* a soft column of shade down one side, so the trunk is round rather than a
    flat brown strip with bark printed on it */
+/* an old branch scar: the one mark that stops a tapered column reading as milled */
+.trunk::after{content:"";position:absolute;left:16%;top:34%;width:46%;height:34px;
+  border-radius:50%;rotate:-7deg;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(28,15,5,.85) 0 22%, rgba(50,30,12,.5) 38%, transparent 66%),
+    radial-gradient(ellipse at 48% 42%, transparent 0 26%, rgba(255,236,205,.17) 34% 46%, transparent 58%);
+}
 .trunk .tk-shade{position:absolute;inset:0;display:block;
-  background:linear-gradient(90deg,rgba(255,236,205,.16) 0 14%,rgba(0,0,0,0) 38%,
-             rgba(0,0,0,.16) 74%,rgba(0,0,0,.34) 100%)}
+  background:linear-gradient(90deg,
+             rgba(0,0,0,.30) 0, rgba(0,0,0,.10) 4%,
+             rgba(255,236,205,.17) 15%, rgba(255,236,205,.05) 26%,
+             rgba(0,0,0,0) 44%, rgba(0,0,0,.15) 70%,
+             rgba(0,0,0,.34) 93%, rgba(0,0,0,.44) 100%)}
+
+/* The trunk is centred and so are the section headings, so it crosses every
+   line of type in this stretch. A halo in the page colour keeps the wood behind
+   the words without having to move either of them. */
+#trunkZone .section-head h2,
+#trunkZone .section-head .eyebrow,
+#trunkZone .section-head .head-tr{
+  text-shadow:0 0 12px var(--sage), 0 0 24px var(--sage), 0 0 34px var(--sage);
+}
 
 /* ── the boards ─────────────────────────────────────────────────────────────
    Weathered plank rather than the review sign's dark board: four dark boards
    plus the sign would be a wall of brown, and the lighter wood puts the sign at
    the top of the hierarchy where it belongs. */
-.how .steps{max-width:1000px;margin:2.2rem auto 0;position:relative;z-index:1}
+.how .steps{max-width:1000px;margin:2.2rem auto 0;position:relative;z-index:1;
+  translate:var(--tk-x,0px) 0}
 .step{
   position:relative;z-index:1;
   padding:1.3rem 1.4rem;display:flex;flex-direction:column;gap:.5rem;
   border-radius:6px;color:var(--cream);
-  background:url("images/weathered-plank.webp") repeat center/auto 210%,
+  background:linear-gradient(rgba(0,0,0,.19),rgba(0,0,0,.19)),
+             url("images/weathered-plank.webp") repeat center/auto 210%,
              linear-gradient(#7b6247,#5d4a35);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.3), inset 0 2px 0 rgba(255,240,214,.14),
              inset 0 -3px 7px -4px rgba(0,0,0,.5),
@@ -547,9 +586,9 @@ footer{position:relative;z-index:1}
 .step .step-head{display:flex;flex-wrap:nowrap;align-items:center;gap:.7rem}
 .step .k{flex:1 1 auto;min-width:0;font-family:var(--ff-display);font-size:1.16rem;line-height:1.15;
   color:var(--cream);text-shadow:0 1px 2px rgba(25,15,6,.55)}
-.step p{font-size:.9rem;opacity:1;color:rgba(247,240,227,.86);line-height:1.5}
+.step p{font-size:.9rem;color:var(--cream);line-height:1.5}
 .step .num{flex:0 0 32px;width:32px;height:32px;border-radius:50%;
-  background:var(--terracotta);color:var(--cream);display:grid;place-items:center;
+  background:#a95534;color:var(--cream);display:grid;place-items:center;
   font-weight:700;font-size:.85rem;line-height:1;
   box-shadow:0 1px 0 rgba(255,240,214,.25), inset 0 -2px 3px -1px rgba(60,20,5,.5)}
 
@@ -636,7 +675,7 @@ footer{position:relative;z-index:1}
    Two nails here rather than one, because the sign is wide and centred ON the
    trunk instead of hanging off one edge of it — a single nail would let a board
    that size swing like a pub sign. */
-.rev-nail{left:50%;margin-left:-7px}
+.rev-nail{left:calc(50% + var(--tk-x,0px));margin-left:-7px}
 .rev-nail--t{top:9px}
 .rev-nail--b{bottom:9px}
 .js .rev-hang.in-view .rev-nail{animation:nailDrive .22s cubic-bezier(.5,0,.75,1) .46s both}
@@ -675,13 +714,30 @@ footer{
   position:relative}
 /* grain: two barely-there speckle layers, offset so the repeat never lines up.
    Without it a 350px band of flat brown reads as a swatch, not as earth. */
+/* Grain, strata and stones. Flat brown plus speckle reads as a swatch; ground
+   read in cross-section has bands where it was laid down, and things in it.
+   Three layers, all low contrast: the soil has to stay a background. */
 footer::before{
-  content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;
   background-image:
     radial-gradient(rgba(247,240,227,.055) 1px, transparent 1.2px),
     radial-gradient(rgba(0,0,0,.10) 1px, transparent 1.2px);
   background-size:23px 23px, 31px 31px;
   background-position:0 0, 11px 17px;
+}
+/* strata: uneven bands, none of them a straight rule across the page */
+footer::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(180deg,transparent 0 14%,rgba(0,0,0,.038) 19%,transparent 24%),
+    linear-gradient(180deg,transparent 0 38%,rgba(255,238,206,.024) 42.5%,transparent 47%),
+    linear-gradient(180deg,transparent 0 59%,rgba(0,0,0,.05) 65%,transparent 71%),
+    linear-gradient(180deg,transparent 0 81%,rgba(0,0,0,.035) 85.5%,transparent 90%);
+}
+/* stones and clumps, on a big tile so the repeat does not read */
+.soil-bits{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='430' height='290' viewBox='0 0 430 290'%3E%3Cg fill='%23000' fill-opacity='.16'%3E%3Cellipse cx='38' cy='54' rx='9' ry='6' transform='rotate(-18 38 54)'/%3E%3Cellipse cx='176' cy='31' rx='6' ry='4.2' transform='rotate(24 176 31)'/%3E%3Cellipse cx='301' cy='78' rx='11' ry='6.6' transform='rotate(-9 301 78)'/%3E%3Cellipse cx='96' cy='142' rx='7' ry='4.6' transform='rotate(37 96 142)'/%3E%3Cellipse cx='247' cy='176' rx='8.4' ry='5.2' transform='rotate(-31 247 176)'/%3E%3Cellipse cx='389' cy='149' rx='5.6' ry='3.8' transform='rotate(12 389 149)'/%3E%3Cellipse cx='143' cy='247' rx='10' ry='5.8' transform='rotate(-22 143 247)'/%3E%3Cellipse cx='338' cy='253' rx='6.6' ry='4.4' transform='rotate(41 338 253)'/%3E%3Cellipse cx='19' cy='205' rx='7.6' ry='4.8' transform='rotate(-6 19 205)'/%3E%3C/g%3E%3Cg fill='%23ffeecd' fill-opacity='.10'%3E%3Cellipse cx='41' cy='51' rx='5.4' ry='3.2' transform='rotate(-18 41 51)'/%3E%3Cellipse cx='304' cy='74.5' rx='6.6' ry='3.4' transform='rotate(-9 304 74.5)'/%3E%3Cellipse cx='146' cy='244' rx='6' ry='3' transform='rotate(-22 146 244)'/%3E%3Cellipse cx='250' cy='173' rx='5' ry='2.6' transform='rotate(-31 250 173)'/%3E%3C/g%3E%3Cg fill='%23000' fill-opacity='.09'%3E%3Cpath d='M212 108c14-6 26 2 24 12s-18 14-28 8-10-14 4-20z'/%3E%3Cpath d='M58 96c11-5 21 1 19 9s-14 12-22 7-8-12 3-16z'/%3E%3Cpath d='M356 199c13-5 24 2 22 11s-17 13-26 7-9-13 4-18z'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat:repeat;background-size:430px 290px;
 }
 /* the seam above is the stem arriving; with a gap between them the plant would be
    hovering over the soil rather than going into it */
@@ -698,31 +754,42 @@ footer::before{
   -webkit-mask-image:linear-gradient(180deg,#000 0,#000 68%,transparent 99%);
   mask-image:linear-gradient(180deg,#000 0,#000 68%,transparent 99%)}
 .foot-roots-img{
-  position:absolute;left:50%;display:block;
-  width:var(--rootW,clamp(700px,112vw,1600px));
+  position:absolute;left:calc(50% + var(--tk-x) + var(--rootW,1900px) * 0.0084);display:block;
+  width:var(--rootW,clamp(760px,132vw,1900px));
   aspect-ratio:2089/753;
-  top:calc(var(--rootW,clamp(700px,112vw,1600px)) * -0.0144);
+  top:calc(var(--rootW,clamp(760px,132vw,1900px)) * -0.0144);
   transform:translateX(-50%);
   background:url("images/roots.webp") no-repeat center top/100% auto;
   opacity:.42;
   filter:drop-shadow(0 2px 3px rgba(16,10,4,.5));
 }
-footer{--rootW:clamp(700px,112vw,1600px)}
+footer{--rootW:clamp(760px,132vw,1900px);--tk-x:clamp(-62px, (900px - 100vw) * 0.115, 0px)}
 footer .wrap{position:relative;z-index:1}
 /* the plate spreads far enough on its own to reach the link columns, so the
    separate hair-root layer that used to bridge that gap is gone */
-.js .foot-rootwrap{clip-path:circle(0% at 50% 0);transition:clip-path 2s cubic-bezier(.25,.7,.3,1)}
-.js footer.in-view .foot-rootwrap{clip-path:circle(150% at 50% 0)}
+/* An ellipse, not a circle, and faster. The plate is 1900x685: a circle big
+   enough to reach the far laterals has to travel 950px sideways but only 685
+   down, so the outer roots arrived long after the middle had finished and the
+   whole thing crawled. An ellipse matched to the shape spreads evenly. */
+.js .foot-rootwrap{clip-path:ellipse(0% 0% at 50% 0);
+  transition:clip-path 1.35s cubic-bezier(.16,.84,.34,1)}
+.js footer.in-view .foot-rootwrap{clip-path:ellipse(78% 135% at 50% 0)}
 footer .wrap{
   /* the painted plate is up to 390px deep; the copy has to clear it */
   max-width:1060px;margin:0 auto;padding:clamp(7rem,20vw,10.5rem) clamp(1.4rem,5vw,3rem) 2.4rem;
   display:flex;flex-wrap:wrap;gap:2rem;justify-content:space-between;align-items:flex-end;
 }
-footer .fm{font-family:var(--ff-display);font-size:2rem;line-height:.85}
+footer .fm{font-family:var(--ff-display);font-size:clamp(2.6rem,4.4vw,3.6rem);line-height:.82;
+  color:var(--cream);letter-spacing:.01em;
+  text-shadow:0 2px 0 rgba(20,12,4,.55), 0 -1px 0 rgba(255,240,214,.18),
+              0 6px 18px rgba(16,10,4,.7)}
 footer .fm em{font-style:normal;color:var(--gold)}
 /* the staggered monogram needs room either side to read as a mark; on a phone it
    is just two letters in a corner, so the wordmark carries the footer instead */
-footer .fm-word{display:none;font-family:var(--ff-display);font-size:1.5rem;line-height:1}
+footer .fm-word{display:none;font-family:var(--ff-display);font-size:1.9rem;line-height:1;
+  color:var(--cream);
+  text-shadow:0 2px 0 rgba(20,12,4,.55), 0 -1px 0 rgba(255,240,214,.18),
+              0 6px 18px rgba(16,10,4,.7)}
 footer .fm-word em{font-style:normal;color:var(--gold)}
 @media(max-width:720px){
   footer .fm{display:none}
@@ -730,37 +797,14 @@ footer .fm-word em{font-style:normal;color:var(--gold)}
   footer .wrap{padding-top:5.2rem;gap:1.6rem}
 }
 footer .cols{display:flex;gap:3rem;font-size:.85rem}
-/* Each group is fed by a root that runs the whole height of the column, past the
-   heading and both links, and puts out side hairs as it goes.
-   It replaces a 26px stub that sat above each heading: the stub began nowhere
-   and ended nowhere, which is why it read as a sticker. Two things fix that —
-   length, and a top edge that FADES rather than stops, so the filament reads as
-   continuing up into the web behind it instead of terminating in mid-air. */
-footer .cols{padding-top:.2rem}
-/* The filament lives in the gutter BETWEEN columns, not inside them. Indenting
-   each column by 15px to make room added 45px to the row, which at 320px was
-   20px more than the footer had and put the whole page into sideways scroll.
-   The gap is 48px wide and empty — that is where it belongs. */
-footer .cols > div{position:relative}
-footer .cols > div::before{
-  content:"";position:absolute;left:-19px;top:-64px;bottom:-26px;width:26px;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 190' preserveAspectRatio='none'%3E%3Cpath d='M14,0 C10,26 17,48 13,72 C9,98 16,124 12,152 C10,170 13,180 11,190' fill='none' stroke='%23cbb08a' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M13,72 C19,79 22,88 21,99' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.7'/%3E%3Cpath d='M12,124 C6,131 4,140 5,150' fill='none' stroke='%23cbb08a' stroke-width='.9' stroke-linecap='round' opacity='.6'/%3E%3Cpath d='M11,168 C16,174 18,181 17,190' fill='none' stroke='%23cbb08a' stroke-width='.8' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E") no-repeat center/100% 100%;
-  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 30%,#000 84%,transparent 100%);
-  mask-image:linear-gradient(180deg,transparent 0,#000 30%,#000 84%,transparent 100%);
-  opacity:0;transform:translateY(-9px);
-  transition:opacity .8s ease, transform .8s cubic-bezier(.25,.7,.3,1);
-}
-footer .cols > div:nth-child(2)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 190' preserveAspectRatio='none'%3E%3Cpath d='M12,0 C17,28 9,50 14,76 C18,100 10,126 14,154 C16,172 12,182 14,190' fill='none' stroke='%23cbb08a' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M14,76 C8,84 5,94 6,106' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.7'/%3E%3Cpath d='M13,130 C19,137 22,146 21,157' fill='none' stroke='%23cbb08a' stroke-width='.9' stroke-linecap='round' opacity='.6'/%3E%3Cpath d='M14,170 C9,176 7,183 8,190' fill='none' stroke='%23cbb08a' stroke-width='.8' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E")}
-footer .cols > div:nth-child(3)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 190' preserveAspectRatio='none'%3E%3Cpath d='M13,0 C9,24 16,44 12,68 C8,94 15,118 13,146 C12,166 15,178 12,190' fill='none' stroke='%23cbb08a' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M12,68 C18,74 21,83 20,94' fill='none' stroke='%23cbb08a' stroke-width='1' stroke-linecap='round' opacity='.7'/%3E%3Cpath d='M14,112 C8,119 5,128 6,139' fill='none' stroke='%23cbb08a' stroke-width='.9' stroke-linecap='round' opacity='.6'/%3E%3Cpath d='M13,162 C18,169 20,178 19,190' fill='none' stroke='%23cbb08a' stroke-width='.8' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E")}
-.js footer.in-view .cols > div::before{opacity:.62;transform:none}
-/* they arrive after the root mass has spread, in reading order */
-.js footer.in-view .cols > div:nth-child(1)::before{transition-delay:1.15s}
-.js footer.in-view .cols > div:nth-child(2)::before{transition-delay:1.35s}
-.js footer.in-view .cols > div:nth-child(3)::before{transition-delay:1.55s}
+/* The drawn filaments that used to feed each column are gone. They existed to
+   bridge a gap between the old root mass and the copy; the painted plate spans
+   the whole footer on its own, and three thin lines laid over it read as
+   scratches on the artwork rather than as roots. */
 footer .cols b{display:block;font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;opacity:.7;margin-bottom:.5rem}
 footer a{opacity:.9}
 footer a:hover{text-decoration:underline}
-footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:.6;border-top:1px solid rgba(247,240,227,.2);padding-top:1.2rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+footer .tiny{width:100%;font-size:.72rem;letter-spacing:.14em;opacity:1;border-top:1px solid rgba(247,240,227,.2);padding-top:1.2rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
 
 /* ---------- modal ---------- */
 .modal-veil{
@@ -1089,7 +1133,7 @@ html.ng-hold,body.ng-hold{overflow:hidden !important;overscroll-behavior:none}
 #allergenBackdrop.show{opacity:1;visibility:visible}
 #allergenPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);opacity:0;pointer-events:none;z-index:57;width:min(360px,90vw);background:var(--cream);border:1px solid rgba(53,40,31,.14);border-radius:20px;padding:1.4rem;box-shadow:0 30px 60px -24px rgba(38,52,47,.6);font-size:.9rem;line-height:1.6;color:var(--espresso);transition:opacity .25s ease,transform .25s ease}
 #allergenPanel.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
-#allergenPanel h4{font-family:var(--ff-display);font-weight:400;font-size:1.15rem;margin-bottom:.4rem;color:var(--terracotta)}
+#allergenPanel h4{font-family:var(--ff-display);font-weight:400;font-size:1.15rem;margin-bottom:.4rem;color:var(--terra-deep)}
 #allergenPanel .aller-close{position:absolute;right:.6rem;top:.5rem;background:none;border:0;font-size:1.1rem;cursor:pointer;opacity:.6}
 /* ── Reviews ── */
 .reviews{padding:1rem 0 2.5rem;position:relative}
@@ -1385,20 +1429,21 @@ main{position:relative}
 /* thicker and a shade deeper than the leaf green: at 3.4 against the trunk beside
    it the shoot read as a weed that had wandered in, not as the same plant */
 .bl-stem{fill:none;stroke:#587a6e;stroke-width:4.4;stroke-linecap:round}
-.bl-root{fill:none;stroke:#cbb08a;stroke-width:2.6;stroke-linecap:round;opacity:.44}
+.bl-root{fill:none;stroke:#cbb08a;stroke-width:3.4;stroke-linecap:round;opacity:.42}
 .bl-leaf path{fill:#5f8177}
 .petal:nth-child(odd){fill:#c4633c}
 .petal:nth-child(even){fill:#b9572f}
 .bl-core{fill:#e08a42}
 .bl-core2{fill:#f6ac66}
-.bloom-label{display:flex;flex-direction:column;align-items:center;line-height:1.25;
-  font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--cream);opacity:1;
-  text-shadow:0 1px 3px rgba(18,11,4,.85), 0 0 8px rgba(18,11,4,.6);
-  transition:opacity .25s}
-.bloom-label .rom{font-family:var(--ff-display);letter-spacing:.06em;text-transform:none;
-  font-size:1.15em;color:var(--gold)}
-.bloom-label em{font-style:normal;font-size:.92em}
-.bloom:hover .bloom-label,.bloom:focus-visible .bloom-label{opacity:1}
+/* the cue: a drawn arrow pointing back up at the flower */
+.bloom-cue{display:block;width:clamp(26px,3vw,36px);margin-top:-2.4rem;opacity:.9;
+  transition:opacity .25s, translate .25s}
+.bloom-cue svg{display:block;width:100%;height:auto;overflow:visible;
+  filter:drop-shadow(0 1px 2px rgba(18,11,4,.8))}
+.bloom-cue .cue-line{fill:none;stroke:var(--gold);stroke-width:2.4;stroke-linecap:round}
+.bloom-cue .cue-head{fill:none;stroke:var(--gold);stroke-width:2.4;
+  stroke-linecap:round;stroke-linejoin:round}
+.bloom:hover .bloom-cue,.bloom:focus-visible .bloom-cue{opacity:1;translate:0 -2px}
 .bloom:focus-visible{outline:2px solid var(--gold);outline-offset:6px;border-radius:10px}
 /* Which side the shoot comes up depends on where the footer's copy is. On a phone the
    link columns run full width underneath, so it sits clear to the right of the crown;
@@ -1409,7 +1454,7 @@ main{position:relative}
      small cream type is unreadable. 201px lands it in the sparse ground to the
      left; the feeder root below is lengthened to match so the shoot still reads
      as joined to the taproot rather than exiled. */
-  .bloom{left:calc(50% - clamp(84px,9.4vw,136px))}
+  .bloom{left:calc(50% + var(--tk-x,0px) - clamp(84px,9.4vw,136px))}
 }
 
 /* closed until the ground is in view, then it opens petal by petal */
@@ -1421,7 +1466,7 @@ main{position:relative}
    so one dasharray in user units would have left the feeder half drawn */
 .js .bl-root{stroke-dasharray:1;stroke-dashoffset:1}
 .js footer.in-view .bl-root{stroke-dashoffset:0;transition:stroke-dashoffset .8s ease .15s}
-.js .bloom-label{opacity:0;transform:translateY(4px)}
+.js .bloom-cue{opacity:0;translate:0 6px}
 .js footer.in-view .bl-stem{stroke-dashoffset:0;transition:stroke-dashoffset 1s ease .35s}
 .js footer.in-view .petal{scale:1;opacity:1;
   transition:scale .75s cubic-bezier(.2,1.6,.45,1) calc(1.25s + var(--i)*.07s),
@@ -1431,13 +1476,13 @@ main{position:relative}
 .js footer.in-view .bl-leaf{scale:1;opacity:1;
   transition:scale .6s cubic-bezier(.2,1.4,.4,1) calc(.7s + var(--i)*.06s),
              opacity .4s ease calc(.7s + var(--i)*.06s)}
-.js footer.in-view .bloom-label{opacity:1;transform:none;transition:opacity .6s ease 2.1s, transform .6s ease 2.1s}
+.js footer.in-view .bloom-cue{opacity:.9;translate:0 0;transition:opacity .6s ease 1.9s, translate .6s ease 1.9s}
 /* focus can arrive before the observer has fired; an invisible focused control is
    not acceptable, so focus opens it immediately */
 .js .bloom:focus-visible .petal,.js .bloom:focus-visible .bl-core,
 .js .bloom:focus-visible .bl-core2,.js .bloom:focus-visible .bl-leaf{scale:1;opacity:1;transition-delay:0s}
 .js .bloom:focus-visible .bl-stem,.js .bloom:focus-visible .bl-root{stroke-dashoffset:0;transition-delay:0s}
-.js .bloom:focus-visible .bloom-label{opacity:1;transform:none;transition-delay:0s}
+.js .bloom:focus-visible .bloom-cue{opacity:1;translate:0 0;transition-delay:0s}
 
 /* the story, in a native dialog: Escape, focus trapping and focus restore come
    with showModal(), which hand-rolled modals usually get wrong */
@@ -1465,7 +1510,7 @@ main{position:relative}
 @media(prefers-reduced-motion:reduce){
   .js .petal,.js .bl-core,.js .bl-core2,.js .bl-leaf{scale:1;opacity:1}
   .js .bl-stem{stroke-dashoffset:0}
-  .js .bloom-label{opacity:.75;transform:none}
+  .js .bloom-cue{opacity:.9;translate:none}
 }
 
 /* ── closed banner + allergen panel: same vocabulary as everything else ──── */
@@ -1608,7 +1653,6 @@ main{position:relative}
   .reveal-l,.reveal-r{opacity:1;transform:none}
   .js .rise{opacity:1;transform:none}
   .js .foot-rootwrap,.js .trunk{clip-path:none}
-  footer .cols > div::before{opacity:.62;transform:none}
   /* drawn, not drawing — *{animation:none} misses a transition */
   .js .vine-link svg{clip-path:none}
   .m-success .sprig .foliage{opacity:1}
@@ -1837,7 +1881,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 <!-- REVIEWS -->
 <section class="reviews" id="reviews" aria-labelledby="revH">
   <div class="section-head" style="padding-top:0">
-    <span class="eyebrow"><span class="rom">Kalīpay</span>&#8202;· noun · the joy of gathering to share a meal</span>
+    <span class="eyebrow">So good they said it twice</span>
     <h2 id="revH">Ano ang Aton <span class="rom">Kalīpay</span></h2>
     <span class="head-tr">What brings us joy</span>
   </div>
@@ -1880,16 +1924,14 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
 
 <!-- FOOTER -->
 <footer>
+  <i class="soil-bits" aria-hidden="true"></i>
   <!-- The plant finishes here. The page's vine arrives at the soil, roots spread,
        and one shoot comes back up to flower — the flower holds the story. -->
-  <button type="button" class="bloom" id="storyBloom" aria-haspopup="dialog" aria-controls="storyDialog">
+  <button type="button" class="bloom" id="storyBloom" aria-haspopup="dialog" aria-controls="storyDialog" aria-label="Read our story" title="Read our story">
     <svg class="bloom-svg" viewBox="0 0 92 158" aria-hidden="true" focusable="false">
-      <!-- Short rootlets only. The long feeder that used to reach across to the
-           taproot is gone: the painted root plate now covers that ground, and a
-           thin drawn line laid over it read as a scratch on the artwork. -->
-      <path pathLength="1" class="bl-root" d="M46,114 C40,124 32,133 23,140"/>
-      <path pathLength="1" class="bl-root" d="M46,114 C52,124 60,132 69,138"/>
-      <path pathLength="1" class="bl-root" d="M46,114 C46,126 45,138 43,150"/>
+      <!-- One root, in the plate's exact colour and opacity, so it belongs to the
+           same drawing. Three thin ones at full strength read as scratches. -->
+      <path pathLength="1" class="bl-root" d="M46,114 C47,128 44,141 46,155"/>
       <path class="bl-stem" d="M46,116 C43,100 49,86 46,64"/>
       <g class="bl-leaf" style="--i:7" transform="translate(46,86) rotate(-40) scale(.5)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
       <g class="bl-leaf" style="--i:8" transform="translate(46,104) rotate(146) scale(.44)"><path d="M0,0 C7,-8 19,-8 27,0 C19,8 7,8 0,0 Z"/></g>
@@ -1905,7 +1947,15 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
         <circle class="bl-core2" r="3.1"/>
       </g>
     </svg>
-    <span class="bloom-label"><span class="rom">Ari ang aton istorya</span><em>our story</em></span>
+    <!-- A cue, not a caption. The words sat in the soil competing with the root
+         plate, and "click here" is wrong on a phone anyway — an arrow is
+         device-neutral. The button keeps its accessible name. -->
+    <span class="bloom-cue" aria-hidden="true">
+      <svg viewBox="0 0 44 46" focusable="false">
+        <path class="cue-line" d="M21,45 C18,35 25,26 21.5,15"/>
+        <path class="cue-head" d="M14.5,21 L21.5,12 L28,21"/>
+      </svg>
+    </span>
   </button>
   <!-- The root plate. Painted art rather than generated paths: it never has to
        stretch, so a picture costs nothing a drawn one would have saved. It is
@@ -1923,7 +1973,7 @@ window.addEventListener('load', function(){ window.scrollTo(0,0); });</script>
       <div><b>Order</b><a href="#menu">Order now</a><br><span style="opacity:.75">Toronto, ON</span></div>
       <div><b>Say hi</b><a href="https://takoshi.ca" target="_blank" rel="noopener">Takoshi</a></div>
     </div>
-    <div class="tiny"><span>© 2026 Namit Gid · abang <span class="rom" style="color:var(--gold)">kalipay</span> gid a</span><span>namit gid, so delicious</span></div>
+    <div class="tiny"><span>© 2026 Namit Gid · abang <span class="rom" style="color:var(--gold)">kalipay</span> gid a</span></div>
   </div>
 </footer>
 
