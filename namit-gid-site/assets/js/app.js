@@ -362,35 +362,76 @@
     if (y < innerHeight * 1.2 && !raf && !calm) raf = requestAnimationFrame(swayTick);
   }, { passive: true });
 
-  // ── Intro: dawn at Long Beach, run as one GSAP timeline ──────────────────
-  // Only transforms, opacity and one clip move, so it stays on the GPU.
+  // ── Intro: a camera pulls back from the lighthouse at dawn, a bird and a
+  // cloud pass the lens, the beam writes the name, a shutter takes the photo
+  // and the photo lands on the sign. One GSAP timeline; transforms, opacity
+  // and one clip only. Afterwards the page waits for a scroll.
   const emblem = $('emblem');
-  let tl = null, done = false;
+  let tl = null, done = false, revealed = false;
+
+  function reveal() {
+    if (revealed) return; revealed = true;
+    root.classList.remove('held');
+    const cue = $('scrollCue'); if (cue) cue.remove();
+    if (calm || !window.gsap) return;
+    // The sign glides up from the middle of the screen and the words follow it.
+    gsap.to('#signWrap', { y: 0, duration: .9, ease: 'power3.inOut', clearProps: 'transform' });
+    gsap.fromTo('.hero h1 .line > span', { yPercent: 105 }, { yPercent: 0, duration: .9, delay: .35, ease: 'expo.out', stagger: .09, clearProps: 'transform' });
+    gsap.fromTo('#heroCopy > *', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .7, delay: .3, ease: 'power2.out', stagger: .07, clearProps: 'all' });
+  }
 
   function finish() {
     if (done) return; done = true;
     if (tl) tl.kill();
+    if (window.__ngAmb) window.__ngAmb.kill();
     root.classList.remove('intro', 'landing');
     const st = $('stage'); if (st) st.remove();
     const sk = $('introSkip'); if (sk) sk.remove();
-    if (window.gsap) gsap.set([plank, emblem, '#shore', '#heroCopy > *', '.hero h1 .line > span'], { clearProps: 'all' });
+    if (window.gsap) gsap.set([plank, emblem, '#shore'], { clearProps: 'all' });
     if (!calm) plank.classList.add('sway');
   }
 
+  function buildSea() {
+    // Wave lines: closer together and fainter toward the horizon.
+    const waves = $('stWaves'), ns = 'http://www.w3.org/2000/svg';
+    const rows = [[.03, .6, 1], [.07, .8, 1.2], [.13, 1, 1.5], [.22, 1.3, 1.9], [.35, 1.6, 2.4], [.52, 2, 3], [.74, 2.4, 3.6]];
+    rows.forEach(([top, amp, w], i) => {
+      const svg = document.createElementNS(ns, 'svg');
+      svg.setAttribute('viewBox', '0 0 800 10'); svg.setAttribute('preserveAspectRatio', 'none');
+      svg.style.top = (top * 100) + '%'; svg.style.height = (6 + i * 3) + 'px';
+      let d = 'M0 5';
+      for (let x = 0; x < 800; x += 50) d += ` Q${x + 12.5} ${5 - amp * 2} ${x + 25} 5 T${x + 50} 5`;
+      const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); p.setAttribute('stroke-width', w); p.setAttribute('vector-effect', 'non-scaling-stroke');
+      svg.append(p); waves.append(svg);
+    });
+    // Glitter along the sun's path, wider as it comes closer.
+    const g = $('stGlitter');
+    for (let i = 0; i < 26; i++) {
+      const depth = Math.pow(Math.random(), 1.6);
+      const s = document.createElement('i');
+      s.style.top = (1 + depth * 45) + '%';
+      s.style.left = (58.6 + (Math.random() - .5) * (4 + depth * 22)) + '%';
+      s.style.width = (3 + depth * 14) + 'px';
+      g.append(s);
+    }
+  }
+
   async function playIntro() {
-    if (!window.gsap) return finish();
-    // Fonts first: the letters are measured for the beam.
+    if (!window.gsap) { finish(); return reveal(); }
     await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 900))]);
     if (done) return;
+    buildSea();
 
-    const isle = $('stIsle'), island = $('stIsland'), word = $('stWord');
+    const cam = $('stCam'), isle = $('stIsle'), island = $('stIsland'), word = $('stWord');
+    const vw = innerWidth, vh = innerHeight;
+    // Until the visitor scrolls, the sign waits in the middle of the screen.
+    const sr = $('signWrap').getBoundingClientRect();
+    gsap.set('#signWrap', { y: Math.max(0, vh * .47 - (sr.top + sr.height / 2)) });
     const lowEnd = (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
 
-    // The name sits in the sky just above the island.
+    // Everything is measured at the camera's final framing.
     const ir = isle.getBoundingClientRect();
-    gsap.set(word, { top: ir.top - word.offsetHeight * 1.05, left: (innerWidth - word.offsetWidth) / 2 });
-
-    // Split the name into letters, keeping the gold "gid".
+    gsap.set(word, { top: ir.top - word.offsetHeight * 1.05, left: (vw - word.offsetWidth) / 2 });
     const chars = [];
     [...word.childNodes].forEach(node => {
       const frag = document.createDocumentFragment();
@@ -400,89 +441,124 @@
       });
       if (node.nodeType === 3) word.replaceChild(frag, node); else { node.textContent = ''; node.append(frag); }
     });
-
-    // The lamp: the lighthouse sits about 81.5% across and 3.5% down the island art.
     const r0 = island.getBoundingClientRect();
-    // The island is still clipped at this point but its box is final.
     const L = { x: r0.left + r0.width * .815, y: r0.top + r0.height * .04 };
     gsap.set('#stBeam', { x: L.x, y: L.y, rotation: 185 });
     gsap.set('#stFlare', { x: L.x, y: L.y });
 
-    const A0 = 185, A1 = 335, BEAM = 1.4, BEAM_AT = 2.3;
+    // The photo: the frame's shape, around the island and the name.
+    const frame = $('frameSlot').getBoundingClientRect();
+    const tIsland = $('island').getBoundingClientRect(), tWord = $('wordmark').getBoundingClientRect();
+    const cIsle = isle.getBoundingClientRect(), cWord = word.getBoundingClientRect();
+    const aspect = frame.width / frame.height;
+    const pw = Math.min(vw - 16, vh * .6 * aspect), ph = pw / aspect;
+    const midY = (cWord.top - 8 + cIsle.bottom + cIsle.height * .1) / 2;
+    const photo = { left: (vw - pw) / 2, top: Math.max(vh * .12, midY - ph / 2), width: pw, height: ph };
+    const inset = r => `inset(${r.top}px ${vw - r.left - r.width}px ${vh - r.top - r.height}px ${r.left}px round 3px)`;
+    gsap.set(['#stFinder', '#stPrint'], { x: photo.left, y: photo.top, width: photo.width, height: photo.height });
+
+    // The camera starts tight on the lamp, centred, and pulls back.
+    const Z = vw < 700 ? 3.4 : 2.6;
+    gsap.set(cam, { transformOrigin: `${L.x}px ${L.y}px`, scale: Z, x: vw / 2 - L.x, y: vh * .42 - L.y });
+
+    const A0 = 185, A1 = 335, BEAM = 1.4;
     const angleOf = el => {
       const r = el.getBoundingClientRect();
       let a = Math.atan2(r.top + r.height / 2 - L.y, r.left + r.width / 2 - L.x) * 180 / Math.PI;
-      if (a < 0) a += 360;
-      return a;
+      return a < 0 ? a + 360 : a;
     };
 
-    tl = gsap.timeline({ onComplete: finish, defaults: { ease: 'power2.out' } });
+    tl = gsap.timeline({ onComplete: () => { finish(); root.classList.add('held'); }, defaults: { ease: 'power2.out' } });
     window.__ngIntro = tl; // for frame-by-frame checks
 
-    // Dawn comes up
-    tl.to('#stStars', { opacity: 0, duration: 1.6, ease: 'sine.inOut' }, 0.3)
-      .to('#stDay', { opacity: 1, duration: 2.6, ease: 'sine.inOut' }, 0.3)
-      .fromTo('#stSun', { opacity: 0, y: '10vh', scale: .8 }, { opacity: 1, y: 0, scale: 1, duration: 2.8, ease: 'sine.out' }, 0.4)
-      .to('#stPath', { opacity: 1, duration: 2, ease: 'sine.inOut' }, 1)
-      .fromTo('.st-clouds i', { x: -20 }, { x: 30, duration: 7, ease: 'none', stagger: .3 }, 0);
+    // ── 0–3.6 s: dawn, and the pull-back ──
+    tl.to(cam, { scale: 1, x: 0, y: 0, duration: 3.6, ease: 'power2.inOut' }, 0)
+      .to('#stStars', { opacity: 0, duration: 2, ease: 'sine.inOut' }, .4)
+      .to('#stDay', { opacity: 1, duration: 3.2, ease: 'sine.inOut' }, .3)
+      .fromTo('#stSun', { opacity: 0, y: '8vh' }, { opacity: 1, y: 0, duration: 3.4, ease: 'sine.out' }, .5)
+      .to('#stPath', { opacity: 1, duration: 2.4, ease: 'sine.inOut' }, 1.2)
+      .fromTo('#stGlow', { scale: .7, opacity: 1 }, { scale: 1.15, duration: .9, ease: 'sine.inOut', repeat: 3, yoyo: true }, 0)
+      .to('#stGlow', { opacity: .35, scale: .8, duration: .8 }, 3.2)
+
+      .fromTo(['#stWash', '#stLip'], { y: 30 }, { y: -2, duration: 1.2, ease: 'power2.out' }, 1.6)
+      .to(['#stWash', '#stLip'], { y: 9, duration: 1.4, ease: 'sine.inOut' }, 2.8)
+      .to('#stWet', { opacity: 1, duration: .9 }, 2.9);
+    // the sea moves the whole time, on its own clock
+    const amb = gsap.timeline();
+    window.__ngAmb = amb;
+    gsap.utils.toArray('#stWaves svg').forEach((s, i) => {
+      amb.fromTo(s, { xPercent: 0 }, { xPercent: -6.25 * (i % 2 ? 1 : -1), duration: 9 - i * .6, ease: 'none' }, 0);
+    });
+    amb.fromTo('.st-clouds i', { x: -20 }, { x: 40, duration: 9, ease: 'none', stagger: .4 }, 0);
     if (!lowEnd) {
-      tl.to('.st-glints.g1', { xPercent: -6, duration: 6, ease: 'none' }, 0)
-        .to('.st-glints.g2', { xPercent: 5, duration: 6, ease: 'none' }, 0);
+      gsap.utils.toArray('#stGlitter i').forEach(s => {
+        amb.to(s, { opacity: .9, duration: .25 + Math.random() * .3, yoyo: true, repeat: 5 + Math.floor(Math.random() * 6), repeatDelay: Math.random() * .6, ease: 'sine.inOut' }, 1.2 + Math.random() * 1.5);
+      });
     }
-    // The tide washes up the sand and draws back
-    tl.fromTo(['#stWash', '#stLip'], { y: 30 }, { y: -2, duration: .9, ease: 'power2.out' }, 0.1)
-      .to(['#stWash', '#stLip'], { y: 9, duration: 1.1, ease: 'sine.inOut' }, 1.0)
-      .to('#stWet', { opacity: 1, duration: .8 }, 1.1);
-    // Byaringan rises over the horizon
-    tl.fromTo(island, { clipPath: 'inset(100% 0% 0% 0%)', yPercent: 14 }, { clipPath: 'inset(0% 0% 0% 0%)', yPercent: 0, duration: 1.4, ease: 'expo.out' }, 0.6)
-      .to('#stReflect', { opacity: .35, duration: .8 }, 1.5);
-    // The lamp lights, the beam sweeps, and each letter lights as the beam crosses it
-    tl.fromTo('#stFlare', { opacity: 0, scale: .2 }, { opacity: 1, scale: 1.5, duration: .35, ease: 'power3.out' }, 2.0)
-      .to('#stFlare', { scale: .8, opacity: .9, duration: .5, ease: 'sine.inOut' }, 2.35)
+    // a bird crosses close to the lens, flapping
+    tl.set('#stBird', { opacity: 1, x: vw * 1.05, y: vh * .3, rotation: -6 }, .9)
+      .to('#stBird', { x: -vw * .55, y: vh * .18, rotation: 4, duration: 1.5, ease: 'none' }, .9)
+      .to('#stBird', { scale: 1.25, duration: 1.5, ease: 'none' }, .9)
+      .to('#stWing', { attr: { d: 'M2 22 Q24 38 50 20 Q76 38 98 22 Q76 30 50 26 Q24 30 2 22Z' }, duration: .17, ease: 'sine.inOut', repeat: 9, yoyo: true }, .9)
+      .set('#stBird', { opacity: 0 }, 2.45);
+    // then a cloud drifts past
+    tl.fromTo('#stFog', { opacity: 0, xPercent: -60, scale: 1.1 }, { opacity: .92, xPercent: -5, scale: 1.25, duration: .7, ease: 'sine.in' }, 2.1)
+      .to('#stFog', { opacity: 0, xPercent: 55, scale: 1.45, duration: .9, ease: 'sine.out' }, 2.8);
+
+    // ── 3.7–5.3 s: the lamp flares, the beam writes the name ──
+    const BEAM_AT = 3.8;
+    tl.fromTo('#stFlare', { opacity: 0, scale: .2 }, { opacity: 1, scale: 1.5, duration: .35, ease: 'power3.out' }, 3.55)
+      .to('#stFlare', { scale: .8, opacity: .9, duration: .5, ease: 'sine.inOut' }, 3.9)
       .to('#stBeam', { opacity: 1, duration: .2 }, BEAM_AT)
       .to('#stBeam', { rotation: A1, duration: BEAM, ease: 'sine.inOut' }, BEAM_AT)
       .to('#stBeam', { opacity: 0, duration: .35 }, BEAM_AT + BEAM - .25);
     chars.forEach(c => {
-      // sine.inOut maps time to angle; invert it to find when the beam reaches this letter
       const p = Math.min(1, Math.max(0, (angleOf(c) - A0) / (A1 - A0)));
-      const t = Math.acos(1 - 2 * p) / Math.PI;
-      tl.fromTo(c, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: .45, ease: 'power2.out' }, BEAM_AT + t * BEAM);
+      const t = Math.acos(1 - 2 * p) / Math.PI; // invert sine.inOut: when the beam reaches this letter
+      tl.fromTo(c, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: .45 }, BEAM_AT + t * BEAM);
     });
 
-    // The view folds onto the sign
-    const FOLD = BEAM_AT + BEAM + .15;
-    tl.add(() => root.classList.add('landing'), FOLD);
-    tl.to('#stSand', { yPercent: 100, duration: .6, ease: 'power2.in' }, FOLD)
-      .to(['#stFlare', '#stReflect', '#stPath'], { opacity: 0, duration: .4 }, FOLD);
-    // Where everything lands is known up front (the sign is laid out, just
-    // invisible), so the fold is part of the timeline and survives seeking.
-    const frame = $('frameSlot').getBoundingClientRect();
-    const tIsland = $('island').getBoundingClientRect(), tWord = $('wordmark').getBoundingClientRect();
-    const cIsle = isle.getBoundingClientRect(), cWord = word.getBoundingClientRect();
-    const vw = innerWidth, vh = innerHeight;
-    const fold = { duration: 1.2, ease: 'power3.inOut' };
-    tl.fromTo('#stage', { clipPath: 'inset(0px 0px 0px 0px round 0px)' },
-        { clipPath: `inset(${frame.top}px ${vw - frame.right}px ${vh - frame.bottom}px ${frame.left}px round 5px)`, ...fold }, FOLD + .05)
-      .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: tIsland.left - cIsle.left, y: tIsland.top - cIsle.top, scale: tIsland.width / cIsle.width, transformOrigin: '0 0', ...fold }, FOLD + .05)
-      .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: tWord.left - cWord.left, y: tWord.top - cWord.top, scale: tWord.width / cWord.width, transformOrigin: '0 0', ...fold }, FOLD + .05)
-      .fromTo(plank, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: .5, ease: 'power2.out' }, FOLD + .8);
-    // Hand over to the painted sign, which catches it and swings
-    const LAND = FOLD + 1.3;
+    // ── 5.4–6.1 s: the viewfinder, then the shutter ──
+    const SHOT = BEAM_AT + BEAM + .55;
+    tl.fromTo('#stFinder', { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: .35, ease: 'power2.out', immediateRender: false }, SHOT - .5)
+      .to(['#bladeTop', '#bladeBot'], { scaleY: 1, duration: .09, ease: 'power2.in' }, SHOT)
+      .add(() => root.classList.add('landing'), SHOT)
+      .set('#stage', { clipPath: inset(photo) }, SHOT + .09)
+      .set(['#stSand', '#stFinder', '#stFlare'], { opacity: 0 }, SHOT + .09)
+      .set('#stPrint', { opacity: 1 }, SHOT + .09)
+      .to(['#bladeTop', '#bladeBot'], { scaleY: 0, duration: .14, ease: 'power2.out' }, SHOT + .1)
+      .fromTo('#stFlash', { opacity: .85 }, { opacity: 0, duration: .45, ease: 'power2.out', immediateRender: false }, SHOT + .1);
+
+    // ── 6.4–7.6 s: the photo flies onto the sign ──
+    const FLY = SHOT + .45, fly = { duration: 1.15, ease: 'power3.inOut' };
+    const fr = { left: frame.left, top: frame.top, width: frame.width, height: frame.height };
+    tl.fromTo('#stage', { clipPath: inset(photo) }, { clipPath: inset(fr), ...fly, immediateRender: false }, FLY)
+      .to('#stPrint', { x: fr.left, y: fr.top, width: fr.width, height: fr.height, ...fly }, FLY)
+      .to('#stPrint', { opacity: 0, duration: .3 }, FLY + .85)
+      .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: tIsland.left - cIsle.left, y: tIsland.top - cIsle.top, scale: tIsland.width / cIsle.width, transformOrigin: '0 0', ...fly }, FLY)
+      .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: tWord.left - cWord.left, y: tWord.top - cWord.top, scale: tWord.width / cWord.width, transformOrigin: '0 0', ...fly }, FLY)
+      .to('#stSun', { opacity: .6, duration: fly.duration }, FLY)
+      .fromTo(plank, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: .5 }, FLY + .7);
+
+    // ── 7.6–8.8 s: the sign catches it and swings; Leny rises ──
+    const LAND = FLY + 1.2;
     tl.set('#shore', { opacity: 1 }, LAND)
       .to('#stage', { opacity: 0, duration: .25 }, LAND)
       .to(plank, { keyframes: [{ rotation: 2.2, duration: .25, ease: 'power2.out' }, { rotation: -1.3, duration: .4, ease: 'sine.inOut' }, { rotation: .5, duration: .4, ease: 'sine.inOut' }, { rotation: 0, duration: .35, ease: 'sine.out' }] }, LAND)
-      // Leny rises from behind the sign
-      .fromTo(emblem, { opacity: 0, yPercent: 34 }, { opacity: 1, yPercent: 0, duration: 1.1, ease: 'expo.out' }, LAND + .15)
-      // The words arrive
-      .set('#heroCopy > h1', { opacity: 1 }, LAND + .5)
-      .fromTo('.hero h1 .line > span', { yPercent: 105 }, { yPercent: 0, duration: .9, ease: 'expo.out', stagger: .09 }, LAND + .55)
-      .fromTo('#heroCopy > :not(h1)', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .6, stagger: .07 }, LAND + .45);
+      .fromTo(emblem, { opacity: 0, yPercent: 34 }, { opacity: 1, yPercent: 0, duration: 1.1, ease: 'expo.out' }, LAND + .15);
   }
 
-  const skip = () => { if (done) return; if (tl) tl.progress(1); finish(); };
-  ['wheel', 'touchmove', 'keydown'].forEach(ev => addEventListener(ev, skip, { passive: true }));
-  $('introSkip').addEventListener('click', skip);
-  document.querySelectorAll('a[href="#menu"]').forEach(a => a.addEventListener('click', skip));
+  // A scroll, swipe or key shows the page; during the intro it also finishes it.
+  const onScrollIntent = () => {
+    if (!done) { if (tl) tl.progress(1); finish(); }
+    reveal();
+  };
+  ['wheel', 'touchmove', 'keydown'].forEach(ev => addEventListener(ev, onScrollIntent, { passive: true }));
+  $('scrollCue').addEventListener('click', onScrollIntent);
+  // Skip ends the intro but still waits for the scroll.
+  $('introSkip').addEventListener('click', () => { if (tl) tl.progress(1); finish(); root.classList.add('held'); });
+  document.querySelectorAll('a[href="#menu"]').forEach(a => a.addEventListener('click', onScrollIntent));
 
-  if (root.classList.contains('intro')) playIntro(); else finish();
+  if (root.classList.contains('intro')) playIntro();
+  else { finish(); reveal(); }
 })();

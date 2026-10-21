@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-1216.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=4">
+<link rel="stylesheet" href="assets/css/site.css?v=5">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -33,23 +33,36 @@
   <div class="st-sky"></div>
   <div class="st-day" id="stDay"></div>
   <div class="st-stars" id="stStars"></div>
-  <div class="st-sun" id="stSun"></div>
-  <div class="st-clouds"><i class="c1"></i><i class="c2"></i><i class="c3"></i></div>
-  <div class="st-sea" id="stSea">
-    <div class="st-path" id="stPath"></div>
-    <div class="st-glints g1"></div><div class="st-glints g2"></div>
+  <!-- The camera: starts tight on the lighthouse and pulls back. -->
+  <div class="st-cam" id="stCam">
+    <div class="st-sun" id="stSun"></div>
+    <div class="st-clouds"><i class="c1"></i><i class="c2"></i><i class="c3"></i></div>
+    <div class="st-sea" id="stSea">
+      <div class="st-path" id="stPath"></div>
+      <div class="st-waves" id="stWaves"></div>
+      <div class="st-glitter" id="stGlitter"></div>
+    </div>
+    <div class="st-isle" id="stIsle">
+      <img class="st-reflect" id="stReflect" src="assets/img/byaringan-1216.webp" alt="">
+      <img class="st-island" id="stIsland" src="assets/img/byaringan-1216.webp" alt="">
+      <i class="st-glow" id="stGlow"></i>
+    </div>
+    <svg class="st-far" viewBox="0 0 100 40"><path d="M20 22 Q26 15 32 21 Q38 15 44 22"/><path d="M56 12 Q61 6 66 11 Q71 6 76 12"/></svg>
   </div>
-  <div class="st-isle" id="stIsle">
-    <img class="st-reflect" id="stReflect" src="assets/img/byaringan-1216.webp" alt="">
-    <img class="st-island" id="stIsland" src="assets/img/byaringan-1216.webp" alt="">
-  </div>
+  <svg class="st-bird" id="stBird" viewBox="0 0 100 44"><path id="stWing" d="M2 22 Q24 2 50 20 Q76 2 98 22 Q76 12 50 26 Q24 12 2 22Z"/></svg>
+  <div class="st-fog" id="stFog"><i></i><i></i><i></i><i></i></div>
   <div class="st-beam" id="stBeam"><i></i></div>
   <div class="st-flare" id="stFlare"></div>
   <p class="st-word" id="stWord">Namit <span>gid</span></p>
   <div class="st-sand" id="stSand">
     <svg class="st-foam" viewBox="0 0 400 40" preserveAspectRatio="none"><path class="wet" id="stWet" d="M0 18 C60 10 110 26 200 16 S330 8 400 18 V40 H0Z"/><path class="wash" id="stWash" d="M0 10 C60 2 120 20 200 8 S330 0 400 10 V40 H0Z"/><path class="lip" id="stLip" d="M0 10 C60 2 120 20 200 8 S330 0 400 10"/></svg>
   </div>
+  <div class="st-finder" id="stFinder"><i></i><i></i><i></i><i></i></div>
+  <div class="st-print" id="stPrint"></div>
+  <div class="st-blade" id="bladeTop"></div><div class="st-blade bot" id="bladeBot"></div>
+  <div class="st-flash" id="stFlash"></div>
 </div>
+<div class="scroll-cue" id="scrollCue" aria-hidden="true"><span>Scroll</span><i></i></div>
 
 <a class="skip-link" href="#menu">Skip to the menu</a>
 <div class="preview-strip" id="previewStrip" hidden>Preview: orders are not sent</div>
@@ -172,6 +185,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=4" defer></script>
+<script src="assets/js/app.js?v=5" defer></script>
 </body>
 </html>

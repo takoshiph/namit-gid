@@ -134,50 +134,68 @@ html.intro .intro-skip { display: block; }
 }
 .wordmark span { color: #f6c97a; }
 
-/* ── intro stage ─────────────────────────────────────────── */
+/* ── intro stage: a camera pulling back from the lighthouse at dawn ─── */
 .stage { display: none; }
-html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; overflow: hidden; background: #1c3442; contain: strict; }
-.stage > * { position: absolute; will-change: transform, opacity; }
-.st-sky { inset: 0; background: linear-gradient(#0f2232 0%, #1d3a4c 35%, #44606a 56%, #8a7f6f 64%); }
-.st-day { inset: 0; opacity: 0; background: linear-gradient(#3f6a7a 0%, #7d9fa3 40%, #e8c08a 60%, #f6dcae 64%); }
-.st-stars { inset: 0 0 45% 0; opacity: .8;
+html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; overflow: hidden; background: #13283a; contain: strict; }
+.stage > *, .st-cam > * { position: absolute; }
+.st-sky { inset: 0; background: linear-gradient(#0d1f30 0%, #1b3649 34%, #3f5a66 54%, #7e7668 63%); }
+.st-day { inset: 0; opacity: 0; background: linear-gradient(#456f80 0%, #86a6a8 38%, #e9c18b 59%, #f7deb0 64%); }
+.st-stars { inset: 0 0 45% 0; opacity: .85;
   background:
     radial-gradient(1.2px 1.2px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 28% 8%, #fff 50%, transparent 51%),
     radial-gradient(1.4px 1.4px at 44% 26%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 63% 12%, #fff 50%, transparent 51%),
     radial-gradient(1.2px 1.2px at 78% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 88% 6%, #fff 50%, transparent 51%),
     radial-gradient(1px 1px at 8% 40%, #fff 50%, transparent 51%), radial-gradient(1.3px 1.3px at 54% 44%, #fff 50%, transparent 51%),
     radial-gradient(1px 1px at 35% 52%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 93% 48%, #fff 50%, transparent 51%); }
+.st-cam { inset: 0; will-change: transform; }
 .st-sun { left: calc(62% - 60vmin); top: calc(64% - 60vmin); width: 120vmin; height: 120vmin; border-radius: 50%; opacity: 0;
-  background: radial-gradient(circle, rgba(255, 238, 196, .95) 0, rgba(255, 212, 150, .55) 14%, rgba(255, 190, 130, .18) 34%, rgba(255, 180, 120, 0) 60%); }
+  background: radial-gradient(circle, rgba(255, 240, 200, 1) 0, rgba(255, 214, 150, .6) 12%, rgba(255, 190, 130, .2) 32%, rgba(255, 180, 120, 0) 58%); }
 .st-clouds { inset: 0; }
-.st-clouds i { position: absolute; border-radius: 50%; opacity: .5;
-  background: radial-gradient(closest-side, rgba(255, 226, 196, .55), rgba(255, 226, 196, 0)); }
+.st-clouds i { position: absolute; border-radius: 50%; opacity: .5; background: radial-gradient(closest-side, rgba(255, 226, 196, .55), rgba(255, 226, 196, 0)); }
 .st-clouds .c1 { left: -10%; top: 30%; width: 70vw; height: 6vh; }
-.st-clouds .c2 { left: 40%; top: 38%; width: 80vw; height: 4vh; opacity: .35; }
-.st-clouds .c3 { left: 10%; top: 48%; width: 60vw; height: 3vh; opacity: .3; }
-.st-sea { left: 0; right: 0; top: 64%; height: 36%; overflow: hidden; background: linear-gradient(#5b8f93 0%, #2f6b72 30%, #1b4f58 100%); }
-.st-path { left: calc(62% - 20vmin); top: 0; width: 40vmin; height: 100%; opacity: 0;
-  background: radial-gradient(40% 100% at 50% 0, rgba(255, 226, 170, .75), rgba(255, 226, 170, 0) 80%); }
-.st-glints { inset: 0 -50% 0 -50%; opacity: .5;
-  background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(255, 240, 210, .18) 7px 8px);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
-          mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); }
-.st-glints.g2 { opacity: .3; background-size: 100% 13px; }
+.st-clouds .c2 { left: 40%; top: 40%; width: 80vw; height: 4vh; opacity: .35; }
+.st-clouds .c3 { left: 10%; top: 50%; width: 60vw; height: 3vh; opacity: .3; }
+
+/* the sea: haze at the horizon, wave lines that close up toward it, a glittering sun path */
+.st-sea { left: -20%; right: -20%; top: 64%; height: 60%; overflow: hidden;
+  background: linear-gradient(#a9b9b0 0%, #6f9a9a 3%, #3f7a80 18%, #23606a 45%, #164852 100%); }
+.st-path { left: calc(58.6% - 22vmin); top: 0; width: 44vmin; height: 100%; opacity: .25;
+  background: radial-gradient(45% 90% at 50% 0, rgba(255, 232, 178, .85), rgba(255, 226, 170, .2) 55%, rgba(255, 226, 170, 0) 85%); }
+.st-waves { inset: 0; }
+.st-waves svg { position: absolute; left: 0; width: 200%; overflow: visible; }
+.st-waves path { fill: none; stroke: rgba(225, 240, 235, .22); stroke-linecap: round; }
+.st-glitter { inset: 0; }
+.st-glitter i { position: absolute; height: 2px; border-radius: 2px; background: #fff3d2; opacity: 0; }
+
 .st-isle { --iw: min(90vw, 72vh); left: calc(50% - var(--iw) * .44); width: var(--iw); aspect-ratio: 1216 / 404; top: calc(64% - var(--iw) * .332 * .985); }
 .st-island, .st-reflect { position: absolute; inset: 0; width: 100%; height: 100%; }
-.st-reflect { top: -1.5%; transform: scaleY(-.5); transform-origin: 50% 100%; opacity: 0;
-  -webkit-mask-image: linear-gradient(transparent 0%, rgba(0,0,0,.6) 70%, #000); mask-image: linear-gradient(transparent 0%, rgba(0,0,0,.6) 70%, #000); filter: brightness(.7) saturate(.8); }
+.st-reflect { top: -1.5%; transform: scaleY(-.5); transform-origin: 50% 100%; opacity: .3;
+  -webkit-mask-image: linear-gradient(transparent 0%, rgba(0,0,0,.6) 70%, #000); mask-image: linear-gradient(transparent 0%, rgba(0,0,0,.6) 70%, #000); filter: brightness(.65) saturate(.8); }
+.st-glow { /* the lamp, lit since before dawn */
+  position: absolute; left: calc(81.5% - 6%); top: calc(4% - 18%); width: 12%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, #fffbe6 0, rgba(255, 222, 150, .85) 14%, rgba(255, 200, 120, .25) 38%, rgba(255, 200, 120, 0) 68%); }
+.st-far { left: 18%; top: 36%; width: 22vw; fill: none; stroke: #23323a; stroke-width: 1.6; stroke-linecap: round; opacity: .7; }
+
+/* passers-by in front of the lens */
+.st-bird { left: 0; top: 0; width: 46vmin; fill: #18242b; opacity: 0; }
+.st-fog { inset: 0; opacity: 0; pointer-events: none; }
+.st-fog i { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 244, 230, .95), rgba(255, 238, 220, .55) 55%, rgba(255, 238, 220, 0)); }
+.st-fog i:nth-child(1) { left: -20%; top: 10%; width: 90vmax; height: 60vmax; }
+.st-fog i:nth-child(2) { left: 30%; top: 30%; width: 80vmax; height: 50vmax; }
+.st-fog i:nth-child(3) { left: -10%; top: 50%; width: 70vmax; height: 45vmax; }
+.st-fog i:nth-child(4) { left: 45%; top: -10%; width: 70vmax; height: 50vmax; }
+
 .st-beam { left: 0; top: -13vmax; width: 160vmax; height: 26vmax; transform-origin: 0 50%; opacity: 0; }
 .st-beam i { position: absolute; inset: 0; clip-path: polygon(0 49%, 100% 0, 100% 100%, 0 51%);
   background: linear-gradient(90deg, rgba(255, 236, 190, .85), rgba(255, 228, 170, .28) 35%, rgba(255, 228, 170, 0) 85%); }
 .st-flare { left: -11vmin; top: -11vmin; width: 22vmin; height: 22vmin; border-radius: 50%; opacity: 0;
   background: radial-gradient(circle, #fffbea 0, rgba(255, 226, 150, .85) 18%, rgba(255, 200, 120, .25) 42%, rgba(255, 200, 120, 0) 70%); }
 .st-word { left: 0; top: 0; margin: 0; white-space: nowrap; text-align: center;
-  font: 400 clamp(56px, 17vw, 150px)/.92 var(--serif); color: #FBF3E2; letter-spacing: -.01em;
+  font: 400 clamp(48px, 15vw, 150px)/.92 var(--serif); color: #FBF3E2; letter-spacing: -.01em;
   text-shadow: 0 0 .35em rgba(255, 214, 150, .45), 0 .04em 0 rgba(19, 40, 48, .5); }
 .st-word span { color: #f6c97a; }
 .st-word .ch { display: inline-block; opacity: 0; }
-.st-sand { left: 0; right: 0; bottom: 0; height: 22%;
+.st-sand { left: 0; right: 0; bottom: 0; height: 20%;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .36 0 0 0 0 .25 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
     linear-gradient(#c9b08a, #e6d3b2 35%, #efe1c6); }
@@ -185,6 +203,28 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
 .st-foam .wash { fill: rgba(120, 178, 176, .9); }
 .st-foam .wet { fill: rgba(150, 126, 92, .35); opacity: 0; }
 .st-foam .lip { fill: none; stroke: rgba(255, 255, 255, .9); stroke-width: 2; stroke-linecap: round; }
+
+/* the camera: viewfinder corners, the print's white border, shutter blades, flash */
+.st-finder { left: 0; top: 0; opacity: 0; }
+.st-finder i { position: absolute; width: 26px; height: 26px; border: 0 solid rgba(255, 255, 255, .92); }
+.st-finder i:nth-child(1) { left: 0; top: 0; border-width: 2px 0 0 2px; }
+.st-finder i:nth-child(2) { right: 0; top: 0; border-width: 2px 2px 0 0; }
+.st-finder i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 2px 2px; }
+.st-finder i:nth-child(4) { right: 0; bottom: 0; border-width: 0 2px 2px 0; }
+.st-print { left: 0; top: 0; opacity: 0; box-shadow: inset 0 0 0 6px #fbf6ec; border-radius: 3px; }
+.st-blade { left: 0; right: 0; top: 0; height: 50%; background: #0b0f12; transform: scaleY(0); transform-origin: 50% 0; }
+.st-blade.bot { top: 50%; transform-origin: 50% 100%; }
+.st-flash { inset: 0; background: #fff; opacity: 0; }
+
+/* after the intro, the rest waits for a scroll */
+.scroll-cue { display: none; position: fixed; left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); z-index: 45; translate: -50% 0;
+  flex-direction: column; align-items: center; gap: 8px; color: var(--ink-2); font: 600 14px/1 var(--sans); letter-spacing: .02em; }
+.scroll-cue i { width: 1.5px; height: 34px; background: linear-gradient(var(--ink-2), transparent); transform-origin: 50% 0; animation: cue 1.8s var(--ease-loop) infinite; }
+@keyframes cue { 0% { transform: scaleY(0); opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+html.held .scroll-cue { display: flex; }
+html.held body { overflow: hidden; }
+html.held .hero-copy > * { opacity: 0; }
+
 html.intro .shore, html.intro .plank, html.intro .emblem { opacity: 0; }
 
 .hero-copy { display: grid; gap: 12px; max-width: 34rem; text-align: center; justify-items: center; }
