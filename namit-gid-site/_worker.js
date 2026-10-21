@@ -327,8 +327,21 @@ export default {
 
     // ── GET /api/availability (public) ────────────────────────────────────────
     if (url.pathname === '/api/availability' && request.method === 'GET') {
+      // If the database is unreachable - a paused free-tier project, most
+      // likely - this used to throw on res.json() and Cloudflare answered with
+      // an HTML 500. The storefront's .catch read that as "open", so a dead
+      // kitchen went on taking orders. Answer honestly instead.
       const res = await fetch(`${SB}/rest/v1/store_schedule?id=eq.1&select=*`, { headers: sbHeaders });
-      const rows = await res.json();
+      let rows = null;
+      try { rows = await res.json(); } catch { rows = null; }
+      if (!res.ok || !Array.isArray(rows)) {
+        return jsonResponse({
+          available: false,
+          reason: 'backend_unavailable',
+          message: 'I can\u2019t take online orders right now. Please message me and I\u2019ll sort it out.',
+          windows: [],
+        }, 503, request);
+      }
       const s = rows[0];
       if (!s) return jsonResponse({ available: true, windows: [] }, 200, request);
       const nowTs = new Date();
@@ -708,7 +721,9 @@ export default {
       const res = await fetch(
         `${SB}/rest/v1/orders?pickup_date=eq.${date}&select=pickup_time,status`,
         { headers: sbHeaders });
-      if (!res.ok) return jsonResponse({ load: {} }, 200, request);
+      // ok:false, so an empty result reads as "could not check" rather than
+      // "every slot is free" - which is how it looked with the DB paused.
+      if (!res.ok) return jsonResponse({ load: {}, ok: false }, 200, request);
       const rows = await res.json().catch(() => []);
       const load = {};
       (rows || []).forEach(o => {
