@@ -387,6 +387,7 @@
     if (done) return; done = true;
     if (tl) tl.kill();
     if (amb) amb.kill();
+    if (window.gsap) gsap.ticker.remove(flyBirds);
     root.classList.remove('intro', 'landing');
     const st = $('stage'); if (st) st.remove();
     const sk = $('introSkip'); if (sk) sk.remove();
@@ -461,6 +462,54 @@
       s.style.width = (3 + depth * 14) + 'px';
       g.append(s);
     }
+  }
+
+  // ── Birds: a jointed wing, not a bending line. Each wing has a shoulder and
+  // a wrist; the downstroke is quick and the upstroke slow, the wing folds at
+  // the wrist on the way up, the body bobs against the beat, and every few
+  // beats the bird glides. Each bird keeps its own rhythm.
+  const ease = t => t * t * (3 - 2 * t);
+  function wingLift(p) {           // p: 0..1 through one beat -> +1 up .. -1 down
+    return p < .38 ? 1 - 2 * ease(p / .38) : -1 + 2 * ease((p - .38) / .62);
+  }
+  function birdPath(cx, cy, s, t, bird) {
+    // beats then a glide: e.g. 3 beats of .5 s, then .7 s held slightly raised
+    const cycle = bird.beats * bird.beat + bird.glide, local = (t + bird.offset) % cycle;
+    const gliding = local > bird.beats * bird.beat;
+    const p = gliding ? 0 : (local % bird.beat) / bird.beat;
+    const e = gliding ? .25 + .05 * Math.sin(t * 3) : wingLift(p);
+    const upstroke = !gliding && p >= .38;
+    const a1 = e * .62;                                   // shoulder angle
+    const a2 = a1 - (upstroke ? .55 * (1 - Math.abs(e)) + .25 : .08); // wrist folds on the way up
+    const bob = -e * 1.4 * s;
+    const L1 = 17 * s, L2 = 24 * s, by = cy + bob;
+    const side = k => {
+      const sx = cx + 3.5 * s * k, sy = by - 1 * s;
+      const wx = sx + k * L1 * Math.cos(a1), wy = sy - L1 * Math.sin(a1);
+      const tx = wx + k * L2 * Math.cos(a2), ty = wy - L2 * Math.sin(a2);
+      return { sx, sy, wx, wy, tx, ty };
+    };
+    const R = side(1), Lf = side(-1);
+    const tail = `L${cx + 1.5 * s} ${by + 4 * s} L${cx} ${by + 6 * s} L${cx - 1.5 * s} ${by + 4 * s}`;
+    return `M${cx} ${by - 2.2 * s} ` +
+      `Q${(R.sx + R.wx) / 2} ${(R.sy + R.wy) / 2 - 2.5 * s} ${R.wx} ${R.wy} ` +
+      `Q${(R.wx + R.tx) / 2} ${(R.wy + R.ty) / 2 - 1.5 * s} ${R.tx} ${R.ty} ` +
+      `Q${R.wx + 1 * s} ${R.wy + 3.4 * s} ${cx + 3 * s} ${by + 2 * s} ` + tail +
+      ` L${cx - 3 * s} ${by + 2 * s} ` +
+      `Q${Lf.wx - 1 * s} ${Lf.wy + 3.4 * s} ${Lf.tx} ${Lf.ty} ` +
+      `Q${(Lf.wx + Lf.tx) / 2} ${(Lf.wy + Lf.ty) / 2 - 1.5 * s} ${Lf.wx} ${Lf.wy} ` +
+      `Q${(Lf.sx + Lf.wx) / 2} ${(Lf.sy + Lf.wy) / 2 - 2.5 * s} ${cx} ${by - 2.2 * s}Z`;
+  }
+  const FLOCK = [
+    { el: 'stWing', cx: 50, cy: 24, s: 1, beats: 3, beat: .46, glide: .8, offset: 0 },
+    { el: 'farA', cx: 30, cy: 22, s: .3, beats: 2, beat: .38, glide: 1.1, offset: .7 },
+    { el: 'farB', cx: 66, cy: 12, s: .26, beats: 4, beat: .34, glide: .6, offset: 1.9 },
+  ];
+  let birdsFrozen = false, birdClock = 0;
+  function flyBirds(time) {
+    if (birdsFrozen) return;
+    birdClock = time;
+    FLOCK.forEach(b => { const el = $(b.el); if (el) el.setAttribute('d', birdPath(b.cx, b.cy, b.s, time, b)); });
   }
 
   async function playIntro() {
@@ -541,6 +590,7 @@
       return a < 0 ? a + 360 : a;
     };
 
+    gsap.ticker.add(flyBirds);
     tl = gsap.timeline({ onComplete: () => { finish(); root.classList.add('held'); }, defaults: { ease: 'power2.out' } });
     window.__ngIntro = tl; // for frame-by-frame checks
 
@@ -567,14 +617,9 @@
     // Ambient motion runs on its own clock so it doesn't stretch the intro.
     amb = gsap.timeline();
     amb.fromTo('#stFrond', { skewX: -1 }, { skewX: 1.5, duration: 2.4, ease: 'sine.inOut', yoyo: true, repeat: -1 }, 0);
-    amb.fromTo('#stWing', { attr: { d: 'M2 22 Q24 2 50 20 Q76 2 98 22 Q76 12 50 26 Q24 12 2 22Z' } }, { attr: { d: 'M2 22 Q24 38 50 20 Q76 38 98 22 Q76 30 50 26 Q24 30 2 22Z' }, duration: .16, ease: 'sine.inOut', repeat: -1, yoyo: true }, .6)
-      .to('#stBird', { x: '+=18', y: '-=6', duration: 7, ease: 'none' }, 2.4)
+    amb.to('#stBird', { x: '+=18', y: '-=6', duration: 7, ease: 'none' }, 2.4)
       .to(near, { x: '+=16', duration: 8, ease: 'none' }, 3.6);
     // The two distant birds flap and drift; they freeze when the shutter fires.
-    [['#farA path', 'M20 22 Q26 15 32 21 Q38 15 44 22', 'M20 18 Q26 24 32 20 Q38 24 44 18', .32],
-     ['#farB path', 'M56 12 Q61 6 66 11 Q71 6 76 12', 'M56 9 Q61 14 66 10 Q71 14 76 9', .27]].forEach(([sel, up, down, d]) => {
-      amb.fromTo(sel, { attr: { d: up } }, { attr: { d: down }, duration: d, ease: 'sine.inOut', repeat: -1, yoyo: true }, 0);
-    });
     amb.fromTo('#farA', { x: 0, y: 0 }, { x: 14, y: -3, duration: 9, ease: 'none' }, 0)
       .fromTo('#farB', { x: 0, y: 0 }, { x: 10, y: 2, duration: 9, ease: 'none' }, 0);
     gsap.utils.toArray('#stWaves svg').forEach((s, i) => {
@@ -617,7 +662,7 @@
     tl.fromTo('#stFinder', { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: .35, ease: 'power2.out', immediateRender: false }, SHOT - .5)
       .set(['#bladeTop', '#bladeBot', '#stFlash'], { display: 'block' }, SHOT - .1)
       .to(['#bladeTop', '#bladeBot'], { scaleY: 1, duration: .09, ease: 'power2.in' }, SHOT)
-      .add(() => { root.classList.add('landing'); amb.pause(); }, SHOT)
+      .add(() => { root.classList.add('landing'); amb.pause(); birdsFrozen = true; }, SHOT)
       .set('#stage', { clipPath: inset(photo) }, SHOT + .09)
       .set(['#stSand', '#stFinder', '#stFlare', '#stBangka'], { opacity: 0 }, SHOT + .09)
       .set('#stPrint', { opacity: 1 }, SHOT + .09)

@@ -186,7 +186,7 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
   background: radial-gradient(circle, #fffbe6 0, rgba(255, 222, 150, .85) 14%, rgba(255, 200, 120, .25) 38%, rgba(255, 200, 120, 0) 68%); }
 .st-haze { left: -20%; right: -20%; top: calc(64% - 5vh); height: 9vh; opacity: 0;
   background: linear-gradient(rgba(255, 214, 170, 0), rgba(255, 220, 182, .5) 50%, rgba(255, 214, 170, 0)); }
-.st-far { left: 18%; top: 34%; width: 22vw; fill: none; stroke: #2A2238; stroke-width: 1.6; stroke-linecap: round; opacity: .7; }
+.st-far { left: 18%; top: 34%; width: 22vw; fill: #2A2238; stroke: #2A2238; stroke-width: .6; stroke-linejoin: round; opacity: .75; overflow: visible; }
 
 /* passers-by in front of the lens */
 .st-bird { left: -23vmin; top: -10vmin; width: 46vmin; transform-origin: 50% 50%; fill: #1A1622; stroke: #1A1622; stroke-width: 2.5; stroke-linejoin: round; opacity: 0; will-change: transform; }
