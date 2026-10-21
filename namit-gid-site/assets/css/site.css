@@ -126,7 +126,7 @@ html.intro .intro-skip { display: block; }
 .shore-sea { position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(#E3A98C 0%, #4E6475 8%, #2C4F63 30%, #1F3A4A); }
 .shore-sea i { position: absolute; inset: 0; background: radial-gradient(50% 60% at 62% 0, rgba(255, 226, 170, .55), transparent 70%); }
 .shore-island { position: absolute; width: 74%; right: 2%; bottom: 29%; filter: brightness(.88) saturate(.9) sepia(.12); }
-.shore-lamp { position: absolute; left: calc(24% + 74% * .815); bottom: calc(29% + 74cqw * .332 * .96); width: 7cqmin; height: 7cqmin; translate: -50% 50%; border-radius: 50%;
+.shore-lamp { position: absolute; left: calc(24% + 74% * .78); bottom: calc(29% + 74cqw * .343 * .953); width: 7cqmin; height: 7cqmin; translate: -50% 50%; border-radius: 50%;
   background: radial-gradient(circle, #fff6d8 0, rgba(255, 220, 140, .7) 30%, rgba(255, 200, 120, 0) 70%); }
 .wordmark {
   position: absolute; left: 50%; top: 9%; translate: -50% 0; margin: 0; white-space: nowrap;
@@ -173,18 +173,18 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
 .st-glitter { inset: 0; will-change: transform; }
 .st-glitter i { position: absolute; height: 2px; border-radius: 2px; background: #FFC48A; opacity: 0; }
 
-.st-isle { --iw: min(90vw, 72vh); left: calc(50% - var(--iw) * .44); width: var(--iw); aspect-ratio: 1216 / 404; top: calc(64% - var(--iw) * .332 * .985); }
+.st-isle { --iw: min(90vw, 72vh); left: calc(50% - var(--iw) * .44); width: var(--iw); aspect-ratio: 1680 / 576; top: calc(64% - var(--iw) * .343 * .985); }
 .st-isle > * { position: absolute; inset: 0; width: 100%; height: 100%; }
 .st-island { will-change: transform; }
 .st-reflect { top: -1.5%; transform: scaleY(-.5); transform-origin: 50% 100%; opacity: .32;
   -webkit-mask-image: linear-gradient(transparent 0%, rgba(0,0,0,.6) 70%, #000); mask-image: linear-gradient(transparent 0%, rgba(0,0,0,.6) 70%, #000); filter: brightness(.55) saturate(.7); }
 /* rim light: a warm copy of the silhouette peeking out on the sun side */
 .st-rim { background: #FFD49A; opacity: 0; translate: 1.5px -1.5px;
-  -webkit-mask: url(../img/byaringan-1216.webp) center / 100% 100% no-repeat; mask: url(../img/byaringan-1216.webp) center / 100% 100% no-repeat; }
+  -webkit-mask: url(../img/byaringan-painted-1680.webp) center / 100% 100% no-repeat; mask: url(../img/byaringan-painted-1680.webp) center / 100% 100% no-repeat; }
 /* backlit: the side facing us falls into cool shadow */
 .st-tint { background: #3E4867; opacity: .55;
-  -webkit-mask: url(../img/byaringan-1216.webp) center / 100% 100% no-repeat; mask: url(../img/byaringan-1216.webp) center / 100% 100% no-repeat; }
-.st-glow { left: calc(81.5% - 6%) !important; top: calc(4% - 18%) !important; right: auto !important; bottom: auto !important; width: 12% !important; height: auto !important; aspect-ratio: 1; border-radius: 50%;
+  -webkit-mask: url(../img/byaringan-painted-1680.webp) center / 100% 100% no-repeat; mask: url(../img/byaringan-painted-1680.webp) center / 100% 100% no-repeat; }
+.st-glow { left: calc(78% - 6%) !important; top: calc(4.7% - 18%) !important; right: auto !important; bottom: auto !important; width: 12% !important; height: auto !important; aspect-ratio: 1; border-radius: 50%;
   background: radial-gradient(circle, #fffbe6 0, rgba(255, 222, 150, .85) 14%, rgba(255, 200, 120, .25) 38%, rgba(255, 200, 120, 0) 68%); }
 .st-haze { left: -20%; right: -20%; top: calc(64% - 5vh); height: 9vh; opacity: 0;
   background: linear-gradient(rgba(255, 214, 170, 0), rgba(255, 220, 182, .5) 50%, rgba(255, 214, 170, 0)); }

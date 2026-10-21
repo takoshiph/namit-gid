@@ -543,7 +543,7 @@
     // The name sits in the sky well above the island, leaving the lamp clear.
     const wordTop = ir.top - wH - vh * .05;
     gsap.set(word, { top: wordTop, left: (vw - wW) / 2 });
-    const L = { x: ir.left + ir.width * .815, y: ir.top + ir.height * .04 };
+    const L = { x: ir.left + ir.width * .78, y: ir.top + ir.height * .047 };
     const cIsle = ir, cWord = { left: (vw - wW) / 2, top: wordTop, width: wW, height: wH };
     // Letter angles from the lamp, computed from the split before any transform.
     const letterRects = chars.map(c => c.getBoundingClientRect());
@@ -563,7 +563,7 @@
     // so near things move more than far things. The zoom is capped by what
     // the island art can resolve on this screen.
     const Zwant = vw < 700 ? 2.8 : 2.3;
-    const Z = Math.max(1.6, Math.min(Zwant, 1216 * 1.6 / (ir.width * dpr)));
+    const Z = Math.max(1.6, Math.min(Zwant, 1680 * 1.6 / (ir.width * dpr)));
     const planes = gsap.utils.toArray('#stage [data-depth]');
     planes.forEach(p => {
       const d = parseFloat(p.dataset.depth);
