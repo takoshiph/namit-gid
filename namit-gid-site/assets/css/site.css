@@ -102,14 +102,15 @@ html.intro .intro-skip { display: block; }
 }
 /* The sign: a painted badge, Leny behind the rail, the board in front. All
    sizes are fractions of the sign's width so it scales as one piece. */
-.sign-wrap { position: relative; width: min(82vw, 320px); aspect-ratio: 1 / 1.14; margin-top: min(13vw, 52px); }
-.badge { position: absolute; left: 9%; width: 82%; top: -13%; overflow: visible; }
+.sign-wrap { position: relative; width: min(82vw, 320px, calc((100svh - 190px) / 1.46)); aspect-ratio: 1 / 1.14; margin-top: min(26vw, 100px); }
+.badge { position: absolute; left: 9%; width: 82%; top: -26.3%; overflow: visible; }
 .badge .ring { fill: none; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; transform: rotate(-90deg); }
 .badge .r1 { stroke: #F3E6CC; stroke-width: 3; }
 .badge .r2 { stroke: #2F5D46; stroke-width: 4; }
 .badge .r3 { stroke: #E9B66B; stroke-width: 3.4; }
 .leny-clip { position: absolute; inset: 0; clip-path: inset(-60% -20% 0 -20%); }
-.emblem { position: absolute; left: 31%; width: 38%; top: -5.7%; height: auto; }
+.emblem, .emblem-arms { position: absolute; left: 31%; width: 38%; top: -14.9%; height: auto; }
+.emblem-arms { clip-path: inset(45% 0 40.6% 0); pointer-events: none; }
 .plank { position: absolute; left: 0; top: 28.9%; width: 100%; aspect-ratio: 1000 / 809; transform-origin: 50% 10%; }
 .sign-img { width: 100%; height: 100%; filter: drop-shadow(0 6px 6px rgba(60, 38, 20, .25)); }
 .plank > .frame-slot { position: absolute; left: 12%; top: 34%; width: 76%; height: 56%; }
@@ -249,7 +250,7 @@ html.held main > section:not(.hero), html.held .foot,
 html.intro main > section:not(.hero), html.intro .foot { visibility: hidden; }
 html.revealing body { overflow: hidden; }
 
-html.intro .shore, html.intro .plank, html.intro .emblem, html.intro .badge { opacity: 0; }
+html.intro .shore, html.intro .plank, html.intro .emblem, html.intro .emblem-arms, html.intro .badge { opacity: 0; }
 
 .hero-copy { display: grid; gap: 12px; max-width: 34rem; text-align: center; justify-items: center; }
 .eyebrow { font-size: 15px; color: var(--ink-2); }
@@ -498,7 +499,7 @@ html.intro .hero-copy > * { opacity: 0; }
   .hero-copy { order: -1; text-align: left; justify-items: start; }
   .hero h1 { font-size: 52px; }
   .hero-cta { justify-items: start; }
-  .sign-wrap { width: 420px; justify-self: center; margin-top: 64px; }
+  .sign-wrap { width: min(420px, calc((100svh - 190px) / 1.46)); justify-self: center; margin-top: 130px; }
   .menu-grid { grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
   .dishes { grid-template-columns: 1fr 1fr; gap: 64px 40px; }
   .dish-fig { width: 100%; max-width: 320px; }
