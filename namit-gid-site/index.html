@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Namit Gid · Filipino home cooking · North York</title>
 <meta name="description" content="Leny’s Filipino home cooking from Long Beach, Romblon. Palabok, lumpia, baked sushi, shawarma rice and cheesecake, cooked the day you pick it up at Fairview Mall.">
-<meta name="theme-color" content="#CFE3E4">
+<meta name="theme-color" content="#F6EBDA">
 <meta property="og:title" content="Namit Gid · Filipino home cooking">
 <meta property="og:description" content="Cooked the day you pick it up at Fairview Mall, North York.">
 <meta property="og:image" content="https://namitgid.takoshi.ca/images/og-image.jpg">
@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-1216.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=5">
+<link rel="stylesheet" href="assets/css/site.css?v=8">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -30,33 +30,47 @@
 <!-- The intro stage: dawn at Long Beach, Romblon, looking out at Byaringan.
      Everything here moves by transform or opacity only. -->
 <div class="stage" id="stage" aria-hidden="true">
+  <!-- Planes back to front. data-depth is how much each one moves with the
+       camera: the island is 1, the far range barely moves, the foreground
+       moves most. -->
   <div class="st-sky"></div>
   <div class="st-day" id="stDay"></div>
-  <div class="st-stars" id="stStars"></div>
-  <!-- The camera: starts tight on the lighthouse and pulls back. -->
-  <div class="st-cam" id="stCam">
-    <div class="st-sun" id="stSun"></div>
-    <div class="st-clouds"><i class="c1"></i><i class="c2"></i><i class="c3"></i></div>
-    <div class="st-sea" id="stSea">
-      <div class="st-path" id="stPath"></div>
-      <div class="st-waves" id="stWaves"></div>
-      <div class="st-glitter" id="stGlitter"></div>
-    </div>
-    <div class="st-isle" id="stIsle">
-      <img class="st-reflect" id="stReflect" src="assets/img/byaringan-1216.webp" alt="">
-      <img class="st-island" id="stIsland" src="assets/img/byaringan-1216.webp" alt="">
-      <i class="st-glow" id="stGlow"></i>
-    </div>
-    <svg class="st-far" viewBox="0 0 100 40"><path d="M20 22 Q26 15 32 21 Q38 15 44 22"/><path d="M56 12 Q61 6 66 11 Q71 6 76 12"/></svg>
+  <div class="st-stars" id="stStars" data-depth=".25"></div>
+  <div class="st-rays" id="stRays" data-depth=".5"></div>
+  <div class="st-sun" id="stSun" data-depth=".5"></div>
+  <svg class="st-range" id="stRange" data-depth=".55" viewBox="0 0 1000 40" preserveAspectRatio="none"><path d="M0 40 L0 30 C40 22 70 26 110 18 C150 12 190 24 240 22 C290 20 310 32 360 38 L360 40Z M600 40 C640 39 660 35 700 30 C730 26 750 20 780 14 C800 11 830 16 860 22 C900 30 950 26 1000 22 L1000 40Z"/></svg>
+  <div class="st-skyclouds" id="stSkyClouds" data-depth=".7"></div>
+  <div class="st-sea" id="stSea" data-depth=".85">
+    <div class="st-path" id="stPath"></div>
+    <div class="st-lampref" id="stLampRef"></div>
+    <div class="st-waves" id="stWaves"></div>
+    <div class="st-glitter" id="stGlitter"></div>
   </div>
+  <div class="st-isle" id="stIsle" data-depth="1">
+    <img class="st-reflect" id="stReflect" src="assets/img/byaringan-1216.webp" alt="">
+    <i class="st-rim" id="stRim"></i>
+    <img class="st-island" id="stIsland" src="assets/img/byaringan-1216.webp" alt="">
+    <i class="st-tint" id="stTint"></i>
+    <i class="st-glow" id="stGlow"></i>
+  </div>
+  <div class="st-haze" id="stHaze" data-depth="1.1"></div>
+  <svg class="st-far" data-depth=".9" viewBox="0 0 100 40"><path d="M20 22 Q26 15 32 21 Q38 15 44 22"/><path d="M56 12 Q61 6 66 11 Q71 6 76 12"/></svg>
   <svg class="st-bird" id="stBird" viewBox="0 0 100 44"><path id="stWing" d="M2 22 Q24 2 50 20 Q76 2 98 22 Q76 12 50 26 Q24 12 2 22Z"/></svg>
-  <div class="st-fog" id="stFog"><i></i><i></i><i></i><i></i></div>
+  <div class="st-near" id="stNear"></div>
   <div class="st-beam" id="stBeam"><i></i></div>
   <div class="st-flare" id="stFlare"></div>
   <p class="st-word" id="stWord">Namit <span>gid</span></p>
   <div class="st-sand" id="stSand">
     <svg class="st-foam" viewBox="0 0 400 40" preserveAspectRatio="none"><path class="wet" id="stWet" d="M0 18 C60 10 110 26 200 16 S330 8 400 18 V40 H0Z"/><path class="wash" id="stWash" d="M0 10 C60 2 120 20 200 8 S330 0 400 10 V40 H0Z"/><path class="lip" id="stLip" d="M0 10 C60 2 120 20 200 8 S330 0 400 10"/></svg>
   </div>
+  <svg class="st-bangka" id="stBangka" data-depth="2.2" viewBox="0 0 300 120">
+    <path class="rim" d="M8 66 Q20 58 42 61 L250 61 Q276 57 294 41"/>
+    <path d="M8 66 Q20 58 42 61 L250 61 Q276 57 294 41 Q288 76 252 86 L64 89 Q26 89 8 66Z"/>
+    <path class="beam" d="M92 63 Q78 84 70 108 M200 63 Q214 84 224 108"/>
+    <path class="float" d="M24 108 Q150 113 280 106"/>
+  </svg>
+  <svg class="st-frond" id="stFrond" data-depth="2.2" viewBox="0 0 400 300"></svg>
+  <div class="st-vignette" id="stVignette"></div>
   <div class="st-finder" id="stFinder"><i></i><i></i><i></i><i></i></div>
   <div class="st-print" id="stPrint"></div>
   <div class="st-blade" id="bladeTop"></div><div class="st-blade bot" id="bladeBot"></div>
@@ -89,6 +103,7 @@
           <div class="shore" id="shore">
             <div class="shore-sky"></div>
             <div class="shore-sun"></div>
+            <div class="shore-clouds" id="shoreClouds"></div>
             <div class="shore-sea"><i></i></div>
             <img class="shore-island" id="island" src="assets/img/byaringan-1216.webp" width="1216" height="404" alt="">
             <div class="shore-lamp"></div>
@@ -185,6 +200,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=5" defer></script>
+<script src="assets/js/app.js?v=8" defer></script>
 </body>
 </html>

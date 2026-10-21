@@ -367,15 +367,18 @@
   // and the photo lands on the sign. One GSAP timeline; transforms, opacity
   // and one clip only. Afterwards the page waits for a scroll.
   const emblem = $('emblem');
-  let tl = null, done = false, revealed = false;
+  let tl = null, amb = null, done = false, revealed = false;
 
   function reveal() {
     if (revealed) return; revealed = true;
     root.classList.remove('held');
     const cue = $('scrollCue'); if (cue) cue.remove();
     if (calm || !window.gsap) return;
+    // The first scroll only opens the page; it starts moving once the sign has risen.
+    root.classList.add('revealing'); scrollTo(0, 0);
+    setTimeout(() => root.classList.remove('revealing'), 900);
     // The sign glides up from the middle of the screen and the words follow it.
-    gsap.to('#signWrap', { y: 0, duration: .9, ease: 'power3.inOut', clearProps: 'transform' });
+    gsap.to('#signWrap', { x: 0, y: 0, duration: .9, ease: 'power3.inOut', clearProps: 'transform' });
     gsap.fromTo('.hero h1 .line > span', { yPercent: 105 }, { yPercent: 0, duration: .9, delay: .35, ease: 'expo.out', stagger: .09, clearProps: 'transform' });
     gsap.fromTo('#heroCopy > *', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .7, delay: .3, ease: 'power2.out', stagger: .07, clearProps: 'all' });
   }
@@ -383,7 +386,7 @@
   function finish() {
     if (done) return; done = true;
     if (tl) tl.kill();
-    if (window.__ngAmb) window.__ngAmb.kill();
+    if (amb) amb.kill();
     root.classList.remove('intro', 'landing');
     const st = $('stage'); if (st) st.remove();
     const sk = $('introSkip'); if (sk) sk.remove();
@@ -391,8 +394,86 @@
     if (!calm) plank.classList.add('sway');
   }
 
-  function buildSea() {
-    // Wave lines: closer together and fainter toward the horizon.
+  // A cumulus, painted once onto a canvas: soft puffs (a low row along the
+  // base, a taller crown), then one gradient laid across the whole shape, lit
+  // from below-right where the sun is. Painting once means the GPU only
+  // scales a texture; nothing is redrawn while it moves.
+  const CLOUD = {
+    dawn: ['#FFD9B0', '#F4A882', '#9B8FB0', '#5D5A7E'],
+    near: ['#FFE9D2', '#F8C4A2', '#C7B8CB', '#8E86A6'],
+    far:  ['#F9CDA8', '#E9A58C', '#A99BB8', '#7C769A'],
+  };
+  function makeCloud(host, { l, t, w, kind = 'dawn', seed = 1, alpha = 1 }) {
+    let s = seed;
+    const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+    const AR = 1.7, dpr = Math.min(devicePixelRatio || 1, 2);
+    const cssW = Math.max(40, host.clientWidth * w / 100), cssH = cssW / AR;
+    const cv = document.createElement('canvas');
+    cv.className = 'cloud';
+    cv.width = Math.round(cssW * dpr); cv.height = Math.round(cssH * dpr);
+    Object.assign(cv.style, { left: l + '%', top: t + '%', width: w + '%', opacity: alpha });
+    const ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+    const puffs = [];
+    for (let i = 0; i < 6; i++) puffs.push([.04 + i * .12 + rnd() * .03, rnd() * .05, .11 + rnd() * .04]);
+    for (let i = 0; i < 3; i++) puffs.push([.18 + i * .2 + rnd() * .05, .08 + rnd() * .08, .14 + rnd() * .04]);
+    puffs.push([.36 + rnd() * .08, .17 + rnd() * .04, .15 + rnd() * .03]);
+    puffs.forEach(([cx, by, r]) => {
+      const R = r * W, x = cx * W + R, y = H - by * W - R;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, R);
+      g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(.78, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.globalCompositeOperation = 'source-in';
+    const [hi, mid, body, shade] = CLOUD[kind];
+    const lg = ctx.createRadialGradient(W * .7, H * 1.15, 0, W * .7, H * 1.15, W * .78);
+    lg.addColorStop(0, hi); lg.addColorStop(.28, mid); lg.addColorStop(.6, body); lg.addColorStop(1, shade);
+    ctx.fillStyle = lg; ctx.fillRect(0, 0, W, H);
+    host.append(cv);
+    return cv;
+  }
+  // The painted sign shows the same sky.
+  makeCloud($('shoreClouds'), { l: 3, t: 10, w: 34, seed: 7 });
+  makeCloud($('shoreClouds'), { l: 64, t: 4, w: 24, seed: 3, kind: 'far' });
+
+  // A coconut frond: a curved rib with leaflets that lengthen then taper.
+  // Each leaflet has a warm sliver underneath, where the low sun catches it.
+  function buildFrond() {
+    const svg = $('stFrond'), ns = 'http://www.w3.org/2000/svg';
+    const P = t => { // the rib, from the top-right corner curving down-left
+      const x = (1 - t) * (1 - t) * 410 + 2 * (1 - t) * t * 250 + t * t * 40;
+      const y = (1 - t) * (1 - t) * -10 + 2 * (1 - t) * t * 40 + t * t * 230;
+      return [x, y];
+    };
+    const lit = document.createElementNS(ns, 'g'), dark = document.createElementNS(ns, 'g');
+    let s = 17;
+    const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+    for (let i = 0; i < 18; i++) {
+      const t = .07 + i * .05 + rnd() * .015;
+      const [x, y] = P(t), [x2, y2] = P(t + .01);
+      const ang = Math.atan2(y2 - y, x2 - x);
+      [1, -1].forEach(side => {
+        const len = (170 * Math.sin(Math.PI * Math.min(1, t * 1.02)) + 40) * (.85 + rnd() * .3);
+        const a = ang + side * (.75 + rnd() * .25);            // swept toward the tip
+        const droop = len * (.35 + rnd() * .2);                // and pulled down by its weight
+        const tx = x + Math.cos(a) * len, ty = y + Math.sin(a) * len + droop;
+        const nx = -Math.sin(a) * side, ny = Math.cos(a) * side; // the leaflet's outer side
+        const c1x = x + Math.cos(a) * len * .5 + nx * 11, c1y = y + Math.sin(a) * len * .5 + ny * 11 + droop * .2;
+        const c2x = c1x - nx * 17, c2y = c1y - ny * 17 + 4;
+        const d = `M${x} ${y} Q${c1x} ${c1y} ${tx} ${ty} Q${c2x} ${c2y} ${x + 2} ${y + 5}Z`;
+        const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); p.setAttribute('class', 'leaf');
+        const q = document.createElementNS(ns, 'path'); q.setAttribute('d', d); q.setAttribute('class', 'lit');
+        q.setAttribute('transform', 'translate(.8 1.4)');
+        lit.append(q); dark.append(p);
+      });
+    }
+    const stem = document.createElementNS(ns, 'path');
+    stem.setAttribute('d', 'M410 -10 Q250 40 40 230'); stem.setAttribute('class', 'stem');
+    svg.append(lit, dark, stem);
+  }
+
+  function buildSea(lowEnd) {
+    // Wave lines: closer together and fainter toward the horizon, each one
+    // broken into strokes of different lengths so it reads as drawn.
     const waves = $('stWaves'), ns = 'http://www.w3.org/2000/svg';
     const rows = [[.03, .6, 1], [.07, .8, 1.2], [.13, 1, 1.5], [.22, 1.3, 1.9], [.35, 1.6, 2.4], [.52, 2, 3], [.74, 2.4, 3.6]];
     rows.forEach(([top, amp, w], i) => {
@@ -402,8 +483,10 @@
       let d = 'M0 5';
       for (let x = 0; x < 800; x += 50) d += ` Q${x + 12.5} ${5 - amp * 2} ${x + 25} 5 T${x + 50} 5`;
       const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); p.setAttribute('stroke-width', w); p.setAttribute('vector-effect', 'non-scaling-stroke');
+      p.setAttribute('stroke-dasharray', `${60 + i * 9} ${14 + i * 3} ${22 + i * 4} ${9 + i * 2}`);
       svg.append(p); waves.append(svg);
     });
+    if (lowEnd) return;
     // Glitter along the sun's path, wider as it comes closer.
     const g = $('stGlitter');
     for (let i = 0; i < 26; i++) {
@@ -420,18 +503,19 @@
     if (!window.gsap) { finish(); return reveal(); }
     await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 900))]);
     if (done) return;
-    buildSea();
 
-    const cam = $('stCam'), isle = $('stIsle'), island = $('stIsland'), word = $('stWord');
-    const vw = innerWidth, vh = innerHeight;
-    // Until the visitor scrolls, the sign waits in the middle of the screen.
-    const sr = $('signWrap').getBoundingClientRect();
-    gsap.set('#signWrap', { y: Math.max(0, vh * .47 - (sr.top + sr.height / 2)) });
+    const vw = innerWidth, vh = innerHeight, dpr = devicePixelRatio || 1;
     const lowEnd = (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+    if (lowEnd) root.classList.add('low-end');
+    const isle = $('stIsle'), island = $('stIsland'), word = $('stWord');
 
-    // Everything is measured at the camera's final framing.
-    const ir = isle.getBoundingClientRect();
-    gsap.set(word, { top: ir.top - word.offsetHeight * 1.05, left: (vw - word.offsetWidth) / 2 });
+    // Build the scene, then read every measurement in one pass before writing.
+    buildSea(lowEnd);
+    buildFrond();
+    const skyc = $('stSkyClouds');
+    [{ l: -10, t: 20, w: 52, seed: 2 }, { l: 56, t: 27, w: 40, seed: 5 }, { l: 24, t: 44, w: 24, seed: 9, kind: 'far', alpha: .8 }, { l: 70, t: 10, w: 30, seed: 4 }]
+      .forEach(o => makeCloud(skyc, o));
+    const near = makeCloud($('stNear'), { l: 0, t: 30, w: 150, seed: 11, kind: 'near' });
     const chars = [];
     [...word.childNodes].forEach(node => {
       const frag = document.createDocumentFragment();
@@ -441,69 +525,105 @@
       });
       if (node.nodeType === 3) word.replaceChild(frag, node); else { node.textContent = ''; node.append(frag); }
     });
-    const r0 = island.getBoundingClientRect();
-    const L = { x: r0.left + r0.width * .815, y: r0.top + r0.height * .04 };
+
+    // ── reads ──
+    const sr = $('signWrap').getBoundingClientRect();
+    const ir = isle.getBoundingClientRect();
+    const wW = word.offsetWidth, wH = word.offsetHeight;
+    const hold = Math.max(0, vh * .47 - (sr.top + sr.height / 2));
+    const holdX = vw / 2 - (sr.left + sr.width / 2);
+    const frame0 = $('frameSlot').getBoundingClientRect();
+    const tIsland0 = $('island').getBoundingClientRect(), tWord0 = $('wordmark').getBoundingClientRect();
+
+    // ── writes ──
+    // Until the visitor scrolls, the sign waits in the middle of the screen.
+    gsap.set('#signWrap', { x: holdX, y: hold });
+    const shift = r => ({ left: r.left + holdX, top: r.top + hold, width: r.width, height: r.height, right: r.right + holdX, bottom: r.bottom + hold });
+    const frame = shift(frame0), tIsland = shift(tIsland0), tWord = shift(tWord0);
+    // The name sits in the sky well above the island, leaving the lamp clear.
+    const wordTop = ir.top - wH - vh * .05;
+    gsap.set(word, { top: wordTop, left: (vw - wW) / 2 });
+    const L = { x: ir.left + ir.width * .815, y: ir.top + ir.height * .04 };
+    const cIsle = ir, cWord = { left: (vw - wW) / 2, top: wordTop, width: wW, height: wH };
+    // Letter angles from the lamp, computed from the split before any transform.
+    const letterRects = chars.map(c => c.getBoundingClientRect());
     gsap.set('#stBeam', { x: L.x, y: L.y, rotation: 185 });
     gsap.set('#stFlare', { x: L.x, y: L.y });
+    gsap.set('#stLampRef', { left: L.x + vw * .2 - vw * .0175 });
 
     // The photo: the frame's shape, around the island and the name.
-    const frame = $('frameSlot').getBoundingClientRect();
-    const tIsland = $('island').getBoundingClientRect(), tWord = $('wordmark').getBoundingClientRect();
-    const cIsle = isle.getBoundingClientRect(), cWord = word.getBoundingClientRect();
-    const aspect = frame.width / frame.height;
-    const pw = Math.min(vw - 16, vh * .6 * aspect), ph = pw / aspect;
-    const midY = (cWord.top - 8 + cIsle.bottom + cIsle.height * .1) / 2;
-    const photo = { left: (vw - pw) / 2, top: Math.max(vh * .12, midY - ph / 2), width: pw, height: ph };
+    // The photo holds the whole group; its shape need not match the frame.
+    const gTop = cWord.top - 14, gBot = ir.bottom + ir.height * .18;
+    const pw = Math.min(vw - 16, (gBot - gTop) * 1.9), ph = Math.max(gBot - gTop, pw / 1.9);
+    const photo = { left: (vw - pw) / 2, top: (gTop + gBot) / 2 - ph / 2, width: pw, height: ph };
     const inset = r => `inset(${r.top}px ${vw - r.left - r.width}px ${vh - r.top - r.height}px ${r.left}px round 3px)`;
     gsap.set(['#stFinder', '#stPrint'], { x: photo.left, y: photo.top, width: photo.width, height: photo.height });
 
-    // The camera starts tight on the lamp, centred, and pulls back.
-    const Z = vw < 700 ? 3.4 : 2.6;
-    gsap.set(cam, { transformOrigin: `${L.x}px ${L.y}px`, scale: Z, x: vw / 2 - L.x, y: vh * .42 - L.y });
+    // The camera: every plane starts zoomed toward the lamp by its own depth,
+    // so near things move more than far things. The zoom is capped by what
+    // the island art can resolve on this screen.
+    const Zwant = vw < 700 ? 2.8 : 2.3;
+    const Z = Math.max(1.6, Math.min(Zwant, 1216 * 1.6 / (ir.width * dpr)));
+    const planes = gsap.utils.toArray('#stage [data-depth]');
+    planes.forEach(p => {
+      const d = parseFloat(p.dataset.depth);
+      const r = p.getBoundingClientRect();
+      gsap.set(p, { transformOrigin: `${L.x - r.left}px ${L.y - r.top}px`, scale: 1 + (Z - 1) * d, x: (vw / 2 - L.x) * d, y: (vh * .42 - L.y) * d, rotation: -2.5 * Math.min(d, 1) });
+    });
+    requestAnimationFrame(() => planes.forEach(p => { p.style.willChange = 'transform'; }));
 
     const A0 = 185, A1 = 335, BEAM = 1.4;
-    const angleOf = el => {
-      const r = el.getBoundingClientRect();
-      let a = Math.atan2(r.top + r.height / 2 - L.y, r.left + r.width / 2 - L.x) * 180 / Math.PI;
+    const angleOf = r => {
+      const a = Math.atan2(r.top + r.height / 2 - L.y, r.left + r.width / 2 - L.x) * 180 / Math.PI;
       return a < 0 ? a + 360 : a;
     };
 
     tl = gsap.timeline({ onComplete: () => { finish(); root.classList.add('held'); }, defaults: { ease: 'power2.out' } });
     window.__ngIntro = tl; // for frame-by-frame checks
 
-    // ── 0–3.6 s: dawn, and the pull-back ──
-    tl.to(cam, { scale: 1, x: 0, y: 0, duration: 3.6, ease: 'power2.inOut' }, 0)
+    // ── 0–3.9 s: dawn, and the pull-back ──
+    const PULL = 3.9;
+    tl.to(planes, { scale: 1, x: 0, y: 0, rotation: 0, duration: PULL, ease: 'power3.inOut' }, 0)
+      .set(planes, { willChange: 'auto' }, PULL + .05)
       .to('#stStars', { opacity: 0, duration: 2, ease: 'sine.inOut' }, .4)
       .to('#stDay', { opacity: 1, duration: 3.2, ease: 'sine.inOut' }, .3)
-      .fromTo('#stSun', { opacity: 0, y: '8vh' }, { opacity: 1, y: 0, duration: 3.4, ease: 'sine.out' }, .5)
+      .fromTo('#stSun', { opacity: 0, yPercent: 8 }, { opacity: 1, yPercent: 0, duration: 3.4, ease: 'sine.out' }, .5)
+      .to('#stRays', { opacity: .75, duration: 2.6, ease: 'sine.inOut' }, 1.4)
+      .to('#stHaze', { opacity: 1, duration: 2.4, ease: 'sine.inOut' }, 1.2)
       .to('#stPath', { opacity: 1, duration: 2.4, ease: 'sine.inOut' }, 1.2)
+      .to('#stTint', { opacity: .3, duration: 3, ease: 'sine.inOut' }, .8)
+      .to('#stRim', { opacity: .95, duration: 2.2, ease: 'sine.inOut' }, 1.6)
+      .to('#stLampRef', { opacity: .25, duration: 2, ease: 'sine.inOut' }, 2.2)
       .fromTo('#stGlow', { scale: .7, opacity: 1 }, { scale: 1.15, duration: .9, ease: 'sine.inOut', repeat: 3, yoyo: true }, 0)
       .to('#stGlow', { opacity: .35, scale: .8, duration: .8 }, 3.2)
-
+      .fromTo('#stSand', { yPercent: 35 }, { yPercent: 0, duration: 2.6, ease: 'power2.out' }, 1.2)
       .fromTo(['#stWash', '#stLip'], { y: 30 }, { y: -2, duration: 1.2, ease: 'power2.out' }, 1.6)
       .to(['#stWash', '#stLip'], { y: 9, duration: 1.4, ease: 'sine.inOut' }, 2.8)
       .to('#stWet', { opacity: 1, duration: .9 }, 2.9);
-    // the sea moves the whole time, on its own clock
-    const amb = gsap.timeline();
-    window.__ngAmb = amb;
+
+    // Ambient motion runs on its own clock so it doesn't stretch the intro.
+    amb = gsap.timeline();
     gsap.utils.toArray('#stWaves svg').forEach((s, i) => {
       amb.fromTo(s, { xPercent: 0 }, { xPercent: -6.25 * (i % 2 ? 1 : -1), duration: 9 - i * .6, ease: 'none' }, 0);
     });
-    amb.fromTo('.st-clouds i', { x: -20 }, { x: 40, duration: 9, ease: 'none', stagger: .4 }, 0);
+    amb.to('#stFrond', { skewX: 1.5, duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: 3 }, 0);
     if (!lowEnd) {
+      amb.fromTo('#stSkyClouds .cloud', { x: -10 }, { x: 24, duration: 10, ease: 'none', stagger: .5 }, 0)
+        .fromTo('#stRays', { rotation: -4 }, { rotation: 6, duration: 10, ease: 'none' }, 0);
       gsap.utils.toArray('#stGlitter i').forEach(s => {
         amb.to(s, { opacity: .9, duration: .25 + Math.random() * .3, yoyo: true, repeat: 5 + Math.floor(Math.random() * 6), repeatDelay: Math.random() * .6, ease: 'sine.inOut' }, 1.2 + Math.random() * 1.5);
       });
     }
-    // a bird crosses close to the lens, flapping
-    tl.set('#stBird', { opacity: 1, x: vw * 1.05, y: vh * .3, rotation: -6 }, .9)
-      .to('#stBird', { x: -vw * .55, y: vh * .18, rotation: 4, duration: 1.5, ease: 'none' }, .9)
-      .to('#stBird', { scale: 1.25, duration: 1.5, ease: 'none' }, .9)
-      .to('#stWing', { attr: { d: 'M2 22 Q24 38 50 20 Q76 38 98 22 Q76 30 50 26 Q24 30 2 22Z' }, duration: .17, ease: 'sine.inOut', repeat: 9, yoyo: true }, .9)
+
+    // A bird crosses close to the lens, a black shape against the lamp's bloom.
+    const bw = Math.min(vw, vh) * .46;
+    tl.set('#stBird', { opacity: 1, x: vw * 1.02, y: vh * .36 - bw * .2, rotation: -6, scale: .9 }, .8)
+      .to('#stBird', { x: -bw * 1.1, y: vh * .3, rotation: 4, scale: 1.25, duration: 1.6, ease: 'none' }, .8)
+      .to('#stWing', { attr: { d: 'M2 22 Q24 38 50 20 Q76 38 98 22 Q76 30 50 26 Q24 30 2 22Z' }, duration: .17, ease: 'sine.inOut', repeat: 9, yoyo: true }, .8)
       .set('#stBird', { opacity: 0 }, 2.45);
-    // then a cloud drifts past
-    tl.fromTo('#stFog', { opacity: 0, xPercent: -60, scale: 1.1 }, { opacity: .92, xPercent: -5, scale: 1.25, duration: .7, ease: 'sine.in' }, 2.1)
-      .to('#stFog', { opacity: 0, xPercent: 55, scale: 1.45, duration: .9, ease: 'sine.out' }, 2.8);
+    // Then a cloud drifts across the island and the sky where the name will be.
+    tl.fromTo(near, { x: -vw * 1.6, scale: .69, opacity: 0 }, { x: vw * .05, scale: .83, opacity: .97, duration: .8, ease: 'sine.in' }, 2.0)
+      .to(near, { x: vw * 1.1, scale: 1, opacity: 0, duration: 1, ease: 'sine.out' }, 2.8);
 
     // ── 3.7–5.3 s: the lamp flares, the beam writes the name ──
     const BEAM_AT = 3.8;
@@ -512,35 +632,36 @@
       .to('#stBeam', { opacity: 1, duration: .2 }, BEAM_AT)
       .to('#stBeam', { rotation: A1, duration: BEAM, ease: 'sine.inOut' }, BEAM_AT)
       .to('#stBeam', { opacity: 0, duration: .35 }, BEAM_AT + BEAM - .25);
-    chars.forEach(c => {
-      const p = Math.min(1, Math.max(0, (angleOf(c) - A0) / (A1 - A0)));
+    chars.forEach((c, i) => {
+      const p = Math.min(1, Math.max(0, (angleOf(letterRects[i]) - A0) / (A1 - A0)));
       const t = Math.acos(1 - 2 * p) / Math.PI; // invert sine.inOut: when the beam reaches this letter
-      tl.fromTo(c, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: .45 }, BEAM_AT + t * BEAM);
+      tl.fromTo(c, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: .45, force3D: false }, BEAM_AT + t * BEAM);
     });
 
-    // ── 5.4–6.1 s: the viewfinder, then the shutter ──
+    // ── the viewfinder, then the shutter ──
     const SHOT = BEAM_AT + BEAM + .55;
     tl.fromTo('#stFinder', { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: .35, ease: 'power2.out', immediateRender: false }, SHOT - .5)
+      .set(['#bladeTop', '#bladeBot', '#stFlash'], { display: 'block' }, SHOT - .1)
       .to(['#bladeTop', '#bladeBot'], { scaleY: 1, duration: .09, ease: 'power2.in' }, SHOT)
       .add(() => root.classList.add('landing'), SHOT)
       .set('#stage', { clipPath: inset(photo) }, SHOT + .09)
-      .set(['#stSand', '#stFinder', '#stFlare'], { opacity: 0 }, SHOT + .09)
+      .set(['#stSand', '#stFinder', '#stFlare', '#stBangka'], { opacity: 0 }, SHOT + .09)
       .set('#stPrint', { opacity: 1 }, SHOT + .09)
       .to(['#bladeTop', '#bladeBot'], { scaleY: 0, duration: .14, ease: 'power2.out' }, SHOT + .1)
       .fromTo('#stFlash', { opacity: .85 }, { opacity: 0, duration: .45, ease: 'power2.out', immediateRender: false }, SHOT + .1);
 
-    // ── 6.4–7.6 s: the photo flies onto the sign ──
+    // ── the photo flies onto the sign ──
     const FLY = SHOT + .45, fly = { duration: 1.15, ease: 'power3.inOut' };
-    const fr = { left: frame.left, top: frame.top, width: frame.width, height: frame.height };
-    tl.fromTo('#stage', { clipPath: inset(photo) }, { clipPath: inset(fr), ...fly, immediateRender: false }, FLY)
-      .to('#stPrint', { x: fr.left, y: fr.top, width: fr.width, height: fr.height, ...fly }, FLY)
+    tl.fromTo('#stage', { clipPath: inset(photo) }, { clipPath: inset(frame), ...fly, immediateRender: false }, FLY)
+      .to('#stPrint', { x: frame.left, y: frame.top, width: frame.width, height: frame.height, ...fly }, FLY)
       .to('#stPrint', { opacity: 0, duration: .3 }, FLY + .85)
-      .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: tIsland.left - cIsle.left, y: tIsland.top - cIsle.top, scale: tIsland.width / cIsle.width, transformOrigin: '0 0', ...fly }, FLY)
-      .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: tWord.left - cWord.left, y: tWord.top - cWord.top, scale: tWord.width / cWord.width, transformOrigin: '0 0', ...fly }, FLY)
-      .to('#stSun', { opacity: .6, duration: fly.duration }, FLY)
+      .set([isle, word], { willChange: 'transform' }, FLY - .05)
+      .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: tIsland.left - cIsle.left, y: tIsland.top - cIsle.top, scale: tIsland.width / cIsle.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
+      .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: tWord.left - cWord.left, y: tWord.top - cWord.top, scale: tWord.width / cWord.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
+      .to(['#stSun', '#stFrond'], { opacity: .5, duration: fly.duration }, FLY)
       .fromTo(plank, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: .5 }, FLY + .7);
 
-    // ── 7.6–8.8 s: the sign catches it and swings; Leny rises ──
+    // ── the sign catches it and swings; Leny rises ──
     const LAND = FLY + 1.2;
     tl.set('#shore', { opacity: 1 }, LAND)
       .to('#stage', { opacity: 0, duration: .25 }, LAND)
