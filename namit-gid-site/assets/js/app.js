@@ -154,10 +154,20 @@
   const repaintDishes = () => document.querySelectorAll('.dish').forEach(n => n._paint && n._paint());
 
   // ── Tray ────────────────────────────────────────────────────────────────
+  // The hanging sign sways a little whenever the tray changes.
+  let signSeen = true;
+  if ('IntersectionObserver' in window) new IntersectionObserver(es => { signSeen = es[0].isIntersecting; }).observe($('signWrap'));
+  function kickSign() {
+    if (calm || !window.gsap || !signSeen) return;
+    gsap.killTweensOf(plank, 'rotation');
+    gsap.to(plank, { keyframes: [{ rotation: 1.4, duration: .25 }, { rotation: -.8, duration: .35 }, { rotation: .3, duration: .35 }, { rotation: 0, duration: .3 }], ease: 'sine.inOut' });
+  }
+
   function add(line, fig) {
     const hit = tray.find(l => lineKey(l) === lineKey(line));
     if (hit) hit.qty += line.qty; else tray.push(line);
     save(); renderTray(true);
+    kickSign();
     if (fig) fly(fig);
     const d = byId[line.id];
     say(`Added ${d.name}${line.size && d.sizes.length > 1 ? ', ' + line.size : ''}. ${count()} in your tray, ${money(total())}.`);
@@ -166,6 +176,7 @@
     line.qty += by;
     if (line.qty <= 0) tray = tray.filter(l => l !== line);
     save(); renderTray(false);
+    kickSign();
     say(`${count()} in your tray, ${money(total())}.`);
   }
 
@@ -226,7 +237,7 @@
     outer.animate([{ transform: `translateX(${x0}px)` }, { transform: `translateX(${x1}px)` }], { duration: dur, easing: 'linear', fill: 'forwards' });
     const lift = Math.min(160, Math.abs(y1 - y0) * .35 + 60);
     inner.animate([
-      { transform: `translateY(${y0}px) scale(1.4)`, opacity: .0 },
+      { transform: `translateY(${y0}px) scale(1)`, opacity: .0 },
       { transform: `translateY(${Math.min(y0, y1) - lift}px) scale(1)`, opacity: 1, offset: .35, easing: 'cubic-bezier(.55,0,.85,.35)' },
       { transform: `translateY(${y1}px) scale(.35)`, opacity: 1 }],
       { duration: dur, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards' })
@@ -335,6 +346,37 @@
     fetch('/api/availability').then(r => r.json()).then(a => {
       if (a.available === false) $('navLamp').classList.remove('is-on');
     }).catch(() => $('navLamp').classList.remove('is-on'));
+  }
+
+  // ── Little life, after the intro ───────────────────────────────────────
+  // Steam curls off a warm dish every few seconds while it's on screen;
+  // boards swing when touched; notes flutter as they come into view; the
+  // footer's lighthouse and fireflies only run while the footer is visible.
+  const lowEndDevice = (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+  if (!calm && 'IntersectionObserver' in window) {
+    const warm = new Set();
+    const steamIO = new IntersectionObserver(es => es.forEach(e => { e.isIntersecting ? warm.add(e.target) : warm.delete(e.target); }), { threshold: .4 });
+    document.querySelectorAll('.dish').forEach(d => { if (d.querySelector('.steam')) steamIO.observe(d); });
+    const puff = () => {
+      if (!document.hidden && warm.size) {
+        const list = [...warm], d = list[Math.floor(Math.random() * list.length)];
+        d.classList.remove('puff'); void d.offsetWidth; d.classList.add('puff');
+      }
+      setTimeout(puff, 5000 + Math.random() * 3000);
+    };
+    setTimeout(puff, 4000);
+    document.querySelectorAll('.board').forEach(b => b.addEventListener('pointerenter', e => {
+      if (e.pointerType !== 'mouse') return;
+      b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge');
+    }));
+    const noteIO = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('flutter'); setTimeout(() => e.target.classList.remove('flutter'), 700); noteIO.unobserve(e.target);
+    }), { threshold: .6 });
+    document.querySelectorAll('.note').forEach(n => noteIO.observe(n));
+    if (!lowEndDevice) {
+      new IntersectionObserver(es => $('foot').classList.toggle('live', es[0].isIntersecting)).observe($('foot'));
+    }
   }
 
   // ── Scroll entrances ────────────────────────────────────────────────────

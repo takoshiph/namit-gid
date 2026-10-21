@@ -526,4 +526,72 @@ html.intro .hero-copy > * { opacity: 0; }
 
 /* calm: reduced motion or data saver */
 html.calm *, html.calm *::before, html.calm *::after { animation: none !important; transition: none !important; }
+html.calm .fireflies { display: none; }
 html.calm .dish.pre .dish-fig img, html.calm .dish.pre .dish-fig .shadow, html.calm .board.pre { opacity: 1 !important; transform: none !important; }
+
+/* ── the painted-film pass ───────────────────────────────── */
+/* Torn watercolour edges: each section's paper overlaps the one above. */
+.menu, .how, .reviews, .pickup { position: relative; }
+.menu::before, .how::before, .reviews::before, .pickup::before {
+  content: ''; position: absolute; left: 0; right: 0; top: -24px; height: 26px; pointer-events: none; z-index: 1;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%201200%2026'%20preserveAspectRatio%3D'none'%3E%3Cpath%20d%3D'M0%2026%20L0%2014.0%20L14%2010.4%20L39%2012.7%20L59%2012.1%20L85%2014.3%20L101%2015.0%20L126%2017.4%20L142%2016.7%20L163%2011.1%20L187%2017.2%20L211%2011.6%20L225%2012.7%20L248%2014.7%20L271%2011.5%20L286%2014.4%20L298%2014.1%20L316%2011.6%20L331%2011.6%20L341%209.6%20L356%206.0%20L373%207.0%20L398%2013.3%20L417%206.6%20L430%2012.9%20L443%2011.0%20L462%208.2%20L484%205.9%20L495%2014.4%20L516%2013.7%20L535%2015.5%20L561%208.9%20L574%2016.7%20L599%2017.7%20L612%2014.0%20L631%2010.5%20L644%2014.0%20L654%2014.4%20L680%2015.3%20L700%2016.6%20L724%2013.1%20L747%2016.1%20L767%2018.9%20L778%2012.4%20L795%2015.9%20L813%2015.5%20L838%2015.8%20L851%208.9%20L870%209.3%20L892%209.1%20L907%207.8%20L921%2013.5%20L945%2013.8%20L959%207.4%20L981%2013.3%20L1002%206.3%20L1017%2010.9%20L1035%2012.1%20L1053%207.8%20L1075%2012.4%20L1097%2013.0%20L1117%2012.3%20L1142%2014.9%20L1167%209.6%20L1184%2013.0%20L1199%2010.8%20L1200%2012%20L1200%2026%20Z'%20fill%3D'black'%2F%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%201200%2026'%20preserveAspectRatio%3D'none'%3E%3Cpath%20d%3D'M0%2026%20L0%2014.0%20L14%2010.4%20L39%2012.7%20L59%2012.1%20L85%2014.3%20L101%2015.0%20L126%2017.4%20L142%2016.7%20L163%2011.1%20L187%2017.2%20L211%2011.6%20L225%2012.7%20L248%2014.7%20L271%2011.5%20L286%2014.4%20L298%2014.1%20L316%2011.6%20L331%2011.6%20L341%209.6%20L356%206.0%20L373%207.0%20L398%2013.3%20L417%206.6%20L430%2012.9%20L443%2011.0%20L462%208.2%20L484%205.9%20L495%2014.4%20L516%2013.7%20L535%2015.5%20L561%208.9%20L574%2016.7%20L599%2017.7%20L612%2014.0%20L631%2010.5%20L644%2014.0%20L654%2014.4%20L680%2015.3%20L700%2016.6%20L724%2013.1%20L747%2016.1%20L767%2018.9%20L778%2012.4%20L795%2015.9%20L813%2015.5%20L838%2015.8%20L851%208.9%20L870%209.3%20L892%209.1%20L907%207.8%20L921%2013.5%20L945%2013.8%20L959%207.4%20L981%2013.3%20L1002%206.3%20L1017%2010.9%20L1035%2012.1%20L1053%207.8%20L1075%2012.4%20L1097%2013.0%20L1117%2012.3%20L1142%2014.9%20L1167%209.6%20L1184%2013.0%20L1199%2010.8%20L1200%2012%20L1200%2026%20Z'%20fill%3D'black'%2F%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat;
+}
+.menu::before { background: #F4ECDD; }
+.how::before { background: #F3EADB; }
+.reviews::before { background: #EADCC4; }
+.pickup::before { background: #EADCC4; }
+.pickup::after { /* the pickup paper tears over the top of the dusk beach */
+  content: ''; position: absolute; left: 0; right: 0; bottom: -24px; height: 26px; pointer-events: none; z-index: 2; background: #DCC9AC;
+  transform: scaleY(-1); -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%201200%2026'%20preserveAspectRatio%3D'none'%3E%3Cpath%20d%3D'M0%2026%20L0%2014.0%20L14%2010.4%20L39%2012.7%20L59%2012.1%20L85%2014.3%20L101%2015.0%20L126%2017.4%20L142%2016.7%20L163%2011.1%20L187%2017.2%20L211%2011.6%20L225%2012.7%20L248%2014.7%20L271%2011.5%20L286%2014.4%20L298%2014.1%20L316%2011.6%20L331%2011.6%20L341%209.6%20L356%206.0%20L373%207.0%20L398%2013.3%20L417%206.6%20L430%2012.9%20L443%2011.0%20L462%208.2%20L484%205.9%20L495%2014.4%20L516%2013.7%20L535%2015.5%20L561%208.9%20L574%2016.7%20L599%2017.7%20L612%2014.0%20L631%2010.5%20L644%2014.0%20L654%2014.4%20L680%2015.3%20L700%2016.6%20L724%2013.1%20L747%2016.1%20L767%2018.9%20L778%2012.4%20L795%2015.9%20L813%2015.5%20L838%2015.8%20L851%208.9%20L870%209.3%20L892%209.1%20L907%207.8%20L921%2013.5%20L945%2013.8%20L959%207.4%20L981%2013.3%20L1002%206.3%20L1017%2010.9%20L1035%2012.1%20L1053%207.8%20L1075%2012.4%20L1097%2013.0%20L1117%2012.3%20L1142%2014.9%20L1167%209.6%20L1184%2013.0%20L1199%2010.8%20L1200%2012%20L1200%2026%20Z'%20fill%3D'black'%2F%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%201200%2026'%20preserveAspectRatio%3D'none'%3E%3Cpath%20d%3D'M0%2026%20L0%2014.0%20L14%2010.4%20L39%2012.7%20L59%2012.1%20L85%2014.3%20L101%2015.0%20L126%2017.4%20L142%2016.7%20L163%2011.1%20L187%2017.2%20L211%2011.6%20L225%2012.7%20L248%2014.7%20L271%2011.5%20L286%2014.4%20L298%2014.1%20L316%2011.6%20L331%2011.6%20L341%209.6%20L356%206.0%20L373%207.0%20L398%2013.3%20L417%206.6%20L430%2012.9%20L443%2011.0%20L462%208.2%20L484%205.9%20L495%2014.4%20L516%2013.7%20L535%2015.5%20L561%208.9%20L574%2016.7%20L599%2017.7%20L612%2014.0%20L631%2010.5%20L644%2014.0%20L654%2014.4%20L680%2015.3%20L700%2016.6%20L724%2013.1%20L747%2016.1%20L767%2018.9%20L778%2012.4%20L795%2015.9%20L813%2015.5%20L838%2015.8%20L851%208.9%20L870%209.3%20L892%209.1%20L907%207.8%20L921%2013.5%20L945%2013.8%20L959%207.4%20L981%2013.3%20L1002%206.3%20L1017%2010.9%20L1035%2012.1%20L1053%207.8%20L1075%2012.4%20L1097%2013.0%20L1117%2012.3%20L1142%2014.9%20L1167%209.6%20L1184%2013.0%20L1199%2010.8%20L1200%2012%20L1200%2026%20Z'%20fill%3D'black'%2F%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat;
+}
+
+/* Leny's kitchen wall at the head of the menu: the painting's wall melts into the page */
+.shelf { display: block; width: min(560px, 92vw); height: auto; margin: -8px auto 8px; mix-blend-mode: multiply; opacity: .95;
+  -webkit-mask-image: radial-gradient(68% 72% at 50% 46%, #000 58%, transparent 100%); mask-image: radial-gradient(68% 72% at 50% 46%, #000 58%, transparent 100%); }
+
+/* a frond stirring over the hero, behind the sign */
+.hero-frond { position: absolute; right: -14vw; top: calc(var(--bar) - 18px); width: min(62vw, 520px); height: auto; z-index: 0; opacity: .9;
+  transform-origin: 100% 0; animation: gust 10s var(--ease-loop) infinite; pointer-events: none; }
+.hero > :not(.hero-frond) { position: relative; z-index: 1; }
+@keyframes gust { 0%, 100% { transform: skewX(0deg) rotate(0deg); } 8% { transform: skewX(1.6deg) rotate(.8deg); } 16% { transform: skewX(-.8deg) rotate(-.3deg); } 24% { transform: skewX(.6deg) rotate(.2deg); } 32% { transform: none; } }
+html.held .hero-frond, html.intro .hero-frond { opacity: .9; }
+
+/* warmer, softer, hand-cut UI */
+.btn { border-radius: 12px 9px 11px 10px; }
+.btn-sea { background: #1F5560; box-shadow: inset 0 -2px 0 rgba(10, 30, 36, .35), 0 3px 0 #5a3a20; }
+.btn-sea:hover { background: #246470; }
+.chip { border-radius: 9px 7px 8px 7px; }
+.chips { border-radius: 11px 9px 10px 9px; }
+.traybar, .tray-panel { border-radius: 14px 11px 13px 12px; }
+.note { box-shadow: 0 2px 0 rgba(90, 58, 32, .14), 0 10px 18px -12px rgba(90, 58, 32, .4); transition: rotate 500ms var(--ease-hang); transform-origin: 50% 8px; }
+.note:hover, .note:focus-within, .note.flutter { rotate: 0deg !important; }
+h2 { letter-spacing: 0; line-height: 1.05; }
+
+/* steam keeps curling off warm dishes while they're in view */
+.dish.puff .steam path { animation: steam-puff 2800ms cubic-bezier(.22,1,.36,1) both; }
+.dish.puff .steam path + path { animation-delay: 380ms; animation-duration: 3300ms; }
+@keyframes steam-puff { 0% { stroke-dashoffset: 1; opacity: 0; transform: translateY(8px) skewX(0); } 30% { opacity: .8; } 100% { stroke-dashoffset: 0; opacity: 0; transform: translateY(-14px) skewX(3deg); } }
+
+/* boards answer a pointer with a small swing */
+.board.nudge { animation: nudge 900ms var(--ease-out); }
+@keyframes nudge { 30% { transform: rotate(1.5deg); } 65% { transform: rotate(-.8deg); } 100% { transform: none; } }
+
+/* the dusk footer: a real lighthouse rhythm, and fireflies by the palms */
+.foot-lamp { animation: lamp-flash 6s linear infinite !important; }
+@keyframes lamp-flash { 0%, 86%, 100% { opacity: .45; scale: .8; } 88% { opacity: 1; scale: 1.3; } 90% { opacity: .5; scale: .85; } 93% { opacity: 1; scale: 1.25; } 95% { opacity: .5; scale: .85; } }
+.fireflies { position: absolute; left: 0; top: 30%; width: 34%; height: 55%; pointer-events: none; }
+.fireflies i { position: absolute; width: 4px; height: 4px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle, #fff8c8 0, rgba(255, 228, 120, .9) 40%, rgba(255, 220, 110, 0) 70%); box-shadow: 0 0 6px 2px rgba(255, 226, 130, .45); }
+.foot.live .fireflies i { animation: firefly 8s var(--ease-loop) infinite; }
+.fireflies i:nth-child(1) { left: 12%; top: 30%; animation-delay: 0s; animation-duration: 7s; }
+.fireflies i:nth-child(2) { left: 30%; top: 60%; animation-delay: 1.4s; }
+.fireflies i:nth-child(3) { left: 48%; top: 22%; animation-delay: 2.6s; animation-duration: 9s; }
+.fireflies i:nth-child(4) { left: 62%; top: 70%; animation-delay: 3.3s; }
+.fireflies i:nth-child(5) { left: 22%; top: 82%; animation-delay: 4.8s; animation-duration: 10s; }
+.fireflies i:nth-child(6) { left: 78%; top: 40%; animation-delay: 5.6s; }
+.fireflies i:nth-child(7) { left: 6%; top: 55%; animation-delay: 6.5s; animation-duration: 7.5s; }
+@keyframes firefly { 0% { opacity: 0; transform: translate(0, 0); } 15% { opacity: 1; } 40% { opacity: .2; transform: translate(14px, -10px); } 55% { opacity: 1; } 80% { opacity: 0; transform: translate(-8px, -22px); } 100% { opacity: 0; transform: translate(0, 0); } }
+html.low-end .fireflies { display: none; }
+
+/* Leny's painted look gets a touch of the same paper as the sign */
+.emblem, .emblem-arms { filter: saturate(.95) contrast(.98); }
