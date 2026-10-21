@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=10">
+<link rel="stylesheet" href="assets/css/site.css?v=11">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -87,11 +87,28 @@
 <main id="top">
   <section class="hero" id="hero" aria-labelledby="heroH">
     <div class="sign-wrap" id="signWrap">
-      <div class="sign-clip">
-        <img class="emblem" id="emblem" src="assets/img/emblem-480.webp" srcset="assets/img/emblem-480.webp 480w, assets/img/emblem-800.webp 800w" sizes="(min-width: 900px) 440px, 92vw" width="1040" height="1199" alt="">
-      </div>
+      <!-- The badge behind Leny, painted in rings that draw themselves in. -->
+      <svg class="badge" id="badge" viewBox="-52 -52 104 104" aria-hidden="true">
+        <defs>
+          <filter id="paintEdge" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+          <radialGradient id="discPaint" cx="42%" cy="36%" r="70%">
+            <stop offset="0" stop-color="#F0A066"/><stop offset=".55" stop-color="#DD7E45"/><stop offset="1" stop-color="#C2602F"/>
+          </radialGradient>
+        </defs>
+        <g filter="url(#paintEdge)">
+          <circle class="disc" r="40" fill="url(#discPaint)"/>
+          <circle class="ring r1" r="42.6" pathLength="1"/>
+          <circle class="ring r2" r="46" pathLength="1"/>
+          <circle class="ring r3" r="49.6" pathLength="1"/>
+        </g>
+      </svg>
+      <div class="leny-clip"><img class="emblem" id="emblem" src="assets/img/leny-painted.webp" width="380" height="1010" alt="Leny, who cooks at Namit Gid"></div>
       <div class="plank" id="plank" aria-hidden="true">
-        <!-- The Long Beach view, painted on the sign. The intro lands on this. -->
+        <img class="sign-img" src="assets/img/sign-painted.webp" width="1000" height="809" alt="">
+        <!-- The Long Beach view, mounted on the board. The intro lands on this. -->
         <div class="frame-slot" id="frameSlot">
           <div class="shore" id="shore">
             <div class="shore-sky"></div>
@@ -193,6 +210,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=10" defer></script>
+<script src="assets/js/app.js?v=11" defer></script>
 </body>
 </html>

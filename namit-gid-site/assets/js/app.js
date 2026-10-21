@@ -390,7 +390,7 @@
     root.classList.remove('intro', 'landing');
     const st = $('stage'); if (st) st.remove();
     const sk = $('introSkip'); if (sk) sk.remove();
-    if (window.gsap) gsap.set([plank, emblem, '#shore'], { clearProps: 'all' });
+    if (window.gsap) gsap.set([plank, emblem, '#shore', '#badge', '#badge .disc', '#badge .ring'], { clearProps: 'all' });
     if (!calm) plank.classList.add('sway');
   }
 
@@ -493,7 +493,7 @@
     const sr = $('signWrap').getBoundingClientRect();
     const ir = isle.getBoundingClientRect();
     const wW = word.offsetWidth, wH = word.offsetHeight;
-    const hold = Math.max(0, vh * .47 - (sr.top + sr.height / 2));
+    const hold = Math.max(0, vh * .47 - (sr.top - sr.width * .15 + sr.bottom) / 2);
     const holdX = vw / 2 - (sr.left + sr.width / 2);
     const frame0 = $('frameSlot').getBoundingClientRect();
     const tIsland0 = $('island').getBoundingClientRect(), tWord0 = $('wordmark').getBoundingClientRect();
@@ -637,7 +637,11 @@
     tl.set('#shore', { opacity: 1 }, LAND)
       .to('#stage', { opacity: 0, duration: .25 }, LAND)
       .to(plank, { keyframes: [{ rotation: 2.2, duration: .25, ease: 'power2.out' }, { rotation: -1.3, duration: .4, ease: 'sine.inOut' }, { rotation: .5, duration: .4, ease: 'sine.inOut' }, { rotation: 0, duration: .35, ease: 'sine.out' }] }, LAND)
-      .fromTo(emblem, { opacity: 0, yPercent: 34 }, { opacity: 1, yPercent: 0, duration: 1.1, ease: 'expo.out' }, LAND + .15);
+      .set('#badge', { opacity: 1 }, LAND)
+      .fromTo('#badge .disc', { scale: .6, opacity: 0, transformOrigin: '50% 50%' }, { scale: 1, opacity: 1, duration: .7, ease: 'back.out(1.6)', immediateRender: false }, LAND + .05)
+      .fromTo('#badge .ring', { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: .8, ease: 'power2.inOut', stagger: .12, immediateRender: false }, LAND + .15)
+      // Leny rises from behind the board
+      .fromTo(emblem, { opacity: 0, yPercent: 60 }, { opacity: 1, yPercent: 0, duration: 1.1, ease: 'expo.out', immediateRender: false }, LAND + .35);
   }
 
   // A scroll, swipe or key shows the page; during the intro it also finishes it.
