@@ -14,18 +14,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-1216.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=1">
+<link rel="stylesheet" href="assets/css/site.css?v=2">
 <script>
-  /* Decide the intro before first paint so nothing flashes. */
+  /* Decide the intro before first paint so nothing flashes. The full intro
+     plays on every visit; only reduced motion or data saver skip it. */
   (function () {
     var d = document.documentElement, rm = matchMedia('(prefers-reduced-motion: reduce)').matches,
-        sd = navigator.connection && navigator.connection.saveData, seen = false;
-    try { seen = !!localStorage.getItem('ng-seen'); } catch (e) {}
-    if (/[?&]intro=1/.test(location.search)) seen = false;
-    d.classList.add(rm || sd ? 'calm' : (seen ? 'intro-short' : 'intro'));
+        sd = navigator.connection && navigator.connection.saveData;
+    d.classList.add(rm || sd ? 'calm' : 'intro');
   })();
 </script>
-<script src="site.config.js?v=1"></script>
+<script src="site.config.js?v=2"></script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -159,6 +158,6 @@
 </dialog>
 
 <div class="sr-only" aria-live="polite" id="live"></div>
-<script src="assets/js/app.js?v=1" defer></script>
+<script src="assets/js/app.js?v=2" defer></script>
 </body>
 </html>
