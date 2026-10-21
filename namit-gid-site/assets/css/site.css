@@ -546,8 +546,8 @@ html.calm .dish.pre .dish-fig img, html.calm .dish.pre .dish-fig .shadow, html.c
 }
 
 /* Leny's kitchen wall at the head of the menu: the painting's wall melts into the page */
-.shelf { display: block; width: min(560px, 92vw); height: auto; margin: -8px auto 8px; mix-blend-mode: multiply; opacity: .95;
-  -webkit-mask-image: radial-gradient(68% 72% at 50% 46%, #000 58%, transparent 100%); mask-image: radial-gradient(68% 72% at 50% 46%, #000 58%, transparent 100%); }
+.shelf { display: block; width: min(380px, 78vw); height: auto; margin: -4px auto 6px; mix-blend-mode: multiply;
+  -webkit-mask-image: radial-gradient(78% 82% at 50% 44%, #000 52%, transparent 97%); mask-image: radial-gradient(78% 82% at 50% 44%, #000 52%, transparent 97%); }
 
 /* a frond stirring over the hero, behind the sign */
 .hero-frond { position: absolute; right: -14vw; top: calc(var(--bar) - 18px); width: min(62vw, 520px); height: auto; z-index: 0; opacity: .9;
