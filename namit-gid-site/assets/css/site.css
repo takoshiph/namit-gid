@@ -65,9 +65,9 @@ button { font: inherit; color: inherit; }
   background: rgba(207, 227, 228, .96); border-bottom: 1px solid rgba(43, 33, 25, .08);
 }
 .bar { transition: background-color 600ms var(--ease-out), border-color 600ms; }
-html.intro .bar { background: transparent; border-color: transparent; }
-html.intro .bar-name { color: #FBF3E2; }
-html.intro .bar-order { background: rgba(251, 243, 226, .16); box-shadow: inset 0 0 0 1.5px rgba(251, 243, 226, .55); }
+html.intro:not(.landing) .bar { background: transparent; border-color: transparent; }
+html.intro:not(.landing) .bar-name { color: #FBF3E2; }
+html.intro:not(.landing) .bar-order { background: rgba(251, 243, 226, .16); box-shadow: inset 0 0 0 1.5px rgba(251, 243, 226, .55); }
 .bar-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); margin-right: auto; min-height: 44px; }
 .bar-name { font: 22px/1 var(--serif); }
 .bar-name em, .foot-name em { font-style: normal; color: var(--cliff); }
@@ -91,7 +91,7 @@ html.intro .bar-order { background: rgba(251, 243, 226, .16); box-shadow: inset 
   border: 1.5px solid rgba(243, 234, 219, .7); background: rgba(19, 67, 74, .35); color: var(--sand);
   font: 600 15px/1 var(--sans); cursor: pointer; display: none;
 }
-html.intro .intro-skip, html.intro-short .intro-skip { display: block; }
+html.intro .intro-skip { display: block; }
 
 /* ── hero ────────────────────────────────────────────────── */
 .hero {
@@ -117,57 +117,75 @@ html.intro .intro-skip, html.intro-short .intro-skip { display: block; }
 .plank::after { left: calc(81.4% - 6px); }
 .frame-slot { position: relative; width: 100%; height: 100%; border-radius: 5px; overflow: hidden; box-shadow: inset 0 0 0 2px rgba(43,33,25,.45); }
 
-/* The Long Beach view. Laid out in its own container units so it reads the
-   same full screen and on the sign. */
-.shore { position: absolute; inset: 0; container-type: size; overflow: hidden; border-radius: 4px; }
-.shore-sky {
-  position: absolute; inset: 0;
-  background: linear-gradient(#1f3f52 0%, #355d6a 38%, #8f9c8a 60%, #e2b47c 70%, #f1d6a6 72%);
-}
-.shore-sea {
-  position: absolute; left: 0; right: 0; bottom: 0; height: 30%;
-  background: linear-gradient(#4f9599 0%, #2b6f76 35%, #1E5A63 100%);
-}
-.shore-sea i { /* a band of light on the water under the lamp's side */
-  position: absolute; inset: 0;
-  background: radial-gradient(60% 40% at 72% 8%, rgba(255, 220, 160, .45), transparent 70%);
-}
-.shore-island { position: absolute; width: 74%; right: 2%; bottom: 25.5%; }
-.beam {
-  position: absolute; inset: 0; pointer-events: none; opacity: 0;
-  background: conic-gradient(from calc(var(--a0, 230deg) + var(--beam) - 9deg) at var(--lx, 85%) var(--ly, 50%),
-    rgba(255, 228, 165, 0) 0deg, rgba(255, 228, 165, .55) 8deg, rgba(255, 228, 165, .2) 11deg, rgba(255, 228, 165, 0) 18deg, transparent 19deg);
-  -webkit-mask-image: radial-gradient(circle at var(--lx, 85%) var(--ly, 50%), #000 0, #000 25%, transparent 90%);
-          mask-image: radial-gradient(circle at var(--lx, 85%) var(--ly, 50%), #000 0, #000 25%, transparent 90%);
-  mix-blend-mode: screen;
-}
-.flare {
-  position: absolute; left: var(--lx, 85%); top: var(--ly, 50%); width: 9cqmin; height: 9cqmin;
-  translate: -50% -50%; border-radius: 50%; opacity: 0; pointer-events: none;
-  background: radial-gradient(circle, #fff6d8 0, rgba(255, 220, 140, .8) 25%, rgba(255, 200, 120, 0) 70%);
-}
-.shore.lit .flare { opacity: .9; scale: .55; }
+/* The Long Beach view painted on the sign (static; the intro lands on it). */
+.shore { position: absolute; inset: 0; container-type: size; overflow: hidden; }
+.shore-sky { position: absolute; inset: 0; background: linear-gradient(#3f6a7a 0%, #7d9fa3 40%, #e8c08a 66%, #f6dcae 70%); }
+.shore-sun { position: absolute; left: 62%; top: 70%; width: 60cqh; height: 60cqh; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 236, 190, .95) 0, rgba(255, 210, 140, .5) 30%, rgba(255, 200, 130, 0) 70%); }
+.shore-sea { position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(#6aaeb0, #2b6f76 45%, var(--sea)); }
+.shore-sea i { position: absolute; inset: 0; background: radial-gradient(50% 60% at 62% 0, rgba(255, 226, 170, .55), transparent 70%); }
+.shore-island { position: absolute; width: 74%; right: 2%; bottom: 29%; }
+.shore-lamp { position: absolute; left: calc(24% + 74% * .815); bottom: calc(29% + 74cqw * .332 * .96); width: 7cqmin; height: 7cqmin; translate: -50% 50%; border-radius: 50%;
+  background: radial-gradient(circle, #fff6d8 0, rgba(255, 220, 140, .7) 30%, rgba(255, 200, 120, 0) 70%); }
 .wordmark {
-  position: absolute; left: 7%; top: 13%; margin: 0;
-  font: 400 min(17cqw, 30cqh)/.92 var(--serif); color: #FBF3E2; letter-spacing: -.01em;
-  text-shadow: 0 .04em 0 rgba(19, 40, 48, .55);
+  position: absolute; left: 50%; top: 9%; translate: -50% 0; margin: 0; white-space: nowrap;
+  font: 400 min(14cqw, 26cqh)/.92 var(--serif); color: #FBF3E2; letter-spacing: -.01em;
+  text-shadow: 0 .04em 0 rgba(19, 40, 48, .5);
 }
-.wordmark span { display: block; padding-left: .55em; color: #f6c97a; }
-html.intro .wordmark {
-  -webkit-mask-image: conic-gradient(from var(--a0, 230deg) at var(--wx, 120%) var(--wy, 200%), #000 0deg, #000 var(--beam), transparent calc(var(--beam) + .4deg));
-          mask-image: conic-gradient(from var(--a0, 230deg) at var(--wx, 120%) var(--wy, 200%), #000 0deg, #000 var(--beam), transparent calc(var(--beam) + .4deg));
-}
-.frame-slot .shore { border-radius: 0; }
+.wordmark span { color: #f6c97a; }
 
-/* sand only lives in the intro; on the page the hero fades to sand below */
-.sand { display: none; }
-html.intro .sand {
-  display: block; position: fixed; left: 0; right: 0; bottom: 0; height: 19vh; z-index: 41;
-  background: linear-gradient(#e9dcc2, #f3eadb 40%, #efe3cc);
-}
-.tide { position: absolute; left: 0; width: 100%; top: -14px; height: 60px; }
-.tide-wash { fill: rgba(134, 195, 193, .85); }
-.tide-wet { fill: rgba(196, 176, 140, .55); opacity: 0; }
+/* ── intro stage ─────────────────────────────────────────── */
+.stage { display: none; }
+html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; overflow: hidden; background: #1c3442; contain: strict; }
+.stage > * { position: absolute; will-change: transform, opacity; }
+.st-sky { inset: 0; background: linear-gradient(#0f2232 0%, #1d3a4c 35%, #44606a 56%, #8a7f6f 64%); }
+.st-day { inset: 0; opacity: 0; background: linear-gradient(#3f6a7a 0%, #7d9fa3 40%, #e8c08a 60%, #f6dcae 64%); }
+.st-stars { inset: 0 0 45% 0; opacity: .8;
+  background:
+    radial-gradient(1.2px 1.2px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 28% 8%, #fff 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 44% 26%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 63% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 78% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 88% 6%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 8% 40%, #fff 50%, transparent 51%), radial-gradient(1.3px 1.3px at 54% 44%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 35% 52%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 93% 48%, #fff 50%, transparent 51%); }
+.st-sun { left: calc(62% - 60vmin); top: calc(64% - 60vmin); width: 120vmin; height: 120vmin; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle, rgba(255, 238, 196, .95) 0, rgba(255, 212, 150, .55) 14%, rgba(255, 190, 130, .18) 34%, rgba(255, 180, 120, 0) 60%); }
+.st-clouds { inset: 0; }
+.st-clouds i { position: absolute; border-radius: 50%; opacity: .5;
+  background: radial-gradient(closest-side, rgba(255, 226, 196, .55), rgba(255, 226, 196, 0)); }
+.st-clouds .c1 { left: -10%; top: 30%; width: 70vw; height: 6vh; }
+.st-clouds .c2 { left: 40%; top: 38%; width: 80vw; height: 4vh; opacity: .35; }
+.st-clouds .c3 { left: 10%; top: 48%; width: 60vw; height: 3vh; opacity: .3; }
+.st-sea { left: 0; right: 0; top: 64%; height: 36%; overflow: hidden; background: linear-gradient(#5b8f93 0%, #2f6b72 30%, #1b4f58 100%); }
+.st-path { left: calc(62% - 20vmin); top: 0; width: 40vmin; height: 100%; opacity: 0;
+  background: radial-gradient(40% 100% at 50% 0, rgba(255, 226, 170, .75), rgba(255, 226, 170, 0) 80%); }
+.st-glints { inset: 0 -50% 0 -50%; opacity: .5;
+  background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(255, 240, 210, .18) 7px 8px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); }
+.st-glints.g2 { opacity: .3; background-size: 100% 13px; }
+.st-isle { --iw: min(90vw, 72vh); left: calc(50% - var(--iw) * .44); width: var(--iw); aspect-ratio: 1216 / 404; top: calc(64% - var(--iw) * .332 * .985); }
+.st-island, .st-reflect { position: absolute; inset: 0; width: 100%; height: 100%; }
+.st-reflect { top: -1.5%; transform: scaleY(-.5); transform-origin: 50% 100%; opacity: 0;
+  -webkit-mask-image: linear-gradient(transparent 0%, rgba(0,0,0,.6) 70%, #000); mask-image: linear-gradient(transparent 0%, rgba(0,0,0,.6) 70%, #000); filter: brightness(.7) saturate(.8); }
+.st-beam { left: 0; top: -13vmax; width: 160vmax; height: 26vmax; transform-origin: 0 50%; opacity: 0; }
+.st-beam i { position: absolute; inset: 0; clip-path: polygon(0 49%, 100% 0, 100% 100%, 0 51%);
+  background: linear-gradient(90deg, rgba(255, 236, 190, .85), rgba(255, 228, 170, .28) 35%, rgba(255, 228, 170, 0) 85%); }
+.st-flare { left: -11vmin; top: -11vmin; width: 22vmin; height: 22vmin; border-radius: 50%; opacity: 0;
+  background: radial-gradient(circle, #fffbea 0, rgba(255, 226, 150, .85) 18%, rgba(255, 200, 120, .25) 42%, rgba(255, 200, 120, 0) 70%); }
+.st-word { left: 0; top: 0; margin: 0; white-space: nowrap; text-align: center;
+  font: 400 clamp(56px, 17vw, 150px)/.92 var(--serif); color: #FBF3E2; letter-spacing: -.01em;
+  text-shadow: 0 0 .35em rgba(255, 214, 150, .45), 0 .04em 0 rgba(19, 40, 48, .5); }
+.st-word span { color: #f6c97a; }
+.st-word .ch { display: inline-block; opacity: 0; }
+.st-sand { left: 0; right: 0; bottom: 0; height: 22%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .36 0 0 0 0 .25 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(#c9b08a, #e6d3b2 35%, #efe1c6); }
+.st-foam { position: absolute; left: 0; width: 100%; top: -22px; height: 48px; overflow: visible; }
+.st-foam .wash { fill: rgba(120, 178, 176, .9); }
+.st-foam .wet { fill: rgba(150, 126, 92, .35); opacity: 0; }
+.st-foam .lip { fill: none; stroke: rgba(255, 255, 255, .9); stroke-width: 2; stroke-linecap: round; }
+html.intro .shore, html.intro .plank, html.intro .emblem { opacity: 0; }
 
 .hero-copy { display: grid; gap: 12px; max-width: 34rem; text-align: center; justify-items: center; }
 .eyebrow { font-size: 15px; color: var(--ink-2); }
@@ -181,15 +199,9 @@ html.intro .sand {
 .hero-cta .btn { min-width: 220px; }
 .caption { font-size: 14px; color: var(--ink-2); max-width: 26rem; }
 
-/* intro: hide what the timeline brings in */
-html.intro body, html.intro-short body { overflow: hidden; }
-html.intro .shore { position: fixed; inset: 0; z-index: 40; border-radius: 0; }
-html.intro .shore-island { clip-path: inset(100% 0 0 0); }
-html.intro .shore-sea { filter: url(#seaShimmer); }
-html.intro .plank, html.intro .emblem, html.intro-short .plank, html.intro-short .emblem { opacity: 0; }
-html.intro .hero-copy > *, html.intro-short .hero-copy > * { opacity: 0; }
-html.intro .hero h1, html.intro-short .hero h1 { opacity: 1; }
-html.intro .hero h1 .line > span, html.intro-short .hero h1 .line > span { transform: translateY(105%); }
+/* intro: the hero copy waits for the stage to land */
+html.intro body { overflow: hidden; }
+html.intro .hero-copy > * { opacity: 0; }
 
 /* idle sway: the only loop on screen */
 .plank.sway { animation: sway 7s var(--ease-loop) infinite; }
