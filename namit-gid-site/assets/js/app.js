@@ -567,6 +567,9 @@
     // Ambient motion runs on its own clock so it doesn't stretch the intro.
     amb = gsap.timeline();
     amb.fromTo('#stFrond', { skewX: -1 }, { skewX: 1.5, duration: 2.4, ease: 'sine.inOut', yoyo: true, repeat: -1 }, 0);
+    amb.fromTo('#stWing', { attr: { d: 'M2 22 Q24 2 50 20 Q76 2 98 22 Q76 12 50 26 Q24 12 2 22Z' } }, { attr: { d: 'M2 22 Q24 38 50 20 Q76 38 98 22 Q76 30 50 26 Q24 30 2 22Z' }, duration: .16, ease: 'sine.inOut', repeat: -1, yoyo: true }, .6)
+      .to('#stBird', { x: '+=18', y: '-=6', duration: 7, ease: 'none' }, 2.4)
+      .to(near, { x: '+=16', duration: 8, ease: 'none' }, 3.6);
     // The two distant birds flap and drift; they freeze when the shutter fires.
     [['#farA path', 'M20 22 Q26 15 32 21 Q38 15 44 22', 'M20 18 Q26 24 32 20 Q38 24 44 18', .32],
      ['#farB path', 'M56 12 Q61 6 66 11 Q71 6 76 12', 'M56 9 Q61 14 66 10 Q71 14 76 9', .27]].forEach(([sel, up, down, d]) => {
@@ -585,17 +588,16 @@
       });
     }
 
-    // A bird comes out of the dawn straight at the lens: a speck near the
-    // lighthouse that grows until it almost fills the frame, then is past us.
-    tl.set('#stBird', { opacity: 1, x: vw * .58, y: vh * .4, scale: .08, rotation: -4 }, .7)
-      .to('#stBird', { x: vw * .2, y: vh * .18, scale: 5.5, rotation: 10, duration: 1.45, ease: 'power3.in' }, .7)
-      .to('#stWing', { attr: { d: 'M2 22 Q24 38 50 20 Q76 38 98 22 Q76 30 50 26 Q24 30 2 22Z' }, duration: .15, ease: 'sine.inOut', repeat: 9, yoyo: true }, .7)
-      .set('#stBird', { opacity: 0 }, 2.15);
-    // Then the camera passes through a cloud: it swells from the middle of the
-    // frame, wraps the view for a moment, and opens out past the edges.
-    gsap.set(near, { left: '50%', top: '42%', xPercent: -50, yPercent: -50, transformOrigin: '50% 50%' });
-    tl.fromTo(near, { scale: .25, opacity: 0 }, { scale: 1.2, opacity: .97, duration: .75, ease: 'power2.in' }, 2.15)
-      .to(near, { scale: 3.4, opacity: 0, duration: .8, ease: 'power1.out' }, 2.9);
+    // The camera backs away past a bird: it fills the top-left of the frame at
+    // first, then shrinks into the sky as we pull back and stays there,
+    // flapping, until the shutter freezes it.
+    tl.set('#stBird', { opacity: 1, x: vw * .02, y: vh * .08, scale: 6, rotation: 8 }, .6)
+      .to('#stBird', { x: vw * .36, y: vh * .3, scale: .32, rotation: -2, duration: 1.7, ease: 'power3.out' }, .6);
+    // Then past a cloud: its edges sweep in from the sides of the frame, and it
+    // shrinks into an ordinary cloud in the sky, where it stays and drifts.
+    gsap.set(near, { left: '50%', top: '40%', xPercent: -50, yPercent: -50, transformOrigin: '50% 50%', opacity: 0 });
+    tl.fromTo(near, { scale: 3.6, opacity: 0, x: 0, y: 0 }, { opacity: .95, duration: .35, ease: 'sine.in', immediateRender: false }, 1.9)
+      .to(near, { scale: .42, x: -vw * .22, y: -vh * .16, duration: 1.6, ease: 'power3.out' }, 1.9);
 
     // ── 3.7–5.3 s: the lamp flares, the beam writes the name ──
     const BEAM_AT = 3.8;
