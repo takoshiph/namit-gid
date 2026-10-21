@@ -566,6 +566,7 @@
 
     // Ambient motion runs on its own clock so it doesn't stretch the intro.
     amb = gsap.timeline();
+    amb.fromTo('#stFrond', { skewX: -1 }, { skewX: 1.5, duration: 2.4, ease: 'sine.inOut', yoyo: true, repeat: -1 }, 0);
     // The two distant birds flap and drift; they freeze when the shutter fires.
     [['#farA path', 'M20 22 Q26 15 32 21 Q38 15 44 22', 'M20 18 Q26 24 32 20 Q38 24 44 18', .32],
      ['#farB path', 'M56 12 Q61 6 66 11 Q71 6 76 12', 'M56 9 Q61 14 66 10 Q71 14 76 9', .27]].forEach(([sel, up, down, d]) => {
@@ -616,7 +617,7 @@
       .to(['#bladeTop', '#bladeBot'], { scaleY: 1, duration: .09, ease: 'power2.in' }, SHOT)
       .add(() => { root.classList.add('landing'); amb.pause(); }, SHOT)
       .set('#stage', { clipPath: inset(photo) }, SHOT + .09)
-      .set(['#stSand', '#stFinder', '#stFlare'], { opacity: 0 }, SHOT + .09)
+      .set(['#stSand', '#stFinder', '#stFlare', '#stBangka'], { opacity: 0 }, SHOT + .09)
       .set('#stPrint', { opacity: 1 }, SHOT + .09)
       .to(['#bladeTop', '#bladeBot'], { scaleY: 0, duration: .14, ease: 'power2.out' }, SHOT + .1)
       .fromTo('#stFlash', { opacity: .85 }, { opacity: 0, duration: .45, ease: 'power2.out', immediateRender: false }, SHOT + .1);
@@ -629,7 +630,7 @@
       .set([isle, word], { willChange: 'transform' }, FLY - .05)
       .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: tIsland.left - cIsle.left, y: tIsland.top - cIsle.top, scale: tIsland.width / cIsle.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
       .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: tWord.left - cWord.left, y: tWord.top - cWord.top, scale: tWord.width / cWord.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
-      .to('#stSun', { opacity: .5, duration: fly.duration }, FLY)
+      .to(['#stSun', '#stFrond'], { opacity: .5, duration: fly.duration }, FLY)
       .fromTo(plank, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: .5 }, FLY + .7);
 
     // ── the sign catches it and swings; Leny rises ──

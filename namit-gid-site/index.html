@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=11">
+<link rel="stylesheet" href="assets/css/site.css?v=12">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -63,6 +63,9 @@
   <div class="st-sand" id="stSand">
     <svg class="st-foam" viewBox="0 0 400 40" preserveAspectRatio="none"><path class="wet" id="stWet" d="M0 18 C60 10 110 26 200 16 S330 8 400 18 V40 H0Z"/><path class="wash" id="stWash" d="M0 10 C60 2 120 20 200 8 S330 0 400 10 V40 H0Z"/><path class="lip" id="stLip" d="M0 10 C60 2 120 20 200 8 S330 0 400 10"/></svg>
   </div>
+  <!-- The near plane, painted: a bangka on the sand and a palm frond overhead. -->
+  <img class="st-bangka" id="stBangka" data-depth="2.2" src="assets/img/bangka-painted.webp" width="1000" height="356" alt="">
+  <img class="st-frond" id="stFrond" data-depth="2.2" src="assets/img/frond-painted.webp" width="1200" height="427" alt="">
   <div class="st-vignette" id="stVignette"></div>
   <div class="st-finder" id="stFinder"><i></i><i></i><i></i><i></i></div>
   <div class="st-print" id="stPrint"></div>
@@ -210,6 +213,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=11" defer></script>
+<script src="assets/js/app.js?v=12" defer></script>
 </body>
 </html>

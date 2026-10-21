@@ -196,7 +196,7 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
 .st-flare { left: -11vmin; top: -11vmin; width: 22vmin; height: 22vmin; border-radius: 50%; opacity: 0;
   background: radial-gradient(circle, #fffbea 0, rgba(255, 226, 150, .85) 18%, rgba(255, 200, 120, .25) 42%, rgba(255, 200, 120, 0) 70%); }
 .st-word { left: 0; top: 0; margin: 0; white-space: nowrap; text-align: center; will-change: transform;
-  font: 400 clamp(48px, 15vw, 150px)/.92 var(--serif); color: #FBF3E2; letter-spacing: -.01em;
+  font: 400 clamp(48px, 15vw, 118px)/.92 var(--serif); color: #FBF3E2; letter-spacing: -.01em;
   text-shadow: 0 0 28px rgba(255, 200, 140, .45), 0 1px 0 rgba(122, 62, 36, .55); }
 .st-word span { color: #F6C97A; }
 .st-word .ch { display: inline-block; opacity: 0; }
@@ -208,6 +208,10 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
 .st-foam .wash { fill: rgba(176, 150, 150, .5); }
 .st-foam .wet { fill: rgba(120, 92, 80, .35); opacity: 0; }
 .st-foam .lip { fill: none; stroke: rgba(255, 240, 226, .7); stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 120 5 40 3 160 7 60 4; }
+/* the near plane: against the dawn, so both sit a little in shadow */
+.st-bangka { left: -8vw; bottom: .5vh; width: min(72vw, 540px); height: auto; filter: brightness(.74) saturate(.85) sepia(.12); }
+.st-frond { right: -10vw; top: -2vh; width: min(118vw, 780px); height: auto; filter: brightness(.9); }
+@media (min-width: 700px) { .st-frond { top: -16vh; width: min(66vw, 680px); } }
 .st-vignette { inset: 0; pointer-events: none;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .4 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E"),
