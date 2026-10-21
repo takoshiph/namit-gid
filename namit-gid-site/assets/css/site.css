@@ -103,7 +103,7 @@ html.intro .intro-skip { display: block; }
 /* The sign: a painted badge, Leny behind the rail, the board in front. All
    sizes are fractions of the sign's width so it scales as one piece. */
 .sign-wrap { position: relative; width: min(82vw, 320px, calc((100svh - 190px) / 1.46)); aspect-ratio: 1 / 1.14; margin-top: min(26vw, 100px); }
-.badge { position: absolute; left: 9%; width: 82%; top: -26.3%; overflow: visible; }
+.badge { position: absolute; left: 2%; width: 96%; top: -24.6%; overflow: visible; }
 .badge .ring { fill: none; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; transform: rotate(-90deg); }
 .badge .r1 { stroke: #F3E6CC; stroke-width: 3; }
 .badge .r2 { stroke: #2F5D46; stroke-width: 4; }
@@ -113,7 +113,7 @@ html.intro .intro-skip { display: block; }
 .emblem-arms { clip-path: inset(45% 0 40.6% 0); pointer-events: none; }
 .plank { position: absolute; left: 0; top: 28.9%; width: 100%; aspect-ratio: 1000 / 809; transform-origin: 50% 10%; }
 .sign-img { width: 100%; height: 100%; filter: drop-shadow(0 6px 6px rgba(60, 38, 20, .25)); }
-.plank > .frame-slot { position: absolute; left: 12%; top: 34%; width: 76%; height: 56%; }
+.plank > .frame-slot { position: absolute; left: 14.4%; top: 34%; width: 76%; height: 56%; }
 .frame-slot { border-radius: 4px; overflow: hidden; }
 .frame-slot::after { content: ''; position: absolute; inset: 0; border-radius: 4px; pointer-events: none; box-shadow: inset 0 0 0 2px #3B2618, inset 0 3px 8px rgba(30, 18, 10, .55); }
 
@@ -230,7 +230,7 @@ html.low-end .st-vignette { background: radial-gradient(120% 90% at 50% 45%, tra
 .st-finder i:nth-child(2) { right: 0; top: 0; border-width: 2px 2px 0 0; }
 .st-finder i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 2px 2px; }
 .st-finder i:nth-child(4) { right: 0; bottom: 0; border-width: 0 2px 2px 0; }
-.st-print { left: 0; top: 0; opacity: 0; box-shadow: inset 0 0 0 6px #fbf6ec; border-radius: 3px; }
+.st-print { display: none; }
 .st-blade { display: none; left: 0; right: 0; top: 0; height: 50%; background: #0b0f12; transform: scaleY(0); transform-origin: 50% 0; }
 .st-blade.bot { top: 50%; transform-origin: 50% 100%; }
 .st-flash { display: none; inset: 0; background: #fff; opacity: 0; }

@@ -569,7 +569,7 @@
     const pw = Math.min(vw - 16, (gBot - gTop) * 1.9), ph = Math.max(gBot - gTop, pw / 1.9);
     const photo = { left: (vw - pw) / 2, top: (gTop + gBot) / 2 - ph / 2, width: pw, height: ph };
     const inset = r => `inset(${r.top}px ${vw - r.left - r.width}px ${vh - r.top - r.height}px ${r.left}px round 3px)`;
-    gsap.set(['#stFinder', '#stPrint'], { x: photo.left, y: photo.top, width: photo.width, height: photo.height });
+    gsap.set('#stFinder', { x: photo.left, y: photo.top, width: photo.width, height: photo.height });
 
     // The camera: every plane starts zoomed toward the lamp by its own depth,
     // so near things move more than far things. The zoom is capped by what
@@ -665,15 +665,12 @@
       .add(() => { root.classList.add('landing'); amb.pause(); birdsFrozen = true; }, SHOT)
       .set('#stage', { clipPath: inset(photo) }, SHOT + .09)
       .set(['#stSand', '#stFinder', '#stFlare', '#stBangka'], { opacity: 0 }, SHOT + .09)
-      .set('#stPrint', { opacity: 1 }, SHOT + .09)
       .to(['#bladeTop', '#bladeBot'], { scaleY: 0, duration: .14, ease: 'power2.out' }, SHOT + .1)
       .fromTo('#stFlash', { opacity: .85 }, { opacity: 0, duration: .45, ease: 'power2.out', immediateRender: false }, SHOT + .1);
 
     // ── the photo flies onto the sign ──
     const FLY = SHOT + .45, fly = { duration: 1.15, ease: 'power3.inOut' };
     tl.fromTo('#stage', { clipPath: inset(photo) }, { clipPath: inset(frame), ...fly, immediateRender: false }, FLY)
-      .to('#stPrint', { x: frame.left, y: frame.top, width: frame.width, height: frame.height, ...fly }, FLY)
-      .to('#stPrint', { opacity: 0, duration: .3 }, FLY + .85)
       .set([isle, word], { willChange: 'transform' }, FLY - .05)
       .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: tIsland.left - cIsle.left, y: tIsland.top - cIsle.top, scale: tIsland.width / cIsle.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
       .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: tWord.left - cWord.left, y: tWord.top - cWord.top, scale: tWord.width / cWord.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
