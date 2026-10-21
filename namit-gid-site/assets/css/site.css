@@ -595,3 +595,32 @@ html.low-end .fireflies { display: none; }
 
 /* Leny's painted look gets a touch of the same paper as the sign */
 .emblem, .emblem-arms { filter: saturate(.95) contrast(.98); }
+
+/* ── PLACEHOLDER characters (preview only) ─────────────────────────────
+   These five images are stand-ins that resemble Studio Ghibli characters.
+   They are added by app.js only off the live domain and must be replaced
+   with original characters before this design ships. */
+.ph { position: absolute; height: auto; pointer-events: none; z-index: 2; }
+.ph-peek { right: 0; top: 150px; width: 104px; transform: translateX(100%); transition: transform 900ms var(--ease-hang); }
+.ph-peek.in { transform: translateX(8%); }
+.ph-peek.duck { transform: translateX(62%); transition-duration: 500ms; }
+.how { padding-bottom: 150px; }
+.ph-baker { left: 4%; bottom: 14px; width: 96px; transform-origin: 50% 100%; animation: stir 2.4s var(--ease-loop) infinite; }
+@keyframes stir { 0%, 100% { rotate: -2deg; } 50% { rotate: 2deg; translate: 0 -2px; } }
+.ph-cat { right: 5%; bottom: 14px; width: 74px; transform-origin: 50% 100%; animation: tilt 7s var(--ease-loop) infinite; }
+@keyframes tilt { 0%, 70%, 100% { rotate: 0deg; } 76% { rotate: -4deg; } 84% { rotate: 3deg; } 90% { rotate: 0deg; } }
+.wave-break { position: relative; }
+.ph-pan { position: relative; display: block; width: 210px; margin: -30px auto 6px; animation: hop 3.2s var(--ease-out) infinite; }
+@keyframes hop { 0%, 72%, 100% { translate: 0 0; scale: 1 1; } 78% { translate: 0 -6px; scale: .98 1.03; } 86% { translate: 0 0; scale: 1.03 .97; } 92% { scale: 1 1; } }
+.ph-stove-wrap { position: relative; width: 120px; margin: 0 auto 10px; }
+.ph-stove-wrap img { width: 100%; height: auto; display: block; }
+.ph-stove-wrap i { position: absolute; left: 30%; top: 30%; width: 38%; height: 40%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 200, 110, .55), rgba(255, 150, 60, 0)); mix-blend-mode: screen; animation: flicker 1.6s steps(1) infinite; }
+@keyframes flicker { 0% { opacity: .7; } 20% { opacity: 1; } 35% { opacity: .55; } 55% { opacity: .95; } 70% { opacity: .65; } 85% { opacity: 1; } }
+@media (min-width: 900px) {
+  .ph-peek { width: 150px; top: 120px; }
+  .how { padding-bottom: 60px; }
+  .ph-baker { left: 1.5%; bottom: 40px; width: 140px; }
+  .ph-cat { right: 2%; bottom: 40px; width: 104px; }
+  .ph-stove-wrap { position: absolute; right: max(24px, calc(50vw - 520px)); top: 70px; width: 180px; margin: 0; }
+}

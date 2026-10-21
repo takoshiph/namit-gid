@@ -348,6 +348,33 @@
     }).catch(() => $('navLamp').classList.remove('is-on'));
   }
 
+  // ── PLACEHOLDER characters: preview only, never on the live domain ─────
+  // Stand-ins chosen by the owner while original characters are made. They
+  // resemble Studio Ghibli characters, so they must not ship: remove this
+  // block and assets/img/placeholder/ before merging to main.
+  if (!isLive) {
+    const robots = document.createElement('meta'); robots.name = 'robots'; robots.content = 'noindex';
+    document.head.append(robots);
+    const ph = (src, cls) => { const im = make('img', { src: 'assets/img/placeholder/' + src, class: 'ph ' + cls, alt: '', 'aria-hidden': 'true', loading: 'lazy' }); return im; };
+    const peek = ph('peaking-jiji.webp', 'ph-peek');
+    $('menu').append(peek);
+    $('how').append(ph('totoro-bake.webp', 'ph-baker'), ph('sitting-jiji.webp', 'ph-cat'));
+    const pan = ph('pan-with-soot-sprites.webp', 'ph-pan'); pan.classList.remove('ph');
+    document.querySelector('.wave-break').append(pan);
+    const stove = make('div', { class: 'ph-stove-wrap', 'aria-hidden': 'true' }, [make('img', { src: 'assets/img/placeholder/oven-with-calcifer-sprite.webp', alt: '', loading: 'lazy' }), make('i')]);
+    $('pickup').prepend(stove);
+    // the cat slips in from the edge when the menu arrives, and ducks now and then
+    if (!calm && 'IntersectionObserver' in window) {
+      let ducking = null;
+      new IntersectionObserver(es => {
+        const on = es[0].isIntersecting;
+        peek.classList.toggle('in', on);
+        clearInterval(ducking);
+        if (on) ducking = setInterval(() => { peek.classList.add('duck'); setTimeout(() => peek.classList.remove('duck'), 1400); }, 9000);
+      }, { threshold: .15 }).observe($('menu'));
+    } else peek.classList.add('in');
+  }
+
   // ── Little life, after the intro ───────────────────────────────────────
   // Steam curls off a warm dish every few seconds while it's on screen;
   // boards swing when touched; notes flutter as they come into view; the
