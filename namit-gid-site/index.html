@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=9">
+<link rel="stylesheet" href="assets/css/site.css?v=10">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -54,7 +54,7 @@
     <i class="st-glow" id="stGlow"></i>
   </div>
   <div class="st-haze" id="stHaze" data-depth="1.1"></div>
-  <svg class="st-far" data-depth=".9" viewBox="0 0 100 40"><path d="M20 22 Q26 15 32 21 Q38 15 44 22"/><path d="M56 12 Q61 6 66 11 Q71 6 76 12"/></svg>
+  <svg class="st-far" id="stFar" data-depth=".9" viewBox="0 0 100 40"><g class="fb" id="farA"><path d="M20 22 Q26 15 32 21 Q38 15 44 22"/></g><g class="fb" id="farB"><path d="M56 12 Q61 6 66 11 Q71 6 76 12"/></g></svg>
   <svg class="st-bird" id="stBird" viewBox="0 0 100 44"><path id="stWing" d="M2 22 Q24 2 50 20 Q76 2 98 22 Q76 12 50 26 Q24 12 2 22Z"/></svg>
   <div class="st-near" id="stNear"></div>
   <div class="st-beam" id="stBeam"><i></i></div>
@@ -63,13 +63,6 @@
   <div class="st-sand" id="stSand">
     <svg class="st-foam" viewBox="0 0 400 40" preserveAspectRatio="none"><path class="wet" id="stWet" d="M0 18 C60 10 110 26 200 16 S330 8 400 18 V40 H0Z"/><path class="wash" id="stWash" d="M0 10 C60 2 120 20 200 8 S330 0 400 10 V40 H0Z"/><path class="lip" id="stLip" d="M0 10 C60 2 120 20 200 8 S330 0 400 10"/></svg>
   </div>
-  <svg class="st-bangka" id="stBangka" data-depth="2.2" viewBox="0 0 300 120">
-    <path class="rim" d="M8 66 Q20 58 42 61 L250 61 Q276 57 294 41"/>
-    <path d="M8 66 Q20 58 42 61 L250 61 Q276 57 294 41 Q288 76 252 86 L64 89 Q26 89 8 66Z"/>
-    <path class="beam" d="M92 63 Q78 84 70 108 M200 63 Q214 84 224 108"/>
-    <path class="float" d="M24 108 Q150 113 280 106"/>
-  </svg>
-  <svg class="st-frond" id="stFrond" data-depth="2.2" viewBox="0 0 400 300"></svg>
   <div class="st-vignette" id="stVignette"></div>
   <div class="st-finder" id="stFinder"><i></i><i></i><i></i><i></i></div>
   <div class="st-print" id="stPrint"></div>
@@ -200,6 +193,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=9" defer></script>
+<script src="assets/js/app.js?v=10" defer></script>
 </body>
 </html>

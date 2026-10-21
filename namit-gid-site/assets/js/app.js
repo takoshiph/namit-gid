@@ -435,42 +435,6 @@
   makeCloud($('shoreClouds'), { l: 3, t: 10, w: 34, seed: 7 });
   makeCloud($('shoreClouds'), { l: 64, t: 4, w: 24, seed: 3, kind: 'far' });
 
-  // A coconut frond: a curved rib with leaflets that lengthen then taper.
-  // Each leaflet has a warm sliver underneath, where the low sun catches it.
-  function buildFrond() {
-    const svg = $('stFrond'), ns = 'http://www.w3.org/2000/svg';
-    const P = t => { // the rib, from the top-right corner curving down-left
-      const x = (1 - t) * (1 - t) * 410 + 2 * (1 - t) * t * 250 + t * t * 40;
-      const y = (1 - t) * (1 - t) * -10 + 2 * (1 - t) * t * 40 + t * t * 230;
-      return [x, y];
-    };
-    const lit = document.createElementNS(ns, 'g'), dark = document.createElementNS(ns, 'g');
-    let s = 17;
-    const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
-    for (let i = 0; i < 18; i++) {
-      const t = .07 + i * .05 + rnd() * .015;
-      const [x, y] = P(t), [x2, y2] = P(t + .01);
-      const ang = Math.atan2(y2 - y, x2 - x);
-      [1, -1].forEach(side => {
-        const len = (170 * Math.sin(Math.PI * Math.min(1, t * 1.02)) + 40) * (.85 + rnd() * .3);
-        const a = ang + side * (.75 + rnd() * .25);            // swept toward the tip
-        const droop = len * (.35 + rnd() * .2);                // and pulled down by its weight
-        const tx = x + Math.cos(a) * len, ty = y + Math.sin(a) * len + droop;
-        const nx = -Math.sin(a) * side, ny = Math.cos(a) * side; // the leaflet's outer side
-        const c1x = x + Math.cos(a) * len * .5 + nx * 11, c1y = y + Math.sin(a) * len * .5 + ny * 11 + droop * .2;
-        const c2x = c1x - nx * 17, c2y = c1y - ny * 17 + 4;
-        const d = `M${x} ${y} Q${c1x} ${c1y} ${tx} ${ty} Q${c2x} ${c2y} ${x + 2} ${y + 5}Z`;
-        const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); p.setAttribute('class', 'leaf');
-        const q = document.createElementNS(ns, 'path'); q.setAttribute('d', d); q.setAttribute('class', 'lit');
-        q.setAttribute('transform', 'translate(.8 1.4)');
-        lit.append(q); dark.append(p);
-      });
-    }
-    const stem = document.createElementNS(ns, 'path');
-    stem.setAttribute('d', 'M410 -10 Q250 40 40 230'); stem.setAttribute('class', 'stem');
-    svg.append(lit, dark, stem);
-  }
-
   function buildSea(lowEnd) {
     // Wave lines: closer together and fainter toward the horizon, each one
     // broken into strokes of different lengths so it reads as drawn.
@@ -511,11 +475,10 @@
 
     // Build the scene, then read every measurement in one pass before writing.
     buildSea(lowEnd);
-    buildFrond();
     const skyc = $('stSkyClouds');
     [{ l: -10, t: 20, w: 52, seed: 2 }, { l: 56, t: 27, w: 40, seed: 5 }, { l: 24, t: 44, w: 24, seed: 9, kind: 'far', alpha: .8 }, { l: 70, t: 10, w: 30, seed: 4 }]
       .forEach(o => makeCloud(skyc, o));
-    const near = makeCloud($('stNear'), { l: 0, t: 30, w: 150, seed: 11, kind: 'near' });
+    const near = makeCloud($('stNear'), { l: 0, t: 0, w: 120, seed: 11, kind: 'near' });
     const chars = [];
     [...word.childNodes].forEach(node => {
       const frag = document.createDocumentFragment();
@@ -603,10 +566,16 @@
 
     // Ambient motion runs on its own clock so it doesn't stretch the intro.
     amb = gsap.timeline();
+    // The two distant birds flap and drift; they freeze when the shutter fires.
+    [['#farA path', 'M20 22 Q26 15 32 21 Q38 15 44 22', 'M20 18 Q26 24 32 20 Q38 24 44 18', .32],
+     ['#farB path', 'M56 12 Q61 6 66 11 Q71 6 76 12', 'M56 9 Q61 14 66 10 Q71 14 76 9', .27]].forEach(([sel, up, down, d]) => {
+      amb.fromTo(sel, { attr: { d: up } }, { attr: { d: down }, duration: d, ease: 'sine.inOut', repeat: -1, yoyo: true }, 0);
+    });
+    amb.fromTo('#farA', { x: 0, y: 0 }, { x: 14, y: -3, duration: 9, ease: 'none' }, 0)
+      .fromTo('#farB', { x: 0, y: 0 }, { x: 10, y: 2, duration: 9, ease: 'none' }, 0);
     gsap.utils.toArray('#stWaves svg').forEach((s, i) => {
       amb.fromTo(s, { xPercent: 0 }, { xPercent: -6.25 * (i % 2 ? 1 : -1), duration: 9 - i * .6, ease: 'none' }, 0);
     });
-    amb.to('#stFrond', { skewX: 1.5, duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: 3 }, 0);
     if (!lowEnd) {
       amb.fromTo('#stSkyClouds .cloud', { x: -10 }, { x: 24, duration: 10, ease: 'none', stagger: .5 }, 0)
         .fromTo('#stRays', { rotation: -4 }, { rotation: 6, duration: 10, ease: 'none' }, 0);
@@ -615,15 +584,17 @@
       });
     }
 
-    // A bird crosses close to the lens, a black shape against the lamp's bloom.
-    const bw = Math.min(vw, vh) * .46;
-    tl.set('#stBird', { opacity: 1, x: vw * 1.02, y: vh * .36 - bw * .2, rotation: -6, scale: .9 }, .8)
-      .to('#stBird', { x: -bw * 1.1, y: vh * .3, rotation: 4, scale: 1.25, duration: 1.6, ease: 'none' }, .8)
-      .to('#stWing', { attr: { d: 'M2 22 Q24 38 50 20 Q76 38 98 22 Q76 30 50 26 Q24 30 2 22Z' }, duration: .17, ease: 'sine.inOut', repeat: 9, yoyo: true }, .8)
-      .set('#stBird', { opacity: 0 }, 2.45);
-    // Then a cloud drifts across the island and the sky where the name will be.
-    tl.fromTo(near, { x: -vw * 1.6, scale: .69, opacity: 0 }, { x: vw * .05, scale: .83, opacity: .97, duration: .8, ease: 'sine.in' }, 2.0)
-      .to(near, { x: vw * 1.1, scale: 1, opacity: 0, duration: 1, ease: 'sine.out' }, 2.8);
+    // A bird comes out of the dawn straight at the lens: a speck near the
+    // lighthouse that grows until it almost fills the frame, then is past us.
+    tl.set('#stBird', { opacity: 1, x: vw * .58, y: vh * .4, scale: .08, rotation: -4 }, .7)
+      .to('#stBird', { x: vw * .2, y: vh * .18, scale: 5.5, rotation: 10, duration: 1.45, ease: 'power3.in' }, .7)
+      .to('#stWing', { attr: { d: 'M2 22 Q24 38 50 20 Q76 38 98 22 Q76 30 50 26 Q24 30 2 22Z' }, duration: .15, ease: 'sine.inOut', repeat: 9, yoyo: true }, .7)
+      .set('#stBird', { opacity: 0 }, 2.15);
+    // Then the camera passes through a cloud: it swells from the middle of the
+    // frame, wraps the view for a moment, and opens out past the edges.
+    gsap.set(near, { left: '50%', top: '42%', xPercent: -50, yPercent: -50, transformOrigin: '50% 50%' });
+    tl.fromTo(near, { scale: .25, opacity: 0 }, { scale: 1.2, opacity: .97, duration: .75, ease: 'power2.in' }, 2.15)
+      .to(near, { scale: 3.4, opacity: 0, duration: .8, ease: 'power1.out' }, 2.9);
 
     // ── 3.7–5.3 s: the lamp flares, the beam writes the name ──
     const BEAM_AT = 3.8;
@@ -643,9 +614,9 @@
     tl.fromTo('#stFinder', { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: .35, ease: 'power2.out', immediateRender: false }, SHOT - .5)
       .set(['#bladeTop', '#bladeBot', '#stFlash'], { display: 'block' }, SHOT - .1)
       .to(['#bladeTop', '#bladeBot'], { scaleY: 1, duration: .09, ease: 'power2.in' }, SHOT)
-      .add(() => root.classList.add('landing'), SHOT)
+      .add(() => { root.classList.add('landing'); amb.pause(); }, SHOT)
       .set('#stage', { clipPath: inset(photo) }, SHOT + .09)
-      .set(['#stSand', '#stFinder', '#stFlare', '#stBangka'], { opacity: 0 }, SHOT + .09)
+      .set(['#stSand', '#stFinder', '#stFlare'], { opacity: 0 }, SHOT + .09)
       .set('#stPrint', { opacity: 1 }, SHOT + .09)
       .to(['#bladeTop', '#bladeBot'], { scaleY: 0, duration: .14, ease: 'power2.out' }, SHOT + .1)
       .fromTo('#stFlash', { opacity: .85 }, { opacity: 0, duration: .45, ease: 'power2.out', immediateRender: false }, SHOT + .1);
@@ -658,7 +629,7 @@
       .set([isle, word], { willChange: 'transform' }, FLY - .05)
       .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: tIsland.left - cIsle.left, y: tIsland.top - cIsle.top, scale: tIsland.width / cIsle.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
       .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: tWord.left - cWord.left, y: tWord.top - cWord.top, scale: tWord.width / cWord.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
-      .to(['#stSun', '#stFrond'], { opacity: .5, duration: fly.duration }, FLY)
+      .to('#stSun', { opacity: .5, duration: fly.duration }, FLY)
       .fromTo(plank, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: .5 }, FLY + .7);
 
     // ── the sign catches it and swings; Leny rises ──
