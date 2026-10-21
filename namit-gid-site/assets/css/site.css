@@ -4,6 +4,7 @@
 @property --beam { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
 
 :root {
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .33 0 0 0 0 .24 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23p)'/%3E%3C/svg%3E");
   --sky: #CFE3E4; --shallows: #86C3C1; --sea: #1E5A63; --sea-night: #13434A;
   --sand: #F3EADB; --sand-wet: #E6D6B8; --ink: #2B2119; --ink-2: #6B5747;
   --island: #3E6337; --cliff: #A3462A; --driftwood: #6E5238; --sun: #E3B04B;
@@ -96,7 +97,7 @@ html.intro .intro-skip { display: block; }
 /* ── hero ────────────────────────────────────────────────── */
 .hero {
   position: relative; padding: calc(var(--bar) + 18px) var(--gutter) 40px;
-  background: linear-gradient(#F6EBDA 0, #F6EBDA 55%, #F4ECDD 80%, var(--sand) 100%);
+  background: var(--paper-grain), radial-gradient(90% 55% at 50% 0, rgba(231, 154, 124, .18), transparent 70%), radial-gradient(60% 40% at 15% 20%, rgba(140, 127, 163, .14), transparent 70%), linear-gradient(#F6EBDA, #F4ECDD);
   display: grid; justify-items: center; gap: 22px; overflow: clip;
 }
 /* The sign: a painted badge, Leny behind the rail, the board in front. All
@@ -273,18 +274,20 @@ html.intro .hero-copy > * { opacity: 0; }
 /* ── sections ────────────────────────────────────────────── */
 .sec-head { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 0 var(--gutter); }
 .sec-sub { max-width: 34rem; color: var(--ink-2); font-size: 16px; }
-.menu { padding: 56px 0 24px; background: var(--sand); }
+.menu { padding: 56px 0 24px; background: var(--paper-grain), radial-gradient(60% 40% at 85% 10%, rgba(233, 182, 107, .12), transparent 70%), radial-gradient(50% 40% at 10% 60%, rgba(62, 99, 55, .07), transparent 70%), #F4ECDD; }
 .menu-grid { display: grid; gap: 32px; padding: 32px var(--gutter) 0; max-width: 1200px; margin: 0 auto; }
 .tray-panel { display: none; }
 .sec-head-inner { padding: 8px 0 0; }
 .dishes { display: grid; gap: 52px; }
 .wave-break { margin: 56px auto 36px; width: min(320px, 80%); }
 .wave-break svg { width: 100%; height: 24px; }
-.wave-break path { fill: none; stroke: var(--shallows); stroke-width: 2.4; stroke-linecap: round; }
+.wave-break path { fill: none; stroke: #8C7FA3; stroke-width: 3; opacity: .6; stroke-linecap: round; }
 
 /* dish: the tray on the sand, no card box */
 .dish { display: grid; gap: 12px; justify-items: center; text-align: center; }
 .dish-fig { position: relative; width: min(78vw, 300px); margin: 0; }
+.dish-fig::before { content: ''; position: absolute; inset: 4% -6% -4%; border-radius: 48% 52% 46% 54% / 55% 48% 52% 45%;
+  background: radial-gradient(closest-side, rgba(233, 196, 140, .32), rgba(233, 196, 140, .12) 70%, transparent); filter: blur(2px); }
 .dish-fig .shadow {
   position: absolute; left: 10%; right: 10%; bottom: -6%; height: 16%; border-radius: 50%;
   background: radial-gradient(closest-side, rgba(84, 62, 38, .38), rgba(84, 62, 38, 0));
@@ -381,44 +384,34 @@ html.intro .hero-copy > * { opacity: 0; }
 .traybar-sum strong { font: 22px/1.1 var(--serif); color: var(--ink); }
 .traybar .btn { min-height: 48px; padding: 0 20px; }
 
-/* ── how it works: driftwood boards lashed to a post ────── */
-.how { position: relative; padding: 56px var(--gutter) 0; background: linear-gradient(var(--sand), var(--sand-wet)); overflow: clip; }
-.post-wrap { position: relative; max-width: 420px; margin: 32px auto 0; padding-bottom: 40px; }
-.post {
-  position: absolute; left: 50%; top: -20px; bottom: 0; width: 18px; translate: -50% 0; border-radius: 6px 6px 0 0;
-  background: linear-gradient(90deg, #5c4430, #8b6a4a 45%, #5c4430);
-}
-.boards { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; position: relative; }
+/* ── how it works: painted driftwood boards hung on a rope ─ */
+.how { position: relative; padding: 56px var(--gutter) 24px; overflow: clip;
+  background: var(--paper-grain), radial-gradient(70% 50% at 20% 30%, rgba(233, 182, 107, .14), transparent 70%), linear-gradient(#F3EADB, #EADCC4); }
+.post-wrap { position: relative; max-width: 440px; margin: 28px auto 0; padding-bottom: 24px; }
+.rope { position: absolute; left: 50%; top: -24px; bottom: 30px; width: 4px; translate: -50% 0; border-radius: 2px;
+  background: repeating-linear-gradient(160deg, #d6bd8a 0 4px, #a9895a 4px 8px); opacity: .9; }
+.boards { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; position: relative; }
 .board {
-  position: relative; padding: 18px 20px 18px; border-radius: 5px 9px 6px 10px; color: var(--sand);
-  background:
-    repeating-linear-gradient(178deg, rgba(255,255,255,.04) 0 2px, transparent 2px 7px),
-    linear-gradient(#7d6045, var(--driftwood));
-  box-shadow: 0 5px 0 rgba(43, 33, 25, .28); transform-origin: 50% 0;
+  position: relative; min-height: 150px; padding: 13% 9% 7%; color: var(--ink);
+  background: center / 100% 100% no-repeat; filter: drop-shadow(0 6px 5px rgba(70, 48, 26, .22)); transform-origin: 50% 4%;
 }
-.board:nth-child(even) { margin-left: 18px; }
-.board:nth-child(odd) { margin-right: 18px; }
+.board:nth-child(1) { background-image: url(../img/board-1.webp); margin-right: 14px; }
+.board:nth-child(2) { background-image: url(../img/board-2.webp); margin-left: 14px; }
+.board:nth-child(3) { background-image: url(../img/board-3.webp); margin-right: 8px; }
+.board:nth-child(4) { background-image: url(../img/board-4.webp); margin-left: 18px; }
 .board h3 { font-size: 22px; display: flex; align-items: center; gap: 10px; }
-.board p { font-size: 16px; margin-top: 6px; color: #efe4d0; }
-.board strong { color: #fff; }
-.n { width: 30px; height: 30px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--sand); color: var(--driftwood); font: 16px/1 var(--serif); flex: none; }
-.lash { /* rope binding the board to the post */
-  position: absolute; left: 50%; top: -9px; width: 34px; height: 18px; translate: -50% 0; border-radius: 4px;
-  background: repeating-linear-gradient(115deg, #d8c08f 0 3px, #a8875a 3px 6px);
-  box-shadow: 0 2px 0 rgba(43,33,25,.25);
-}
+.board p { font-size: 16px; margin-top: 6px; color: #4A3726; }
+.board strong { color: var(--ink); }
+.n { width: 30px; height: 30px; border-radius: 50%; display: inline-grid; place-items: center; background: #3B2A1C; color: #F6EBDA; font: 16px/1 var(--serif); flex: none; }
 .js .board.pre { opacity: 0; transform: rotate(4deg) translateY(-8px); }
 .board.in { animation: swing 1200ms var(--ease-out) both; }
 @keyframes swing { 0% { opacity: 0; transform: rotate(4deg) translateY(-8px); } 30% { opacity: 1; transform: rotate(-1.6deg); } 60% { transform: rotate(.6deg); } 100% { opacity: 1; transform: none; } }
-.post-tide { display: block; width: 100%; height: 30px; margin-top: -30px; position: relative; }
-.post-tide path { fill: var(--shallows); opacity: .7; animation: breathe 7s var(--ease-loop) infinite; transform-origin: 50% 100%; }
-@keyframes breathe { 50% { transform: scaleY(1.25); } }
 
 /* ── reviews: notes pinned to a board ───────────────────── */
-.reviews { padding: 56px var(--gutter); background: var(--sand-wet); }
+.reviews { padding: 56px var(--gutter); background: var(--paper-grain), radial-gradient(60% 50% at 80% 20%, rgba(140, 127, 163, .12), transparent 70%), #EADCC4; }
 .notes { display: grid; gap: 18px; max-width: 1000px; margin: 28px auto 0; }
 .note {
-  position: relative; background: #fbf6ec; padding: 22px 20px 18px; border-radius: 3px;
+  position: relative; background: var(--paper-grain), radial-gradient(120% 90% at 30% 20%, #FFFBF2, #F6EDDC 70%); padding: 22px 20px 18px; border-radius: 3px;
   box-shadow: 0 2px 0 rgba(43,33,25,.12), 0 10px 18px -12px rgba(43,33,25,.35);
 }
 .note:nth-child(3n+1) { rotate: -.8deg; } .note:nth-child(3n+2) { rotate: .6deg; } .note:nth-child(3n) { rotate: -.3deg; }
@@ -427,17 +420,23 @@ html.intro .hero-copy > * { opacity: 0; }
 .note cite { display: block; margin-top: 10px; font-style: normal; font-size: 15px; color: var(--ink-2); }
 
 /* ── pickup ──────────────────────────────────────────────── */
-.pickup { padding: 56px var(--gutter) 64px; background: var(--sand-wet); }
+.pickup { padding: 56px var(--gutter) 64px; background: var(--paper-grain), linear-gradient(#EADCC4, #DCC9AC); }
 .facts { max-width: 640px; margin: 24px auto 0; display: grid; gap: 14px; }
 .facts div { display: grid; gap: 2px; padding-bottom: 14px; border-bottom: 1px solid rgba(110,82,56,.2); }
 .facts dt { font-weight: 600; font-size: 14px; color: var(--island); }
 .facts dd { margin: 0; }
 
 /* ── footer: the beach at dusk ──────────────────────────── */
-.foot { position: relative; background: linear-gradient(#2f4b52 0, #2c3a3a 90px, var(--ground) 160px); color: var(--sand); padding: 0 var(--gutter) calc(40px + env(safe-area-inset-bottom)); }
-.foot-horizon { height: 90px; position: relative; display: flex; justify-content: flex-end; align-items: flex-end; max-width: 1000px; margin: 0 auto; }
-.foot-horizon img { width: 140px; opacity: .55; filter: brightness(.35) saturate(.5) sepia(.2); margin-bottom: -2px; }
-.foot-inner { max-width: 1000px; margin: 0 auto; padding-top: 28px; border-top: 2px solid rgba(134, 195, 193, .35); display: grid; gap: 14px; }
+.foot { position: relative; background: #1B1F32; color: var(--sand); padding: 0 0 calc(40px + env(safe-area-inset-bottom)); }
+/* the dusk beach, with Byaringan just off the tip of the headland */
+.foot-scene { position: relative; aspect-ratio: 1584 / 672; overflow: hidden; }
+.foot-scene::after { content: ''; position: absolute; inset: auto 0 0; height: 30%; background: linear-gradient(transparent, #1B1F32); }
+.foot-beach { width: 100%; height: 100%; object-fit: cover; }
+.foot-isle { position: absolute; left: 50.5%; width: 19%; top: 41.4%; filter: brightness(.55) saturate(.75) sepia(.15) hue-rotate(-12deg); }
+.foot-lamp { position: absolute; left: calc(50.5% + 19% * .78); top: 42.1%; width: 2.2%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(circle, #fff6d8 0, rgba(255, 210, 140, .8) 30%, rgba(255, 200, 120, 0) 70%); animation: lamp-breathe 5s var(--ease-loop) infinite; }
+.foot-inner { padding-left: var(--gutter); padding-right: var(--gutter); }
+.foot-inner { max-width: 1000px; margin: 0 auto; padding-top: 8px; display: grid; gap: 14px; }
 .foot-name { font: 30px/1 var(--serif); }
 .foot-name em { color: var(--sun); }
 .foot-line { color: #d9ccb4; }
@@ -510,14 +509,17 @@ html.intro .hero-copy > * { opacity: 0; }
   .tray-panel h2 { font-size: 26px; display: flex; align-items: center; gap: 12px; }
   .tray-panel .bilao { width: 48px; height: 48px; }
   .traybar { display: none !important; }
-  .boards { grid-template-columns: repeat(4, 1fr); gap: 20px; }
-  .post-wrap { max-width: 1100px; padding-top: 30px; }
-  .post { left: 0; right: 0; top: 0; bottom: auto; width: auto; height: 16px; translate: none; border-radius: 6px; background: linear-gradient(#5c4430, #8b6a4a 45%, #5c4430); }
+  /* two rows of boards, each row hung from its own rope */
+  .boards { grid-template-columns: repeat(2, 1fr); gap: 30px 34px; }
+  .post-wrap { max-width: 1040px; padding-top: 8px; }
+  .rope { display: none; }
+  .boards::before, .boards::after { content: ''; position: absolute; left: -2%; right: -2%; height: 4px; border-radius: 2px; background: repeating-linear-gradient(80deg, #d6bd8a 0 4px, #a9895a 4px 8px); }
+  .boards::before { top: 4px; } .boards::after { top: calc(50% + 19px); }
+  .board { min-height: 230px; padding: 12% 9% 7%; }
   .board:nth-child(n) { margin: 0; }
-  .board:nth-child(even) { margin-top: 18px; }
+  .board:nth-child(even) { margin-top: 14px; }
   .notes { grid-template-columns: repeat(3, 1fr); }
   .foot-cols { grid-template-columns: repeat(3, 1fr); }
-  .foot-horizon img { width: 220px; }
   .sheet { margin: auto; border-radius: 12px; }
 }
 

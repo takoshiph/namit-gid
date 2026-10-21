@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=12">
+<link rel="stylesheet" href="assets/css/site.css?v=13">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -157,15 +157,14 @@
   <section class="how" id="how" aria-labelledby="howH">
     <header class="sec-head"><h2 id="howH">How ordering works</h2></header>
     <div class="post-wrap">
-      <div class="post" aria-hidden="true"></div>
+      <div class="rope" aria-hidden="true"></div>
       <ol class="boards">
-        <li class="board"><span class="lash" aria-hidden="true"></span><h3><span class="n">1</span>Fill your tray</h3><p>Pick your dishes and a pickup time.</p></li>
-        <li class="board"><span class="lash" aria-hidden="true"></span><h3><span class="n">2</span>Send $10 to hold it</h3><p>Interac e-Transfer to <strong>orders@takoshi.ca</strong>, with “Namit Gid” and your name in the message.</p></li>
-        <li class="board"><span class="lash" aria-hidden="true"></span><h3><span class="n">3</span>I cook it fresh</h3><p>On your pickup day, never the day before.</p></li>
-        <li class="board"><span class="lash" aria-hidden="true"></span><h3><span class="n">4</span>Pick it up warm</h3><p>At 180 Fairview Mall Dr. Pay the rest in cash or e-Transfer.</p></li>
+        <li class="board"><h3><span class="n">1</span>Fill your tray</h3><p>Pick your dishes and a pickup time.</p></li>
+        <li class="board"><h3><span class="n">2</span>Send $10 to hold it</h3><p>Interac e-Transfer to <strong>orders@takoshi.ca</strong>, with “Namit Gid” and your name in the message.</p></li>
+        <li class="board"><h3><span class="n">3</span>I cook it fresh</h3><p>On your pickup day, never the day before.</p></li>
+        <li class="board"><h3><span class="n">4</span>Pick it up warm</h3><p>At 180 Fairview Mall Dr. Pay the rest in cash or e-Transfer.</p></li>
       </ol>
     </div>
-    <svg class="post-tide" viewBox="0 0 400 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 16 C50 8 100 22 150 14 S250 6 300 14 350 22 400 14 V30 H0Z"/></svg>
   </section>
 
   <section class="reviews" id="reviews" aria-labelledby="revH">
@@ -185,7 +184,11 @@
 </main>
 
 <footer class="foot" id="foot">
-  <div class="foot-horizon" aria-hidden="true"><img src="assets/img/byaringan-painted-840.webp" alt="" width="840" height="288" loading="lazy"></div>
+  <div class="foot-scene" aria-hidden="true">
+    <img class="foot-beach" src="assets/img/dusk-beach.webp" alt="" width="1584" height="672" loading="lazy">
+    <img class="foot-isle" src="assets/img/byaringan-painted-840.webp" alt="" width="840" height="288" loading="lazy">
+    <i class="foot-lamp"></i>
+  </div>
   <div class="foot-inner">
     <p class="foot-name">Namit <em>gid</em></p>
     <p class="foot-line"><em data-k="brand.footerLine"></em> From Long Beach, Romblon to North York.</p>
@@ -213,6 +216,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=12" defer></script>
+<script src="assets/js/app.js?v=13" defer></script>
 </body>
 </html>
