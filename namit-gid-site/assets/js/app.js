@@ -339,68 +339,76 @@
   // ── Leny's kitchen: pots, oven and register open to the menu ───────────
   const kitchen = $('kitchen'), menu = $('menu');
 
-  // The stove: stretches of counter, each a band cut from its own painting,
-  // with four burners. Mains fill the burners in order (a main can ask for a
-  // vessel with "pot" in the config); a new stretch appears only when the
-  // menu has more mains than burners.
-  const STOVES = [
-    { base: 'stove1.webp', slots: [
-      { pot: 'palayok', l: 5, t: 22.4, w: 20.5, h: 58.5 }, { pot: 'wok', l: 25.5, t: 30.9, w: 28, h: 50 },
-      { pot: 'pan', l: 53.5, t: 30.9, w: 24, h: 50 }, { pot: 'dish', l: 76, t: 34.8, w: 22, h: 45.8 }] },
-    { base: 'stove2.webp', slots: [
-      { pot: 'stock', l: 4, t: 22, w: 25, h: 60 }, { pot: 'steamer', l: 29, t: 25, w: 22, h: 57 },
-      { pot: 'saucepan', l: 53, t: 40, w: 25, h: 42 }, { pot: 'claypot', l: 76, t: 25, w: 22, h: 57 }] },
+  // The kitchen is a row of scenes, each a whole painting of one stretch of
+  // the wall, with four burners. Mains take burners in order (a main can ask
+  // for a vessel with "pot" in the config); a scene beyond the first appears
+  // only when the menu has more mains than the burners before it.
+  const SCENES = [
+    { slots: [
+      { pot: 'palayok', layer: 'pot-palayok', l: 5, t: 41, w: 20.5, h: 14 }, { pot: 'wok', layer: 'pot-wok', l: 25.5, t: 43, w: 28, h: 12 },
+      { pot: 'pan', layer: 'pot-pan', l: 53.5, t: 43, w: 24, h: 12 }, { pot: 'dish', layer: 'pot-dish', l: 76, t: 44, w: 22, h: 11 }] },
+    { base: 'scene2.webp', alt: 'Further along Leny’s kitchen: open shelves of bowls, four more pots on the stove and cabinets below.', slots: [
+      { pot: 'stock', layer: 'sc2-stock', l: 4, t: 40.9, w: 25, h: 14.4 }, { pot: 'steamer', layer: 'sc2-steamer', l: 29, t: 41.6, w: 22, h: 13.7 },
+      { pot: 'saucepan', layer: 'sc2-saucepan', l: 53, t: 45.2, w: 25, h: 10.1 }, { pot: 'claypot', layer: 'sc2-claypot', l: 76, t: 41.6, w: 22, h: 13.7 }] },
   ];
-  const LAYER = { palayok: 's1-palayok', wok: 's1-wok', pan: 's1-pan', dish: 's1-dish', stock: 's2-stock', steamer: 's2-steamer', saucepan: 's2-saucepan', claypot: 's2-claypot' };
   // Today's four keep the vessels they were painted for.
   const PREFERRED = { palabok: 'palayok', shawarma: 'wok', lumpia: 'pan', sushi: 'dish' };
-  const burners = STOVES.flatMap((s, si) => s.slots.map(sl => ({ ...sl, page: si })));
+  const burners = SCENES.flatMap((s, si) => s.slots.map(sl => ({ ...sl, scene: si })));
   const seat = {};
   S.menu.mains.forEach(d => { const want = d.pot || PREFERRED[d.id]; if (want && burners.some(b => b.pot === want)) seat[want] = d; });
   S.menu.mains.filter(d => !Object.values(seat).includes(d)).forEach(d => { const free = burners.find(b => !seat[b.pot]); if (free) seat[free.pot] = d; });
-  // On the preview, show what a second stretch looks like before there is a fifth main.
-  const usedPages = new Set(burners.filter(b => seat[b.pot]).map(b => b.page));
-  const samplePage = !isLive && !usedPages.has(1);
-  const pagesShown = STOVES.filter((s, i) => usedPages.has(i) || (samplePage && i === 1));
-  const track = $('kTrack');
-  pagesShown.forEach((stove, pi) => {
-    const si = STOVES.indexOf(stove);
-    const page = make('div', { class: 'k-page' }, [make('img', { src: 'assets/img/kitchen/' + stove.base, alt: '', 'aria-hidden': 'true' })]);
-    stove.slots.forEach(sl => page.append(make('img', { class: 'k-layer', 'data-layer': sl.pot, src: 'assets/img/kitchen/' + LAYER[sl.pot] + '.webp', alt: '', 'aria-hidden': 'true' })));
-    stove.slots.forEach((sl, k) => {
+  // On the preview, show the next scene with sample pots so the walk can be tried.
+  const used = new Set(burners.filter(b => seat[b.pot]).map(b => b.scene));
+  const sampleScene = !isLive && !used.has(1);
+  const scroller = $('kScroller');
+  SCENES.forEach((scene, si) => {
+    if (si > 0 && !used.has(si) && !(sampleScene && si === 1)) return;
+    let el = scroller.querySelector('[data-scene="' + si + '"]');
+    if (!el) {
+      el = make('div', { class: 'k-scene', 'data-scene': String(si) }, [make('img', { class: 'k-wall', src: 'assets/img/kitchen/' + scene.base, width: 768, height: 1376, alt: scene.alt, loading: 'lazy' })]);
+      scroller.append(el);
+    }
+    const before = el.querySelector('.k-glow');
+    scene.slots.forEach((sl, k) => {
       const d = seat[sl.pot];
-      if (!d && !(samplePage && si === 1)) return;
-      const btn = make('button', { class: 'k-spot', type: 'button', 'data-spot': sl.pot, 'data-dish': d ? d.id : 'sample',
+      if (!d && !(sampleScene && si === 1)) return;
+      el.insertBefore(make('img', { class: 'k-layer', 'data-layer': sl.pot, src: 'assets/img/kitchen/' + sl.layer + '.webp', alt: '', 'aria-hidden': 'true' }), before);
+      el.append(make('button', { class: 'k-spot', type: 'button', 'data-spot': sl.pot, 'data-dish': d ? d.id : 'sample',
         style: `left:${sl.l}%;top:${sl.t}%;width:${sl.w}%;height:${sl.h}%` },
-        [make('span', { class: 'k-tag' + (d ? '' : ' sample'), style: `--r:${[-3, 2, -2, 3][k]}deg`, text: d ? (d.short || d.name) : 'Your next main' })]);
-      page.append(btn);
+        [make('span', { class: 'k-tag' + (d ? '' : ' sample'), style: `--r:${[-3, 2, -2, 3][k]}deg`, text: d ? (d.short || d.name) : 'Soon' })]));
     });
-    track.append(page);
   });
-  // arrows, dots and a first nudge so people find the rest of the counter
-  const stoveEl = $('kStove'), dots = $('kDots');
-  const pageCount = pagesShown.length;
-  if (pageCount > 1) {
-    for (let i = 0; i < pageCount; i++) dots.append(make('i'));
-    const sync = () => {
-      const i = Math.round(stoveEl.scrollLeft / stoveEl.clientWidth);
+  // Walking: arrows, dots, a first nudge, and a little depth while moving —
+  // the scene you leave eases back and the next comes forward.
+  const scenes = [...scroller.querySelectorAll('.k-scene')], dots = $('kDots');
+  if (scenes.length > 1) {
+    scenes.forEach(() => dots.append(make('i')));
+    let ticking = false;
+    const depth = () => {
+      ticking = false;
+      const w = scroller.clientWidth, x = scroller.scrollLeft;
+      scenes.forEach((sc, i) => {
+        const p = Math.max(-1, Math.min(1, (i * w - x) / w));
+        if (!calm) sc.style.transform = `translateX(${p * -12}%) scale(${1 - .07 * Math.abs(p)})`;
+        sc.style.opacity = String(1 - .25 * Math.abs(p));
+      });
+      const i = Math.round(x / w);
       [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i));
-      $('kPrev').hidden = i === 0; $('kNext').hidden = i === pageCount - 1;
+      $('kPrev').hidden = i === 0; $('kNext').hidden = i === scenes.length - 1;
     };
-    stoveEl.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
-    $('kPrev').addEventListener('click', () => stoveEl.scrollBy({ left: -stoveEl.clientWidth, behavior: calm ? 'auto' : 'smooth' }));
-    $('kNext').addEventListener('click', () => stoveEl.scrollBy({ left: stoveEl.clientWidth, behavior: calm ? 'auto' : 'smooth' }));
-    sync();
+    scroller.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(depth); } }, { passive: true });
+    $('kPrev').addEventListener('click', () => scroller.scrollBy({ left: -scroller.clientWidth, behavior: calm ? 'auto' : 'smooth' }));
+    $('kNext').addEventListener('click', () => scroller.scrollBy({ left: scroller.clientWidth, behavior: calm ? 'auto' : 'smooth' }));
+    depth();
     if (!calm && 'IntersectionObserver' in window) {
       const nudge = new IntersectionObserver(es => {
         if (!es[0].isIntersecting) return;
         nudge.disconnect();
-        setTimeout(() => { stoveEl.scrollBy({ left: 46, behavior: 'smooth' }); setTimeout(() => stoveEl.scrollBy({ left: -46, behavior: 'smooth' }), 650); }, 700);
-      }, { threshold: .8 });
-      nudge.observe(stoveEl);
+        setTimeout(() => { scroller.scrollBy({ left: 60, behavior: 'smooth' }); setTimeout(() => scroller.scrollBy({ left: -60, behavior: 'smooth' }), 650); }, 900);
+      }, { threshold: .6 });
+      nudge.observe(kitchen);
     }
   }
-  menu.classList.add('kitchen-mode'); root.classList.add('kitchen-on');
   const dishSheet = $('dishSheet'), dishBody = $('dishSheetBody');
   const layerOf = name => kitchen.querySelector('[data-layer="' + name + '"]');
   let openSpot = null, borrowed = [];

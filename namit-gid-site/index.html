@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=23">
+<link rel="stylesheet" href="assets/css/site.css?v=24">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -148,26 +148,27 @@
     <!-- Leny's kitchen: the menu, painted. Each pot, the oven and the register
          is a button; its open state is a layer cut from the same painting. -->
     <div class="kitchen" id="kitchen">
-      <img class="k-wall" src="assets/img/kitchen/wall.webp" width="768" height="1376" alt="Leny’s kitchen: a spice shelf, four pots on the stove, an oven and a cash register on the counter.">
-      <img class="k-layer" data-layer="oven" src="assets/img/kitchen/oven.webp" alt="" aria-hidden="true">
-      <img class="k-layer" data-layer="register" src="assets/img/kitchen/register.webp" alt="" aria-hidden="true">
-      <i class="k-glow" aria-hidden="true"></i>
-      <i class="k-wisp" style="--x:15%;--d:0s" aria-hidden="true"></i>
-      <i class="k-wisp" style="--x:39%;--d:2.1s" aria-hidden="true"></i>
-      <i class="k-wisp" style="--x:66%;--d:4.3s" aria-hidden="true"></i>
-      <i class="k-wisp" style="--x:86%;--d:6.2s" aria-hidden="true"></i>
-      <!-- The stove: a row you can slide along. Each stretch of counter is a
-           band from its own painting; app.js fills it from the menu. -->
-      <div class="k-stove" id="kStove" aria-label="The stove: slide for more pots" role="group">
-        <div class="k-track" id="kTrack"></div>
+      <!-- Each scene is a whole painting of one stretch of the wall; swiping
+           walks along it. app.js adds the pots for each scene from the menu. -->
+      <div class="k-scroller" id="kScroller" role="group" aria-label="Leny’s kitchen: swipe to walk along the wall">
+        <div class="k-scene" data-scene="0">
+          <img class="k-wall" src="assets/img/kitchen/wall.webp" width="768" height="1376" alt="Leny’s kitchen: a spice shelf, pots on the stove, an oven and a cash register on the counter.">
+          <img class="k-layer" data-layer="oven" src="assets/img/kitchen/oven.webp" alt="" aria-hidden="true">
+          <img class="k-layer" data-layer="register" src="assets/img/kitchen/register.webp" alt="" aria-hidden="true">
+          <i class="k-glow" aria-hidden="true"></i>
+          <i class="k-wisp" style="--x:15%;--d:0s" aria-hidden="true"></i>
+          <i class="k-wisp" style="--x:39%;--d:2.1s" aria-hidden="true"></i>
+          <i class="k-wisp" style="--x:66%;--d:4.3s" aria-hidden="true"></i>
+          <i class="k-wisp" style="--x:86%;--d:6.2s" aria-hidden="true"></i>
+          <button class="k-spot k-spot-oven" type="button" data-spot="oven" data-dish="desserts" style="left:27.5%;top:59.5%;width:45%;height:26%">
+            <span class="k-tag" style="--r:-1.5deg">Something sweet</span></button>
+          <button class="k-spot k-spot-reg" type="button" data-spot="register" style="left:76%;top:79.5%;width:21%;height:13%">
+            <span class="k-tag" style="--r:2.5deg">Your order <b id="kCount">0</b></span></button>
+        </div>
       </div>
-      <button class="k-arrow k-prev" type="button" id="kPrev" aria-label="Previous pots" hidden>‹</button>
-      <button class="k-arrow k-next" type="button" id="kNext" aria-label="More pots" hidden>›</button>
+      <button class="k-arrow k-prev" type="button" id="kPrev" aria-label="Walk back" hidden>‹</button>
+      <button class="k-arrow k-next" type="button" id="kNext" aria-label="Walk further along the kitchen" hidden>›</button>
       <div class="k-dots" id="kDots" aria-hidden="true"></div>
-      <button class="k-spot k-spot-oven" type="button" data-spot="oven" data-dish="desserts" style="left:27.5%;top:59.5%;width:45%;height:26%">
-        <span class="k-tag" style="--r:-1.5deg">Something sweet</span></button>
-      <button class="k-spot k-spot-reg" type="button" data-spot="register" style="left:76%;top:79.5%;width:21%;height:13%">
-        <span class="k-tag" style="--r:2.5deg">Your order <b id="kCount">0</b></span></button>
     </div>
     <p class="k-alt"><button type="button" class="btn btn-line" id="fullMenuBtn" aria-expanded="false" aria-controls="menuGrid">See the full menu as a list</button></p>
 
@@ -252,6 +253,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=23" defer></script>
+<script src="assets/js/app.js?v=25" defer></script>
 </body>
 </html>
