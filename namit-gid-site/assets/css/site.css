@@ -754,3 +754,25 @@ html.calm .k-layer { transition: none; }
 .how-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .how-steps li { display: flex; gap: 10px; align-items: flex-start; }
 .how-steps .n { width: 24px; height: 24px; font-size: 13px; margin-top: 1px; }
+
+/* the holiday dome: a red satin ribbon and bow, a few sparkles on the glass */
+.k-ribbon { position: absolute; left: 2.2%; top: 72.5%; width: 18.4%; pointer-events: none; overflow: visible; filter: drop-shadow(0 2px 2px rgba(80, 10, 10, .35));
+  transition: opacity 400ms var(--ease-out); }
+.k-ribbon .band { fill: #C8102E; }
+.k-ribbon .band-shade { fill: #8E0B21; }
+.k-ribbon .loop { fill: #D7263D; stroke: #8E0B21; stroke-width: 1.5; }
+.k-ribbon .tail { fill: #B30F2A; }
+.k-ribbon .knot { fill: #A50E27; }
+.kitchen.dome-open .k-ribbon { opacity: 0; }
+.k-sparkle { position: absolute; width: 1.4%; aspect-ratio: 1; pointer-events: none; translate: -50% -50%;
+  background: radial-gradient(circle, #fff 0 18%, rgba(255, 255, 255, 0) 60%), conic-gradient(from 45deg, transparent 0 20%, rgba(255,255,255,.9) 22% 28%, transparent 30% 45%, rgba(255,255,255,.9) 47% 53%, transparent 55% 70%, rgba(255,255,255,.9) 72% 78%, transparent 80% 95%, rgba(255,255,255,.9) 97%);
+  border-radius: 50%; opacity: 0; animation: sparkle 3.6s var(--ease-loop) infinite; animation-delay: var(--d, 0s); }
+@keyframes sparkle { 0%, 60%, 100% { opacity: 0; scale: .4; } 72% { opacity: 1; scale: 1.1; } 84% { opacity: 0; scale: .6; } }
+.k-world .k-tag-red { background: #C8102E; color: #FFF4E6; box-shadow: 0 2px 0 #7a0a1c, 0 4px 8px -4px rgba(80, 10, 10, .6); }
+.k-world .k-tag-in { bottom: auto; top: 38%; translate: -50% 0; }
+/* the oven glows hot when opened */
+.kitchen.oven-hot .k-glow { opacity: 1; scale: 1.25; animation: none; background: radial-gradient(closest-side, rgba(255, 170, 90, .85), rgba(255, 140, 60, 0)); }
+/* the dreamcake is a photo, framed like a snapshot */
+.dish-fig.is-photo img { border-radius: 6px; box-shadow: 0 10px 20px -12px rgba(60, 30, 10, .6); rotate: -1.5deg; }
+.dish-fig.is-photo .shadow, .dish-fig.is-photo::before, .dish-fig.is-photo .glint { display: none; }
+.gift-note { font-weight: 600; color: #A50E27; background: #FCE9EA; border-radius: 999px; padding: 6px 12px; font-size: 14px; }

@@ -33,7 +33,11 @@
   if (mock) $('previewStrip').hidden = false;
 
   // ── Menu ────────────────────────────────────────────────────────────────
-  const ALL = [...S.menu.mains, ...S.menu.desserts];
+  // Month-day windows in Toronto time (a window may run over New Year).
+  const torontoMD = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', month: '2-digit', day: '2-digit' }).format(new Date()).replace('/', '-');
+  const inWindow = w => { if (!w) return true; const t = torontoMD(); return w.from <= w.until ? (t >= w.from && t <= w.until) : (t >= w.from || t <= w.until); };
+  const HOLIDAY = (S.menu.holiday || []).filter(d => !isLive || inWindow(d.season));
+  const ALL = [...S.menu.mains, ...S.menu.desserts, ...HOLIDAY];
   const byId = Object.fromEntries(ALL.map(d => [d.id, d]));
   let tray = [];
   try { tray = JSON.parse(localStorage.getItem('ng-tray') || '[]').filter(l => byId[l.id]); } catch (e) {}
@@ -65,7 +69,7 @@
       make('figcaption', { text: q.name + (q.ordered ? ', ordered ' + q.ordered : '') })]);
   }
   function dishFig(d) {
-    const fig = make('figure', { class: 'dish-fig' });
+    const fig = make('figure', { class: 'dish-fig' + (d.photo ? ' is-photo' : '') });
     fig.style.setProperty('--m', `url(${d.img})`);
     fig.append(make('span', { class: 'shadow' }),
       make('img', { src: d.img, alt: d.name, width: d.w, height: d.h, loading: 'lazy', decoding: 'async' }),
@@ -100,7 +104,7 @@
       const line = tray.find(l => l.id === d.id && l.size === size);
       row.replaceChildren();
       if (!line) {
-        row.append(make('button', { type: 'button', class: 'btn btn-sea', text: 'Add to tray', onclick: () => { add({ id: d.id, size, qty: 1 }, fig); paint(); } }));
+        row.append(make('button', { type: 'button', class: 'btn btn-sea', text: d.min ? 'Add ' + d.min + ' to tray' : 'Add to tray', onclick: () => { add({ id: d.id, size, qty: d.min || 1 }, fig); paint(); } }));
       } else {
         const st = make('div', { class: 'stepper' });
         st.append(
@@ -112,7 +116,10 @@
     }
     paint();
     el._paint = paint;
-    el.append(fig, make('div', { class: 'dish-text' }, [make('h3', { text: d.name }), make('p', { class: 'dish-desc', text: d.desc }), dishQuote(d), chips, row]));
+    const extra = [];
+    if (d.min) extra.push(make('p', { class: 'dish-fact', text: money(d.sizes[0].price) + ' each · minimum ' + d.min }));
+    if (d.gift && (!isLive || inWindow(d.gift))) extra.push(make('p', { class: 'gift-note', text: '🎀 ' + d.gift.text }));
+    el.append(fig, make('div', { class: 'dish-text' }, [make('h3', { text: d.name }), make('p', { class: 'dish-desc', text: d.desc }), ...extra, dishQuote(d), d.min ? '' : chips, row]));
     return el;
   }
 
@@ -159,6 +166,7 @@
 
   $('mains').append(...S.menu.mains.map(sizedDish));
   $('desserts').append(...S.menu.desserts.map(d => d.batch ? boxDish(d) : sizedDish(d)));
+  $('holiday').append(...HOLIDAY.map(sizedDish));
   const repaintDishes = () => document.querySelectorAll('.dish').forEach(n => n._paint && n._paint());
 
   // ── Tray ────────────────────────────────────────────────────────────────
@@ -182,7 +190,8 @@
   }
   function change(line, by) {
     line.qty += by;
-    if (line.qty <= 0) tray = tray.filter(l => l !== line);
+    const dm = byId[line.id] && byId[line.id].min;
+    if (line.qty <= 0 || (dm && line.qty < dm)) tray = tray.filter(l => l !== line);
     save(); renderTray(false);
     kickSign();
     say(`${count()} in your tray, ${money(total())}.`);
@@ -361,6 +370,7 @@
   S.menu.mains.forEach(d => { const want = d.pot || PREFERRED[d.id]; if (want && BURNERS.some(b => b.pot === want)) seat[want] = d; });
   S.menu.mains.filter(d => !Object.values(seat).includes(d)).forEach(d => { const free = BURNERS.find(b => !seat[b.pot]); if (free) seat[free.pot] = d; });
   const world = $('kWorld'), scroller = $('kScroller'), glow = world.querySelector('.k-glow');
+  if (!HOLIDAY.length) world.querySelectorAll('.k-holiday, .k-ribbon, .k-sparkle').forEach(n => n.remove());
   BURNERS.forEach((b, k) => {
     const d = seat[b.pot];
     // on the live site an empty burner is just part of the painting
@@ -406,10 +416,11 @@
   const dishSheet = $('dishSheet'), dishBody = $('dishSheetBody');
   const layerOf = name => kitchen.querySelector('[data-layer="' + name + '"]');
   let openSpot = null, borrowed = [];
-  const titles = { desserts: 'Under the glass dome', register: 'Your order' };
+  const titles = { desserts: 'From the oven', holiday: 'Holiday special', register: 'Your order' };
   function closeSpot() {
     if (!openSpot) return;
-    layerOf(openSpot).classList.remove('open');
+    const ol = layerOf(openSpot); if (ol) ol.classList.remove('open');
+    kitchen.classList.remove('oven-hot', 'dome-open');
     // the dishes go back where they live in the list
     borrowed.reverse().forEach(({ node, home, next }) => home.insertBefore(node, next && next.parentNode === home ? next : null));
     borrowed = []; openSpot = null;
@@ -431,7 +442,9 @@
     const spot = btn.dataset.spot, dish = btn.dataset.dish;
     closeSpot();
     openSpot = spot;
-    layerOf(spot).classList.add('open');
+    const nl = layerOf(spot); if (nl) nl.classList.add('open');
+    if (spot === 'oven') kitchen.classList.add('oven-hot');
+    if (spot === 'dome') kitchen.classList.add('dome-open');
     // bring the spot near the top so it stays in view above the sheet
     const r = btn.getBoundingClientRect(), sr = scroller.getBoundingClientRect();
     scroller.scrollBy({ left: (r.left + r.width / 2) - (sr.left + sr.width / 2), behavior: calm ? 'auto' : 'smooth' });
@@ -453,6 +466,7 @@
         $('dishSheetH').textContent = 'Your next main'; dishSheet.showModal(); return;
       }
       if (dish === 'desserts') openDishes(S.menu.desserts.map(d => d.id), titles.desserts);
+      else if (dish === 'holiday') openDishes(HOLIDAY.map(d => d.id), titles.holiday);
       else openDishes([dish], (S.menu.mains.find(d => d.id === dish) || {}).name || 'From the stove');
     }, calm ? 0 : 560);
   }));

@@ -48,6 +48,16 @@ window.SITE = {
         desc: 'Banana bread with chocolate chips, baked in little foil loaves.',
         sizes: [{ label: 'One loaf', price: 10 }] },
     ],
+    // The holiday special lives under the glass dome. It shows between the
+    // season dates (month-day, Toronto time); the free sticker only between
+    // the sticker dates. On the preview it always shows.
+    holiday: [
+      { id: 'dreamcake', name: 'Chocolate Dreamcake', short: 'Holiday special', img: 'assets/img/dreamcake-gift.webp', w: 720, h: 720, photo: true,
+        desc: 'Layers of chocolate cake and silky chocolate cream under a snow of cocoa, in a gold tin with a window lid. Ready to give.',
+        sizes: [{ label: 'One tin', price: 20 }], min: 4,
+        season: { from: '11-15', until: '01-06' },
+        gift: { text: 'Free “Happy Holidays” sticker on every tin', from: '12-01', until: '12-25' } },
+    ],
   },
   // Shown at first paint, merged with live reviews. TODO: Leny's favourite real reviews.
   // What customers said, shown inside each dish's sheet, plus the overall
