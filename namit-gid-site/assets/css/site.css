@@ -814,3 +814,4 @@ html.calm .k-layer { transition: none; }
   font: 400 12cqw/1 var(--serif); letter-spacing: -.01em; color: #3B2212; opacity: .88; mix-blend-mode: multiply;
   text-shadow: 0 0 1px rgba(40, 18, 6, .7), 0 0 5px rgba(110, 55, 18, .45), 0 0 11px rgba(150, 80, 30, .25); }
 .plank > .wordmark span { color: #2B170B; }
+.place-error { display: grid; gap: 8px; padding: 12px 14px; border-radius: 6px; background: #FCE9EA; color: #7a1020; }

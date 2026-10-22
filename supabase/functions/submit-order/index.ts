@@ -31,12 +31,14 @@ const MENU: Record<string, number> = {
   'Cheesecake (Matcha)': 15,
   'Cheesecake (Pistachio)': 15,
   'Banana Bread Loaf': 10,
+  'Chocolate Dreamcake': 20,
 }
 
 const MIN_QTY: Record<string, number> = {
   'Cheesecake (Regular)': 4,
   'Cheesecake (Matcha)': 4,
   'Cheesecake (Pistachio)': 4,
+  'Chocolate Dreamcake': 4,
 }
 
 // Dishes sold by the batch: a batch is a fixed count at a fixed price, and the
@@ -104,6 +106,59 @@ function torontoNowMs(): number {
   return Date.UTC(+p.year, +p.month - 1, +p.day, hr, +p.minute)
 }
 
+// ── Pricing ─────────────────────────────────────────────────────────────────
+// A tray is a list of lines. A plain line is one dish (with its size, if it
+// has sizes) and a quantity; a batch line (the cheesecake box) is a number of
+// batches and the flavour count in each. Every line is priced from MENU /
+// BATCH here; nothing the browser says about money is used. The stored label
+// is rebuilt here too.
+type Priced = { label: string; qty: number; total: number } | { error: string; detail?: Record<string, unknown> }
+const MAX_LINES = 20, MAX_QTY = 50
+
+function priceLine(line: Record<string, unknown>): Priced {
+  const dish = String(line?.dish ?? '').trim()
+  const batch = BATCH[dish]
+  if (batch && Array.isArray(line?.items)) {
+    const batches = parseInt(String(line?.batches), 10) || 0
+    let count = 0
+    const parts: string[] = []
+    for (const it of line.items as Record<string, unknown>[]) {
+      const label = String(it?.label ?? '')
+      const n = parseInt(String(it?.qty), 10) || 0
+      if (MENU[`${dish} (${label})`] === undefined || n < 0) return { error: 'invalid_order' }
+      if (n === 0) continue
+      count += n
+      parts.push(`${n} ${label}`)
+    }
+    const expected = batches * batch.size
+    if (batches < 1 || batches > batch.max || count !== expected) {
+      return { error: 'invalid_order', detail: { batchSize: batch.size, maxBatches: batch.max, expected } }
+    }
+    return { label: `${dish} \u00d7${batches} ${batches === 1 ? 'batch' : 'batches'} (${parts.join(', ')})`, qty: batches, total: round2(batch.price * batches) }
+  }
+  const size = String(line?.size ?? '').trim()
+  // a sized dish is keyed "Name (Size)"; a dish with one size is keyed by name
+  const key = size && MENU[`${dish} (${size})`] !== undefined ? `${dish} (${size})` : dish
+  const unit = MENU[key]
+  const min = MIN_QTY[key] || 1
+  const qty = parseInt(String(line?.qty), 10) || 0
+  if (!unit || qty < min || qty > MAX_QTY) return { error: 'invalid_order', detail: { dish: key, min } }
+  return { label: `${key} \u00d7${qty}`, qty, total: round2(unit * qty) }
+}
+
+function priceTray(lines: unknown): Priced {
+  if (!Array.isArray(lines) || lines.length < 1 || lines.length > MAX_LINES) return { error: 'invalid_order' }
+  const labels: string[] = []
+  let total = 0
+  for (const l of lines) {
+    const p = priceLine(l as Record<string, unknown>)
+    if ('error' in p) return p
+    labels.push(p.label)
+    total += p.total
+  }
+  return { label: labels.join(' \u00b7 '), qty: lines.length, total: round2(total) }
+}
+
 // One order reserves a 1.5-hour prep window, so no two pickups sit closer than this.
 const BLOCK_WINDOW_MIN = 90
 
@@ -133,6 +188,7 @@ serve(async (req) => {
     // dish carries a base name plus one line per flavour — each line is priced
     // from MENU independently, and the stored label is rebuilt here rather than
     // trusted from the browser.
+    const trayPrice = Array.isArray(order?.lines) ? priceTray(order.lines) : null
     const rawItems = Array.isArray(order?.items) ? order.items : null
     const batch = BATCH[dish]
     let dishLabel = dish
@@ -140,7 +196,17 @@ serve(async (req) => {
     let qty: number
     let total: number
 
-    if (rawItems && batch) {
+    if (trayPrice) {
+      if ('error' in trayPrice || !name || !contact) {
+        return new Response(JSON.stringify({ error: 'invalid_order', ...('error' in trayPrice ? trayPrice.detail : {}) }), {
+          status: 400, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+      dishLabel = trayPrice.label
+      qty = trayPrice.qty
+      total = trayPrice.total
+      unit = total                         // one row per order: the admin reads the total
+    } else if (rawItems && batch) {
       const batches = parseInt(order?.batches, 10) || 0
       let count = 0
       const parts: string[] = []

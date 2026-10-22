@@ -141,11 +141,22 @@ function timeToMin(t) {
 
 // ── Order confirmation email (Namit Gid branded, best-effort) ─────────────────
 
+// Everything a customer typed is escaped before it goes into an email: the
+// address is theirs to choose, so unescaped HTML here would let anyone send
+// formatted mail from orders@takoshi.ca.
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 async function sendConfirmationEmail(resendApiKey, order, result) {
-  const { name, email, qty, notes } = order;
+  const name = escHtml(String(order.name || '').slice(0, 120));
+  const notes = escHtml(String(order.notes || '').slice(0, 500));
+  const { email } = order;
   // For a mixed batch the browser only sends the base name; the edge function
   // rebuilds the real label ("Cheesecake (2 Regular, 2 Matcha)") and returns it.
-  const dish = (result && result.dish) || order.dish;
+  // The server rebuilds the order label from its own price table; a tray is
+  // "Palabok (Small) ×1 · Tiramisu ×1", shown one dish per line.
+  const dish = escHtml((result && result.dish) || order.dish || '').split(' \u00b7 ').join('<br>');
   const balance = result && result.balanceDue != null ? Number(result.balanceDue) : null;
   const pickupLine = order.pickupDate
     ? new Date(order.pickupDate + 'T00:00:00').toLocaleDateString('en-CA',
@@ -168,9 +179,9 @@ async function sendConfirmationEmail(resendApiKey, order, result) {
         <p style="margin:0 0 24px;font-size:15px;color:#6f645a;line-height:1.7;">We've got your order and we'll message you to confirm. Everything is cooked fresh, so it's made the day you pick it up.</p>
         <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
           <tr><td colspan="2" style="padding-bottom:12px;font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#c07a3a;">Your order</td></tr>
-          ${row('Dish', dish)}
-          ${row('Quantity', qty)}
-          ${pickupLine ? row('Pickup', pickupLine) : ''}
+          ${row('Order', dish)}
+          ${result && result.total != null ? row('Total', '$' + Number(result.total).toFixed(2)) : ''}
+          ${pickupLine ? row('Pickup', escHtml(pickupLine)) : ''}
           ${row('Pickup at', '180 Fairview Mall Dr., North York')}
           ${balance != null ? row('Balance at pickup', '$' + balance.toFixed(2)) : ''}
           ${notes ? row('Notes', notes) : ''}
@@ -204,7 +215,8 @@ async function sendConfirmationEmail(resendApiKey, order, result) {
 
 // ── Review request email (admin-triggered, Namit Gid branded) ────────────────
 
-async function sendReviewRequestEmail(resendApiKey, { name, email, dish }) {
+async function sendReviewRequestEmail(resendApiKey, { name: rawName, email, dish: rawDish }) {
+  const name = escHtml(rawName), dish = escHtml(rawDish);
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
 <body style="margin:0;padding:0;background:#f6efe6;font-family:'Helvetica Neue',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;padding:40px 20px;"><tr><td align="center">

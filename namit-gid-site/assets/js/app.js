@@ -340,6 +340,7 @@
         make('p', { class: 'stamp', text: 'Pending · send ' + money(S.deposit.amount) }),
         make('p', { text: `Salamat, ${order.name.split(' ')[0]}! Send the ${money(S.deposit.amount)} and you’re set. I’ll message you at ${order.contact} to confirm.` }),
         make('p', { text: 'Pickup ' + new Date(order.date + 'T12:00').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }) + ' at ' + order.time + '.' }),
+        ...(placed ? [make('p', { class: 'small', text: (placed.orderId ? 'Order #' + placed.orderId + ' · ' : '') + 'Total ' + money(placed.total) + ' · ' + money(placed.balanceDue) + ' at pickup' })] : []),
         make('p', { class: 'small', text: S.pickup.address })]),
         calendarLink(),
         make('button', { type: 'button', class: 'btn btn-line', text: 'Done', onclick: () => sheet.close() }));
@@ -359,15 +360,65 @@
     return make('a', { class: 'btn btn-line', download: 'namit-gid-pickup.ics', href: 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics), text: 'Add pickup to my calendar' });
   }
 
+  // The tray as the server reads it: one line per dish and size, a cheesecake
+  // box as its flavour counts. Only names, sizes and counts are sent; the
+  // server prices everything from its own table.
+  function trayLines() {
+    return tray.map(l => {
+      const d = byId[l.id];
+      if (d.batch) {
+        const c = {};
+        l.box.forEach(fl => { c[fl] = (c[fl] || 0) + l.qty; });
+        return { dish: d.name, batches: l.qty, items: Object.entries(c).map(([label, qty]) => ({ label, qty })) };
+      }
+      return { dish: d.name, size: l.size, qty: l.qty };
+    });
+  }
+  // A plain-text copy of the order, for when the system can't take it.
+  const orderText = () => ['Namit Gid order', ...tray.map(l => '• ' + byId[l.id].name + (lineLabel(l) ? ' (' + lineLabel(l) + ')' : '') + ' ×' + l.qty),
+    'Total ' + money(total()), 'Pickup ' + order.date + ' ' + (order.time || ''), order.name + ' · ' + order.contact].join('\n');
+  let placed = null, placing = false;
+
   async function place() {
-    if (!mock) {
-      // The live order API lands with the server change; until then the preview only runs in mock mode.
-      say('Orders open soon. Message me for now.');
-      if (!$('sheetBody').querySelector('.soon-note')) $('sheetBody').append(make('p', { class: 'small soon-note', text: 'Orders open soon. Message me for now.' }));
-      return;
-    }
-    await new Promise(r => setTimeout(r, 500));
-    step = 4; tray = []; save(); renderTray(false); repaintDishes(); refreshSheet();
+    if (placing) return;
+    placing = true;
+    const btn = [...$('sheetBody').querySelectorAll('button')].find(b => /Place my order/.test(b.textContent));
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+    const done = res => { placed = res; step = 4; tray = []; save(); renderTray(false); repaintDishes(); refreshSheet(); };
+    const fail = (msg, offerCopy) => {
+      if (btn) { btn.disabled = false; btn.textContent = 'Place my order'; }
+      $('sheetBody').querySelectorAll('.place-error').forEach(n => n.remove());
+      const box = make('div', { class: 'place-error', role: 'alert' }, [make('p', { text: msg })]);
+      if (offerCopy) {
+        const cp = make('button', { type: 'button', class: 'btn btn-line', text: 'Copy my order' });
+        cp.addEventListener('click', () => { navigator.clipboard && navigator.clipboard.writeText(orderText()).then(() => { cp.textContent = 'Copied'; }); });
+        box.append(cp);
+        const c = S.contacts || {};
+        if (c.messenger) box.append(make('a', { class: 'btn btn-sea', href: c.messenger, target: '_blank', rel: 'noopener', text: 'Send it on Messenger' }));
+        else box.append(make('p', { class: 'small' }, ['Or email it to ', make('a', { href: 'mailto:' + S.deposit.email, text: S.deposit.email }), '.']));
+      }
+      $('sheetBody').append(box);
+      say(msg);
+    };
+    const payload = { order: { lines: trayLines(), name: order.name.trim(), contact: order.contact.trim(), email: (order.email || '').trim(),
+      notes: (order.notes || '').trim(), pickupDate: order.date, pickup: order.time } };
+    try {
+      if (mock) {
+        await new Promise(r => setTimeout(r, 500));
+        return done({ orderId: 'TEST', total: total(), balanceDue: Math.max(0, total() - S.deposit.amount) });
+      }
+      const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 15000);
+      const res = await fetch('/api/submit-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: ctl.signal });
+      clearTimeout(timer);
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) return done(data);
+      if (res.status === 409 && data.error === 'closed_slot') { step = 1; order.time = null; refreshSheet(); return say('That time just filled up. Pick another?'); }
+      if (res.status === 409) return fail(data.message || 'Sarado anay kita: the kitchen isn’t taking orders right now.', true);
+      if (res.status === 400) return fail('Something in the tray didn’t add up. Please check it and try again.', false);
+      fail('My order system is napping. Send me your order instead and I’ll sort it out.', true);
+    } catch (e) {
+      fail('My order system is napping. Send me your order instead and I’ll sort it out.', true);
+    } finally { placing = false; }
   }
 
   $('trayReview').addEventListener('click', () => openSheet(0));
