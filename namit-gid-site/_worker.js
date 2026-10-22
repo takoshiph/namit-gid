@@ -156,7 +156,10 @@ async function sendConfirmationEmail(resendApiKey, order, result) {
   // rebuilds the real label ("Cheesecake (2 Regular, 2 Matcha)") and returns it.
   // The server rebuilds the order label from its own price table; a tray is
   // "Palabok (Small) ×1 · Tiramisu ×1", shown one dish per line.
-  const dish = escHtml((result && result.dish) || order.dish || '').split(' \u00b7 ').join('<br>');
+  // The older one-dish checkout sends a quantity the label doesn't carry.
+  let label = String((result && result.dish) || order.dish || '');
+  if (!Array.isArray(order.lines) && !label.includes('\u00d7') && order.qty) label += ' \u00d7' + (parseInt(order.qty, 10) || 1);
+  const dish = escHtml(label).split(' \u00b7 ').join('<br>');
   const balance = result && result.balanceDue != null ? Number(result.balanceDue) : null;
   const pickupLine = order.pickupDate
     ? new Date(order.pickupDate + 'T00:00:00').toLocaleDateString('en-CA',
