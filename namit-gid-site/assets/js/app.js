@@ -490,7 +490,6 @@
     const ph = (src, cls) => { const im = make('img', { src: 'assets/img/placeholder/' + src, class: 'ph ' + cls, alt: '', 'aria-hidden': 'true', loading: 'lazy' }); return im; };
     const peek = ph('peaking-jiji.webp', 'ph-peek');
     $('menu').append(peek);
-    $('how').append(ph('totoro-bake.webp', 'ph-baker'), ph('sitting-jiji.webp', 'ph-cat'));
     const pan = ph('pan-with-soot-sprites.webp', 'ph-pan'); pan.classList.remove('ph');
     document.querySelector('.wave-break').append(pan);
     const stove = make('div', { class: 'ph-stove-wrap', 'aria-hidden': 'true' }, [make('img', { src: 'assets/img/placeholder/oven-with-calcifer-sprite.webp', alt: '', loading: 'lazy' }), make('i')]);
