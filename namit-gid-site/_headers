@@ -10,11 +10,16 @@
 /images/*
   Cache-Control: public, max-age=2592000
 
+# CSS and JS carry ?v= versions; paintings are swapped rarely. A day of cache
+# also stops Chrome re-downloading the splash's CSS mask on every restyle.
+/assets/*
+  Cache-Control: public, max-age=86400
+
 # The admin API must never be cached anywhere
 /api/*
   Cache-Control: no-store
 
-# Baseline security headers. No CSP yet — the page loads three.js from cdnjs
+# Baseline security headers. No CSP yet — the page loads GSAP from cdnjs
 # and fonts from Google, so a policy has to name those hosts before it can be
 # turned on without breaking the site.
 /*
