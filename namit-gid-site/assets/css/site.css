@@ -463,7 +463,7 @@ html.intro .hero-copy > * { opacity: 0; }
 /* ── order sheet ─────────────────────────────────────────── */
 .sheet { border: 0; padding: 0; width: 100%; max-width: 560px; max-height: 92vh; margin: auto auto 0; border-radius: 12px 12px 0 0; background: var(--sand); color: var(--ink); }
 .sheet::backdrop { background: rgba(19, 40, 48, .45); }
-.sheet[open] { animation: sheet-up 320ms var(--ease-out); }
+.sheet[open] { animation: sheet-up 260ms var(--ease-out); }
 @keyframes sheet-up { from { transform: translateY(40px); opacity: 0; } }
 .sheet-inner { padding: 18px var(--gutter) calc(24px + env(safe-area-inset-bottom)); display: grid; gap: 16px; }
 .sheet-head { display: flex; align-items: center; justify-content: space-between; }
@@ -784,10 +784,17 @@ html.calm .k-layer { transition: none; }
 .next-pickup { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink-2); }
 .next-pickup strong { color: var(--ink); }
 .np-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 4px rgba(227, 176, 75, .25); animation: lamp-breathe 4s var(--ease-loop) infinite; }
-/* sheets are torn paper at the top, not app panels */
-.sheet[open] { overflow: visible; }
-.sheet .sheet-inner { position: relative; background: var(--paper-grain), var(--sand); }
-.sheet .sheet-inner::before { content: ''; position: absolute; left: 0; right: 0; top: -12px; height: 14px; background: var(--sand);
+/* sheets are torn paper at the top, not app panels. The window itself lets the
+   torn edge stick out above it; the paper inside is what scrolls, with its
+   title pinned, and a swipe that reaches its end stops there instead of
+   scrolling the page behind. */
+.sheet[open] { overflow: visible; display: flex; flex-direction: column; }
+.sheet .sheet-inner { position: relative; background: var(--paper-grain), var(--sand); padding-top: 0;
+  max-height: inherit; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.sheet .sheet-head { position: sticky; top: 0; z-index: 2; padding: 18px 0 8px; margin-bottom: -8px; background: inherit; }
+html:has(dialog[open]) body { overflow: hidden; }
+.sheet.dragging, .sheet.dragging .sheet-inner { transition: none; }
+.sheet::before { content: ''; position: absolute; left: 0; right: 0; top: -12px; height: 14px; background: var(--sand); z-index: 3;
   -webkit-mask: radial-gradient(9px 8px at 9px 100%, #000 98%, transparent) 0 0 / 18px 14px repeat-x; mask: radial-gradient(9px 8px at 9px 100%, #000 98%, transparent) 0 0 / 18px 14px repeat-x; }
 
 /* the name is burned into the board, above a smaller picture */

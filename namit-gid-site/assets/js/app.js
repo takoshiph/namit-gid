@@ -529,7 +529,7 @@
     const r = btn.getBoundingClientRect(), sr = scroller.getBoundingClientRect();
     scroller.scrollBy({ left: (r.left + r.width / 2) - (sr.left + sr.width / 2), behavior: calm ? 'auto' : 'smooth' });
     window.scrollBy({ top: r.top - innerHeight * .12, behavior: calm ? 'auto' : 'smooth' });
-    // let the lid lift (or the door drop) before the sheet comes up
+    // the sheet starts rising while the lid is still lifting (it fades in over 450 ms)
     setTimeout(() => {
       if (spot === 'register') { sheet.classList.add('receipt'); openSheet(0); return; }
       if (spot === 'phone') {
@@ -548,7 +548,7 @@
       if (dish === 'desserts') openDishes(S.menu.desserts.map(d => d.id), titles.desserts);
       else if (dish === 'holiday') openDishes(HOLIDAY.map(d => d.id), titles.holiday);
       else openDishes([dish], (S.menu.mains.find(d => d.id === dish) || {}).name || 'From the stove');
-    }, calm ? 0 : 560);
+    }, calm ? 0 : 200);
   }));
   // The recipe card on the wall: how ordering works.
   $('kCard').addEventListener('click', () => {
@@ -561,6 +561,44 @@
   dishSheet.addEventListener('click', e => { if (e.target === dishSheet) dishSheet.close(); });
   dishSheet.addEventListener('close', closeSpot);
   sheet.addEventListener('close', () => { sheet.classList.remove('receipt'); if (openSpot === 'register') closeSpot(); });
+
+  // Pull a sheet down to close it, like any phone sheet: only once its paper
+  // is scrolled to the top, so scrolling the paper itself still works.
+  [sheet, dishSheet].forEach(d => {
+    const paper = d.querySelector('.sheet-inner');
+    let y0 = null, dy = 0, t0 = 0;
+    d.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1 || paper.scrollTop > 0) { y0 = null; return; }
+      y0 = e.touches[0].clientY; dy = 0; t0 = performance.now();
+    }, { passive: true });
+    d.addEventListener('touchmove', e => {
+      if (y0 === null) return;
+      dy = e.touches[0].clientY - y0;
+      if (dy <= 0 || paper.scrollTop > 0) { if (dy < 0) y0 = null; d.classList.remove('dragging'); d.style.transform = ''; return; }
+      e.preventDefault();
+      d.classList.add('dragging');
+      d.style.transform = 'translateY(' + dy + 'px)';
+    }, { passive: false });
+    d.addEventListener('touchend', () => {
+      if (y0 === null) return;
+      const fast = dy / Math.max(1, performance.now() - t0) > .6;
+      y0 = null; d.classList.remove('dragging');
+      if (dy > 110 || (fast && dy > 40)) {
+        d.animate([{ transform: 'translateY(' + dy + 'px)' }, { transform: 'translateY(100%)' }], { duration: 200, easing: 'ease-in' }).onfinish = () => { d.style.transform = ''; d.close(); };
+      } else if (dy > 0) {
+        d.animate([{ transform: 'translateY(' + dy + 'px)' }, { transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.2,.9,.3,1.2)' });
+        d.style.transform = '';
+      }
+      dy = 0;
+    });
+  });
+
+  // Dish photos sit in a list nobody scrolls past, so lazy loading meant each
+  // photo started downloading only when its sheet opened. Fetch them quietly
+  // once the page has settled.
+  const warmDishes = () => document.querySelectorAll('.dish-fig img[loading="lazy"]').forEach(im => { im.loading = 'eager'; });
+  const warmLater = () => setTimeout(() => (window.requestIdleCallback || setTimeout)(warmDishes), 2500);
+  if (document.readyState === 'complete') warmLater(); else addEventListener('load', warmLater, { once: true });
   sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
 
   renderTray(false);
