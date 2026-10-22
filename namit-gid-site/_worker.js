@@ -253,7 +253,22 @@ async function sendReviewRequestEmail(resendApiKey, { name: rawName, email, dish
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 export default {
+  // A paused or unreachable database makes fetch() itself throw, which
+  // Cloudflare turns into an HTML "error 1101". Answer JSON the storefront
+  // understands instead, so it falls back to "message me".
   async fetch(request, env) {
+    try {
+      return await handle(request, env);
+    } catch (e) {
+      console.error('[namitgid] unhandled error on', new URL(request.url).pathname, e);
+      return jsonResponse({ error: 'backend_unavailable', available: false, reason: 'backend_unavailable',
+        message: 'I can’t take online orders right now. Please message me and I’ll sort it out.', windows: [] }, 503, request);
+    }
+  },
+};
+
+async function handle(request, env) {
+  {
     const url = new URL(request.url);
 
     // Everything that isn't /api/* is served as a static asset by Cloudflare Pages.
@@ -753,5 +768,5 @@ export default {
     }
 
     return jsonResponse({ error: 'Not found' }, 404, request);
-  },
-};
+  }
+}
