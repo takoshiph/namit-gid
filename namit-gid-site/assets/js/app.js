@@ -278,7 +278,7 @@
   try { Object.assign(order, JSON.parse(localStorage.getItem('ng-me') || '{}')); } catch (e) {}
   const STEPS = ['Tray', 'Details', 'Deposit'], DONE = STEPS.length;
   const TITLES = ['Your tray', 'Pickup & details', 'Deposit'];
-  const TIMES = ['11:00 AM', '12:30 PM', '2:00 PM', '3:30 PM', '5:00 PM', '6:30 PM'];
+  const TIMES = S.pickup.times || ['11:00 AM', '12:30 PM', '2:00 PM', '3:30 PM', '5:00 PM', '6:30 PM'];
   const toMin = t => { const m = String(t || '').match(/(\d+):(\d+)\s*(AM|PM)/i); return m ? (+m[1] % 12 + (/pm/i.test(m[3]) ? 12 : 0)) * 60 + +m[2] : null; };
   // Every order holds a 90-minute prep window, so a time near a booked one is full.
   let slotLoad = { date: null, load: {} };
@@ -343,7 +343,7 @@
       const today = new Date(Date.UTC(+tp.year, +tp.month - 1, +tp.day, 12));
       const hourNow = +tp.hour % 24, CUTOFF_HOUR = S.pickup.cutoffHour || 20, OPEN_DAYS = S.pickup.days || [5, 6, 0];
       const days = [];
-      for (let i = 1; days.length < 8 && i < 30; i++) {
+      for (let i = 1; i <= (S.pickup.bookAheadDays || 28); i++) {
         const d = new Date(today); d.setUTCDate(today.getUTCDate() + i);
         if (i === 1 && hourNow >= CUTOFF_HOUR) continue;
         if (OPEN_DAYS.includes(d.getUTCDay())) days.push(d);
@@ -373,8 +373,7 @@
         });
         return make('div', { class: 'field' }, [make('label', { for: id, text: label }), inp]);
       };
-      body.push(make('p', { class: 'small', text: S.pickup.cutoff + '. Pickup at ' + S.pickup.address + '.' }),
-        make('p', { class: 'nb-label', text: 'Pickup day' }), dc,
+      body.push(make('p', { class: 'nb-label', text: 'Pickup day' }), dc,
         make('p', { class: 'nb-label', text: 'Pickup time' }), tc,
         make('p', { class: 'small', text: open ? 'Every order gets its own prep window, so times fill up.' : 'No times left this day. Try another day.' }),
         f('name', 'Your name', 'text', { autocomplete: 'name' }),

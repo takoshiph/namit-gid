@@ -969,3 +969,9 @@ html.calm .sheet.notebook .line-item { animation: none; }
 /* the paper's column is the paper's width: a long row (the day chips) scrolls
    inside itself instead of widening the page and pushing it sideways */
 .sheet .sheet-inner { grid-template-columns: minmax(0, 1fr); overflow-x: hidden; }
+
+/* each label sits right on top of its own line, with clear space above it,
+   so it can't be read as belonging to the line before */
+.sheet.notebook .field { gap: 0; margin-top: 10px; }
+.sheet.notebook .field label { line-height: 1; }
+.sheet.notebook .field input { padding-top: 2px; }

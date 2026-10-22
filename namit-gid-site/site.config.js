@@ -19,6 +19,11 @@ window.SITE = {
     mapUrl: 'https://maps.google.com/?q=180+Fairview+Mall+Dr,+North+York,+ON',
     cutoff: 'Order by 8 PM the day before', // TODO-CHECK
     cutoffHour: 20, days: [5, 6, 0], // pickup days: 0 = Sunday … 6 = Saturday
+    bookAheadDays: 28,               // how far ahead a pickup can be booked
+    // Pickup times. Each order holds a 90-minute prep window (the order
+    // function and /api/slot-load use the same 90), so times 90 minutes
+    // apart means one order per time.
+    times: ['11:00 AM', '12:30 PM', '2:00 PM', '3:30 PM', '5:00 PM', '6:30 PM'],
     hours: 'Pickup Friday to Sunday, 11 AM to 7 PM', // TODO-CHECK
   },
   deposit: { amount: 10, email: 'orders@takoshi.ca' },
