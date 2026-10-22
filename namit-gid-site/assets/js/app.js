@@ -934,7 +934,12 @@
 
     // ── the photo flies onto the sign ──
     const FLY = SHOT + .45, fly = { duration: 1.15, ease: 'power3.inOut' };
-    tl.fromTo('#stage', { clipPath: inset(photo) }, { clipPath: inset(frame), ...fly, immediateRender: false }, FLY)
+    // the photo lands on the picture and the name on the wood above it
+    const lt = Math.min(frame.top, tWord.top) - 6, ll = Math.min(frame.left, tWord.left) - 6;
+    const landing = { left: ll, top: lt, width: Math.max(frame.left + frame.width, tWord.left + tWord.width) + 6 - ll, height: frame.top + frame.height - lt };
+    tl.fromTo('#stage', { clipPath: inset(photo) }, { clipPath: inset(landing), ...fly, immediateRender: false }, FLY)
+      // as it lands, the light-written name darkens into the wood like a burn
+      .to(['#stWord', '#stWord span'], { color: '#3B2212', textShadow: '0 0 5px rgba(110,55,18,.45)', duration: fly.duration, ease: 'power2.in' }, FLY)
       .set([isle, word], { willChange: 'transform' }, FLY - .05)
       .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: tIsland.left - cIsle.left, y: tIsland.top - cIsle.top, scale: tIsland.width / cIsle.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
       .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: tWord.left - cWord.left, y: tWord.top - cWord.top, scale: tWord.width / cWord.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)

@@ -806,3 +806,11 @@ html.calm .k-layer { transition: none; }
 .sheet .sheet-inner { position: relative; background: var(--paper-grain), var(--sand); }
 .sheet .sheet-inner::before { content: ''; position: absolute; left: 0; right: 0; top: -12px; height: 14px; background: var(--sand);
   -webkit-mask: radial-gradient(9px 8px at 9px 100%, #000 98%, transparent) 0 0 / 18px 14px repeat-x; mask: radial-gradient(9px 8px at 9px 100%, #000 98%, transparent) 0 0 / 18px 14px repeat-x; }
+
+/* the name is burned into the board, above a smaller picture */
+.plank { container-type: inline-size; }
+.plank > .frame-slot { top: 47%; height: 44%; left: 18%; width: 69%; }
+.plank > .wordmark { position: absolute; left: 50%; top: 29.5%; translate: -46% 0; margin: 0; white-space: nowrap; z-index: 1;
+  font: 400 12cqw/1 var(--serif); letter-spacing: -.01em; color: #3B2212; opacity: .88; mix-blend-mode: multiply;
+  text-shadow: 0 0 1px rgba(40, 18, 6, .7), 0 0 5px rgba(110, 55, 18, .45), 0 0 11px rgba(150, 80, 30, .25); }
+.plank > .wordmark span { color: #2B170B; }
