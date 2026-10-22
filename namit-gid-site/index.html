@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=34">
+<link rel="stylesheet" href="assets/css/site.css?v=35">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -24,7 +24,7 @@
     d.classList.add(rm || sd ? 'calm' : 'intro');
   })();
 </script>
-<script src="site.config.js?v=6"></script>
+<script src="site.config.js?v=7"></script>
 </head>
 <body>
 <!-- The intro stage: dawn at Long Beach, Romblon, looking out at Byaringan.
@@ -142,7 +142,7 @@
   <section class="menu" id="menu" aria-labelledby="menuH">
     <header class="sec-head">
       <h2 id="menuH">What I’m cooking</h2>
-      <p class="sec-sub">Swipe along my kitchen. Lift a lid for mains, open the oven for desserts, and pay at the register. The holiday special is under the glass dome.</p>
+      <p class="sec-sub">Swipe through my kitchen. Tap a pot to see what’s cooking.</p>
     </header>
 
     <!-- Leny's kitchen: the menu, painted. Each pot, the oven and the register
@@ -165,9 +165,9 @@
             <span class="k-card-lines" aria-hidden="true"><i></i><i></i><i></i></span>
           </button>
           <template id="howSteps"><p class="how-lede">Fill your tray, send $10, pick it up warm.</p><ol class="how-steps">
-        <li><span class="n">1</span><span>Pick your dishes and a pickup time in the kitchen above.</span></li>
+        <li><span class="n">1</span><span>Fill your tray and pick a time.</span></li>
         <li><span class="n">2</span><span>e-Transfer the $10 deposit to <strong>orders@takoshi.ca</strong>. It holds your spot.</span></li>
-        <li><span class="n">3</span><span>Pick up at Fairview Mall. I cook it that day; pay the rest when you get there.</span></li>
+        <li><span class="n">3</span><span>I cook it that morning. Pick up at Fairview Mall and pay the rest.</span></li>
       </ol></template>
           <button class="k-spot" type="button" data-spot="phone" style="left:1.5%;top:24.5%;width:8.5%;height:12%">
             <span class="k-tag">Say hi</span></button>
@@ -221,10 +221,9 @@
     <div class="foot-cols">
       <div><h3>Pickup</h3><p><a href="#" data-href="pickup.mapUrl" data-k="pickup.address"></a></p><p data-k="pickup.hours"></p><p data-k="pickup.cutoff"></p></div>
       <div><h3>Say hi</h3><p><a href="mailto:orders@takoshi.ca">orders@takoshi.ca</a></p><p class="todo">Facebook · Messenger · Instagram</p></div>
-      <div><h3>Sister kitchen</h3><p><a href="https://takoshi.ca">Takoshi</a></p></div>
     </div>
     <p class="foot-rating" id="footRating" hidden></p>
-    <p class="foot-legal">© 2026 Namit Gid · <a href="https://takoshi.ca/privacy.html">Privacy</a> · <a href="https://takoshi.ca/terms.html">Terms</a></p>
+    <p class="foot-legal">© 2026 Namit Gid · <a href="https://takoshi.ca/privacy.html">Privacy</a> · <a href="https://takoshi.ca/terms.html">Terms</a> · Sister kitchen: <a href="https://takoshi.ca">Takoshi</a></p>
   </div>
 </footer>
 
@@ -250,6 +249,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=32" defer></script>
+<script src="assets/js/app.js?v=33" defer></script>
 </body>
 </html>

@@ -8,9 +8,9 @@ window.SITE = {
     island: 'Byaringan Island',
     // TODO-CHECK: Hiligaynon lines
     eyebrow: 'Luto sa balay · Long Beach, Romblon to North York',
-    eyebrowShort: 'Luto sa balay · Romblon to Toronto',
+    eyebrowShort: 'Luto sa balay · Romblon to North York',
     headline: 'Filipino home cooking, made the day you pick it up.',
-    caption: 'That’s Byaringan Island, the view from our beach in Long Beach, Romblon.',
+    caption: 'Byaringan Island, from our beach back home in Romblon.',
     closedLine: 'Sarado anay kita. The kitchen’s light is off.',
     footerLine: 'Abang kalipay gid.',
   },
@@ -18,6 +18,7 @@ window.SITE = {
     address: '180 Fairview Mall Dr, North York',
     mapUrl: 'https://maps.google.com/?q=180+Fairview+Mall+Dr,+North+York,+ON',
     cutoff: 'Order by 8 PM the day before', // TODO-CHECK
+    cutoffHour: 20, days: [5, 6, 0], // pickup days: 0 = Sunday … 6 = Saturday
     hours: 'Pickup Friday to Sunday, 11 AM to 7 PM', // TODO-CHECK
   },
   deposit: { amount: 10, email: 'orders@takoshi.ca' },
@@ -42,7 +43,7 @@ window.SITE = {
         desc: 'Ladyfingers soaked in espresso, thick cocoa on top, set overnight so it slices clean.',
         sizes: [{ label: 'One tray', price: 25 }] },
       { id: 'cheesecake', name: 'Cheesecake', img: 'images/cheesecake.webp', w: 620, h: 565,
-        desc: 'Creamy, slow-set cheesecakes. A box is four, mixed however you like.',
+        desc: 'Mini cheesecakes, a box of four. Mix the flavours.',
         batch: { size: 4, price: 60, max: 5, flavours: ['Regular', 'Matcha', 'Pistachio'] } },
       { id: 'banana', name: 'Banana Bread Loaf', img: 'images/banana.webp', w: 620, h: 423,
         desc: 'Banana bread with chocolate chips, baked in little foil loaves.',
@@ -53,7 +54,7 @@ window.SITE = {
     // the sticker dates. On the preview it always shows.
     holiday: [
       { id: 'dreamcake', name: 'Chocolate Dreamcake', short: 'Holiday special', img: 'assets/img/dreamcake-gift.webp', w: 720, h: 720, photo: true,
-        desc: 'Layers of chocolate cake and silky chocolate cream under a snow of cocoa, in a gold tin with a window lid. Ready to give.',
+        desc: 'Chocolate cake, chocolate cream, cocoa on top. In a gold tin, ready to gift.',
         sizes: [{ label: 'One tin', price: 20 }], min: 4,
         season: { from: '11-15', until: '01-06' },
         gift: { text: 'Free “Happy Holidays” sticker on every tin', from: '12-01', until: '12-25' } },

@@ -250,7 +250,7 @@
     const outer = make('div', { class: 'flyer', 'aria-hidden': 'true' });
     const inner = make('div');
     inner.append(make('img', { src: fig.querySelector('img').src, alt: '' }));
-    outer.append(inner); document.body.append(outer);
+    outer.append(inner); (document.querySelector('dialog[open]') || document.body).append(outer);
     const dur = 640;
     outer.animate([{ transform: `translateX(${x0}px)` }, { transform: `translateX(${x1}px)` }], { duration: dur, easing: 'linear', fill: 'forwards' });
     const lift = Math.min(160, Math.abs(y1 - y0) * .35 + 60);
@@ -282,17 +282,23 @@
     if (step === 0) {
       body.push(lineList(), sums(), make('button', { type: 'button', class: 'btn btn-sea', text: 'Choose pickup', onclick: () => { step = 1; refreshSheet(); } }));
     } else if (step === 1) {
+      // Days are counted in Toronto, whatever the visitor's clock says. A day
+      // can be picked only before the cutoff hour on the day before it.
+      const tz = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false }).formatToParts(new Date());
+      const tp = Object.fromEntries(tz.map(p => [p.type, p.value]));
+      const today = new Date(Date.UTC(+tp.year, +tp.month - 1, +tp.day, 12));
+      const hourNow = +tp.hour % 24, CUTOFF_HOUR = S.pickup.cutoffHour || 20, OPEN_DAYS = S.pickup.days || [5, 6, 0];
       const days = [];
-      const now = new Date();
-      for (let i = 1; days.length < 8 && i < 20; i++) {
-        const d = new Date(now); d.setDate(now.getDate() + i);
-        if ([5, 6, 0].includes(d.getDay())) days.push(d);
+      for (let i = 1; days.length < 8 && i < 30; i++) {
+        const d = new Date(today); d.setUTCDate(today.getUTCDate() + i);
+        if (i === 1 && hourNow >= CUTOFF_HOUR) continue;
+        if (OPEN_DAYS.includes(d.getUTCDay())) days.push(d);
       }
       const iso = d => d.toISOString().slice(0, 10);
       if (!order.date) order.date = iso(days[0]);
       const dc = make('div', { class: 'datechips', role: 'group', 'aria-label': 'Pickup day' }, days.map(d => make('button', {
         type: 'button', 'aria-pressed': String(iso(d) === order.date), onclick: () => { order.date = iso(d); order.time = null; refreshSheet(); },
-      }, [d.toLocaleDateString('en-CA', { weekday: 'short' }), make('b', { text: String(d.getDate()) }), d.toLocaleDateString('en-CA', { month: 'short' })])));
+      }, [d.toLocaleDateString('en-CA', { weekday: 'short', timeZone: 'UTC' }), make('b', { text: String(d.getUTCDate()) }), d.toLocaleDateString('en-CA', { month: 'short', timeZone: 'UTC' })])));
       const times = ['11:00 AM', '12:30 PM', '2:00 PM', '3:30 PM', '5:00 PM', '6:30 PM'];
       const full = new Set(mock ? ['2:00 PM'] : []);
       const tc = make('div', { class: 'chipgrid', role: 'group', 'aria-label': 'Pickup time' }, times.map(t => {
@@ -321,28 +327,43 @@
         } }));
     } else if (step === 3) {
       const copy = make('button', { type: 'button', class: 'btn btn-line', text: 'Copy address', onclick: () => {
-        navigator.clipboard && navigator.clipboard.writeText(S.deposit.email).then(() => { copy.textContent = 'Copied'; });
+        const done = () => { copy.textContent = 'Copied'; };
+        const select = () => { const r = document.createRange(); r.selectNodeContents(copy.previousElementSibling); const s = getSelection(); s.removeAllRanges(); s.addRange(r); copy.textContent = 'Selected, tap Copy'; };
+        if (navigator.clipboard) navigator.clipboard.writeText(S.deposit.email).then(done, select); else select();
       } });
       body.push(make('div', { class: 'etr' }, [make('p', { text: `Send ${money(S.deposit.amount)} by Interac e-Transfer to` }), make('code', { text: S.deposit.email }), copy,
-        make('p', { class: 'small', text: 'Message: “Namit Gid” and your name. That’s the shared inbox for our two home kitchens, Namit Gid and Takoshi. It comes straight to me.' })]),
+        make('p', { class: 'small', text: 'Write “Namit Gid” and your name in the message. It comes straight to me.' })]),
         sums(),
         make('button', { type: 'button', class: 'btn btn-sea', text: 'Place my order', onclick: place }));
     } else {
       body.push(make('div', { class: 'receipt' }, [
-        make('p', { class: 'stamp', text: 'HELD ' + money(S.deposit.amount) }),
-        make('p', { text: `Your order’s in, ${order.name.split(' ')[0]}. I’ll message you at ${order.contact} to confirm.` }),
+        make('p', { class: 'stamp', text: 'Pending · send ' + money(S.deposit.amount) }),
+        make('p', { text: `Salamat, ${order.name.split(' ')[0]}! Send the ${money(S.deposit.amount)} and you’re set. I’ll message you at ${order.contact} to confirm.` }),
         make('p', { text: 'Pickup ' + new Date(order.date + 'T12:00').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }) + ' at ' + order.time + '.' }),
         make('p', { class: 'small', text: S.pickup.address })]),
+        calendarLink(),
         make('button', { type: 'button', class: 'btn btn-line', text: 'Done', onclick: () => sheet.close() }));
     }
     $('sheetBody').replaceChildren(...(step < 4 ? [prog] : []), ...body);
   }
 
+  // An .ics file for the pickup, so it lands in their calendar.
+  function calendarLink() {
+    const m = String(order.time || '').match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!order.date || !m) return '';
+    const start = (+m[1] % 12 + (/pm/i.test(m[3]) ? 12 : 0)) * 60 + +m[2], end = start + 30;
+    const stamp = mins => order.date.replace(/-/g, '') + 'T' + String(Math.floor(mins / 60)).padStart(2, '0') + String(mins % 60).padStart(2, '0') + '00';
+    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Namit Gid//Pickup//EN', 'BEGIN:VEVENT',
+      'UID:' + Date.now() + '@namitgid', 'DTSTART;TZID=America/Toronto:' + stamp(start), 'DTEND;TZID=America/Toronto:' + stamp(end),
+      'SUMMARY:Namit Gid pickup', 'LOCATION:' + S.pickup.address, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    return make('a', { class: 'btn btn-line', download: 'namit-gid-pickup.ics', href: 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics), text: 'Add pickup to my calendar' });
+  }
+
   async function place() {
     if (!mock) {
       // The live order API lands with the server change; until then the preview only runs in mock mode.
-      say('Ordering opens when the new kitchen system is live.');
-      $('sheetBody').append(make('p', { class: 'small', text: 'Ordering on this preview runs only in test mode (add ?mock=1 to the link).' }));
+      say('Orders open soon. Message me for now.');
+      if (!$('sheetBody').querySelector('.soon-note')) $('sheetBody').append(make('p', { class: 'small soon-note', text: 'Orders open soon. Message me for now.' }));
       return;
     }
     await new Promise(r => setTimeout(r, 500));
@@ -374,7 +395,6 @@
   BURNERS.forEach((b, k) => {
     const d = seat[b.pot];
     // on the live site an empty burner is just part of the painting
-    if (!d && isLive) return;
     world.insertBefore(make('img', { class: 'k-layer', 'data-layer': b.pot, src: 'assets/img/kitchen/lid-' + b.pot + '.webp', alt: '', 'aria-hidden': 'true' }), glow);
     if (d) world.insertBefore(make('i', { class: 'k-wisp', 'aria-hidden': 'true', style: `--x:${b.l + b.w / 2}%;--d:${(k * 1.9) % 8}s` }), glow);
     world.append(make('button', { class: 'k-spot', type: 'button', 'data-spot': b.pot, 'data-dish': d ? d.id : 'sample',
@@ -405,7 +425,14 @@
   addEventListener('pointerup', () => { drag = null; scroller.classList.remove('dragging'); });
   // a drag that moved should not also count as a tap on a pot
   scroller.addEventListener('click', e => { if (dragged) { e.stopPropagation(); e.preventDefault(); dragged = false; } }, true);
+  const peekLid = () => {
+    const first = world.querySelector('.k-layer[data-layer="palayok"]');
+    if (!first || calm) return;
+    first.classList.add('peek'); setTimeout(() => first.classList.remove('peek'), 1300);
+  };
   if (!calm && 'IntersectionObserver' in window) {
+    const lidHint = new IntersectionObserver(es => { if (es[0].isIntersecting) { lidHint.disconnect(); setTimeout(peekLid, 500); } }, { threshold: .5 });
+    lidHint.observe(kitchen);
     const nudge = new IntersectionObserver(es => {
       if (!es[0].isIntersecting || scroller.scrollWidth - scroller.clientWidth < 4) return;
       nudge.disconnect();
@@ -456,14 +483,14 @@
         const c = S.contacts || {};
         const links = [c.messenger && ['Message me on Messenger', c.messenger], c.facebook && ['Facebook', c.facebook], c.instagram && ['Instagram', c.instagram]].filter(Boolean);
         dishBody.replaceChildren(make('div', { class: 'phone-card' }, [
-          make('p', { text: 'Questions about an order, a big tray for a party, or just saying hi? I’d love to hear from you.' }),
+          make('p', { text: 'Party tray? Allergy question? Or just kumusta? Message me.' }),
           ...links.map(([t, u]) => make('p', {}, [make('a', { class: 'btn btn-sea', href: u, target: '_blank', rel: 'noopener', text: t })])),
           make('p', {}, [make('a', { href: 'mailto:' + S.deposit.email, text: S.deposit.email })])]));
         $('dishSheetH').textContent = 'Say hi'; dishSheet.showModal(); return;
       }
       if (dish === 'sample') {
-        dishBody.replaceChildren(make('p', { class: 'small', text: 'This burner is waiting for your next main. Add one to the menu and it takes this pot.' }));
-        $('dishSheetH').textContent = 'Your next main'; dishSheet.showModal(); return;
+        dishBody.replaceChildren(make('p', { text: 'Something new is coming to this pot. Check back soon!' }));
+        $('dishSheetH').textContent = 'Coming soon'; dishSheet.showModal(); return;
       }
       if (dish === 'desserts') openDishes(S.menu.desserts.map(d => d.id), titles.desserts);
       else if (dish === 'holiday') openDishes(HOLIDAY.map(d => d.id), titles.holiday);
@@ -486,6 +513,10 @@
   renderTray(false);
 
   // ── Reviews: static first, never empty ──────────────────────────────────
+  // Footer socials, only those that exist.
+  { const c = S.contacts || {}, todo = document.querySelector('.foot .todo');
+    const links = [['Facebook', c.facebook], ['Messenger', c.messenger], ['Instagram', c.instagram]].filter(x => x[1]);
+    if (todo) { if (links.length) todo.replaceChildren(...links.flatMap(([t, u], i) => [i ? ' · ' : '', make('a', { href: u, target: '_blank', rel: 'noopener', text: t })])); else todo.remove(); } }
   // The overall rating, in the footer.
   if (showReviews && S.reviews.rating) {
     const r = S.reviews.rating, fr = $('footRating');
@@ -553,7 +584,7 @@
     }), { threshold: .6 });
     document.querySelectorAll('.note').forEach(n => noteIO.observe(n));
     if (!lowEndDevice) {
-      new IntersectionObserver(es => $('foot').classList.toggle('live', es[0].isIntersecting)).observe($('foot'));
+      new IntersectionObserver(es => $('foot').classList.toggle('live', es[0].isIntersecting), { threshold: .25 }).observe($('foot'));
     }
   }
 
