@@ -283,9 +283,6 @@ html.intro .shore, html.intro .plank, html.intro .emblem, html.intro .emblem-arm
 html.intro body { overflow: hidden; }
 html.intro .hero-copy > * { opacity: 0; }
 
-/* idle sway: the only loop on screen */
-.plank.sway { animation: sway 7s var(--ease-loop) infinite; }
-@keyframes sway { 0%, 100% { rotate: -.7deg; } 50% { rotate: .7deg; } }
 
 /* ── sections ────────────────────────────────────────────── */
 .sec-head { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 0 var(--gutter); }

@@ -172,13 +172,13 @@
   const repaintDishes = () => document.querySelectorAll('.dish').forEach(n => n._paint && n._paint());
 
   // ── Tray ────────────────────────────────────────────────────────────────
-  // The hanging sign sways a little whenever the tray changes.
+  // The board settles a little whenever the tray changes.
   let signSeen = true;
   if ('IntersectionObserver' in window) new IntersectionObserver(es => { signSeen = es[0].isIntersecting; }).observe($('signWrap'));
   function kickSign() {
     if (calm || !window.gsap || !signSeen) return;
-    gsap.killTweensOf(plank, 'rotation');
-    gsap.to(plank, { keyframes: [{ rotation: 1.4, duration: .25 }, { rotation: -.8, duration: .35 }, { rotation: .3, duration: .35 }, { rotation: 0, duration: .3 }], ease: 'sine.inOut' });
+    gsap.killTweensOf(plank, 'y');
+    gsap.fromTo(plank, { y: -3 }, { y: 0, duration: .45, ease: 'back.out(3)' });
   }
 
   function add(line, fig) {
@@ -646,27 +646,7 @@
     n.classList.add('pre'); n.style.animationDelay = (i % 4) * 90 + 'ms'; io.observe(n);
   });
 
-  // ── The sign answers scroll speed ───────────────────────────────────────
-  // A pendulum, not a needle: scroll speed only nudges it, a slow spring
-  // brings it back, and it never tips past 1.5°. Speed is read once a frame
-  // (a phone flick fires scroll events in bursts), and the rubber-band
-  // bounce above the top of the page is ignored.
   const plank = $('plank');
-  let lastY = Math.max(0, scrollY), angle = 0, spin = 0, raf = 0;
-  function swayTick() {
-    raf = 0;
-    const y = Math.max(0, scrollY), speed = y - lastY; lastY = y;
-    spin += Math.max(-1.5, Math.min(1.5, speed * .02)) * .05;   // nudge from scrolling
-    spin += -angle * .025;                                      // spring back (period about 0.7 s)
-    spin *= .9;                                                 // rope friction
-    angle = Math.max(-1.5, Math.min(1.5, angle + spin));
-    plank.style.transform = `rotate(${angle.toFixed(3)}deg)`;
-    if (Math.abs(angle) > .01 || Math.abs(spin) > .002 || speed) raf = requestAnimationFrame(swayTick);
-    else plank.style.transform = '';
-  }
-  addEventListener('scroll', () => {
-    if (scrollY < innerHeight * 1.2 && !raf && !calm) { lastY = Math.max(0, scrollY); raf = requestAnimationFrame(swayTick); }
-  }, { passive: true });
 
   // ── Intro: a camera pulls back from the lighthouse at dawn, a bird and a
   // cloud pass the lens, the beam writes the name, a shutter takes the photo
@@ -698,7 +678,6 @@
     const st = $('stage'); if (st) st.remove();
     const sk = $('introSkip'); if (sk) sk.remove();
     if (window.gsap) gsap.set([plank, emblem, '#lenyArms', '#shore', '#badge', '#badge .disc', '#badge .ring'], { clearProps: 'all' });
-    if (!calm) plank.classList.add('sway');
   }
 
   // A cumulus, painted once onto a canvas: soft puffs (a low row along the
@@ -988,11 +967,11 @@
       .to(['#stSun', '#stFrond'], { opacity: .5, duration: fly.duration }, FLY)
       .fromTo(plank, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: .5, immediateRender: false }, FLY + .7);
 
-    // ── the sign catches it and swings; Leny rises ──
+    // ── the board takes the photo and settles; Leny rises ──
     const LAND = FLY + 1.2;
     tl.set('#shore', { opacity: 1 }, LAND)
       .to('#stage', { opacity: 0, duration: .25 }, LAND)
-      .to(plank, { keyframes: [{ rotation: 2.2, duration: .25, ease: 'power2.out' }, { rotation: -1.3, duration: .4, ease: 'sine.inOut' }, { rotation: .5, duration: .4, ease: 'sine.inOut' }, { rotation: 0, duration: .35, ease: 'sine.out' }] }, LAND)
+      .fromTo(plank, { y: -6 }, { y: 0, duration: .5, ease: 'back.out(2.5)', immediateRender: false }, LAND)
       .set('#badge', { opacity: 1 }, LAND)
       .fromTo('#badge .disc', { scale: .6, opacity: 0, transformOrigin: '50% 50%' }, { scale: 1, opacity: 1, duration: .7, ease: 'back.out(1.6)', immediateRender: false }, LAND + .05)
       .fromTo('#badge .ring', { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: .8, ease: 'power2.inOut', stagger: .12, immediateRender: false }, LAND + .15)
