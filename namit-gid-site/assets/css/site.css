@@ -110,7 +110,12 @@ html.intro .intro-skip { display: block; }
 .badge .r3 { stroke: #E9B66B; stroke-width: 3.4; }
 .leny-clip { position: absolute; inset: 0; clip-path: inset(-60% -20% 0 -20%); }
 .emblem, .emblem-arms { position: absolute; left: 31%; width: 38%; top: -14.9%; height: auto; }
-.emblem-arms { clip-path: inset(43.5% 0 41% 0); pointer-events: none; }
+/* In Leny's height the crossbar runs 55.7%–61.3% and her crossed arms end just
+   above it. She stops at the bar's lower edge (nothing of her shows in the gap
+   above the board), and the copy drawn in front of the sign stops at its top
+   edge, so no apron is painted over the bar. */
+.emblem { clip-path: inset(0 0 38.6% 0); }
+.emblem-arms { clip-path: inset(43.5% 0 44.3% 0); pointer-events: none; }
 .plank { position: absolute; left: 0; top: 28.9%; width: 100%; aspect-ratio: 1000 / 809; transform-origin: 50% 10%; }
 .sign-img { width: 100%; height: 100%; filter: drop-shadow(0 6px 6px rgba(60, 38, 20, .25)); }
 .plank > .frame-slot { position: absolute; left: 14.4%; top: 34%; width: 76%; height: 56%; }
@@ -254,7 +259,10 @@ html.held main > section:not(.hero), html.held .foot,
 html.intro main > section:not(.hero), html.intro .foot { visibility: hidden; }
 html.revealing body { overflow: hidden; }
 
-html.intro .shore, html.intro .plank, html.intro .emblem, html.intro .emblem-arms, html.intro .badge { opacity: 0; }
+/* Not 0: at .001 the browser still paints and decodes them, behind the opaque
+   intro, so they don't stall the frame they first appear in (83 and 117 ms
+   hitches at the landing when they were 0). */
+html.intro .shore, html.intro .plank, html.intro .emblem, html.intro .emblem-arms, html.intro .badge { opacity: .001; }
 
 .hero-copy { display: grid; gap: 12px; max-width: 34rem; text-align: center; justify-items: center; }
 .eyebrow { font-size: 15px; color: var(--ink-2); }

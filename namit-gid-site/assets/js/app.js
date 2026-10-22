@@ -647,17 +647,25 @@
   });
 
   // ── The sign answers scroll speed ───────────────────────────────────────
+  // A pendulum, not a needle: scroll speed only nudges it, a slow spring
+  // brings it back, and it never tips past 1.5°. Speed is read once a frame
+  // (a phone flick fires scroll events in bursts), and the rubber-band
+  // bounce above the top of the page is ignored.
   const plank = $('plank');
-  let lastY = scrollY, vel = 0, raf = 0;
+  let lastY = Math.max(0, scrollY), angle = 0, spin = 0, raf = 0;
   function swayTick() {
     raf = 0;
-    vel *= .86;
-    plank.style.transform = `rotate(${Math.max(-4, Math.min(4, vel * .08)).toFixed(2)}deg)`;
-    if (Math.abs(vel) > .2) raf = requestAnimationFrame(swayTick);
+    const y = Math.max(0, scrollY), speed = y - lastY; lastY = y;
+    spin += Math.max(-1.5, Math.min(1.5, speed * .02)) * .05;   // nudge from scrolling
+    spin += -angle * .025;                                      // spring back (period about 0.7 s)
+    spin *= .9;                                                 // rope friction
+    angle = Math.max(-1.5, Math.min(1.5, angle + spin));
+    plank.style.transform = `rotate(${angle.toFixed(3)}deg)`;
+    if (Math.abs(angle) > .01 || Math.abs(spin) > .002 || speed) raf = requestAnimationFrame(swayTick);
+    else plank.style.transform = '';
   }
   addEventListener('scroll', () => {
-    const y = scrollY; vel += (y - lastY); lastY = y;
-    if (y < innerHeight * 1.2 && !raf && !calm) raf = requestAnimationFrame(swayTick);
+    if (scrollY < innerHeight * 1.2 && !raf && !calm) { lastY = Math.max(0, scrollY); raf = requestAnimationFrame(swayTick); }
   }, { passive: true });
 
   // ── Intro: a camera pulls back from the lighthouse at dawn, a bird and a
@@ -978,7 +986,7 @@
       .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: tIsland.left - cIsle.left, y: tIsland.top - cIsle.top, scale: tIsland.width / cIsle.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
       .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: tWord.left - cWord.left, y: tWord.top - cWord.top, scale: tWord.width / cWord.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
       .to(['#stSun', '#stFrond'], { opacity: .5, duration: fly.duration }, FLY)
-      .fromTo(plank, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: .5 }, FLY + .7);
+      .fromTo(plank, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: .5, immediateRender: false }, FLY + .7);
 
     // ── the sign catches it and swings; Leny rises ──
     const LAND = FLY + 1.2;
