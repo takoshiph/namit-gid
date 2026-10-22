@@ -70,7 +70,9 @@
   }
   function dishFig(d) {
     const fig = make('figure', { class: 'dish-fig' + (d.photo ? ' is-photo' : '') });
-    fig.style.setProperty('--m', `url(${d.img})`);
+    // absolute: a url() in a custom property resolves against the stylesheet
+    // that uses it (assets/css/), not the page
+    fig.style.setProperty('--m', `url("${new URL(d.img, document.baseURI).href}")`);
     fig.append(make('span', { class: 'shadow' }),
       make('img', { src: d.img, alt: d.name, width: d.w, height: d.h, loading: 'lazy', decoding: 'async' }),
       make('span', { class: 'glint' }));
