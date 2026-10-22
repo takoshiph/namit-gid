@@ -261,7 +261,7 @@ export default {
       const res = await env.ASSETS.fetch(request);
       // Pages answers an unknown path with index.html. For a missing image or
       // script that hides the mistake and feeds the browser a page instead.
-      if (/^/(assets|images)//.test(url.pathname) && (res.headers.get('content-type') || '').startsWith('text/html')) {
+      if ((url.pathname.startsWith('/assets/') || url.pathname.startsWith('/images/')) && (res.headers.get('content-type') || '').startsWith('text/html')) {
         return new Response('Not found', { status: 404, headers: { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' } });
       }
       return res;
