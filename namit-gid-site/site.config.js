@@ -50,11 +50,22 @@ window.SITE = {
     ],
   },
   // Shown at first paint, merged with live reviews. TODO: Leny's favourite real reviews.
-  // Placeholders until the owner picks real ones; never ship these.
-  reviews: [
-    { name: 'Placeholder', text: 'One of your real customer reviews goes here.' },
-    { name: 'Placeholder', text: 'A second real review, a line or two long.' },
-    { name: 'Placeholder', text: 'A third real review.' },
-  ],
+  // What customers said, shown inside each dish's sheet, plus the overall
+  // rating in the footer. PLACEHOLDERS: invented for the preview. While
+  // placeholder is true they are hidden on namitgid.takoshi.ca. Replace with
+  // real reviews (first name + what they ordered), then set placeholder: false.
+  reviews: {
+    placeholder: true,
+    rating: { stars: 4.9, count: 37, url: '' },
+    quotes: {
+      palabok: { text: 'Lasang luto ni lola. We finished the tray before we got home.', name: 'Marites', ordered: 'Palabok' },
+      shawarma: { text: 'So much garlic sauce, exactly how I like it. Medium fed four of us.', name: 'Joel', ordered: 'Shawarma Rice' },
+      lumpia: { text: 'Still crunchy after the drive home. Ordering 50 for the party.', name: 'Rhea', ordered: 'Lumpiang Shanghai' },
+      sushi: { text: 'Scooped onto nori, the kids fought over the last bit. Namit gid talaga.', name: 'Carlo', ordered: 'Baked Sushi' },
+      tiramisu: { text: 'Soft, not too sweet, and it really does slice clean.', name: 'Ana', ordered: 'Tiramisu' },
+      cheesecake: { text: 'The matcha one is the reason I keep coming back.', name: 'Bea', ordered: 'Cheesecake box' },
+      banana: { text: 'One for the drive, one for breakfast. Never lasts.', name: 'Paolo', ordered: 'Banana bread' },
+    },
+  },
   motion: { intro: true, introMs: 6000, returnMs: 1400 },
 };

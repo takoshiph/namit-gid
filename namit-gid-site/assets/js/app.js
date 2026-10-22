@@ -56,6 +56,14 @@
   const total = () => tray.reduce((a, l) => a + linePrice(l), 0);
 
   const STEAM = 'M30 70 C20 55 40 45 30 30 S40 10 32 0';
+  // Placeholder reviews never reach the live site.
+  const showReviews = S.reviews && (!S.reviews.placeholder || location.hostname !== 'namitgid.takoshi.ca');
+  function dishQuote(d) {
+    const q = showReviews && S.reviews.quotes && S.reviews.quotes[d.id];
+    if (!q) return '';
+    return make('figure', { class: 'dish-quote' }, [make('blockquote', { text: '“' + q.text + '”' }),
+      make('figcaption', { text: q.name + (q.ordered ? ', ordered ' + q.ordered : '') })]);
+  }
   function dishFig(d) {
     const fig = make('figure', { class: 'dish-fig' });
     fig.style.setProperty('--m', `url(${d.img})`);
@@ -104,7 +112,7 @@
     }
     paint();
     el._paint = paint;
-    el.append(fig, make('div', { class: 'dish-text' }, [make('h3', { text: d.name }), make('p', { class: 'dish-desc', text: d.desc }), chips, row]));
+    el.append(fig, make('div', { class: 'dish-text' }, [make('h3', { text: d.name }), make('p', { class: 'dish-desc', text: d.desc }), dishQuote(d), chips, row]));
     return el;
   }
 
@@ -144,7 +152,7 @@
     });
     paint();
     el._paint = paint;
-    el.append(fig, make('div', { class: 'dish-text' }, [make('h3', { text: d.name }), make('p', { class: 'dish-desc', text: d.desc }),
+    el.append(fig, make('div', { class: 'dish-text' }, [make('h3', { text: d.name }), make('p', { class: 'dish-desc', text: d.desc }), dishQuote(d),
       make('div', { class: 'cbox' }, [slots, flav, note, addBtn])]));
     return el;
   }
@@ -457,7 +465,13 @@
   renderTray(false);
 
   // ── Reviews: static first, never empty ──────────────────────────────────
-  $('notes').append(...S.reviews.map(r => make('figure', { class: 'note' }, [make('p', { text: r.text }), make('cite', { text: r.name })])));
+  // The overall rating, in the footer.
+  if (showReviews && S.reviews.rating) {
+    const r = S.reviews.rating, fr = $('footRating');
+    fr.hidden = false;
+    fr.append(make('span', { class: 'stars', 'aria-hidden': 'true', text: '★★★★★' }), ' ' + r.stars + ' from ' + r.count + ' reviews');
+    if (r.url) fr.append(' · ', make('a', { href: r.url, target: '_blank', rel: 'noopener', text: 'Read them on Facebook' }));
+  }
 
   // ── Open / closed: the lighthouse in the bar ────────────────────────────
   if (!mock) {
