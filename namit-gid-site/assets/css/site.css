@@ -737,7 +737,7 @@ html.calm .k-layer { transition: none; }
 @media (min-width: 900px) { .how:has(.ph) { padding-bottom: 60px; } }
 
 /* the recipe card pinned on the kitchen wall, under the bowls */
-.k-card { position: absolute; left: 60%; top: 29.5%; width: 12.5%; aspect-ratio: 1.35; padding: 1.2% 1%; border: 0; cursor: pointer;
+.k-card { position: absolute; left: 70%; top: 28%; width: 12.5%; aspect-ratio: 1.35; padding: 1.2% 1%; border: 0; cursor: pointer;
   display: grid; align-content: start; gap: 6%; rotate: -4deg; transform-origin: 50% 6%;
   background: var(--paper-grain), linear-gradient(#FFFBF1, #F6EDDA); border-radius: 2px;
   box-shadow: 0 2px 0 rgba(90, 58, 32, .15), 0 8px 12px -8px rgba(90, 58, 32, .55); }

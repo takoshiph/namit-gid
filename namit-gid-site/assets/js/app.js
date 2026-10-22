@@ -381,10 +381,10 @@
   // order (a main can ask for a vessel with "pot" in the config); today's four
   // keep the vessels they were first painted for.
   const BURNERS = [
-    { pot: 'palayok', l: 2.5, t: 41, w: 10.5, h: 17.5 }, { pot: 'wok', l: 13, t: 41, w: 13.6, h: 17.5 },
-    { pot: 'pan', l: 26.6, t: 41, w: 11.4, h: 17.5 }, { pot: 'dish', l: 38, t: 41, w: 10.6, h: 17.5 },
-    { pot: 'stock', l: 51.8, t: 41, w: 13, h: 17.5 }, { pot: 'steamer', l: 65, t: 41, w: 10.6, h: 17.5 },
-    { pot: 'saucepan', l: 76.6, t: 41, w: 10.5, h: 17.5 }, { pot: 'claypot', l: 87.6, t: 41, w: 12, h: 17.5 },
+    { pot: 'palayok', l: 2.8, t: 41, w: 9.6, h: 17.5 }, { pot: 'wok', l: 12.8, t: 41, w: 13.8, h: 17.5 },
+    { pot: 'pan', l: 26.6, t: 41, w: 11, h: 17.5 }, { pot: 'dish', l: 37.8, t: 41, w: 10.8, h: 17.5 },
+    { pot: 'stock', l: 52.5, t: 41, w: 12.2, h: 17.5 }, { pot: 'steamer', l: 65.1, t: 41, w: 10.3, h: 17.5 },
+    { pot: 'saucepan', l: 76.6, t: 41, w: 12.6, h: 17.5 }, { pot: 'ricecooker', l: 89.9, t: 41, w: 9.6, h: 17.5 },
   ];
   const PREFERRED = { palabok: 'palayok', shawarma: 'wok', lumpia: 'pan', sushi: 'dish' };
   const seat = {};
@@ -395,7 +395,7 @@
   BURNERS.forEach((b, k) => {
     const d = seat[b.pot];
     // on the live site an empty burner is just part of the painting
-    world.insertBefore(make('img', { class: 'k-layer', 'data-layer': b.pot, src: 'assets/img/kitchen/lid-' + b.pot + '.webp', alt: '', 'aria-hidden': 'true' }), glow);
+    world.insertBefore(make('img', { class: 'k-layer', 'data-layer': b.pot, src: 'assets/img/kitchen/lid-' + b.pot + '.webp?v=2', alt: '', 'aria-hidden': 'true' }), glow);
     if (d) world.insertBefore(make('i', { class: 'k-wisp', 'aria-hidden': 'true', style: `--x:${b.l + b.w / 2}%;--d:${(k * 1.9) % 8}s` }), glow);
     world.append(make('button', { class: 'k-spot', type: 'button', 'data-spot': b.pot, 'data-dish': d ? d.id : 'sample',
       style: `left:${b.l}%;top:${b.t}%;width:${b.w}%;height:${b.h}%` },
