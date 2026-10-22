@@ -348,8 +348,8 @@ serve(async (req) => {
   <table width="100%" style="background:#fff;border:1px solid rgba(53,40,31,0.1);border-radius:14px;">
     <tr><td style="padding:18px 20px;text-align:center;">
       <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#c4633c;font-weight:700;">Cook this</div>
-      <div style="font-size:24px;font-weight:700;color:#35281f;margin-top:6px;">${esc(dishLabel)}</div>
-      <div style="font-size:16px;color:#c4633c;margin-top:2px;">Qty ${qty} · $${total}</div>
+      <div style="font-size:24px;font-weight:700;color:#35281f;margin-top:6px;">${esc(dishLabel).split(' · ').join('<br>')}</div>
+      <div style="font-size:16px;color:#c4633c;margin-top:2px;">${trayPrice ? '' : `Qty ${qty} · `}$${total}</div>
       <div style="font-size:13px;color:rgba(53,40,31,0.6);margin-top:6px;">Balance at pickup: <strong>$${balanceDue.toFixed(2)}</strong></div>
     </td></tr>
   </table>
@@ -374,7 +374,8 @@ serve(async (req) => {
         body: JSON.stringify({
           from: 'Namit Gid Orders <orders@takoshi.ca>',
           to: [NOTIFY_EMAIL],
-          subject: `🍽️ Namit Gid — ${dishLabel} x${qty} ($${total}) from ${name}`,
+          // a tray's qty is its number of lines, and each line carries its own count
+          subject: `🍽️ Namit Gid — ${dishLabel}${trayPrice ? '' : ` x${qty}`} ($${total}) from ${name}`,
           html,
         }),
       })
