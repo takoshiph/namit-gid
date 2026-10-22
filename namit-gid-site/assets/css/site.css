@@ -794,3 +794,15 @@ html.calm .k-layer { transition: none; }
 .foot-lamp { opacity: 0; transition: opacity 1.2s ease; }
 .foot.live .foot-lamp { opacity: 1; }
 .sheet .stamp { color: #A3462A; }
+
+/* signed by Leny */
+.sig { font: 400 20px/1 var(--serif); color: var(--cliff); margin-top: -4px; rotate: -2deg; }
+/* the next pickup day, with the lighthouse's warm light as its dot */
+.next-pickup { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink-2); }
+.next-pickup strong { color: var(--ink); }
+.np-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 4px rgba(227, 176, 75, .25); animation: lamp-breathe 4s var(--ease-loop) infinite; }
+/* sheets are torn paper at the top, not app panels */
+.sheet[open] { overflow: visible; }
+.sheet .sheet-inner { position: relative; background: var(--paper-grain), var(--sand); }
+.sheet .sheet-inner::before { content: ''; position: absolute; left: 0; right: 0; top: -12px; height: 14px; background: var(--sand);
+  -webkit-mask: radial-gradient(9px 8px at 9px 100%, #000 98%, transparent) 0 0 / 18px 14px repeat-x; mask: radial-gradient(9px 8px at 9px 100%, #000 98%, transparent) 0 0 / 18px 14px repeat-x; }

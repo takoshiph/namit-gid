@@ -513,6 +513,19 @@
   renderTray(false);
 
   // ── Reviews: static first, never empty ──────────────────────────────────
+  // The next day you can still order for, in Toronto, after the cutoff.
+  {
+    const tp = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false }).formatToParts(new Date()).map(p => [p.type, p.value]));
+    const today = new Date(Date.UTC(+tp.year, +tp.month - 1, +tp.day, 12)), open = S.pickup.days || [5, 6, 0];
+    for (let i = 1; i < 15; i++) {
+      const d = new Date(today); d.setUTCDate(today.getUTCDate() + i);
+      if (i === 1 && (+tp.hour % 24) >= (S.pickup.cutoffHour || 20)) continue;
+      if (!open.includes(d.getUTCDay())) continue;
+      const np = $('nextPickup'); np.hidden = false;
+      np.append(make('i', { class: 'np-dot', 'aria-hidden': 'true' }), 'Next pickup: ', make('strong', { text: d.toLocaleDateString('en-CA', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' }) }));
+      break;
+    }
+  }
   // Footer socials, only those that exist.
   { const c = S.contacts || {}, todo = document.querySelector('.foot .todo');
     const links = [['Facebook', c.facebook], ['Messenger', c.messenger], ['Instagram', c.instagram]].filter(x => x[1]);
