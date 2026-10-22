@@ -949,3 +949,23 @@ html.calm .sheet.notebook .line-item { animation: none; }
 /* secondary buttons are pen-drawn */
 .sheet.notebook .btn-line { background: transparent; color: var(--pen); box-shadow: none; border: 1.5px solid rgba(46, 61, 99, .55);
   border-radius: 6px 10px 7px 11px / 10px 6px 11px 7px; font: 700 22px/1 var(--hand); }
+
+/* Takoshi's checkout pieces, written into the notebook */
+.nb-label { margin: 4px 0 -8px; font: 700 22px/1.1 var(--hand); color: var(--pen); }
+.chipgrid button small { font-size: .8em; }
+.nb-flag { font: 700 21px/1.25 var(--hand); color: var(--pencil-red); padding-left: 22px; position: relative; }
+.nb-flag::before { content: '!'; position: absolute; left: 4px; top: -1px; font-size: 1.15em; }
+.sheet.notebook .etr .etr-h { font: 700 26px/1.1 var(--hand); color: var(--pen); }
+.dep-row { display: grid; grid-template-columns: 74px 1fr auto; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px dashed rgba(46, 61, 99, .25); }
+.dep-row .k { font: 600 19px/1 var(--hand); color: var(--pen-soft); }
+.dep-row .v { font: 600 16px/1.25 var(--sans); color: var(--ink); overflow-wrap: anywhere; }
+.dep-row .copy { min-height: 36px; padding: 0 12px; background: transparent; cursor: pointer; color: var(--pen);
+  border: 1.5px solid rgba(46, 61, 99, .5); border-radius: 5px 9px 6px 10px / 9px 5px 10px 6px; font: 700 19px/1 var(--hand); }
+.upload { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; cursor: pointer;
+  border: 1.5px dashed rgba(46, 61, 99, .45); border-radius: 6px 11px 7px 12px / 11px 6px 12px 7px; font: 600 20px/1.2 var(--hand); color: var(--pen-soft); }
+.upload.has { border-style: solid; color: var(--pen); }
+.upload:focus-within { outline: 2px solid var(--pencil-red); outline-offset: 2px; }
+.up-prev { width: 44px; height: 44px; object-fit: cover; padding: 2px; background: #fff; box-shadow: 0 1px 3px rgba(60, 40, 20, .3); rotate: -4deg; }
+/* the paper's column is the paper's width: a long row (the day chips) scrolls
+   inside itself instead of widening the page and pushing it sideways */
+.sheet .sheet-inner { grid-template-columns: minmax(0, 1fr); overflow-x: hidden; }

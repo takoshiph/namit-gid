@@ -267,18 +267,70 @@
     [$('bilao'), $('panelBilao')].forEach(b => { if (!b) return; b.classList.remove('dip'); void b.offsetWidth; b.classList.add('dip'); });
   }
 
-  // ── Order sheet (Tray · Pickup · Details · Deposit) ─────────────────────
+  // ── Order sheet (Tray · Details · Deposit) ─────────────────────────────
+  // The same checkout as Takoshi's: Details takes the pickup day and time and
+  // who is ordering on one page; Deposit shows what to send, each with a copy
+  // button, and takes an optional screenshot; "I've sent my deposit" places
+  // the order.
   const sheet = $('sheet');
   let step = 0;
   const order = { date: null, time: null, name: '', contact: '', email: '', notes: '' };
   try { Object.assign(order, JSON.parse(localStorage.getItem('ng-me') || '{}')); } catch (e) {}
-  const STEPS = ['Tray', 'Pickup', 'Details', 'Deposit'];
+  const STEPS = ['Tray', 'Details', 'Deposit'], DONE = STEPS.length;
+  const TITLES = ['Your tray', 'Pickup & details', 'Deposit'];
+  const TIMES = ['11:00 AM', '12:30 PM', '2:00 PM', '3:30 PM', '5:00 PM', '6:30 PM'];
+  const toMin = t => { const m = String(t || '').match(/(\d+):(\d+)\s*(AM|PM)/i); return m ? (+m[1] % 12 + (/pm/i.test(m[3]) ? 12 : 0)) * 60 + +m[2] : null; };
+  // Every order holds a 90-minute prep window, so a time near a booked one is full.
+  let slotLoad = { date: null, load: {} };
+  const isFull = t => {
+    if (mock) return t === '2:00 PM';
+    const load = slotLoad.date === order.date ? slotLoad.load : {}, m = toMin(t);
+    return m !== null && Object.keys(load).some(k => load[k] && Math.abs(toMin(k) - m) < 90);
+  };
+  async function refreshSlotLoad() {
+    const date = order.date;
+    if (mock || !date) return;
+    try {
+      const r = await fetch('/api/slot-load?date=' + encodeURIComponent(date));
+      if (!r.ok) return;
+      slotLoad = { date, load: (await r.json()).load || {} };
+      if (order.time && isFull(order.time)) order.time = null;
+      if (step === 1 && order.date === date) refreshSheet();
+    } catch (e) { /* fail open: the server still refuses a taken slot */ }
+  }
+  let shot = null;   // the e-Transfer screenshot, if they add one
+  const phoneOk = p => { const d = String(p || '').replace(/\D/g, ''); return d.length === 10 || (d.length === 11 && d[0] === '1'); };
+  // A problem with what they entered, written in red pencil above the button.
+  function flag(msg) {
+    say(msg);
+    const body = $('sheetBody');
+    body.querySelectorAll('.nb-flag').forEach(n => n.remove());
+    const btn = [...body.querySelectorAll('.btn-sea')].pop(), p = make('p', { class: 'nb-flag', role: 'alert', text: msg });
+    if (btn) btn.before(p); else body.append(p);
+    p.scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' });
+  }
+  function copyIt(text, btn, node) {
+    const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy'; }, 1600); };
+    const select = () => { const r = document.createRange(); r.selectNodeContents(node); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Selected'; };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, select); else select();
+  }
+  async function toDeposit() {
+    order.name = (order.name || '').trim(); order.email = (order.email || '').trim();
+    if (!order.date || !order.time) return flag('Pick a pickup day and time.');
+    if (!order.name) return flag('Please add your name.');
+    if (!phoneOk(order.contact)) return flag('Please enter a 10-digit phone number, like 416-555-0123.');
+    if (order.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(order.email)) return flag('That email doesn’t look right. Check it, or leave it blank.');
+    await refreshSlotLoad();
+    if (!order.time || isFull(order.time)) { order.time = null; refreshSheet(); return flag('Sorry, that time was just taken. Please choose another.'); }
+    try { localStorage.setItem('ng-me', JSON.stringify({ name: order.name, contact: order.contact, email: order.email })); } catch (e) {}
+    step = 2; refreshSheet();
+  }
 
   function openSheet(at) { step = at || 0; refreshSheet(); if (!sheet.open) sheet.showModal(); }
   function refreshSheet() {
     if (!sheet.open && step === undefined) return;
-    if (!count() && step < 4) { $('sheetH').textContent = 'Your tray'; $('sheetBody').replaceChildren(make('p', { text: 'Your tray is empty.' })); return; }
-    $('sheetH').textContent = step < 4 ? STEPS[step] : 'Salamat gid!';
+    if (!count() && step < DONE) { $('sheetH').textContent = 'Your tray'; $('sheetBody').replaceChildren(make('p', { text: 'Your tray is empty.' })); return; }
+    $('sheetH').textContent = step < DONE ? TITLES[step] : 'Salamat gid!';
     const prog = make('div', { class: 'progress', 'aria-hidden': 'true' }, STEPS.map((s, i) => make('span', { class: i < step ? 'on done' : i === step ? 'on now' : '', text: s })));
     const body = [];
     if (step === 0) {
@@ -297,57 +349,69 @@
         if (OPEN_DAYS.includes(d.getUTCDay())) days.push(d);
       }
       const iso = d => d.toISOString().slice(0, 10);
-      if (!order.date) order.date = iso(days[0]);
+      if (!order.date || !days.some(d => iso(d) === order.date)) order.date = iso(days[0]);
+      if (slotLoad.date !== order.date) refreshSlotLoad();
       const dc = make('div', { class: 'datechips', role: 'group', 'aria-label': 'Pickup day' }, days.map(d => make('button', {
-        type: 'button', 'aria-pressed': String(iso(d) === order.date), onclick: () => { order.date = iso(d); order.time = null; refreshSheet(); },
+        type: 'button', 'aria-pressed': String(iso(d) === order.date), onclick: () => { order.date = iso(d); order.time = null; refreshSheet(); refreshSlotLoad(); },
       }, [d.toLocaleDateString('en-CA', { weekday: 'short', timeZone: 'UTC' }), make('b', { text: String(d.getUTCDate()) }), d.toLocaleDateString('en-CA', { month: 'short', timeZone: 'UTC' })])));
-      const times = ['11:00 AM', '12:30 PM', '2:00 PM', '3:30 PM', '5:00 PM', '6:30 PM'];
-      const full = new Set(mock ? ['2:00 PM'] : []);
-      const tc = make('div', { class: 'chipgrid', role: 'group', 'aria-label': 'Pickup time' }, times.map(t => {
-        const b = make('button', { type: 'button', 'aria-pressed': String(t === order.time), class: full.has(t) ? 'full' : '' }, [t]);
-        if (full.has(t)) { b.disabled = true; b.append(make('span', { class: 'sr-only', text: ' (full)' })); }
+      let open = 0;
+      const tc = make('div', { class: 'chipgrid', role: 'group', 'aria-label': 'Pickup time' }, TIMES.map(t => {
+        const full = isFull(t);
+        if (full && order.time === t) order.time = null;
+        if (!full) open++;
+        const b = make('button', { type: 'button', 'aria-pressed': String(t === order.time), class: full ? 'full' : '' }, [t]);
+        if (full) { b.disabled = true; b.append(make('small', { text: ' full' })); }
         b.addEventListener('click', () => { order.time = t; refreshSheet(); });
         return b;
       }));
-      body.push(make('p', { class: 'small', text: S.pickup.cutoff + '. Pickup at ' + S.pickup.address + '.' }), dc, tc,
-        make('button', { type: 'button', class: 'btn btn-sea', text: 'Next', onclick: () => { if (order.time) { step = 2; refreshSheet(); } } }));
-      if (!order.time) body[body.length - 1].disabled = true;
-    } else if (step === 2) {
       const f = (id, label, type, attrs = {}) => {
         const inp = type === 'textarea' ? make('textarea', { id, rows: 3, ...attrs }) : make('input', { id, type, ...attrs });
         inp.value = order[id] || '';
-        inp.addEventListener('input', () => { order[id] = inp.value; });
+        inp.addEventListener('input', () => {
+          if (id === 'contact') inp.value = inp.value.replace(/[^\d()+\-.\s]/g, '');
+          order[id] = inp.value;
+        });
         return make('div', { class: 'field' }, [make('label', { for: id, text: label }), inp]);
       };
-      body.push(f('name', 'Your name', 'text', { autocomplete: 'name' }), f('contact', 'Phone or IG handle', 'text', { autocomplete: 'tel' }),
+      body.push(make('p', { class: 'small', text: S.pickup.cutoff + '. Pickup at ' + S.pickup.address + '.' }),
+        make('p', { class: 'nb-label', text: 'Pickup day' }), dc,
+        make('p', { class: 'nb-label', text: 'Pickup time' }), tc,
+        make('p', { class: 'small', text: open ? 'Every order gets its own prep window, so times fill up.' : 'No times left this day. Try another day.' }),
+        f('name', 'Your name', 'text', { autocomplete: 'name' }),
+        f('contact', 'Phone', 'tel', { autocomplete: 'tel', inputmode: 'tel', placeholder: '416-555-0123' }),
         f('email', 'Email (optional, for a confirmation)', 'email', { autocomplete: 'email' }),
         f('notes', 'Notes (allergies, anything I should know)', 'textarea'),
-        make('button', { type: 'button', class: 'btn btn-sea', text: 'Next', onclick: () => {
-          if (!order.name.trim() || !order.contact.trim()) { say('Please add your name and a phone number or IG handle.'); return; }
-          try { localStorage.setItem('ng-me', JSON.stringify({ name: order.name, contact: order.contact, email: order.email })); } catch (e) {}
-          step = 3; refreshSheet();
-        } }));
-    } else if (step === 3) {
-      const copy = make('button', { type: 'button', class: 'btn btn-line', text: 'Copy address', onclick: () => {
-        const done = () => { copy.textContent = 'Copied'; };
-        const select = () => { const r = document.createRange(); r.selectNodeContents(copy.previousElementSibling); const s = getSelection(); s.removeAllRanges(); s.addRange(r); copy.textContent = 'Selected, tap Copy'; };
-        if (navigator.clipboard) navigator.clipboard.writeText(S.deposit.email).then(done, select); else select();
-      } });
-      body.push(make('div', { class: 'etr' }, [make('p', { text: `Send ${money(S.deposit.amount)} by Interac e-Transfer to` }), make('code', { text: S.deposit.email }), copy,
-        make('p', { class: 'small', text: 'Write “Namit Gid” and your name in the message. It comes straight to me.' })]),
-        sums(),
-        make('button', { type: 'button', class: 'btn btn-sea', text: 'Place my order', onclick: place }));
+        make('button', { type: 'button', class: 'btn btn-sea', text: 'Continue to deposit', onclick: toDeposit }));
+    } else if (step === 2) {
+      const dep = S.deposit.amount;
+      const row = (label, value, copyText) => {
+        const v = make('span', { class: 'v', text: value });
+        const btn = make('button', { type: 'button', class: 'copy', text: 'Copy' });
+        btn.addEventListener('click', () => copyIt(copyText || value, btn, v));
+        return make('div', { class: 'dep-row' }, [make('span', { class: 'k', text: label }), v, btn]);
+      };
+      const pick = make('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp,image/heic', class: 'sr-only' });
+      pick.addEventListener('change', () => { shot = pick.files[0] || null; refreshSheet(); });
+      const up = make('label', { class: 'upload' + (shot ? ' has' : '') }, [pick,
+        ...(shot ? [make('img', { class: 'up-prev', src: URL.createObjectURL(shot), alt: '' })] : []),
+        make('span', { text: shot ? '✓ ' + shot.name + ' (tap to change)' : 'Add a screenshot of your e-Transfer (optional)' })]);
+      body.push(make('div', { class: 'etr' }, [
+          make('p', { class: 'etr-h', text: 'Send your ' + money(dep) + ' deposit' }),
+          make('p', { class: 'small', text: 'Send it by Interac e-Transfer to lock in your order. I start cooking once I confirm it.' }),
+          row('To', S.deposit.email), row('Amount', money(dep) + ' CAD', String(dep)), row('Message', 'Namit Gid ' + order.name)]),
+        up, sums(),
+        make('button', { type: 'button', class: 'btn btn-sea', text: 'I’ve sent my deposit', onclick: place }));
     } else {
       body.push(make('div', { class: 'receipt' }, [
-        make('p', { class: 'stamp', text: 'Pending · send ' + money(S.deposit.amount) }),
-        make('p', { text: `Salamat, ${order.name.split(' ')[0]}! Send the ${money(S.deposit.amount)} and you’re set. I’ll message you at ${order.contact} to confirm.` }),
+        make('p', { class: 'stamp', text: 'Received · checking deposit' }),
+        make('p', { text: `Salamat, ${order.name.split(' ')[0]}! I’ll check your deposit and start cooking. I’ll text you at ${order.contact} to confirm.` }),
         make('p', { text: 'Pickup ' + new Date(order.date + 'T12:00').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }) + ' at ' + order.time + '.' }),
         ...(placed ? [make('p', { class: 'small', text: (placed.orderId ? 'Order #' + placed.orderId + ' · ' : '') + 'Total ' + money(placed.total) + ' · ' + money(placed.balanceDue) + ' at pickup' })] : []),
         make('p', { class: 'small', text: S.pickup.address })]),
         calendarLink(),
         make('button', { type: 'button', class: 'btn btn-line', text: 'Done', onclick: () => sheet.close() }));
     }
-    $('sheetBody').replaceChildren(...(step < 4 ? [prog] : []), ...body);
+    $('sheetBody').replaceChildren(...(step < DONE ? [prog] : []), ...body);
   }
 
   // An .ics file for the pickup, so it lands in their calendar.
@@ -384,11 +448,11 @@
   async function place() {
     if (placing) return;
     placing = true;
-    const btn = [...$('sheetBody').querySelectorAll('button')].find(b => /Place my order/.test(b.textContent));
+    const btn = [...$('sheetBody').querySelectorAll('button')].find(b => /sent my deposit/.test(b.textContent));
     if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
-    const done = res => { placed = res; step = 4; tray = []; save(); renderTray(false); repaintDishes(); refreshSheet(); };
+    const done = res => { placed = res; step = DONE; shot = null; tray = []; save(); renderTray(false); repaintDishes(); refreshSheet(); };
     const fail = (msg, offerCopy) => {
-      if (btn) { btn.disabled = false; btn.textContent = 'Place my order'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'I’ve sent my deposit'; }
       $('sheetBody').querySelectorAll('.place-error').forEach(n => n.remove());
       const box = make('div', { class: 'place-error', role: 'alert' }, [make('p', { text: msg })]);
       if (offerCopy) {
@@ -408,6 +472,16 @@
       if (mock) {
         await new Promise(r => setTimeout(r, 500));
         return done({ orderId: 'TEST', total: total(), balanceDue: Math.max(0, total() - S.deposit.amount) });
+      }
+      // the screenshot goes up first; an order never waits on it failing
+      if (shot) {
+        if (btn) btn.textContent = 'Uploading screenshot…';
+        try {
+          const fd = new FormData(); fd.append('file', shot);
+          const upr = await (await fetch('/api/upload-deposit', { method: 'POST', body: fd })).json();
+          if (upr.url) payload.order.deposit_screenshot_url = upr.url;
+        } catch (e) { /* continue without the screenshot */ }
+        if (btn) btn.textContent = 'Sending…';
       }
       const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 15000);
       const res = await fetch('/api/submit-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: ctl.signal });
