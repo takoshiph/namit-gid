@@ -593,10 +593,38 @@
     });
   });
 
+  // A breeze as a sheet opens: a painted sprig and a leaf blow in over its
+  // top edge, tumble across and fade. Transforms and opacity only.
+  if (!calm && 'MutationObserver' in window) {
+    const LEAVES = [['assets/img/leaf-sprig.webp', 58], ['assets/img/leaf-one.webp', 22]];
+    const gust = d => {
+      const w = d.offsetWidth;
+      LEAVES.forEach(([src, size], i) => {
+        const leaf = make('img', { src, class: 'sheet-leaf', alt: '', 'aria-hidden': 'true' });
+        leaf.style.width = size + 'px';
+        leaf.style.left = -size + 'px';
+        leaf.style.top = (i ? -34 : -60) + 'px';
+        d.append(leaf);
+        const dx = w + size * 2, fall = 40 + i * 50, spin = i ? 300 : 70;
+        const at = (k, r) => `translate(${dx * k}px, ${fall * k}px) rotate(${r}deg)`;
+        leaf.animate([
+          { transform: 'translate(0, 0) rotate(-20deg)', opacity: 0 },
+          { transform: at(.3, spin * .3 - 10), opacity: .95, offset: .18 },
+          { transform: at(.65, spin * .7), opacity: .9, offset: .6 },
+          { transform: at(1, spin), opacity: 0 },
+        ], { duration: 1900 + i * 350, delay: 60 + i * 260, easing: 'cubic-bezier(.3,.1,.4,1)', fill: 'both' }).onfinish = () => leaf.remove();
+      });
+    };
+    [sheet, dishSheet].forEach(d => new MutationObserver(() => { if (d.open) gust(d); }).observe(d, { attributes: true, attributeFilter: ['open'] }));
+  }
+
   // Dish photos sit in a list nobody scrolls past, so lazy loading meant each
   // photo started downloading only when its sheet opened. Fetch them quietly
   // once the page has settled.
-  const warmDishes = () => document.querySelectorAll('.dish-fig img[loading="lazy"]').forEach(im => { im.loading = 'eager'; });
+  const warmDishes = () => {
+    document.querySelectorAll('.dish-fig img[loading="lazy"]').forEach(im => { im.loading = 'eager'; });
+    ['assets/img/leaf-sprig.webp', 'assets/img/leaf-one.webp'].forEach(src => { const im = new Image(); im.src = src; im.decode && im.decode().catch(() => {}); });
+  };
   const warmLater = () => setTimeout(() => (window.requestIdleCallback || setTimeout)(warmDishes), 2500);
   if (document.readyState === 'complete') warmLater(); else addEventListener('load', warmLater, { once: true });
   sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
