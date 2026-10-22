@@ -185,6 +185,7 @@
     const bar = $('traybar');
     bar.hidden = n === 0;
     $('bilaoCount').textContent = n;
+    if ($('kCount')) $('kCount').textContent = n;
     $('traySum').textContent = n + (n === 1 ? ' item' : ' items');
     $('trayTotal').textContent = money(total());
     if (bump) {
@@ -223,7 +224,7 @@
   // The dish flies on an arc into the bilao: X runs linear, Y eases, so the path curves.
   function fly(fig) {
     if (calm) return dip();
-    const target = window.innerWidth >= 900 ? $('panelBilao') : $('bilao');
+    const target = root.classList.contains('kitchen-on') || window.innerWidth < 900 ? $('bilao') : $('panelBilao');
     if (!target) return;
     const a = fig.querySelector('img').getBoundingClientRect(), b = target.getBoundingClientRect();
     const size = 72;
@@ -334,6 +335,62 @@
   $('trayReview').addEventListener('click', () => openSheet(0));
   $('bilao').addEventListener('click', () => openSheet(0));
   $('sheetClose').addEventListener('click', () => sheet.close());
+
+  // ── Leny's kitchen: pots, oven and register open to the menu ───────────
+  const kitchen = $('kitchen'), menu = $('menu');
+  menu.classList.add('kitchen-mode'); root.classList.add('kitchen-on');
+  const dishSheet = $('dishSheet'), dishBody = $('dishSheetBody');
+  const layerOf = name => kitchen.querySelector('[data-layer="' + name + '"]');
+  let openSpot = null, borrowed = [];
+  const titles = { desserts: 'From the oven', register: 'Your order' };
+  function closeSpot() {
+    if (!openSpot) return;
+    layerOf(openSpot).classList.remove('open');
+    if (openSpot === 'oven') kitchen.classList.remove('oven-open');
+    // the dishes go back where they live in the list
+    borrowed.reverse().forEach(({ node, home, next }) => home.insertBefore(node, next && next.parentNode === home ? next : null));
+    borrowed = []; openSpot = null;
+  }
+  function openDishes(ids, title) {
+    dishBody.replaceChildren();
+    const wrap = make('div', { class: 'dishes-in' });
+    ids.forEach(id => {
+      const node = $('dish-' + id); if (!node) return;
+      borrowed.push({ node, home: node.parentNode, next: node.nextSibling });
+      node.classList.remove('pre'); node.classList.add('in');
+      wrap.append(node);
+    });
+    dishBody.append(wrap);
+    $('dishSheetH').textContent = title;
+    dishSheet.showModal();
+  }
+  kitchen.querySelectorAll('.k-spot').forEach(btn => btn.addEventListener('click', () => {
+    const spot = btn.dataset.spot, dish = btn.dataset.dish;
+    closeSpot();
+    openSpot = spot;
+    layerOf(spot).classList.add('open');
+    if (spot === 'oven') kitchen.classList.add('oven-open');
+    // bring the spot near the top so it stays in view above the sheet
+    const r = btn.getBoundingClientRect();
+    window.scrollBy({ top: r.top - innerHeight * .1, behavior: calm ? 'auto' : 'smooth' });
+    // let the lid lift (or the door drop) before the sheet comes up
+    setTimeout(() => {
+      if (spot === 'register') { sheet.classList.add('receipt'); openSheet(0); return; }
+      if (dish === 'desserts') openDishes(S.menu.desserts.map(d => d.id), titles.desserts);
+      else openDishes([dish], (S.menu.mains.find(d => d.id === dish) || {}).name || 'From the stove');
+    }, calm ? 0 : 560);
+  }));
+  $('dishSheetClose').addEventListener('click', () => dishSheet.close());
+  dishSheet.addEventListener('click', e => { if (e.target === dishSheet) dishSheet.close(); });
+  dishSheet.addEventListener('close', closeSpot);
+  sheet.addEventListener('close', () => { sheet.classList.remove('receipt'); if (openSpot === 'register') closeSpot(); });
+  // the list is always one tap away
+  $('fullMenuBtn').addEventListener('click', e => {
+    const on = menu.classList.toggle('list-open');
+    e.currentTarget.setAttribute('aria-expanded', String(on));
+    e.currentTarget.textContent = on ? 'Hide the list' : 'See the full menu as a list';
+    if (on) document.querySelectorAll('#menuGrid .dish.pre').forEach(n => { n.classList.remove('pre'); n.classList.add('in'); });
+  });
   sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
 
   renderTray(false);

@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=20">
+<link rel="stylesheet" href="assets/css/site.css?v=22">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -140,13 +140,42 @@
   </section>
 
   <section class="menu" id="menu" aria-labelledby="menuH">
-    <!-- Leny's kitchen wall: where the beach turns into the kitchen. -->
-    <img class="shelf" src="assets/img/shelf.webp" width="760" height="502" alt="" aria-hidden="true" loading="lazy">
     <header class="sec-head">
       <h2 id="menuH">What I’m cooking</h2>
-      <p class="sec-sub">Everything is cooked after your order is confirmed. You pick it up warm at <a href="#" data-href="pickup.mapUrl" data-k="pickup.address"></a>.</p>
+      <p class="sec-sub">Lift a lid to see what’s on the stove, open the oven for something sweet, and pay at the register. Everything is cooked after your order is confirmed, for pickup at <a href="#" data-href="pickup.mapUrl" data-k="pickup.address"></a>.</p>
     </header>
-    <div class="menu-grid">
+
+    <!-- Leny's kitchen: the menu, painted. Each pot, the oven and the register
+         is a button; its open state is a layer cut from the same painting. -->
+    <div class="kitchen" id="kitchen">
+      <img class="k-wall" src="assets/img/kitchen/wall.webp" width="768" height="1376" alt="Leny’s kitchen: a spice shelf, four pots on the stove, an oven and a cash register on the counter.">
+      <img class="k-layer" data-layer="palayok" src="assets/img/kitchen/pot-palayok.webp" alt="" aria-hidden="true">
+      <img class="k-layer" data-layer="wok" src="assets/img/kitchen/pot-wok.webp" alt="" aria-hidden="true">
+      <img class="k-layer" data-layer="pan" src="assets/img/kitchen/pot-pan.webp" alt="" aria-hidden="true">
+      <img class="k-layer" data-layer="dish" src="assets/img/kitchen/pot-dish.webp" alt="" aria-hidden="true">
+      <img class="k-layer" data-layer="oven" src="assets/img/kitchen/oven.webp" alt="" aria-hidden="true">
+      <img class="k-layer" data-layer="register" src="assets/img/kitchen/register.webp" alt="" aria-hidden="true">
+      <i class="k-glow" aria-hidden="true"></i>
+      <i class="k-wisp" style="--x:15%;--d:0s" aria-hidden="true"></i>
+      <i class="k-wisp" style="--x:39%;--d:2.1s" aria-hidden="true"></i>
+      <i class="k-wisp" style="--x:66%;--d:4.3s" aria-hidden="true"></i>
+      <i class="k-wisp" style="--x:86%;--d:6.2s" aria-hidden="true"></i>
+      <button class="k-spot" type="button" data-spot="palayok" data-dish="palabok" style="left:5%;top:41%;width:20.5%;height:14%">
+        <span class="k-tag" style="--r:-3deg">Palabok</span></button>
+      <button class="k-spot" type="button" data-spot="wok" data-dish="shawarma" style="left:25.5%;top:43%;width:28%;height:12%">
+        <span class="k-tag" style="--r:2deg">Shawarma rice</span></button>
+      <button class="k-spot" type="button" data-spot="pan" data-dish="lumpia" style="left:53.5%;top:43%;width:24%;height:12%">
+        <span class="k-tag" style="--r:-2deg">Lumpia</span></button>
+      <button class="k-spot" type="button" data-spot="dish" data-dish="sushi" style="left:76%;top:44%;width:22%;height:11%">
+        <span class="k-tag" style="--r:3deg">Baked sushi</span></button>
+      <button class="k-spot k-spot-oven" type="button" data-spot="oven" data-dish="desserts" style="left:27.5%;top:59.5%;width:45%;height:26%">
+        <span class="k-tag" style="--r:-1.5deg">Something sweet</span></button>
+      <button class="k-spot k-spot-reg" type="button" data-spot="register" style="left:76%;top:79.5%;width:21%;height:13%">
+        <span class="k-tag" style="--r:2.5deg">Your order <b id="kCount">0</b></span></button>
+    </div>
+    <p class="k-alt"><button type="button" class="btn btn-line" id="fullMenuBtn" aria-expanded="false" aria-controls="menuGrid">See the full menu as a list</button></p>
+
+    <div class="menu-grid" id="menuGrid">
       <div class="menu-col">
         <div class="dishes" id="mains"></div>
         <div class="wave-break" aria-hidden="true"><svg viewBox="0 0 400 24" preserveAspectRatio="none"><path d="M0 12 C40 4 80 20 120 12 S200 4 240 12 S320 20 360 12 400 8 400 8"/></svg></div>
@@ -211,6 +240,13 @@
   <button class="btn btn-sea" id="trayReview" type="button">Review</button>
 </div>
 
+<dialog class="sheet dish-sheet" id="dishSheet" aria-labelledby="dishSheetH">
+  <div class="sheet-inner">
+    <header class="sheet-head"><h2 id="dishSheetH">From the stove</h2><button class="x" type="button" id="dishSheetClose" aria-label="Close">×</button></header>
+    <div id="dishSheetBody"></div>
+  </div>
+</dialog>
+
 <dialog class="sheet" id="sheet" aria-labelledby="sheetH">
   <div class="sheet-inner">
     <header class="sheet-head"><h2 id="sheetH">Your tray</h2><button class="x" type="button" id="sheetClose" aria-label="Close">×</button></header>
@@ -220,6 +256,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=19" defer></script>
+<script src="assets/js/app.js?v=21" defer></script>
 </body>
 </html>

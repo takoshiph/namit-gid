@@ -624,3 +624,55 @@ html.low-end .fireflies { display: none; }
   .ph-cat { right: 2%; bottom: 40px; width: 104px; }
   .ph-stove-wrap { position: absolute; right: max(24px, calc(50vw - 520px)); top: 70px; width: 180px; margin: 0; }
 }
+
+/* ── Leny's kitchen: the menu ─────────────────────────────── */
+.kitchen { position: relative; width: min(520px, calc(100vw - 2 * var(--gutter))); aspect-ratio: 768 / 1376; margin: 26px auto 0; border-radius: 6px; overflow: hidden;
+  box-shadow: 0 18px 40px -26px rgba(90, 58, 32, .55); }
+.kitchen > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.k-layer { opacity: 0; transition: opacity 450ms var(--ease-out), transform 600ms var(--ease-hang); transform: translateY(4px); pointer-events: none; }
+.k-layer.open { opacity: 1; transform: none; }
+.k-spot { position: absolute; border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 14px; -webkit-tap-highlight-color: transparent; }
+.k-spot:focus-visible { outline: 3px solid #F6C97A; outline-offset: 2px; }
+.k-spot::after { /* a soft glow that breathes so the spot reads as touchable */
+  content: ''; position: absolute; inset: 8%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 236, 196, .55), rgba(255, 236, 196, 0));
+  opacity: 0; animation: spot-hint 5s var(--ease-loop) infinite; animation-delay: var(--hint, 0s); pointer-events: none; }
+.k-spot:nth-of-type(2)::after { --hint: 1.2s; } .k-spot:nth-of-type(3)::after { --hint: 2.4s; } .k-spot:nth-of-type(4)::after { --hint: 3.6s; }
+@keyframes spot-hint { 0%, 70%, 100% { opacity: 0; } 82% { opacity: .9; } }
+.k-spot:hover::after { opacity: .7; animation: none; }
+.k-tag { position: absolute; left: 50%; bottom: -26%; translate: -50% 0; rotate: var(--r, 0deg); white-space: nowrap; pointer-events: none;
+  font: 400 clamp(11px, 2.9vw, 15px)/1 var(--serif); color: var(--ink); padding: 5px 9px 6px; border-radius: 3px;
+  background: var(--paper-grain), #FBF4E6; box-shadow: 0 2px 0 rgba(90, 58, 32, .18), 0 4px 8px -4px rgba(90, 58, 32, .45); }
+.k-spot-oven .k-tag { bottom: 9%; }
+.k-spot-reg .k-tag { bottom: auto; top: -42%; }
+.k-tag b { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 4px; border-radius: 9px; background: var(--cliff); color: #FBF4E6; font: 600 11px/1 var(--sans); }
+.k-spot:active .k-tag { scale: .96; }
+/* steam drifting up from the closed pots, and the oven's warm window */
+.k-wisp { position: absolute; left: var(--x); top: 38%; width: 7%; height: 9%; translate: -50% 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(50% 60% at 50% 70%, rgba(255, 255, 255, .7), rgba(255, 255, 255, 0)); filter: blur(2px);
+  animation: wisp 8s var(--ease-out) infinite; animation-delay: var(--d); }
+@keyframes wisp { 0% { opacity: 0; transform: translateY(14px) scale(.6); } 18% { opacity: .75; } 45% { opacity: 0; transform: translateY(-26px) scale(1.2) skewX(6deg); } 100% { opacity: 0; } }
+.k-glow { position: absolute; left: 38%; top: 67.5%; width: 24%; height: 9%; border-radius: 40%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 150, 80, .5), rgba(255, 140, 60, 0)); mix-blend-mode: screen; animation: oven-glow 3.2s var(--ease-loop) infinite; }
+@keyframes oven-glow { 50% { opacity: .5; } }
+.kitchen.oven-open .k-glow { display: none; }
+.k-alt { text-align: center; margin: 18px 0 0; }
+.menu.kitchen-mode .menu-grid { display: none; }
+.menu.kitchen-mode.list-open .menu-grid { display: grid; }
+/* the dish sheet: what came out of the pot */
+.dish-sheet { max-height: 70vh; }
+.dish-sheet .dish { gap: 10px; }
+.dish-sheet .dishes-in { display: grid; gap: 34px; }
+.dish-sheet .dish-fig { width: min(70vw, 260px); }
+/* the tray, opened at the register, is a paper receipt */
+.sheet.receipt .sheet-inner { background: var(--paper-grain), linear-gradient(#FFFDF7, #FBF4E6); }
+.sheet.receipt .lines { border-top: 2px dashed rgba(90, 58, 32, .35); padding-top: 12px; }
+.sheet.receipt .sums { border-top: 2px dashed rgba(90, 58, 32, .35); }
+.sheet.receipt .sheet-inner::after { content: ''; display: block; height: 10px; margin: 6px calc(-1 * var(--gutter)) 0;
+  background: linear-gradient(135deg, transparent 50%, #FBF4E6 50%) 0 0 / 14px 14px, linear-gradient(225deg, transparent 50%, #FBF4E6 50%) 0 0 / 14px 14px; }
+.sheet.receipt .line-item { animation: print 360ms var(--ease-out) both; }
+.sheet.receipt .line-item:nth-child(2) { animation-delay: 90ms; } .sheet.receipt .line-item:nth-child(3) { animation-delay: 180ms; } .sheet.receipt .line-item:nth-child(4) { animation-delay: 270ms; }
+@keyframes print { from { opacity: 0; transform: translateY(-8px); clip-path: inset(0 0 100% 0); } to { opacity: 1; transform: none; clip-path: inset(0); } }
+@media (min-width: 900px) {
+  html.kitchen-on .traybar:not([hidden]) { display: flex !important; max-width: 520px; margin: 0 auto; }
+}
+html.calm .k-layer { transition: none; }
