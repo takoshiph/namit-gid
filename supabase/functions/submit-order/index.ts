@@ -13,7 +13,21 @@ const CORS = {
 const RESEND_API_KEY = Deno.env.get('NOTIFY_RESEND_API_KEY') ?? Deno.env.get('RESEND_API_KEY') ?? ''
 const NOTIFY_EMAIL   = Deno.env.get('NOTIFY_EMAIL') ?? 'takoshi.phstore@gmail.com'
 
-const DEPOSIT = 10
+const DEPOSIT = 10                       // an order from an older page keeps the fixed deposit
+// A tray is a request: Leny says yes or no, then the customer pays half.
+const DEPOSIT_SHARE = 0.5
+// Leny shops after she says yes, so a pickup needs a day's notice.
+const LEAD_HOURS = 24, LEAD_MS = LEAD_HOURS * 3600_000
+const SITE = Deno.env.get('SITE_URL') ?? 'https://namitgid.takoshi.ca'
+// statuses that hold a pickup time
+const ACTIVE = ['requested', 'accepted', 'verifying', 'confirmed', 'pending', 'ready']
+// a link secret: 24 random bytes, hex
+const newToken = () => Array.from(crypto.getRandomValues(new Uint8Array(24)), b => b.toString(16).padStart(2, '0')).join('')
+const waLink = (phone: string, text: string) => {
+  const d = String(phone || '').replace(/\D/g, '')
+  if (d.length < 10) return ''
+  return 'https://wa.me/' + (d.length === 10 ? '1' + d : d) + '?text=' + encodeURIComponent(text)
+}
 
 // The dish string is built by the storefront as `Name` or `Name (Variant)`.
 // This table is the price authority — the browser's number is never trusted.
@@ -245,7 +259,17 @@ serve(async (req) => {
       total = round2(unit * qty)
     }
 
-    const balanceDue = round2(Math.max(0, total - DEPOSIT))
+    const isRequest = !!trayPrice
+    const deposit = isRequest ? Math.ceil(total * DEPOSIT_SHARE) : DEPOSIT
+    const balanceDue = round2(Math.max(0, total - deposit))
+    if (isRequest) {
+      const pMs = pickupDate && pickupTime ? pickupMs(pickupDate, pickupTime) : null
+      if (pMs === null || pMs < torontoNowMs() + LEAD_MS) {
+        return new Response(JSON.stringify({ error: 'too_soon', leadHours: LEAD_HOURS }), {
+          status: 409, headers: { 'Content-Type': 'application/json', ...CORS },
+        })
+      }
+    }
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -297,10 +321,10 @@ serve(async (req) => {
       } catch (_e) { /* never block a real order on a schedule lookup failure */ }
     }
 
-    // ── Slot capacity backstop ────────────────────────────────────────────────
-    // The form checks this before the deposit step; this catches a conflicting
-    // order that landed while the customer was sending their e-Transfer. The
-    // order is still accepted — they've paid — but flagged for the operator.
+    // ── Slot hold ─────────────────────────────────────────────────────────────
+    // A request holds its time while Leny decides and the deposit comes in, so
+    // a second request too close to it goes back to pick another time. An
+    // order from an older page is still taken, and flagged, as before.
     let notesOut = notes
     if (pickupDate && pickupTime) {
       try {
@@ -308,18 +332,25 @@ serve(async (req) => {
         const { data: slotRows } = await supabase.from('orders')
           .select('pickup_time,status').eq('pickup_date', pickupDate)
         const conflict = (slotRows || []).some((o: { pickup_time?: string; status?: string }) => {
-          if (o.status === 'cancelled') return false
+          if (!ACTIVE.includes(o.status || 'pending')) return false
           const b = timeToMin(o.pickup_time || '')
           return myMin !== null && b !== null && Math.abs(b - myMin) < BLOCK_WINDOW_MIN
         })
+        if (conflict && isRequest) {
+          return new Response(JSON.stringify({ error: 'closed_slot', reason: 'taken' }), {
+            status: 409, headers: { 'Content-Type': 'application/json', ...CORS },
+          })
+        }
         if (conflict) notesOut = (notesOut ? notesOut + ' ' : '') + '[DOUBLE-BOOKED SLOT]'
       } catch (_e) { /* non-fatal */ }
     }
 
     // ── Insert (critical path) ────────────────────────────────────────────────
+    const token = newToken(), adminToken = newToken()
     const { data: inserted, error } = await supabase.from('orders').insert([{
       dish: dishLabel, qty, unit_price: unit, total, balance_due: balanceDue,
-      customer_name: name, contact, email, notes: notesOut, status: 'pending',
+      deposit_amount: deposit, token, admin_token: adminToken,
+      customer_name: name, contact, email, notes: notesOut, status: isRequest ? 'requested' : 'pending',
       pickup_date: pickupDate, pickup_time: pickupTime,
       deposit_screenshot_url: depositUrl,
     }]).select('id').single()
@@ -336,13 +367,15 @@ serve(async (req) => {
         ? new Date(pickupDate + 'T00:00:00').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' })
           + (pickupTime ? ' · ' + pickupTime : '')
         : 'Not specified'
+      const decide = `${SITE}/api/decide?id=${inserted.id}&t=${adminToken}`
+      const wa = waLink(contact, `Hi ${name.split(' ')[0]}! This is Leny from Namit Gid, about your order for ${pickupLine}.`)
       const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/></head>
 <body style="margin:0;padding:0;background:#9bb9af;font-family:'Helvetica Neue',Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;"><tr><td align="center">
 <table width="100%" style="max-width:460px;background:#f7f0e3;border-radius:18px;overflow:hidden;">
 <tr><td style="padding:26px 28px 16px;text-align:center;border-bottom:1px solid rgba(53,40,31,0.1);">
   <div style="font-size:20px;font-weight:700;color:#35281f;">Namit <span style="color:#c4633c;">Gid</span></div>
-  <p style="margin:4px 0 0;font-size:12px;color:#7fa196;">New order — namit gid, let's cook!</p>
+  <p style="margin:4px 0 0;font-size:12px;color:#7fa196;">${isRequest ? 'New request · please reply within an hour' : 'New order — namit gid, let\'s cook!'}</p>
 </td></tr>
 <tr><td style="padding:22px 28px 0;">
   <table width="100%" style="background:#fff;border:1px solid rgba(53,40,31,0.1);border-radius:14px;">
@@ -350,7 +383,7 @@ serve(async (req) => {
       <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#c4633c;font-weight:700;">Cook this</div>
       <div style="font-size:24px;font-weight:700;color:#35281f;margin-top:6px;">${esc(dishLabel).split(' · ').join('<br>')}</div>
       <div style="font-size:16px;color:#c4633c;margin-top:2px;">${trayPrice ? '' : `Qty ${qty} · `}$${total}</div>
-      <div style="font-size:13px;color:rgba(53,40,31,0.6);margin-top:6px;">Balance at pickup: <strong>$${balanceDue.toFixed(2)}</strong></div>
+      <div style="font-size:13px;color:rgba(53,40,31,0.6);margin-top:6px;">Deposit $${deposit.toFixed(2)} · <strong>$${balanceDue.toFixed(2)}</strong> at pickup</div>
     </td></tr>
   </table>
   <table width="100%" style="margin-top:10px;"><tr><td style="background:rgba(127,161,150,0.14);border:1px solid rgba(127,161,150,0.3);border-radius:10px;padding:10px 14px;text-align:center;">
@@ -360,6 +393,12 @@ serve(async (req) => {
   ${notesOut ? `<table width="100%" style="margin-top:10px;"><tr><td style="background:rgba(196,99,60,0.1);border:1px solid rgba(196,99,60,0.25);border-radius:10px;padding:10px 14px;"><span style="font-size:11px;color:#c4633c;font-weight:700;">Notes: </span><span style="font-size:13px;color:#35281f;">${esc(notesOut)}</span></td></tr></table>` : ''}
   ${depositUrl ? `<table width="100%" style="margin-top:10px;"><tr><td style="background:rgba(127,161,150,0.14);border:1px solid rgba(127,161,150,0.3);border-radius:10px;padding:10px 14px;text-align:center;"><a href="${esc(depositUrl)}" style="font-size:13px;color:#5f8177;font-weight:700;text-decoration:none;">📎 View deposit screenshot</a></td></tr></table>` : ''}
 </td></tr>
+${isRequest ? `<tr><td style="padding:18px 28px 0;text-align:center;">
+  <p style="margin:0 0 12px;font-size:15px;color:#35281f;">Can you make it?</p>
+  <a href="${decide}&d=yes" style="display:inline-block;margin:0 4px 8px;padding:13px 20px;border-radius:10px;background:#1E5A63;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">Yes, I can make it</a>
+  <a href="${decide}&d=no" style="display:inline-block;margin:0 4px 8px;padding:13px 20px;border-radius:10px;background:#fff;color:#A3462A;border:1.5px solid #A3462A;font-size:15px;font-weight:700;text-decoration:none;">No, I'll message them</a>
+  <p style="margin:6px 0 0;font-size:12px;color:rgba(53,40,31,0.55);">A yes asks them for the $${deposit.toFixed(2)} deposit right away.${wa ? ` To talk first: <a href="${wa}" style="color:#1E5A63;">WhatsApp them</a>.` : ''}</p>
+</td></tr>` : ''}
 <tr><td style="padding:18px 28px 24px;">
   <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(53,40,31,0.45);font-weight:700;">Customer</p>
   <p style="margin:0;font-size:15px;font-weight:600;color:#35281f;">${esc(name)}</p>
@@ -375,7 +414,9 @@ serve(async (req) => {
           from: 'Namit Gid Orders <orders@takoshi.ca>',
           to: [NOTIFY_EMAIL],
           // a tray's qty is its number of lines, and each line carries its own count
-          subject: `🍽️ Namit Gid — ${dishLabel}${trayPrice ? '' : ` x${qty}`} ($${total}) from ${name}`,
+          subject: isRequest
+            ? `🍽️ New request · reply within an hour: ${dishLabel} ($${total}) from ${name}`
+            : `🍽️ Namit Gid — ${dishLabel} x${qty} ($${total}) from ${name}`,
           html,
         }),
       })
@@ -389,7 +430,9 @@ serve(async (req) => {
       dish: dishLabel,
       total,
       balanceDue,
-      deposit: DEPOSIT,
+      deposit,
+      status: isRequest ? 'requested' : 'pending',
+      token,
       pickup: { date: pickupDate, time: pickupTime },
     }), { headers: { 'Content-Type': 'application/json', ...CORS } })
 

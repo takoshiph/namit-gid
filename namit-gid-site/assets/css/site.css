@@ -975,3 +975,6 @@ html.calm .sheet.notebook .line-item { animation: none; }
 .sheet.notebook .field { gap: 0; margin-top: 10px; }
 .sheet.notebook .field label { line-height: 1; }
 .sheet.notebook .field input { padding-top: 2px; }
+
+/* the order page lists the dishes as plain written lines */
+.line-item.plain { grid-template-columns: 1fr; }

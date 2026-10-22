@@ -270,6 +270,155 @@ export default {
   },
 };
 
+// ── Order requests ────────────────────────────────────────────────────────────
+// A tray is a request. Leny gets an email with Yes / No; a yes asks the
+// customer for half the total as a deposit (their order page has the details);
+// once Leny sees it in her bank she confirms. The links carry a per-order
+// secret: `token` for the customer's page, `admin_token` for Leny's buttons.
+const SITE = 'https://namitgid.takoshi.ca';
+const LENY_EMAIL_DEFAULT = 'takoshi.phstore@gmail.com';   // same default as the order function
+const DEPOSIT_HOURS = 2;    // after a yes, how long the customer has to send the deposit
+const ACTIVE_STATUSES = ['requested', 'accepted', 'verifying', 'confirmed', 'pending', 'ready'];
+const ORDER_FIELDS = 'id,status,dish,total,deposit_amount,balance_due,customer_name,contact,email,notes,pickup_date,pickup_time,created_at,accepted_at,deposit_sent_at,deposit_screenshot_url,token,admin_token';
+
+const money2 = n => '$' + Number(n || 0).toFixed(2);
+const firstName = n => String(n || '').trim().split(/\s+/)[0] || 'there';
+const orderLink = o => `${SITE}/?order=${o.id}&t=${o.token}`;
+const decideLink = o => `${SITE}/api/decide?id=${o.id}&t=${o.admin_token}`;
+const pickupText = o => o.pickup_date
+  ? new Date(o.pickup_date + 'T12:00:00Z').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }) + (o.pickup_time ? ' at ' + o.pickup_time : '')
+  : 'your pickup';
+const torontoTime = iso => new Date(iso).toLocaleTimeString('en-CA', { timeZone: 'America/Toronto', hour: 'numeric', minute: '2-digit' });
+const depositDeadline = o => o.accepted_at ? new Date(new Date(o.accepted_at).getTime() + DEPOSIT_HOURS * 3600_000).toISOString() : null;
+function waTo(phone, text) {
+  const d = String(phone || '').replace(/\D/g, '');
+  if (d.length < 10) return '';
+  return 'https://wa.me/' + (d.length === 10 ? '1' + d : d) + '?text=' + encodeURIComponent(text);
+}
+
+// The customer emails share one frame. `paras` are plain text (escaped here).
+function noteEmailHtml({ kicker, heading, paras = [], rows = [], button }) {
+  const row = (l, v) => `<tr><td style="padding:6px 0;color:#8a7f74;font-size:13px;width:40%;">${escHtml(l)}</td><td style="padding:6px 0;font-size:13px;color:#3a332e;">${v}</td></tr>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;padding:0;background:#f6efe6;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;padding:40px 20px;"><tr><td align="center">
+    <table width="100%" style="max-width:520px;background:#fffaf3;border-radius:16px;overflow:hidden;border:1px solid #ece0d1;">
+      <tr><td style="padding:32px 36px 20px;text-align:center;border-bottom:1px solid #efe4d6;">
+        <div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#1f5c3d;">Namit Gid</div>
+        <p style="margin:6px 0 0;font-size:13px;color:#9a8f83;">Filipino home cooking · Toronto</p>
+      </td></tr>
+      <tr><td style="padding:30px 36px;">
+        <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#c2604a;">${escHtml(kicker)}</p>
+        <h1 style="margin:0 0 18px;font-family:Georgia,serif;font-size:24px;color:#2a241f;">${escHtml(heading)}</h1>
+        ${paras.map(p => `<p style="margin:0 0 16px;font-size:15px;color:#6f645a;line-height:1.7;">${escHtml(p)}</p>`).join('')}
+        ${rows.length ? `<table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;border-radius:12px;padding:18px 22px;margin:8px 0 24px;">${rows.map(([l, v]) => row(l, v)).join('')}</table>` : ''}
+        ${button ? `<p style="margin:8px 0 24px;text-align:center;"><a href="${escHtml(button.href)}" style="display:inline-block;padding:14px 26px;border-radius:12px;background:#1E5A63;color:#fff;font-size:16px;font-weight:700;text-decoration:none;">${escHtml(button.text)}</a></p>` : ''}
+        <p style="margin:0;font-size:13px;color:#9a8f83;">Namit gid — so delicious. 💛</p>
+      </td></tr>
+      <tr><td style="padding:18px 36px;text-align:center;border-top:1px solid #efe4d6;">
+        <p style="margin:0;font-size:11px;color:#b6a89a;">© 2026 Namit Gid · Toronto, ON</p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+}
+async function sendMail(key, to, subject, html) {
+  if (!key || !to) return false;
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: 'Namit Gid <orders@takoshi.ca>', to: [to], subject, html }),
+  });
+  if (!res.ok) throw new Error('resend ' + res.status + ' ' + (await res.text().catch(() => '')).slice(0, 200));
+  return true;
+}
+const orderRows = o => [
+  ['Order', escHtml(o.dish).split(' · ').join('<br>')],
+  ['Pickup', escHtml(pickupText(o))],
+  ['Pickup at', '180 Fairview Mall Dr., North York'],
+  ['Total', money2(o.total)],
+  ['Deposit (half)', money2(o.deposit_amount)],
+  ['At pickup', money2(o.balance_due)],
+];
+
+async function sendRequestReceivedEmail(key, order, result) {
+  const o = { id: result.orderId, token: result.token, dish: result.dish, total: result.total, deposit_amount: result.deposit,
+    balance_due: result.balanceDue, pickup_date: order.pickupDate, pickup_time: order.pickup };
+  return sendMail(key, order.email, 'We got your request 💛', noteEmailHtml({
+    kicker: 'Request received', heading: `Salamat, ${firstName(order.name)}!`,
+    paras: [`Leny will reply within an hour. If she can make it, you'll get a link to send the ${money2(o.deposit_amount)} deposit (half the total). The rest is paid at pickup.`,
+      'We cook at home and shop for each order, so nothing is charged until Leny says yes.'],
+    rows: orderRows(o), button: { href: orderLink(o), text: 'See my request' } }));
+}
+const customerEmails = {
+  accepted: o => ['Leny can make it 💛', noteEmailHtml({ kicker: 'Leny can make it', heading: `Good news, ${firstName(o.customer_name)}!`,
+    paras: [`Leny can make your order for ${pickupText(o)}. To lock it in, send the ${money2(o.deposit_amount)} deposit (half the total) by ${torontoTime(depositDeadline(o))}. The rest, ${money2(o.balance_due)}, is paid at pickup.`],
+    rows: orderRows(o), button: { href: orderLink(o), text: 'Send my deposit' } })],
+  declined: o => ['About your Namit Gid request', noteEmailHtml({ kicker: 'About your request', heading: `Hi ${firstName(o.customer_name)},`,
+    paras: [`Leny can't make ${pickupText(o)}, but she'd love to cook for you. She'll message you soon to find another day or time.`, 'Nothing has been charged.'] })],
+  confirmed: o => ['Your Namit Gid order is confirmed 💛', noteEmailHtml({ kicker: 'Order confirmed', heading: `You're all set, ${firstName(o.customer_name)}!`,
+    paras: [`Leny received your deposit. See you ${pickupText(o)}.`],
+    rows: orderRows(o), button: { href: orderLink(o), text: 'See my order' } })],
+};
+async function mailCustomer(env, o, kind) {
+  if (!o.email || !customerEmails[kind]) return 'no_email';
+  try { const [subject, html] = customerEmails[kind](o); await sendMail(env.RESEND_API_KEY, o.email, subject, html); return 'sent'; }
+  catch (e) { console.error('[namitgid] customer email failed', kind, o.id, e); return 'failed'; }
+}
+
+// Leny's pages, behind the buttons in her emails. A link only shows the page;
+// the choice is a button on it, because mail scanners open links on their own.
+function lenyPage(title, inner, status = 200) {
+  return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${escHtml(title)}</title>
+<style>body{margin:0;background:#f6efe6;font:16px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;color:#2a241f}main{max-width:480px;margin:0 auto;padding:28px 18px 40px}
+h1{font:700 26px/1.2 Georgia,serif;margin:0 0 6px}.lead{margin:0 0 14px;color:#6f645a}.card{background:#fffaf3;border:1px solid #ece0d1;border-radius:14px;padding:14px 18px;margin:14px 0}
+.row{display:flex;justify-content:space-between;gap:14px;padding:5px 0;font-size:15px;border-bottom:1px solid #f1e8dc}.row:last-child{border:0}.row span:first-child{color:#8a7f74;flex:none}.row span:last-child{text-align:right}
+button,.btn{display:block;width:100%;box-sizing:border-box;margin:10px 0 0;padding:16px;border-radius:12px;border:0;font:700 17px/1.2 inherit;text-align:center;text-decoration:none;cursor:pointer}
+.yes{background:#1E5A63;color:#fff}.no{background:#fff;color:#A3462A;border:1.5px solid #A3462A}.wa{background:#25D366;color:#063b1b}.muted{color:#8a7f74;font-size:14px}.tag{display:inline-block;padding:3px 10px;border-radius:99px;background:#efe4d6;font-size:13px;font-weight:600}</style></head>
+<body><main>${inner}</main></body></html>`, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
+}
+const STATUS_WORDS = { requested: 'Waiting for your answer', accepted: 'Waiting for their deposit', verifying: 'Deposit sent: check your bank',
+  confirmed: 'Confirmed', declined: 'You said no', expired: 'Expired: no deposit in time', cancelled: 'Cancelled', completed: 'Completed', pending: 'Order', ready: 'Ready', picked_up: 'Picked up' };
+function lenyOrderCard(o) {
+  const r = (l, v) => `<div class="row"><span>${escHtml(l)}</span><span>${v}</span></div>`;
+  return `<div class="card">
+    ${r('Order', escHtml(o.dish).split(' · ').join('<br>'))}${r('Pickup', escHtml(pickupText(o)))}
+    ${r('Total', money2(o.total))}${r('Deposit', money2(o.deposit_amount))}${r('At pickup', money2(o.balance_due))}
+  </div><div class="card">
+    ${r('Name', escHtml(o.customer_name))}${r('Phone', escHtml(o.contact))}${o.email ? r('Email', escHtml(o.email)) : ''}${o.notes ? r('Notes', escHtml(o.notes)) : ''}
+  </div>`;
+}
+function lenyDecidePage(o, { done, focus } = {}) {
+  const first = firstName(o.customer_name), pickup = pickupText(o);
+  const form = (buttons) => `<form method="post" action="/api/decide"><input type="hidden" name="id" value="${o.id}"><input type="hidden" name="t" value="${escHtml(o.admin_token)}">${buttons}</form>`;
+  const waText = {
+    requested: `Hi ${first}! This is Leny from Namit Gid, about your order for ${pickup}.`,
+    accepted: `Hi ${first}! Leny here from Namit Gid. I can make your order for ${pickup}. Please send the ${money2(o.deposit_amount)} deposit here: ${orderLink(o)}`,
+    verifying: `Hi ${first}! Leny here from Namit Gid, about your deposit for ${pickup}.`,
+    confirmed: `Hi ${first}! Leny here from Namit Gid. Your order for ${pickup} is confirmed. See you then!`,
+    declined: `Hi ${first}! Leny here from Namit Gid. I'm sorry, I can't make ${pickup}. Could another day or time work for you?`,
+    expired: `Hi ${first}! Leny here from Namit Gid, about your order for ${pickup}. Do you still want it?`,
+  }[o.status];
+  const wa = waText ? waTo(o.contact, waText) : '';
+  let action = '';
+  if (o.status === 'requested') {
+    const yes = '<button class="yes" name="d" value="yes">Yes, I can make it</button>', no = '<button class="no" name="d" value="no">No, I\'ll message them</button>';
+    action = form(focus === 'no' ? no + yes : yes + no) + `<p class="muted">A yes asks ${escHtml(first)} for the ${money2(o.deposit_amount)} deposit right away. They have ${DEPOSIT_HOURS} hours to send it.</p>`;
+  } else if (o.status === 'accepted') {
+    action = `<p class="lead">${escHtml(first)} has until ${torontoTime(depositDeadline(o))} to send the ${money2(o.deposit_amount)} deposit.</p>` + form('<button class="no" name="d" value="paid">The deposit is already in my bank</button>');
+  } else if (o.status === 'verifying') {
+    action = `<p class="lead">${escHtml(first)} says the ${money2(o.deposit_amount)} deposit is sent. Check your bank, then confirm.</p>`
+      + (o.deposit_screenshot_url ? `<p><a href="${escHtml(o.deposit_screenshot_url)}">See their screenshot</a></p>` : '')
+      + form('<button class="yes" name="d" value="paid">Deposit received: confirm the order</button>');
+  }
+  return lenyPage('Namit Gid · ' + o.customer_name, `
+    <p class="tag">${escHtml(STATUS_WORDS[o.status] || o.status)}</p>
+    <h1>${escHtml(done || o.customer_name + "'s request")}</h1>
+    ${action}
+    ${wa ? `<a class="btn wa" href="${escHtml(wa)}">Message ${escHtml(first)} on WhatsApp</a>` : ''}
+    ${lenyOrderCard(o)}`);
+}
+
 async function handle(request, env) {
   {
     const url = new URL(request.url);
@@ -576,6 +725,82 @@ async function handle(request, env) {
       return jsonResponse({ url: `${SB}/storage/v1/object/public/reviews/${filename}` }, 200, request);
     }
 
+    // ── Order requests: Leny's decision, the customer's page, the deposit ─────
+    const getOrder = async (id, field, value) => {
+      if (!/^\d+$/.test(String(id || '')) || !/^[0-9a-f]{48}$/.test(String(value || ''))) return null;
+      const r = await fetch(`${SB}/rest/v1/orders?id=eq.${id}&${field}=eq.${value}&select=${ORDER_FIELDS}`, { headers: sbHeaders });
+      if (!r.ok) throw new Error('db ' + r.status);
+      return (await r.json())[0] || null;
+    };
+    // Moves an order on only if it is still where we expect it, so a double tap
+    // or two tabs can't apply a step twice.
+    const moveOrder = async (o, from, patch) => {
+      const r = await fetch(`${SB}/rest/v1/orders?id=eq.${o.id}&status=in.(${from.join(',')})`, {
+        method: 'PATCH', headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify(patch) });
+      if (!r.ok) throw new Error('db ' + r.status);
+      return (await r.json())[0] || null;
+    };
+
+    // GET /api/decide?id=&t=[&d=yes|no]: Leny's page for one request
+    if (url.pathname === '/api/decide' && request.method === 'GET') {
+      const o = await getOrder(url.searchParams.get('id'), 'admin_token', url.searchParams.get('t'));
+      if (!o) return lenyPage('Namit Gid', '<h1>This link isn\'t valid</h1><p class="lead">Open the latest email about this order.</p>', 404);
+      return lenyDecidePage(o, { focus: url.searchParams.get('d') });
+    }
+    // POST /api/decide (form): yes / no / paid
+    if (url.pathname === '/api/decide' && request.method === 'POST') {
+      let fd; try { fd = await request.formData(); } catch { return lenyPage('Namit Gid', '<h1>Something went wrong</h1>', 400); }
+      const o = await getOrder(fd.get('id'), 'admin_token', fd.get('t'));
+      if (!o) return lenyPage('Namit Gid', '<h1>This link isn\'t valid</h1>', 404);
+      const now = new Date().toISOString(), d = fd.get('d');
+      let moved = null, done = '';
+      if (d === 'yes') {
+        moved = await moveOrder(o, ['requested'], { status: 'accepted', accepted_at: now, responded_at: now });
+        if (moved) { const m = await mailCustomer(env, moved, 'accepted'); done = m === 'sent' ? `Done. ${firstName(o.customer_name)} has been emailed for the deposit.` : `Done. Send ${firstName(o.customer_name)} the deposit link on WhatsApp.`; }
+      } else if (d === 'no') {
+        moved = await moveOrder(o, ['requested'], { status: 'declined', responded_at: now });
+        if (moved) { await mailCustomer(env, moved, 'declined'); done = `Noted. Message ${firstName(o.customer_name)} to find another time.`; }
+      } else if (d === 'paid') {
+        moved = await moveOrder(o, ['accepted', 'verifying', 'expired'], { status: 'confirmed', confirmed_at: now });
+        if (moved) { await mailCustomer(env, moved, 'confirmed'); done = 'Confirmed. Time to shop!'; }
+      }
+      return lenyDecidePage(moved || o, { done: moved ? done : 'This was already answered' });
+    }
+
+    // GET /api/my-order?id=&t=: the customer's own order, for their page
+    if (url.pathname === '/api/my-order' && request.method === 'GET') {
+      const o = await getOrder(url.searchParams.get('id'), 'token', url.searchParams.get('t'));
+      if (!o) return jsonResponse({ error: 'not_found' }, 404, request);
+      return jsonResponse({ id: o.id, status: o.status, dish: o.dish, total: Number(o.total), deposit: Number(o.deposit_amount || 0),
+        balance: Number(o.balance_due || 0), pickupDate: o.pickup_date, pickupTime: o.pickup_time, name: firstName(o.customer_name),
+        depositDeadline: o.status === 'accepted' ? depositDeadline(o) : null, depositEmail: 'orders@takoshi.ca' }, 200, request);
+    }
+
+    // POST /api/deposit-sent {id, t, screenshot}: the customer says the deposit is sent
+    if (url.pathname === '/api/deposit-sent' && request.method === 'POST') {
+      let b; try { b = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
+      const o = await getOrder(b.id, 'token', b.t);
+      if (!o) return jsonResponse({ error: 'not_found' }, 404, request);
+      if (o.status === 'verifying' || o.status === 'confirmed') return jsonResponse({ ok: true, status: o.status }, 200, request);
+      if (o.status !== 'accepted') return jsonResponse({ error: o.status === 'expired' ? 'expired' : 'not_accepted', status: o.status }, 409, request);
+      if (Date.parse(depositDeadline(o)) < Date.now()) {
+        await moveOrder(o, ['accepted'], { status: 'expired' });
+        return jsonResponse({ error: 'expired', status: 'expired' }, 409, request);
+      }
+      // only a screenshot this site uploaded is kept
+      const shot = typeof b.screenshot === 'string' && b.screenshot.startsWith(`${SB}/storage/v1/object/public/deposits/`) ? b.screenshot : null;
+      const moved = await moveOrder(o, ['accepted'], { status: 'verifying', deposit_sent_at: new Date().toISOString(), ...(shot ? { deposit_screenshot_url: shot } : {}) });
+      if (moved) {
+        try {
+          await sendMail(env.RESEND_API_KEY, env.NOTIFY_EMAIL || LENY_EMAIL_DEFAULT, `💸 Deposit sent: ${moved.customer_name}, ${pickupText(moved)}`,
+            noteEmailHtml({ kicker: 'Deposit sent', heading: `${firstName(moved.customer_name)} sent the ${money2(moved.deposit_amount)} deposit`,
+              paras: ['Check your bank, then confirm the order.'], rows: orderRows(moved), button: { href: decideLink(moved), text: 'Check and confirm' } }));
+        } catch (e) { console.error('[namitgid] deposit email to Leny failed', moved.id, e); }
+      }
+      return jsonResponse({ ok: true, status: 'verifying' }, 200, request);
+    }
+
     // ── POST /api/submit-order (public) — proxy to the Supabase edge function ──
     if (url.pathname === '/api/submit-order' && request.method === 'POST') {
       let body;
@@ -627,7 +852,8 @@ async function handle(request, env) {
             data?.orderId, 'saved, no confirmation email sent to', body.order.email);
         } else {
           try {
-            await sendConfirmationEmail(env.RESEND_API_KEY, body.order, data);
+            if (data.status === 'requested') await sendRequestReceivedEmail(env.RESEND_API_KEY, body.order, data);
+            else await sendConfirmationEmail(env.RESEND_API_KEY, body.order, data);
             confirmation = 'sent';
           } catch (e) {
             confirmation = 'failed';
@@ -755,7 +981,7 @@ async function handle(request, env) {
       const date = url.searchParams.get('date') || '';
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return jsonResponse({ load: {} }, 200, request);
       const res = await fetch(
-        `${SB}/rest/v1/orders?pickup_date=eq.${date}&select=pickup_time,status`,
+        `${SB}/rest/v1/orders?pickup_date=eq.${date}&status=in.(${ACTIVE_STATUSES.join(',')})&select=pickup_time,status`,
         { headers: sbHeaders });
       // ok:false, so an empty result reads as "could not check" rather than
       // "every slot is free" - which is how it looked with the DB paused.
