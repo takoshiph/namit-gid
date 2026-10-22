@@ -704,3 +704,11 @@ html.calm .k-layer { transition: none; }
 .k-tag-low { bottom: -62%; }
 .k-tag.sample { display: none; }
 .menu .menu-grid { display: none !important; }
+
+/* labels, organised: pot labels sit in one level row on the counter's front
+   edge, the dessert and order labels on the wooden counter below their things */
+.k-world .k-tag { rotate: 0deg; bottom: 0; translate: -50% 50%; letter-spacing: .01em; }
+.k-world .k-tag-down { bottom: auto; top: calc(100% + 4px); translate: -50% 0; }
+.k-world .k-tag-end { left: auto; right: 4px; translate: 0 0; }
+.k-tag-low { bottom: 0; }
+.k-world .k-tag { font-size: clamp(10px, 1.5vw, 13px); padding: 3px 6px 4px; }

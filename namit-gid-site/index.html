@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=27">
+<link rel="stylesheet" href="assets/css/site.css?v=29">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -24,7 +24,7 @@
     d.classList.add(rm || sd ? 'calm' : 'intro');
   })();
 </script>
-<script src="site.config.js?v=3"></script>
+<script src="site.config.js?v=4"></script>
 </head>
 <body>
 <!-- The intro stage: dawn at Long Beach, Romblon, looking out at Byaringan.
@@ -160,11 +160,11 @@
           <img class="k-layer" data-layer="register" src="assets/img/kitchen/register.webp" alt="" aria-hidden="true">
           <i class="k-glow" aria-hidden="true"></i>
           <button class="k-spot" type="button" data-spot="phone" style="left:1.5%;top:24.5%;width:8.5%;height:12%">
-            <span class="k-tag" style="--r:-3deg">Say hi</span></button>
+            <span class="k-tag">Say hi</span></button>
           <button class="k-spot" type="button" data-spot="dome" data-dish="desserts" style="left:2.5%;top:61%;width:18%;height:30%">
-            <span class="k-tag k-tag-up" style="--r:2deg">Dessert</span></button>
+            <span class="k-tag k-tag-down">Dessert</span></button>
           <button class="k-spot" type="button" data-spot="register" style="left:86%;top:79%;width:12%;height:13.5%">
-            <span class="k-tag k-tag-up" style="--r:-2.5deg">Your order <b id="kCount">0</b></span></button>
+            <span class="k-tag k-tag-down k-tag-end">Your order <b id="kCount">0</b></span></button>
         </div>
       </div>
       <div class="k-meter" id="kMeter" aria-hidden="true"><i></i></div>
@@ -242,6 +242,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=27" defer></script>
+<script src="assets/js/app.js?v=28" defer></script>
 </body>
 </html>

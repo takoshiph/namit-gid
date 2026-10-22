@@ -343,10 +343,10 @@
   // order (a main can ask for a vessel with "pot" in the config); today's four
   // keep the vessels they were first painted for.
   const BURNERS = [
-    { pot: 'palayok', l: 2.5, t: 43, w: 10.5, h: 12.5 }, { pot: 'wok', l: 13, t: 44, w: 13.6, h: 11 },
-    { pot: 'pan', l: 26.6, t: 46, w: 11.4, h: 9 }, { pot: 'dish', l: 38, t: 47.5, w: 10.6, h: 7.5 },
-    { pot: 'stock', l: 51.8, t: 41, w: 13, h: 14 }, { pot: 'steamer', l: 65, t: 43.5, w: 10.6, h: 11.5 },
-    { pot: 'saucepan', l: 76.6, t: 46, w: 10.5, h: 9 }, { pot: 'claypot', l: 87.6, t: 44.5, w: 12, h: 10.5 },
+    { pot: 'palayok', l: 2.5, t: 41, w: 10.5, h: 17.5 }, { pot: 'wok', l: 13, t: 41, w: 13.6, h: 17.5 },
+    { pot: 'pan', l: 26.6, t: 41, w: 11.4, h: 17.5 }, { pot: 'dish', l: 38, t: 41, w: 10.6, h: 17.5 },
+    { pot: 'stock', l: 51.8, t: 41, w: 13, h: 17.5 }, { pot: 'steamer', l: 65, t: 41, w: 10.6, h: 17.5 },
+    { pot: 'saucepan', l: 76.6, t: 41, w: 10.5, h: 17.5 }, { pot: 'claypot', l: 87.6, t: 41, w: 12, h: 17.5 },
   ];
   const PREFERRED = { palabok: 'palayok', shawarma: 'wok', lumpia: 'pan', sushi: 'dish' };
   const seat = {};
@@ -361,7 +361,7 @@
     if (d) world.insertBefore(make('i', { class: 'k-wisp', 'aria-hidden': 'true', style: `--x:${b.l + b.w / 2}%;--d:${(k * 1.9) % 8}s` }), glow);
     world.append(make('button', { class: 'k-spot', type: 'button', 'data-spot': b.pot, 'data-dish': d ? d.id : 'sample',
       style: `left:${b.l}%;top:${b.t}%;width:${b.w}%;height:${b.h}%` },
-      [make('span', { class: 'k-tag' + (d ? '' : ' sample') + (k % 2 ? ' k-tag-low' : ''), style: `--r:${[-3, 2, -2, 3][k % 4]}deg`, text: d ? (d.short || d.name) : 'Soon' })]));
+      [make('span', { class: 'k-tag' + (d ? '' : ' sample'), text: d ? (d.short || d.name) : 'Soon' })]));
   });
   // Walking along the wall: drag with a mouse too, arrows step half a screen,
   // a small meter shows where you are, and a first nudge shows there's more.
