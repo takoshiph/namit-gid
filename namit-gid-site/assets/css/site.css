@@ -720,3 +720,18 @@ html.calm .k-layer { transition: none; }
 .dish-quote figcaption { margin-top: 4px; font-size: 13px; color: var(--ink-2); }
 .foot-rating { font-size: 15px; color: #e3d8c4; }
 .foot-rating .stars { color: var(--sun); letter-spacing: 1px; }
+
+/* how it works: one painted driftwood board on a rope */
+.how { padding: 40px var(--gutter) 40px; }
+.how-board { position: relative; max-width: 560px; margin: 26px auto 0; padding: 13% 9% 8%; color: var(--ink);
+  background: url(../img/board-2.webp) center / 100% 100% no-repeat; filter: drop-shadow(0 6px 5px rgba(70, 48, 26, .22));
+  transform-origin: 50% 0; animation: board-sway 9s var(--ease-loop) infinite; }
+@keyframes board-sway { 0%, 100% { rotate: -.6deg; } 50% { rotate: .6deg; } }
+.how-board::before { content: ''; position: absolute; left: 50%; bottom: 100%; width: 4px; height: 30px; translate: -50% 0; border-radius: 2px;
+  background: repeating-linear-gradient(160deg, #d6bd8a 0 4px, #a9895a 4px 8px); }
+.how-board h2 { font-size: clamp(20px, 5.4vw, 30px); line-height: 1.12; text-align: center; margin-bottom: 12px; }
+.how-board ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.how-board li { display: flex; gap: 9px; align-items: flex-start; font-size: clamp(14px, 3.8vw, 16px); line-height: 1.4; color: #3d2c1d; }
+.how-board .n { width: 22px; height: 22px; font-size: 13px; margin-top: 1px; }
+.how:has(.ph) { padding-bottom: 150px; }
+@media (min-width: 900px) { .how:has(.ph) { padding-bottom: 60px; } }
