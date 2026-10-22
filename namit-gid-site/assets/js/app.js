@@ -456,6 +456,13 @@
       else openDishes([dish], (S.menu.mains.find(d => d.id === dish) || {}).name || 'From the stove');
     }, calm ? 0 : 560);
   }));
+  // The recipe card on the wall: how ordering works.
+  $('kCard').addEventListener('click', () => {
+    closeSpot();
+    dishBody.replaceChildren($('howSteps').content.cloneNode(true));
+    $('dishSheetH').textContent = 'How to order';
+    dishSheet.showModal();
+  });
   $('dishSheetClose').addEventListener('click', () => dishSheet.close());
   dishSheet.addEventListener('click', e => { if (e.target === dishSheet) dishSheet.close(); });
   dishSheet.addEventListener('close', closeSpot);

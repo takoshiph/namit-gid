@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=32">
+<link rel="stylesheet" href="assets/css/site.css?v=33">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -159,6 +159,16 @@
           <img class="k-layer" data-layer="phone" src="assets/img/kitchen/phone.webp" alt="" aria-hidden="true">
           <img class="k-layer" data-layer="register" src="assets/img/kitchen/register.webp" alt="" aria-hidden="true">
           <i class="k-glow" aria-hidden="true"></i>
+          <button class="k-card" type="button" id="kCard" aria-haspopup="dialog">
+            <i class="k-tack" aria-hidden="true"></i>
+            <span class="k-card-title">How to order</span>
+            <span class="k-card-lines" aria-hidden="true"><i></i><i></i><i></i></span>
+          </button>
+          <template id="howSteps"><p class="how-lede">Fill your tray, send $10, pick it up warm.</p><ol class="how-steps">
+        <li><span class="n">1</span><span>Pick your dishes and a pickup time in the kitchen above.</span></li>
+        <li><span class="n">2</span><span>e-Transfer the $10 deposit to <strong>orders@takoshi.ca</strong>. It holds your spot.</span></li>
+        <li><span class="n">3</span><span>Pick up at Fairview Mall. I cook it that day; pay the rest when you get there.</span></li>
+      </ol></template>
           <button class="k-spot" type="button" data-spot="phone" style="left:1.5%;top:24.5%;width:8.5%;height:12%">
             <span class="k-tag">Say hi</span></button>
           <button class="k-spot" type="button" data-spot="dome" data-dish="desserts" style="left:2.5%;top:61%;width:18%;height:30%">
@@ -181,17 +191,6 @@
     </div>
   </section>
 
-  <section class="how" id="how" aria-labelledby="howH">
-    <!-- One driftwood board, hung on its rope: the whole process in a line. -->
-    <div class="how-board">
-      <h2 id="howH">Fill your tray, send $10, pick it up warm.</h2>
-      <ol>
-        <li><span class="n">1</span><span>Pick your dishes and a pickup time in the kitchen above.</span></li>
-        <li><span class="n">2</span><span>e-Transfer the $10 deposit to <strong>orders@takoshi.ca</strong>. It holds your spot.</span></li>
-        <li><span class="n">3</span><span>Pick up at Fairview Mall. I cook it that day; pay the rest when you get there.</span></li>
-      </ol>
-    </div>
-  </section>
 
 </main>
 
@@ -237,6 +236,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=30" defer></script>
+<script src="assets/js/app.js?v=31" defer></script>
 </body>
 </html>
