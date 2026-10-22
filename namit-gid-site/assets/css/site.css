@@ -676,3 +676,27 @@ html.low-end .fireflies { display: none; }
   html.kitchen-on .traybar:not([hidden]) { display: flex !important; max-width: 520px; margin: 0 auto; }
 }
 html.calm .k-layer { transition: none; }
+
+/* the stove row slides between stretches of counter */
+.k-stove { position: absolute; left: 0; right: 0; top: 35.61%; height: 23.98%; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.k-stove::-webkit-scrollbar { display: none; }
+.k-track { display: flex; height: 100%; }
+.k-page { position: relative; flex: 0 0 100%; height: 100%; scroll-snap-align: start; }
+.k-page > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.k-page .k-spot { position: absolute; }
+.k-page .k-tag { bottom: -18%; }
+.k-arrow { position: absolute; top: 47%; translate: 0 -50%; z-index: 3; width: 38px; height: 46px; border: 0; cursor: pointer;
+  font: 400 30px/1 var(--serif); color: var(--ink); background: var(--paper-grain), #FBF4E6; box-shadow: 0 2px 0 rgba(90, 58, 32, .18), 0 6px 10px -6px rgba(90, 58, 32, .5); }
+.k-prev { left: 0; border-radius: 0 10px 10px 0; }
+.k-next { right: 0; border-radius: 10px 0 0 10px; animation: arrow-nudge 2.6s var(--ease-loop) infinite; }
+@keyframes arrow-nudge { 0%, 70%, 100% { translate: 0 -50%; } 82% { translate: -4px -50%; } }
+.k-arrow[hidden] { display: none; }
+.k-dots { position: absolute; left: 0; right: 0; top: 57.3%; display: flex; justify-content: center; gap: 6px; pointer-events: none; }
+.k-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(90, 58, 32, .25); transition: background-color 200ms, scale 200ms; }
+.k-dots i.on { background: var(--cliff); scale: 1.2; }
+.k-tag.sample { background: var(--paper-grain), #EFE6D4; color: var(--ink-2); font-style: italic; }
+/* on phones the kitchen runs edge to edge */
+@media (max-width: 599px) {
+  .kitchen { width: 100%; border-radius: 0; box-shadow: none; margin-top: 20px; }
+}

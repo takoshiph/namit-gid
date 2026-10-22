@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=22">
+<link rel="stylesheet" href="assets/css/site.css?v=23">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -24,7 +24,7 @@
     d.classList.add(rm || sd ? 'calm' : 'intro');
   })();
 </script>
-<script src="site.config.js?v=2"></script>
+<script src="site.config.js?v=3"></script>
 </head>
 <body>
 <!-- The intro stage: dawn at Long Beach, Romblon, looking out at Byaringan.
@@ -149,10 +149,6 @@
          is a button; its open state is a layer cut from the same painting. -->
     <div class="kitchen" id="kitchen">
       <img class="k-wall" src="assets/img/kitchen/wall.webp" width="768" height="1376" alt="Leny’s kitchen: a spice shelf, four pots on the stove, an oven and a cash register on the counter.">
-      <img class="k-layer" data-layer="palayok" src="assets/img/kitchen/pot-palayok.webp" alt="" aria-hidden="true">
-      <img class="k-layer" data-layer="wok" src="assets/img/kitchen/pot-wok.webp" alt="" aria-hidden="true">
-      <img class="k-layer" data-layer="pan" src="assets/img/kitchen/pot-pan.webp" alt="" aria-hidden="true">
-      <img class="k-layer" data-layer="dish" src="assets/img/kitchen/pot-dish.webp" alt="" aria-hidden="true">
       <img class="k-layer" data-layer="oven" src="assets/img/kitchen/oven.webp" alt="" aria-hidden="true">
       <img class="k-layer" data-layer="register" src="assets/img/kitchen/register.webp" alt="" aria-hidden="true">
       <i class="k-glow" aria-hidden="true"></i>
@@ -160,14 +156,14 @@
       <i class="k-wisp" style="--x:39%;--d:2.1s" aria-hidden="true"></i>
       <i class="k-wisp" style="--x:66%;--d:4.3s" aria-hidden="true"></i>
       <i class="k-wisp" style="--x:86%;--d:6.2s" aria-hidden="true"></i>
-      <button class="k-spot" type="button" data-spot="palayok" data-dish="palabok" style="left:5%;top:41%;width:20.5%;height:14%">
-        <span class="k-tag" style="--r:-3deg">Palabok</span></button>
-      <button class="k-spot" type="button" data-spot="wok" data-dish="shawarma" style="left:25.5%;top:43%;width:28%;height:12%">
-        <span class="k-tag" style="--r:2deg">Shawarma rice</span></button>
-      <button class="k-spot" type="button" data-spot="pan" data-dish="lumpia" style="left:53.5%;top:43%;width:24%;height:12%">
-        <span class="k-tag" style="--r:-2deg">Lumpia</span></button>
-      <button class="k-spot" type="button" data-spot="dish" data-dish="sushi" style="left:76%;top:44%;width:22%;height:11%">
-        <span class="k-tag" style="--r:3deg">Baked sushi</span></button>
+      <!-- The stove: a row you can slide along. Each stretch of counter is a
+           band from its own painting; app.js fills it from the menu. -->
+      <div class="k-stove" id="kStove" aria-label="The stove: slide for more pots" role="group">
+        <div class="k-track" id="kTrack"></div>
+      </div>
+      <button class="k-arrow k-prev" type="button" id="kPrev" aria-label="Previous pots" hidden>‹</button>
+      <button class="k-arrow k-next" type="button" id="kNext" aria-label="More pots" hidden>›</button>
+      <div class="k-dots" id="kDots" aria-hidden="true"></div>
       <button class="k-spot k-spot-oven" type="button" data-spot="oven" data-dish="desserts" style="left:27.5%;top:59.5%;width:45%;height:26%">
         <span class="k-tag" style="--r:-1.5deg">Something sweet</span></button>
       <button class="k-spot k-spot-reg" type="button" data-spot="register" style="left:76%;top:79.5%;width:21%;height:13%">
@@ -256,6 +252,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=21" defer></script>
+<script src="assets/js/app.js?v=23" defer></script>
 </body>
 </html>
