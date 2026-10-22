@@ -453,7 +453,7 @@
       const up = make('label', { class: 'upload' + (shot ? ' has' : '') }, [pick,
         ...(shot ? [make('img', { class: 'up-prev', src: URL.createObjectURL(shot), alt: '' })] : []),
         make('span', { text: shot ? '✓ ' + shot.name + ' (tap to change)' : 'Add a screenshot of your e-Transfer (optional)' })]);
-      const by = o.depositDeadline ? new Date(o.depositDeadline).toLocaleTimeString('en-CA', { timeZone: 'America/Toronto', hour: 'numeric', minute: '2-digit' }) : null;
+      const by = o.depositDeadline ? new Date(o.depositDeadline).toLocaleTimeString('en-US', { timeZone: 'America/Toronto', hour: 'numeric', minute: '2-digit' }) : null;
       body.push(make('p', { text: `Good news, ${o.name}! I can make it.` }),
         make('div', { class: 'etr' }, [
           make('p', { class: 'etr-h', text: 'Send your ' + money(o.deposit) + ' deposit' }),

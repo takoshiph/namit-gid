@@ -288,7 +288,8 @@ const decideLink = o => `${SITE}/api/decide?id=${o.id}&t=${o.admin_token}`;
 const pickupText = o => o.pickup_date
   ? new Date(o.pickup_date + 'T12:00:00Z').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }) + (o.pickup_time ? ' at ' + o.pickup_time : '')
   : 'your pickup';
-const torontoTime = iso => new Date(iso).toLocaleTimeString('en-CA', { timeZone: 'America/Toronto', hour: 'numeric', minute: '2-digit' });
+// "5:23 PM", like the pickup times (en-CA writes "5:23 p.m.", which doubles a full stop)
+const torontoTime = iso => new Date(iso).toLocaleTimeString('en-US', { timeZone: 'America/Toronto', hour: 'numeric', minute: '2-digit' });
 const depositDeadline = o => o.accepted_at ? new Date(new Date(o.accepted_at).getTime() + DEPOSIT_HOURS * 3600_000).toISOString() : null;
 function waTo(phone, text) {
   const d = String(phone || '').replace(/\D/g, '');
@@ -373,7 +374,7 @@ function lenyPage(title, inner, status = 200) {
 <style>body{margin:0;background:#f6efe6;font:16px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;color:#2a241f}main{max-width:480px;margin:0 auto;padding:28px 18px 40px}
 h1{font:700 26px/1.2 Georgia,serif;margin:0 0 6px}.lead{margin:0 0 14px;color:#6f645a}.card{background:#fffaf3;border:1px solid #ece0d1;border-radius:14px;padding:14px 18px;margin:14px 0}
 .row{display:flex;justify-content:space-between;gap:14px;padding:5px 0;font-size:15px;border-bottom:1px solid #f1e8dc}.row:last-child{border:0}.row span:first-child{color:#8a7f74;flex:none}.row span:last-child{text-align:right}
-button,.btn{display:block;width:100%;box-sizing:border-box;margin:10px 0 0;padding:16px;border-radius:12px;border:0;font:700 17px/1.2 inherit;text-align:center;text-decoration:none;cursor:pointer}
+button,.btn{display:block;width:100%;box-sizing:border-box;margin:10px 0 0;padding:16px;border-radius:12px;border:0;font-family:inherit;font-size:17px;font-weight:700;line-height:1.2;text-align:center;text-decoration:none;cursor:pointer}
 .yes{background:#1E5A63;color:#fff}.no{background:#fff;color:#A3462A;border:1.5px solid #A3462A}.wa{background:#25D366;color:#063b1b}.muted{color:#8a7f74;font-size:14px}.tag{display:inline-block;padding:3px 10px;border-radius:99px;background:#efe4d6;font-size:13px;font-weight:600}</style></head>
 <body><main>${inner}</main></body></html>`, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
 }
