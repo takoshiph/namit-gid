@@ -650,15 +650,6 @@ html.low-end .fireflies { display: none; }
 .dish-sheet .dish { gap: 10px; }
 .dish-sheet .dishes-in { display: grid; gap: 34px; }
 .dish-sheet .dish-fig { width: min(70vw, 260px); }
-/* the tray, opened at the register, is a paper receipt */
-.sheet.receipt .sheet-inner { background: var(--paper-grain), linear-gradient(#FFFDF7, #FBF4E6); }
-.sheet.receipt .lines { border-top: 2px dashed rgba(90, 58, 32, .35); padding-top: 12px; }
-.sheet.receipt .sums { border-top: 2px dashed rgba(90, 58, 32, .35); }
-.sheet.receipt .sheet-inner::after { content: ''; display: block; height: 10px; margin: 6px calc(-1 * var(--gutter)) 0;
-  background: linear-gradient(135deg, transparent 50%, #FBF4E6 50%) 0 0 / 14px 14px, linear-gradient(225deg, transparent 50%, #FBF4E6 50%) 0 0 / 14px 14px; }
-.sheet.receipt .line-item { animation: print 360ms var(--ease-out) both; }
-.sheet.receipt .line-item:nth-child(2) { animation-delay: 90ms; } .sheet.receipt .line-item:nth-child(3) { animation-delay: 180ms; } .sheet.receipt .line-item:nth-child(4) { animation-delay: 270ms; }
-@keyframes print { from { opacity: 0; transform: translateY(-8px); clip-path: inset(0 0 100% 0); } to { opacity: 1; transform: none; clip-path: inset(0); } }
 @media (min-width: 900px) {
   .traybar:not([hidden]) { display: flex !important; max-width: 520px; margin: 0 auto; }
 }
@@ -826,11 +817,6 @@ html:has(dialog[open]) body { overflow: hidden; }
 .sheet .sheet-head { background: var(--paper-grain), #F6EEDF; }
 .sheet .sheet-head::after { content: ''; position: absolute; left: 0; right: 0; bottom: -10px; height: 10px; pointer-events: none;
   background: linear-gradient(#F6EEDF, rgba(246, 238, 223, 0)); }
-.sheet.receipt .sheet-head, .sheet.receipt::before { background: #FFFDF7; }
-.sheet.receipt .sheet-inner { box-shadow: none; }
-/* the generic .receipt card style (padding, its own background) is not for the window itself */
-.sheet.receipt { padding: 0; background: transparent; }
-.sheet.receipt .sheet-head::after { background: linear-gradient(#FFFDF7, rgba(255, 253, 247, 0)); }
 /* a brush stroke under the title */
 .sheet-head h2 { padding-bottom: 6px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 8' preserveAspectRatio='none'%3E%3Cpath d='M2 5.5C20 3 38 6.5 58 4.2S96 2.6 118 4.6' fill='none' stroke='%23A3462A' stroke-opacity='.38' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") 0 100% / min(100%, 7em) 8px no-repeat; }
 
@@ -860,3 +846,106 @@ html.calm .sheet[open] { animation: none; }
 .sheet .btn-sea:hover { background: linear-gradient(rgba(255, 244, 224, .32), rgba(90, 55, 25, .08)), url(../img/sign-board.webp) 50% 58% / 320% auto; }
 .sheet .btn-sea:active { transform: translateY(2px); box-shadow: inset 0 0 0 1.5px rgba(110, 72, 38, .55), 0 1px 0 #8A5A30, 0 2px 5px rgba(60, 38, 20, .22); }
 .sheet .btn-sea:disabled { filter: grayscale(.4) opacity(.7); }
+
+/* ── Leny's order notebook ──────────────────────────────────
+   The tray and checkout are written into a top-bound order pad: a wire coil,
+   blue ruled lines that scroll with the writing, a red margin, blue-ink
+   handwriting, and red pencil for what matters (the step you're on, your
+   choices, the total). The e-Transfer address stays in print, on a sticky
+   note, so it can't be misread. */
+:root {
+  --hand: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  --pen: #2E3D63; --pen-soft: rgba(46, 61, 99, .72); --pencil-red: #C2452D;
+  --circle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50' preserveAspectRatio='none'%3E%3Cpath d='M14 31C5 15 38 4 69 6s34 21 12 33S15 47 8 27' fill='none' stroke='%23C2452D' stroke-opacity='.82' stroke-width='2.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  --pen-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 4' preserveAspectRatio='none'%3E%3Cpath d='M1 2.4C40 1.2 80 3.2 120 2s60 .8 78 .2' fill='none' stroke='%232E3D63' stroke-opacity='.45' stroke-width='1.4' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+}
+.sheet.notebook { --nb-left: 46px; --rule: 30px;
+  --margin-line: linear-gradient(90deg, transparent calc(var(--nb-left) - 12px), rgba(205, 85, 70, .45) calc(var(--nb-left) - 12px), rgba(205, 85, 70, .45) calc(var(--nb-left) - 10.5px), transparent calc(var(--nb-left) - 10.5px)); }
+.sheet.notebook .sheet-inner {
+  padding-left: var(--nb-left); padding-right: 18px;
+  background: var(--margin-line),
+    repeating-linear-gradient(transparent 0, transparent calc(var(--rule) - 1px), rgba(92, 128, 168, .22) calc(var(--rule) - 1px), rgba(92, 128, 168, .22) var(--rule)),
+    var(--paper-grain), #FBF6E8;
+  background-attachment: local;
+  box-shadow: inset 0 0 36px rgba(150, 120, 70, .10);
+}
+.sheet.notebook .sheet-head { margin-left: calc(-1 * var(--nb-left)); margin-right: -18px; padding: 24px 18px 8px var(--nb-left);
+  background: var(--margin-line), var(--paper-grain), #FBF6E8; }
+.sheet.notebook .sheet-head::after { background: linear-gradient(#FBF6E8, rgba(251, 246, 232, 0)); }
+.sheet.notebook .sheet-head h2 { font: 700 34px/1 var(--hand); color: var(--pen); padding-bottom: 4px; }
+
+/* the wire coil along the top, through punched holes */
+.sheet.notebook::before { top: -13px; height: 26px; -webkit-mask: none; mask: none;
+  background:
+    radial-gradient(5px 11px at 50% 46%, transparent 52%, #9aa0a8 58%, #5f646b 82%, transparent 90%) 6px 0 / 22px 26px repeat-x,
+    radial-gradient(3px 3px at 50% 82%, rgba(58, 48, 40, .75) 70%, transparent 80%) 6px 0 / 22px 26px repeat-x; }
+
+/* steps: a checklist, ticked as you go, the current one circled */
+.sheet.notebook .progress { gap: 2px; font: 600 21px/1.1 var(--hand); color: rgba(46, 61, 99, .4); }
+.sheet.notebook .progress span { border-top: 0; padding: 4px 4px 6px; text-align: center; font-weight: 600; }
+.sheet.notebook .progress span.done { color: var(--pen-soft); }
+.sheet.notebook .progress span.done::before { content: '\2713\00a0'; color: var(--pencil-red); }
+.sheet.notebook .progress span.now { color: var(--pen); font-weight: 700; background: var(--circle); }
+
+/* the tray: snapshots taped in, written in blue ink */
+.sheet.notebook .lines { gap: 14px; }
+.sheet.notebook .line-item img { width: 52px; height: 52px; object-fit: cover; padding: 3px; background: #fff; box-shadow: 0 1px 3px rgba(60, 40, 20, .3); rotate: -4deg; }
+.sheet.notebook .line-item:nth-child(even) img { rotate: 3deg; }
+.sheet.notebook .line-item .nm { font: 700 25px/1 var(--hand); color: var(--pen); }
+.sheet.notebook .line-item .sub { font: 600 19px/1.1 var(--hand); color: var(--pen-soft); }
+.sheet.notebook .line-item .tot { font: 700 26px/1 var(--hand); color: var(--pen); }
+.sheet.notebook .line-ctl button { border: 1.5px solid rgba(46, 61, 99, .5); border-radius: 4px 7px 5px 8px / 7px 4px 8px 5px; background: transparent;
+  font: 700 22px/1 var(--hand); color: var(--pen); }
+.sheet.notebook .line-ctl span { font: 700 22px/1 var(--hand); color: var(--pen); min-width: 16px; text-align: center; }
+.sheet.notebook .line-ctl .rm { border: 0; font: 600 20px/1 var(--hand); color: var(--pencil-red); text-decoration: none; }
+/* each line writes itself in */
+.sheet.notebook .line-item { animation: write-in 520ms var(--ease-out) both; }
+.sheet.notebook .line-item:nth-child(2) { animation-delay: 110ms; }
+.sheet.notebook .line-item:nth-child(3) { animation-delay: 220ms; }
+.sheet.notebook .line-item:nth-child(n+4) { animation-delay: 330ms; }
+@keyframes write-in { from { clip-path: inset(-8px 100% -8px -8px); opacity: .4; } to { clip-path: inset(-8px -8px -8px -8px); opacity: 1; } }
+html.calm .sheet.notebook .line-item { animation: none; }
+
+/* sums under a pen line, the total circled */
+.sheet.notebook .sums { border-top: 0; padding-top: 14px; background: var(--pen-line) 0 0 / 100% 4px no-repeat; font: 600 22px/1.2 var(--hand); color: var(--pen); }
+.sheet.notebook .sums .small { font: 600 20px/1.2 var(--hand); color: var(--pen-soft); }
+.sheet.notebook .sums .big { font: 700 32px/1 var(--hand); color: var(--pen); padding: 6px 14px; margin-right: -10px; background: var(--circle); }
+
+/* pickup: pencilled boxes, the chosen one circled */
+.sheet.notebook .datechips button, .sheet.notebook .chipgrid button { background: transparent; color: var(--pen);
+  border: 1.5px solid rgba(46, 61, 99, .42); border-radius: 5px 9px 6px 10px / 9px 5px 10px 6px; font: 600 19px/1.1 var(--hand); }
+.sheet.notebook .chipgrid button { font-size: 21px; }
+.sheet.notebook .datechips button b { font: 700 27px/1 var(--hand); }
+.sheet.notebook .datechips button[aria-pressed="true"], .sheet.notebook .chipgrid button[aria-pressed="true"] {
+  background: var(--circle); color: var(--pencil-red); border-color: transparent; font-weight: 700; }
+.sheet.notebook .chipgrid button.full { color: rgba(46, 61, 99, .4); }
+
+/* details: written on the lines */
+.sheet.notebook .field label { font: 600 21px/1.1 var(--hand); color: var(--pen-soft); }
+.sheet.notebook .field input, .sheet.notebook .field textarea { background: transparent; border: 0; border-bottom: 1.5px solid rgba(46, 61, 99, .4);
+  border-radius: 0; padding: 4px 2px; font: 600 24px/1.3 var(--hand); color: var(--pen); }
+.sheet.notebook .field textarea { border: 1.5px solid rgba(46, 61, 99, .3); border-radius: 4px; padding: 6px 8px; }
+.sheet.notebook .field input:focus, .sheet.notebook .field textarea:focus { outline: none; border-color: var(--pencil-red); }
+
+/* handwritten notes and lines on the page */
+.sheet.notebook #sheetBody > p { font: 600 22px/1.3 var(--hand); color: var(--pen); }
+.sheet.notebook #sheetBody > p.small { font-size: 20px; color: var(--pen-soft); }
+
+/* the e-Transfer instructions: a sticky note, taped on */
+.sheet.notebook .etr { position: relative; background: linear-gradient(#FFF4B8, #FCEB97); border-radius: 2px; rotate: -1.2deg;
+  padding: 18px 14px 14px; box-shadow: 0 3px 8px rgba(60, 40, 20, .18); }
+.sheet.notebook .etr::before { content: ''; position: absolute; top: -9px; left: 50%; width: 72px; height: 18px; translate: -50% 0; rotate: 3deg;
+  background: rgba(236, 226, 202, .78); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+.sheet.notebook .etr p { font: 600 21px/1.25 var(--hand); color: var(--pen); }
+.sheet.notebook .etr p.small { font-size: 19px; color: var(--pen-soft); }
+.sheet.notebook .etr code { font: 600 18px/1.2 var(--sans); color: var(--ink); }
+
+/* the thank-you, written on the page under its stamp */
+.sheet.notebook .receipt { background: transparent; padding: 4px 0; }
+.sheet.notebook .receipt p { font: 600 22px/1.3 var(--hand); color: var(--pen); }
+.sheet.notebook .receipt p.small { font-size: 19px; color: var(--pen-soft); }
+.sheet.notebook .receipt p.stamp { font: 600 15px/1 var(--sans); color: #A3462A; }
+
+/* secondary buttons are pen-drawn */
+.sheet.notebook .btn-line { background: transparent; color: var(--pen); box-shadow: none; border: 1.5px solid rgba(46, 61, 99, .55);
+  border-radius: 6px 10px 7px 11px / 10px 6px 11px 7px; font: 700 22px/1 var(--hand); }

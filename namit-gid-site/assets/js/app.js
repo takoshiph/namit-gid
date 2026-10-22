@@ -279,7 +279,7 @@
     if (!sheet.open && step === undefined) return;
     if (!count() && step < 4) { $('sheetH').textContent = 'Your tray'; $('sheetBody').replaceChildren(make('p', { text: 'Your tray is empty.' })); return; }
     $('sheetH').textContent = step < 4 ? STEPS[step] : 'Salamat gid!';
-    const prog = make('div', { class: 'progress', 'aria-hidden': 'true' }, STEPS.map((s, i) => make('span', { class: i <= step ? 'on' : '', text: s })));
+    const prog = make('div', { class: 'progress', 'aria-hidden': 'true' }, STEPS.map((s, i) => make('span', { class: i < step ? 'on done' : i === step ? 'on now' : '', text: s })));
     const body = [];
     if (step === 0) {
       body.push(lineList(), sums(), make('button', { type: 'button', class: 'btn btn-sea', text: 'Choose pickup', onclick: () => { step = 1; refreshSheet(); } }));
@@ -531,7 +531,7 @@
     window.scrollBy({ top: r.top - innerHeight * .12, behavior: calm ? 'auto' : 'smooth' });
     // the sheet starts rising while the lid is still lifting (it fades in over 450 ms)
     setTimeout(() => {
-      if (spot === 'register') { sheet.classList.add('receipt'); openSheet(0); return; }
+      if (spot === 'register') { openSheet(0); return; }
       if (spot === 'phone') {
         const c = S.contacts || {};
         const links = [c.messenger && ['Message me on Messenger', c.messenger], c.facebook && ['Facebook', c.facebook], c.instagram && ['Instagram', c.instagram]].filter(Boolean);
@@ -560,7 +560,7 @@
   $('dishSheetClose').addEventListener('click', () => dishSheet.close());
   dishSheet.addEventListener('click', e => { if (e.target === dishSheet) dishSheet.close(); });
   dishSheet.addEventListener('close', closeSpot);
-  sheet.addEventListener('close', () => { sheet.classList.remove('receipt'); if (openSpot === 'register') closeSpot(); });
+  sheet.addEventListener('close', () => { if (openSpot === 'register') closeSpot(); });
 
   // Pull a sheet down to close it, like any phone sheet: only once its paper
   // is scrolled to the top, so scrolling the paper itself still works.
