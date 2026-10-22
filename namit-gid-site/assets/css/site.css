@@ -626,9 +626,15 @@ html.low-end .fireflies { display: none; }
 }
 
 /* ── Leny's kitchen: the menu ─────────────────────────────── */
-.kitchen { position: relative; width: min(520px, calc(100vw - 2 * var(--gutter))); aspect-ratio: 768 / 1376; margin: 26px auto 0; border-radius: 6px; overflow: hidden;
-  box-shadow: 0 18px 40px -26px rgba(90, 58, 32, .55); }
-
+/* The wall is shown at a fixed height; its width follows the painting. On a
+   phone that is wider than the screen, so you drag along it. */
+.kitchen { --kh: min(78svh, 880px, 160vw); position: relative; height: var(--kh); max-width: calc(var(--kh) * 1090 / 976); margin: 26px auto 0; }
+.k-scroller { position: absolute; inset: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+  border-radius: 6px; box-shadow: 0 18px 40px -26px rgba(90, 58, 32, .55); }
+.k-scroller::-webkit-scrollbar { display: none; }
+.k-world { position: relative; height: 100%; aspect-ratio: 1090 / 976; }
+.k-world > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.k-scroller.dragging { cursor: grabbing; }
 .k-layer { opacity: 0; transition: opacity 450ms var(--ease-out), transform 600ms var(--ease-hang); transform: translateY(4px); pointer-events: none; }
 .k-layer.open { opacity: 1; transform: none; }
 .k-spot { position: absolute; border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 14px; -webkit-tap-highlight-color: transparent; }
@@ -642,19 +648,17 @@ html.low-end .fireflies { display: none; }
 .k-tag { position: absolute; left: 50%; bottom: -26%; translate: -50% 0; rotate: var(--r, 0deg); white-space: nowrap; pointer-events: none;
   font: 400 clamp(11px, 2.9vw, 15px)/1 var(--serif); color: var(--ink); padding: 5px 9px 6px; border-radius: 3px;
   background: var(--paper-grain), #FBF4E6; box-shadow: 0 2px 0 rgba(90, 58, 32, .18), 0 4px 8px -4px rgba(90, 58, 32, .45); }
-.k-spot-oven .k-tag { bottom: 9%; }
-.k-spot-reg .k-tag { bottom: auto; top: -42%; }
+.k-tag-up { bottom: auto; top: -10%; }
 .k-tag b { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 4px; border-radius: 9px; background: var(--cliff); color: #FBF4E6; font: 600 11px/1 var(--sans); }
 .k-spot:active .k-tag { scale: .96; }
 /* steam drifting up from the closed pots, and the oven's warm window */
-.k-wisp { position: absolute; left: var(--x); top: 38%; width: 7%; height: 9%; translate: -50% 0; pointer-events: none; opacity: 0;
+.k-wisp { position: absolute; left: var(--x); top: 36%; width: 6%; height: 9%; translate: -50% 0; pointer-events: none; opacity: 0;
   background: radial-gradient(50% 60% at 50% 70%, rgba(255, 255, 255, .7), rgba(255, 255, 255, 0)); filter: blur(2px);
   animation: wisp 8s var(--ease-out) infinite; animation-delay: var(--d); }
 @keyframes wisp { 0% { opacity: 0; transform: translateY(14px) scale(.6); } 18% { opacity: .75; } 45% { opacity: 0; transform: translateY(-26px) scale(1.2) skewX(6deg); } 100% { opacity: 0; } }
-.k-glow { position: absolute; left: 38%; top: 67.5%; width: 24%; height: 9%; border-radius: 40%; pointer-events: none;
+.k-glow { position: absolute; left: 19%; top: 68%; width: 12%; height: 9%; border-radius: 40%; pointer-events: none;
   background: radial-gradient(closest-side, rgba(255, 150, 80, .5), rgba(255, 140, 60, 0)); mix-blend-mode: screen; animation: oven-glow 3.2s var(--ease-loop) infinite; }
 @keyframes oven-glow { 50% { opacity: .5; } }
-.kitchen.oven-open .k-glow { display: none; }
 .k-alt { text-align: center; margin: 18px 0 0; }
 .menu.kitchen-mode .menu-grid { display: none; }
 .menu.kitchen-mode.list-open .menu-grid { display: grid; }
@@ -677,23 +681,20 @@ html.low-end .fireflies { display: none; }
 }
 html.calm .k-layer { transition: none; }
 
-/* walking along the kitchen: each scene is a whole painting */
-.k-scroller { position: absolute; inset: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
-  scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
-.k-scroller::-webkit-scrollbar { display: none; }
-.k-scene { position: relative; flex: 0 0 100%; height: 100%; scroll-snap-align: center; scroll-snap-stop: always; transform-origin: 50% 55%; will-change: transform; }
-.k-scene > img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .k-arrow { position: absolute; top: 50%; translate: 0 -50%; z-index: 3; width: 38px; height: 54px; border: 0; cursor: pointer;
   font: 400 30px/1 var(--serif); color: var(--ink); background: var(--paper-grain), #FBF4E6; box-shadow: 0 2px 0 rgba(90, 58, 32, .18), 0 6px 10px -6px rgba(90, 58, 32, .5); }
 .k-prev { left: 0; border-radius: 0 10px 10px 0; }
 .k-next { right: 0; border-radius: 10px 0 0 10px; animation: arrow-nudge 2.6s var(--ease-loop) infinite; }
 @keyframes arrow-nudge { 0%, 70%, 100% { translate: 0 -50%; } 82% { translate: -4px -50%; } }
 .k-arrow[hidden] { display: none; }
-.k-dots { position: absolute; left: 0; right: 0; bottom: 10px; z-index: 3; display: flex; justify-content: center; gap: 7px; pointer-events: none; }
-.k-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(251, 244, 230, .7); box-shadow: 0 0 0 1px rgba(90, 58, 32, .3); transition: background-color 200ms, scale 200ms; }
-.k-dots i.on { background: var(--cliff); scale: 1.2; }
+.k-meter { position: absolute; left: 50%; bottom: 10px; width: 64px; height: 4px; translate: -50% 0; z-index: 3; border-radius: 2px; background: rgba(251, 244, 230, .75); box-shadow: 0 0 0 1px rgba(90, 58, 32, .25); overflow: hidden; pointer-events: none; }
+.k-meter i { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 2px; background: var(--cliff); }
 .k-tag.sample { background: var(--paper-grain), #EFE6D4; color: var(--ink-2); font-style: italic; }
 /* on phones the kitchen runs edge to edge */
 @media (max-width: 599px) {
-  .kitchen { width: 100%; border-radius: 0; box-shadow: none; margin-top: 20px; }
+  .kitchen { margin-top: 20px; }
+  .k-scroller { border-radius: 0; box-shadow: none; }
 }
+
+/* nothing in the menu (the peeking cat, the kitchen) may widen the page */
+.menu { overflow-x: clip; }
