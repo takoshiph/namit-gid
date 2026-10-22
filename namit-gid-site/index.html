@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=26">
+<link rel="stylesheet" href="assets/css/site.css?v=27">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -142,7 +142,7 @@
   <section class="menu" id="menu" aria-labelledby="menuH">
     <header class="sec-head">
       <h2 id="menuH">What I’m cooking</h2>
-      <p class="sec-sub">Walk along my kitchen: lift a lid to see what’s on the stove, lift the glass dome for something sweet, and pay at the register. Everything is cooked after your order is confirmed, for pickup at <a href="#" data-href="pickup.mapUrl" data-k="pickup.address"></a>.</p>
+      <p class="sec-sub">Swipe along my kitchen. Lift a lid for mains, the glass dome for dessert, and pay at the register.</p>
     </header>
 
     <!-- Leny's kitchen: the menu, painted. Each pot, the oven and the register
@@ -162,16 +162,13 @@
           <button class="k-spot" type="button" data-spot="phone" style="left:1.5%;top:24.5%;width:8.5%;height:12%">
             <span class="k-tag" style="--r:-3deg">Say hi</span></button>
           <button class="k-spot" type="button" data-spot="dome" data-dish="desserts" style="left:2.5%;top:61%;width:18%;height:30%">
-            <span class="k-tag k-tag-up" style="--r:2deg">Something sweet</span></button>
+            <span class="k-tag k-tag-up" style="--r:2deg">Dessert</span></button>
           <button class="k-spot" type="button" data-spot="register" style="left:86%;top:79%;width:12%;height:13.5%">
             <span class="k-tag k-tag-up" style="--r:-2.5deg">Your order <b id="kCount">0</b></span></button>
         </div>
       </div>
-      <button class="k-arrow k-prev" type="button" id="kPrev" aria-label="Walk left along the kitchen" hidden>‹</button>
-      <button class="k-arrow k-next" type="button" id="kNext" aria-label="Walk right along the kitchen" hidden>›</button>
       <div class="k-meter" id="kMeter" aria-hidden="true"><i></i></div>
     </div>
-    <p class="k-alt"><button type="button" class="btn btn-line" id="fullMenuBtn" aria-expanded="false" aria-controls="menuGrid">See the full menu as a list</button></p>
 
     <div class="menu-grid" id="menuGrid">
       <div class="menu-col">
@@ -202,15 +199,6 @@
     <div class="notes" id="notes"></div>
   </section>
 
-  <section class="pickup" id="pickup" aria-labelledby="pickH">
-    <header class="sec-head"><h2 id="pickH">Pickup and questions</h2></header>
-    <dl class="facts">
-      <div><dt>Where</dt><dd><a href="#" data-href="pickup.mapUrl" data-k="pickup.address"></a></dd></div>
-      <div><dt>When</dt><dd data-k="pickup.hours"></dd></div>
-      <div><dt>Order by</dt><dd data-k="pickup.cutoff"></dd></div>
-      <div><dt>Why orders@takoshi.ca?</dt><dd>It’s the shared inbox for our two home kitchens, Namit Gid and Takoshi. It comes straight to me.</dd></div>
-    </dl>
-  </section>
 </main>
 
 <footer class="foot" id="foot">
@@ -224,7 +212,7 @@
     <p class="foot-name">Namit <em>gid</em></p>
     <p class="foot-line"><em data-k="brand.footerLine"></em> From Long Beach, Romblon to North York.</p>
     <div class="foot-cols">
-      <div><h3>Pickup</h3><p data-k="pickup.address"></p><p data-k="pickup.hours"></p></div>
+      <div><h3>Pickup</h3><p><a href="#" data-href="pickup.mapUrl" data-k="pickup.address"></a></p><p data-k="pickup.hours"></p><p data-k="pickup.cutoff"></p></div>
       <div><h3>Say hi</h3><p><a href="mailto:orders@takoshi.ca">orders@takoshi.ca</a></p><p class="todo">Facebook · Messenger · Instagram</p></div>
       <div><h3>Sister kitchen</h3><p><a href="https://takoshi.ca">Takoshi</a></p></div>
     </div>
@@ -254,6 +242,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=26" defer></script>
+<script src="assets/js/app.js?v=27" defer></script>
 </body>
 </html>

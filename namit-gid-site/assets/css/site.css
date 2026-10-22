@@ -698,3 +698,9 @@ html.calm .k-layer { transition: none; }
 
 /* nothing in the menu (the peeking cat, the kitchen) may widen the page */
 .menu { overflow-x: clip; }
+
+/* pot tags: smaller, alternating high and low so neighbours never overlap */
+.k-world .k-tag { font-size: clamp(10px, 2.6vw, 14px); padding: 4px 7px 5px; }
+.k-tag-low { bottom: -62%; }
+.k-tag.sample { display: none; }
+.menu .menu-grid { display: none !important; }

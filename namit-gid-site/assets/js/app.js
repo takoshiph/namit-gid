@@ -361,7 +361,7 @@
     if (d) world.insertBefore(make('i', { class: 'k-wisp', 'aria-hidden': 'true', style: `--x:${b.l + b.w / 2}%;--d:${(k * 1.9) % 8}s` }), glow);
     world.append(make('button', { class: 'k-spot', type: 'button', 'data-spot': b.pot, 'data-dish': d ? d.id : 'sample',
       style: `left:${b.l}%;top:${b.t}%;width:${b.w}%;height:${b.h}%` },
-      [make('span', { class: 'k-tag' + (d ? '' : ' sample'), style: `--r:${[-3, 2, -2, 3][k % 4]}deg`, text: d ? (d.short || d.name) : 'Soon' })]));
+      [make('span', { class: 'k-tag' + (d ? '' : ' sample') + (k % 2 ? ' k-tag-low' : ''), style: `--r:${[-3, 2, -2, 3][k % 4]}deg`, text: d ? (d.short || d.name) : 'Soon' })]));
   });
   // Walking along the wall: drag with a mouse too, arrows step half a screen,
   // a small meter shows where you are, and a first nudge shows there's more.
@@ -370,17 +370,12 @@
     const max = scroller.scrollWidth - scroller.clientWidth;
     const room = max > 4;
     $('kMeter').hidden = !room;
-    $('kPrev').hidden = !room || scroller.scrollLeft < 4;
-    $('kNext').hidden = !room || scroller.scrollLeft > max - 4;
     if (room) { const f = scroller.clientWidth / scroller.scrollWidth; meter.style.width = (f * 100) + '%'; meter.style.left = (scroller.scrollLeft / scroller.scrollWidth * 100) + '%'; }
   };
   scroller.addEventListener('scroll', () => requestAnimationFrame(where), { passive: true });
   addEventListener('resize', where);
   world.querySelector('.k-wall').addEventListener('load', where);
   where();
-  const walk = dir => scroller.scrollBy({ left: dir * scroller.clientWidth * .6, behavior: calm ? 'auto' : 'smooth' });
-  $('kPrev').addEventListener('click', () => walk(-1));
-  $('kNext').addEventListener('click', () => walk(1));
   let drag = null, dragged = false;
   scroller.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; drag = { x: e.clientX, s: scroller.scrollLeft }; dragged = false; });
   addEventListener('pointermove', e => {
@@ -457,13 +452,6 @@
   dishSheet.addEventListener('click', e => { if (e.target === dishSheet) dishSheet.close(); });
   dishSheet.addEventListener('close', closeSpot);
   sheet.addEventListener('close', () => { sheet.classList.remove('receipt'); if (openSpot === 'register') closeSpot(); });
-  // the list is always one tap away
-  $('fullMenuBtn').addEventListener('click', e => {
-    const on = menu.classList.toggle('list-open');
-    e.currentTarget.setAttribute('aria-expanded', String(on));
-    e.currentTarget.textContent = on ? 'Hide the list' : 'See the full menu as a list';
-    if (on) document.querySelectorAll('#menuGrid .dish.pre').forEach(n => { n.classList.remove('pre'); n.classList.add('in'); });
-  });
   sheet.addEventListener('click', e => { if (e.target === sheet) sheet.close(); });
 
   renderTray(false);
@@ -492,7 +480,6 @@
     const pan = ph('pan-with-soot-sprites.webp', 'ph-pan'); pan.classList.remove('ph');
     document.querySelector('.wave-break').append(pan);
     const stove = make('div', { class: 'ph-stove-wrap', 'aria-hidden': 'true' }, [make('img', { src: 'assets/img/placeholder/oven-with-calcifer-sprite.webp', alt: '', loading: 'lazy' }), make('i')]);
-    $('pickup').prepend(stove);
     // the cat slips in from the edge when the menu arrives, and ducks now and then
     if (!calm && 'IntersectionObserver' in window) {
       let ducking = null;
