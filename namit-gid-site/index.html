@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=57">
+<link rel="stylesheet" href="assets/css/site.css?v=58">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -24,7 +24,7 @@
     d.classList.add(rm || sd ? 'calm' : 'intro');
   })();
 </script>
-<script src="site.config.js?v=8"></script>
+<script src="site.config.js?v=9"></script>
 </head>
 <body>
 <!-- The intro stage: dawn at Long Beach, Romblon, looking out at Byaringan.
@@ -131,11 +131,10 @@
       <p class="eyebrow"><span class="long" data-k="brand.eyebrow"></span><span class="short" data-k="brand.eyebrowShort"></span></p>
       <h1 id="heroH"><span class="line"><span>Filipino home cooking,</span></span> <span class="line"><span>made the day you pick it up.</span></span></h1>
       <p class="sig">— Leny</p>
-      <p class="meta"><span data-k="pickup.address"></span> · <span data-k="pickup.cutoff"></span></p>
+      <p class="meta"><span data-k="pickup.address"></span> · Pickup Friday to Sunday</p>
       <div class="hero-cta">
         <a class="btn btn-sea" href="#menu">See the menu</a>
         <p class="next-pickup" id="nextPickup" hidden></p>
-        <p class="small">A $10 e-Transfer deposit holds your order.</p>
       </div>
       <p class="caption" data-k="brand.caption"></p>
     </div>
@@ -166,10 +165,10 @@
             <span class="k-card-title">How to order</span>
             <span class="k-card-lines" aria-hidden="true"><i></i><i></i><i></i></span>
           </button>
-          <template id="howSteps"><p class="how-lede">Fill your tray, send $10, pick it up warm.</p><ol class="how-steps">
-        <li><span class="n">1</span><span>Fill your tray and pick a time.</span></li>
-        <li><span class="n">2</span><span>e-Transfer the $10 deposit to <strong>orders@takoshi.ca</strong>. It holds your spot.</span></li>
-        <li><span class="n">3</span><span>I cook it that morning. Pick up at Fairview Mall and pay the rest.</span></li>
+          <template id="howSteps"><p class="how-lede">Fill your tray, I say yes, pick it up warm.</p><ol class="how-steps">
+        <li><span class="n">1</span><span>Fill your tray and pick a time, at least 24 hours ahead.</span></li>
+        <li><span class="n">2</span><span>I reply within an hour. If I can make it, you e-Transfer half as a deposit.</span></li>
+        <li><span class="n">3</span><span>I cook it fresh before you come. Pick up at Fairview Mall and pay the rest.</span></li>
       </ol></template>
           <button class="k-spot" type="button" data-spot="phone" style="left:1.5%;top:24.5%;width:8.5%;height:12%">
             <span class="k-tag">Say hi</span></button>
@@ -195,15 +194,12 @@
       <div class="k-meter" id="kMeter" aria-hidden="true"><i></i></div>
     </div>
 
-    <div class="menu-grid" id="menuGrid">
-      <div class="menu-col">
-        <div class="dishes" id="mains"></div>
-        <div class="wave-break" aria-hidden="true"><svg viewBox="0 0 400 24" preserveAspectRatio="none"><path d="M0 12 C40 4 80 20 120 12 S200 4 240 12 S320 20 360 12 400 8 400 8"/></svg></div>
-        <header class="sec-head sec-head-inner"><h2>Something sweet</h2></header>
-        <div class="dishes" id="desserts"></div>
-        <div class="dishes" id="holiday"></div>
-      </div>
-      <aside class="tray-panel" id="trayPanel" aria-label="Your tray"></aside>
+    <!-- Every dish card lives here, unseen: the kitchen's windows borrow the
+         cards they show and put them back when they close. -->
+    <div class="dish-store" hidden>
+      <div class="dishes" id="mains"></div>
+      <div class="dishes" id="desserts"></div>
+      <div class="dishes" id="holiday"></div>
     </div>
   </section>
 
@@ -221,7 +217,7 @@
     <p class="foot-name">Namit <em>gid</em></p>
     <p class="foot-line"><em data-k="brand.footerLine"></em> From Long Beach, Romblon to North York.</p>
     <div class="foot-cols">
-      <div><h3>Pickup</h3><p><a href="#" data-href="pickup.mapUrl" data-k="pickup.address"></a></p><p data-k="pickup.hours"></p><p data-k="pickup.cutoff"></p></div>
+      <div><h3>Pickup</h3><p><a href="#" data-href="pickup.mapUrl" data-k="pickup.address"></a></p><p data-k="pickup.hours"></p></div>
       <div><h3>Say hi</h3><p><a href="mailto:orders@takoshi.ca">orders@takoshi.ca</a></p><p class="todo">Facebook · Messenger · Instagram</p></div>
     </div>
     <p class="foot-rating" id="footRating" hidden></p>
@@ -251,6 +247,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=49" defer></script>
+<script src="assets/js/app.js?v=50" defer></script>
 </body>
 </html>

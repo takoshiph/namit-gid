@@ -210,12 +210,6 @@
     if (bump) {
       const c = $('bilaoCount'); c.classList.remove('roll'); void c.offsetWidth; c.classList.add('roll');
     }
-    // desktop panel
-    const p = $('trayPanel');
-    p.replaceChildren(
-      make('h2', {}, [make('span', { class: 'bilao', 'aria-hidden': 'true', id: 'panelBilao' }), 'Your tray']),
-      n ? lineList() : make('p', { class: 'small', text: 'Add a dish and it lands here. One pickup, one $10 deposit for the whole tray.' }),
-      ...(n ? [sums(), make('button', { type: 'button', class: 'btn btn-sea', text: 'Choose pickup', onclick: () => openSheet(1) })] : []));
   }
 
   function lineList() {
@@ -233,17 +227,18 @@
     }));
   }
   function sums() {
-    const t = total(), dep = S.deposit.amount;
+    // the deposit is half, rounded up to the dollar (the server works it out the same way)
+    const t = total(), dep = Math.ceil(t / 2);
     return make('div', { class: 'sums' }, [
       make('div', {}, [make('span', { text: 'Total' }), make('span', { class: 'big', text: money(t) })]),
-      make('div', { class: 'small' }, [make('span', { text: 'Deposit now' }), make('span', { text: money(dep) })]),
+      make('div', { class: 'small' }, [make('span', { text: 'Deposit after my yes' }), make('span', { text: money(dep) })]),
       make('div', { class: 'small' }, [make('span', { text: 'At pickup' }), make('span', { text: money(Math.max(0, t - dep)) })])]);
   }
 
   // The dish flies on an arc into the bilao: X runs linear, Y eases, so the path curves.
   function fly(fig) {
     if (calm) return dip();
-    const target = root.classList.contains('kitchen-on') || window.innerWidth < 900 ? $('bilao') : $('panelBilao');
+    const target = $('bilao');
     if (!target) return;
     const a = fig.querySelector('img').getBoundingClientRect(), b = target.getBoundingClientRect();
     const size = 72;
@@ -264,7 +259,7 @@
       .finished.then(() => { outer.remove(); dip(); });
   }
   function dip() {
-    [$('bilao'), $('panelBilao')].forEach(b => { if (!b) return; b.classList.remove('dip'); void b.offsetWidth; b.classList.add('dip'); });
+    const b = $('bilao'); b.classList.remove('dip'); void b.offsetWidth; b.classList.add('dip');
   }
 
   // ── Order sheet: Tray · Details · Leny's yes · Deposit ──────────────────
@@ -795,14 +790,13 @@
   renderTray(false);
 
   // ── Reviews: static first, never empty ──────────────────────────────────
-  // The next day you can still order for, in Toronto, after the cutoff.
+  // The next pickup day with a time at least 24 hours away, in Toronto (the
+  // same rule as the checkout's times).
   {
-    const tp = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false }).formatToParts(new Date()).map(p => [p.type, p.value]));
-    const today = new Date(Date.UTC(+tp.year, +tp.month - 1, +tp.day, 12)), open = S.pickup.days || [5, 6, 0];
+    const now = torontoNow(), earliest = now.ms + LEAD_HOURS * 3600e3, open = S.pickup.days || [5, 6, 0];
     for (let i = 1; i < 15; i++) {
-      const d = new Date(today); d.setUTCDate(today.getUTCDate() + i);
-      if (i === 1 && (+tp.hour % 24) >= (S.pickup.cutoffHour || 20)) continue;
-      if (!open.includes(d.getUTCDay())) continue;
+      const d = new Date(now.day); d.setUTCDate(now.day.getUTCDate() + i);
+      if (!open.includes(d.getUTCDay()) || !TIMES.some(t => slotMs(d, t) >= earliest)) continue;
       const np = $('nextPickup'); np.hidden = false;
       np.append(make('i', { class: 'np-dot', 'aria-hidden': 'true' }), 'Next pickup: ', make('strong', { text: d.toLocaleDateString('en-CA', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' }) }));
       break;
