@@ -24,7 +24,7 @@
     d.classList.add(rm || sd ? 'calm' : 'intro');
   })();
 </script>
-<script src="site.config.js?v=9"></script>
+<script src="site.config.js?v=10"></script>
 </head>
 <body>
 <!-- The intro stage: dawn at Long Beach, Romblon, looking out at Byaringan.
@@ -242,11 +242,13 @@
   <div class="sheet-inner">
     <header class="sheet-head"><h2 id="sheetH">Your tray</h2><button class="x" type="button" id="sheetClose" aria-label="Close">×</button></header>
     <div id="sheetBody"></div>
+    <!-- the invisible bot check (Cloudflare Turnstile) renders here; it draws nothing -->
+    <div id="tsWidget"></div>
   </div>
 </dialog>
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=50" defer></script>
+<script src="assets/js/app.js?v=51" defer></script>
 </body>
 </html>

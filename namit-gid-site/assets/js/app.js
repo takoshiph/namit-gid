@@ -376,6 +376,7 @@
         });
         return make('div', { class: 'field' }, [make('label', { for: id, text: label }), inp]);
       };
+      startTurnstile();
       body.push(make('p', { class: 'nb-label', text: 'Pickup day' }), dc,
         make('p', { class: 'nb-label', text: 'Pickup time' }), tc,
         make('p', { class: 'small', text: open ? 'Order at least 24 hours ahead, so I can shop for it.' : 'No times left this day. Try another day.' }),
@@ -537,6 +538,40 @@
     'Total ' + money(total()), 'Pickup ' + order.date + ' ' + (order.time || ''), order.name + ' · ' + order.contact].join('\n');
   let placed = null, placing = false;
 
+  // ── Bot check: Cloudflare Turnstile, invisible, as on Takoshi ──────────
+  // Started when the details page opens, so a token is usually ready by the
+  // time they send. A token works once, so it's renewed after every send.
+  let tsToken = '', tsId = null, tsLoad = null;
+  function loadTurnstile() {
+    if (window.turnstile) return Promise.resolve();
+    return tsLoad || (tsLoad = new Promise(done => {
+      const s = make('script', { src: 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit', async: '' });
+      s.onload = s.onerror = () => done();
+      document.head.append(s);
+    }));
+  }
+  // Renders once; `again` asks for a fresh token (after a send, or when one is missing).
+  async function startTurnstile(again) {
+    if (!S.turnstileSiteKey || mock) return;
+    await loadTurnstile();
+    if (!window.turnstile) return;
+    if (tsId !== null) { if (again) { tsToken = ''; turnstile.reset(tsId); } return; }
+    tsId = turnstile.render('#tsWidget', {
+      sitekey: S.turnstileSiteKey,
+      callback: t => { tsToken = t; },
+      'expired-callback': () => { tsToken = ''; turnstile.reset(tsId); },
+      'error-callback': () => { tsToken = ''; },
+    });
+  }
+  async function turnstileToken(btn) {
+    if (!S.turnstileSiteKey || mock) return '';
+    if (tsId === null) await startTurnstile();
+    // the check usually finishes while they fill in the page; if not, give it up to 8 s
+    if (!tsToken && btn) btn.textContent = 'Checking…';
+    for (let i = 0; i < 16 && !tsToken; i++) await new Promise(r => setTimeout(r, 500));
+    return tsToken;
+  }
+
   async function place() {
     if (placing) return;
     placing = true;
@@ -561,6 +596,14 @@
     const payload = { order: { lines: trayLines(), name: order.name.trim(), contact: order.contact.trim(), email: (order.email || '').trim(),
       notes: (order.notes || '').trim(), pickupDate: order.date, pickup: order.time } };
     try {
+      const token = await turnstileToken(btn);
+      if (S.turnstileSiteKey && !mock && !token) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Send my request'; }
+        startTurnstile(true);
+        return flag('The security check is still running. Wait a moment and try again.');
+      }
+      payload.token = token;
+      if (btn) btn.textContent = 'Sending…';
       if (mock) {
         await new Promise(r => setTimeout(r, 500));
         const t = total(), dep = Math.ceil(t / 2);
@@ -575,10 +618,15 @@
       if (res.status === 409 && data.error === 'too_soon') { step = 1; order.time = null; refreshSheet(); return flag('Pickups need 24 hours’ notice. Please pick a later time.'); }
       if (res.status === 409) return fail(data.message || 'Sarado anay kita: the kitchen isn’t taking orders right now.', true);
       if (res.status === 400) return fail('Something in the tray didn’t add up. Please check it and try again.', false);
+      if (res.status === 403) { if (btn) { btn.disabled = false; btn.textContent = 'Send my request'; } return flag('The security check didn’t pass. Please try again.'); }
       fail('My order system is napping. Send me your order instead and I’ll sort it out.', true);
     } catch (e) {
       fail('My order system is napping. Send me your order instead and I’ll sort it out.', true);
-    } finally { placing = false; }
+    } finally {
+      placing = false;
+      // a token works once
+      if (tsId !== null && window.turnstile) { tsToken = ''; turnstile.reset(tsId); }
+    }
   }
 
   $('trayReview').addEventListener('click', () => openSheet(0));

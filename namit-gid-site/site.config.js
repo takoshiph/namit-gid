@@ -26,6 +26,9 @@ window.SITE = {
     hours: 'Pickup Friday to Sunday, 11 AM to 7 PM', // TODO-CHECK
   },
   deposit: { email: 'orders@takoshi.ca' },   // the deposit is half the total, after Leny's yes
+  // Cloudflare Turnstile site key (an Invisible widget). Empty means no bot check.
+  // The secret goes in Cloudflare Pages as TURNSTILE_SECRET_KEY, never here.
+  turnstileSiteKey: '',
   contacts: { facebook: '', messenger: '', instagram: '' }, // TODO: links from the owner
   menu: {
     mains: [
