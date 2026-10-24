@@ -28,7 +28,7 @@ window.SITE = {
   deposit: { email: 'orders@takoshi.ca' },   // the deposit is half the total, after Leny's yes
   // Cloudflare Turnstile site key (an Invisible widget). Empty means no bot check.
   // The secret goes in Cloudflare Pages as TURNSTILE_SECRET_KEY, never here.
-  turnstileSiteKey: '',
+  turnstileSiteKey: '0x4AAAAAAFjQpVGHv8gHp7IU',   // widget "Namit Gid Request Form"
   contacts: { facebook: '', messenger: '', instagram: '' }, // TODO: links from the owner
   menu: {
     mains: [
