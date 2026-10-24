@@ -117,7 +117,9 @@ function toAdminOrder(o) {
     email:       o.email || null,
     size:        total != null ? `${o.dish} · $${total.toFixed(2)}` : o.dish,
     filling:     o.qty != null ? `Qty ${o.qty}` : '',
-    sauce:       o.deposit_screenshot_url ? 'Deposit screenshot received' : 'No deposit screenshot',
+    sauce:       o.deposit_amount != null
+      ? `Half, $${Number(o.deposit_amount).toFixed(2)}${o.deposit_screenshot_url ? ' · screenshot sent' : ''}`
+      : (o.deposit_screenshot_url ? 'Deposit screenshot received' : 'No deposit screenshot'),
     pickup_date: o.pickup_date || null,
     pickup_time: o.pickup_time || null,
     balance_due: balance,
@@ -499,7 +501,14 @@ async function handle(request, env) {
       const res = await fetch(`${SB}/rest/v1/orders?select=*&order=created_at.desc`, { headers: sbHeaders });
       if (!res.ok) return jsonResponse({ error: 'Failed to load' }, res.status, request);
       const rows = await res.json().catch(() => []);
-      return jsonResponse(Array.isArray(rows) ? rows.map(toAdminOrder) : rows, 200, request);
+      if (!Array.isArray(rows)) return jsonResponse(rows, 200, request);
+      const out = await Promise.all(rows.map(async o => {
+        const a = toAdminOrder(o);
+        delete a.token; delete a.admin_token;   // the links' secrets stay out of the browser
+        if (o.deposit_screenshot_url) a.deposit_shot_url = await depositShotLink(env, o.deposit_screenshot_url, 3600).catch(() => null);
+        return a;
+      }));
+      return jsonResponse(out, 200, request);
     }
 
     // ── PATCH /api/orders/:id (admin) ─────────────────────────────────────────
@@ -767,12 +776,10 @@ async function handle(request, env) {
       if (!o) return lenyPage('Namit Gid', '<h1>This link isn\'t valid</h1><p class="lead">Open the latest email about this order.</p>', 404);
       return lenyDecidePage(o, { focus: url.searchParams.get('d') });
     }
-    // POST /api/decide (form): yes / no / paid
-    if (url.pathname === '/api/decide' && request.method === 'POST') {
-      let fd; try { fd = await request.formData(); } catch { return lenyPage('Namit Gid', '<h1>Something went wrong</h1>', 400); }
-      const o = await getOrder(fd.get('id'), 'admin_token', fd.get('t'));
-      if (!o) return lenyPage('Namit Gid', '<h1>This link isn\'t valid</h1>', 404);
-      const now = new Date().toISOString(), d = fd.get('d');
+    // Leny's yes / no / paid, from her email's page or from the admin: the order
+    // moves on only from the state the step expects, and the customer is told.
+    const decide = async (o, d) => {
+      const now = new Date().toISOString();
       let moved = null, done = '';
       if (d === 'yes') {
         moved = await moveOrder(o, ['requested'], { status: 'accepted', accepted_at: now, responded_at: now });
@@ -784,7 +791,31 @@ async function handle(request, env) {
         moved = await moveOrder(o, ['accepted', 'verifying', 'expired'], { status: 'confirmed', confirmed_at: now });
         if (moved) { await mailCustomer(env, moved, 'confirmed'); done = 'Confirmed. Time to shop!'; }
       }
-      return lenyDecidePage(moved || o, { done: moved ? done : 'This was already answered' });
+      return { moved, done: moved ? done : 'This was already answered' };
+    };
+
+    // POST /api/decide (form): yes / no / paid, from Leny's page
+    if (url.pathname === '/api/decide' && request.method === 'POST') {
+      let fd; try { fd = await request.formData(); } catch { return lenyPage('Namit Gid', '<h1>Something went wrong</h1>', 400); }
+      const o = await getOrder(fd.get('id'), 'admin_token', fd.get('t'));
+      if (!o) return lenyPage('Namit Gid', '<h1>This link isn\'t valid</h1>', 404);
+      const { moved, done } = await decide(o, fd.get('d'));
+      return lenyDecidePage(moved || o, { done });
+    }
+
+    // POST /api/orders/:id/decide {d} (admin): the same, from the admin page
+    {
+      const m = url.pathname.match(/^\/api\/orders\/(\d+)\/decide$/);
+      if (m && request.method === 'POST') {
+        if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
+        let b; try { b = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
+        if (!['yes', 'no', 'paid'].includes(b.d)) return jsonResponse({ error: 'Bad decision' }, 400, request);
+        const r = await fetch(`${SB}/rest/v1/orders?id=eq.${m[1]}&select=${ORDER_FIELDS}`, { headers: sbHeaders });
+        const o = r.ok ? (await r.json())[0] : null;
+        if (!o) return jsonResponse({ error: 'not_found' }, 404, request);
+        const { moved, done } = await decide(o, b.d);
+        return jsonResponse({ ok: !!moved, status: (moved || o).status, message: done }, moved ? 200 : 409, request);
+      }
     }
 
     // GET /api/deposit-shot?id=&t=: Leny opens a deposit screenshot (a link that expires in 10 minutes)
