@@ -282,6 +282,22 @@ const ACTIVE_STATUSES = ['requested', 'accepted', 'verifying', 'confirmed', 'pen
 const ORDER_FIELDS = 'id,status,dish,total,deposit_amount,balance_due,customer_name,contact,email,notes,pickup_date,pickup_time,created_at,accepted_at,deposit_sent_at,deposit_screenshot_url,token,admin_token';
 
 const money2 = n => '$' + Number(n || 0).toFixed(2);
+// a deposit screenshot reference, as /api/upload-deposit hands it out
+const DEPOSIT_REF = /^deposit:\d+-[a-z0-9]+\.(jpg|jpeg|png|webp|heic)$/;
+// A link to a private screenshot that works for a few minutes. Older orders
+// may hold a full public address from before the bucket went private.
+async function depositShotLink(env, ref, seconds = 600) {
+  if (!ref) return null;
+  if (!DEPOSIT_REF.test(ref)) return /^https:\/\//.test(ref) ? ref : null;
+  const r = await fetch(`${env.SUPABASE_URL}/storage/v1/object/sign/deposits/${ref.slice(8)}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, 'apikey': env.SUPABASE_SERVICE_ROLE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ expiresIn: seconds }),
+  });
+  if (!r.ok) return null;
+  const j = await r.json().catch(() => ({}));
+  return j.signedURL ? `${env.SUPABASE_URL}/storage/v1${j.signedURL}` : null;
+}
 const firstName = n => String(n || '').trim().split(/\s+/)[0] || 'there';
 const orderLink = o => `${SITE}/?order=${o.id}&t=${o.token}`;
 const decideLink = o => `${SITE}/api/decide?id=${o.id}&t=${o.admin_token}`;
@@ -409,7 +425,7 @@ function lenyDecidePage(o, { done, focus } = {}) {
     action = `<p class="lead">${escHtml(first)} has until ${torontoTime(depositDeadline(o))} to send the ${money2(o.deposit_amount)} deposit.</p>` + form('<button class="no" name="d" value="paid">The deposit is already in my bank</button>');
   } else if (o.status === 'verifying') {
     action = `<p class="lead">${escHtml(first)} says the ${money2(o.deposit_amount)} deposit is sent. Check your bank, then confirm.</p>`
-      + (o.deposit_screenshot_url ? `<p><a href="${escHtml(o.deposit_screenshot_url)}">See their screenshot</a></p>` : '')
+      + (o.deposit_screenshot_url ? `<p><a href="/api/deposit-shot?id=${o.id}&amp;t=${escHtml(o.admin_token)}">See their screenshot</a></p>` : '')
       + form('<button class="yes" name="d" value="paid">Deposit received: confirm the order</button>');
   }
   return lenyPage('Namit Gid · ' + o.customer_name, `
@@ -703,7 +719,9 @@ async function handle(request, env) {
         body: arrayBuffer,
       });
       if (!uploadRes.ok) return jsonResponse({ error: 'Upload failed' }, 500, request);
-      return jsonResponse({ url: `${SB}/storage/v1/object/public/deposits/${filename}` }, 200, request);
+      // The bucket is private: the order keeps a reference, and only Leny's page
+      // (or the admin) turns it into a short-lived link.
+      return jsonResponse({ url: 'deposit:' + filename }, 200, request);
     }
 
     // ── POST /api/upload-review-photo (admin) ─────────────────────────────────
@@ -769,6 +787,14 @@ async function handle(request, env) {
       return lenyDecidePage(moved || o, { done: moved ? done : 'This was already answered' });
     }
 
+    // GET /api/deposit-shot?id=&t=: Leny opens a deposit screenshot (a link that expires in 10 minutes)
+    if (url.pathname === '/api/deposit-shot' && request.method === 'GET') {
+      const o = await getOrder(url.searchParams.get('id'), 'admin_token', url.searchParams.get('t'));
+      const link = o && await depositShotLink(env, o.deposit_screenshot_url);
+      if (!link) return lenyPage('Namit Gid', '<h1>No screenshot</h1><p class="lead">This request has no deposit screenshot, or the link isn\'t valid.</p>', 404);
+      return new Response(null, { status: 302, headers: { 'Location': link, 'Cache-Control': 'no-store' } });
+    }
+
     // GET /api/my-order?id=&t=: the customer's own order, for their page
     if (url.pathname === '/api/my-order' && request.method === 'GET') {
       const o = await getOrder(url.searchParams.get('id'), 'token', url.searchParams.get('t'));
@@ -790,7 +816,7 @@ async function handle(request, env) {
         return jsonResponse({ error: 'expired', status: 'expired' }, 409, request);
       }
       // only a screenshot this site uploaded is kept
-      const shot = typeof b.screenshot === 'string' && b.screenshot.startsWith(`${SB}/storage/v1/object/public/deposits/`) ? b.screenshot : null;
+      const shot = typeof b.screenshot === 'string' && DEPOSIT_REF.test(b.screenshot) ? b.screenshot : null;
       const moved = await moveOrder(o, ['accepted'], { status: 'verifying', deposit_sent_at: new Date().toISOString(), ...(shot ? { deposit_screenshot_url: shot } : {}) });
       if (moved) {
         try {
