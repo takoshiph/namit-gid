@@ -377,12 +377,13 @@ html.intro .hero-copy > * { opacity: 0; }
 @keyframes bar-up { from { transform: translateY(120%); } }
 .bilao {
   position: relative; width: 56px; height: 56px; border-radius: 50%; border: 0; cursor: pointer; flex: none;
-  background:
-    radial-gradient(circle, #6f8f4e 0 38%, transparent 39%),
-    repeating-conic-gradient(#c49a5c 0 6deg, #a97c42 6deg 12deg),
-    #b88a4f;
-  box-shadow: inset 0 0 0 4px #8a6434, inset 0 0 0 6px #d2ac6c, 0 3px 0 rgba(43,33,25,.25);
+  padding: 0; background: none; box-shadow: 0 3px 0 rgba(43,33,25,.22), 0 4px 10px rgba(43,33,25,.18);
 }
+.bilao-art { display: block; width: 100%; height: 100%; }
+.bilao .food { opacity: 0; scale: .5; transform-origin: 50% 50%; transform-box: fill-box; transition: opacity 300ms, scale 420ms var(--ease-hang); }
+.bilao:is([data-fill="1"], [data-fill="2"], [data-fill="3"]) .f1,
+.bilao:is([data-fill="2"], [data-fill="3"]) .f2,
+.bilao[data-fill="3"] .f3 { opacity: 1; scale: 1; }
 .bilao.dip { animation: dip 420ms var(--ease-hang); }
 @keyframes dip { 30% { transform: scale(.92); } 65% { transform: scale(1.05); } }
 .bilao-count {
