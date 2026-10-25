@@ -63,7 +63,7 @@ window.SITE = {
       { id: 'dreamcake', name: 'Chocolate Dreamcake', short: 'Holiday special', img: 'assets/img/dreamcake-gift.webp', w: 720, h: 720, photo: true,
         desc: 'Chocolate cake, chocolate cream, cocoa on top. In a gold tin, ready to gift.',
         sizes: [{ label: 'One tin', price: 20 }], min: 4,
-        season: { from: '11-15', until: '01-06' },
+        season: { from: '10-24', until: '01-06' },   // on sale from Oct 24 (Leny's call); was Nov 15
         gift: { text: 'Free “Happy Holidays” sticker on every tin', from: '12-01', until: '12-25' } },
     ],
   },
