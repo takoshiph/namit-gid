@@ -7,10 +7,9 @@ window.SITE = {
     home: 'Long Beach, Romblon',
     island: 'Byaringan Island',
     // TODO-CHECK: Hiligaynon lines
-    headline: 'Filipino home cooking, made the day you pick it up.',
+    headline: 'Filipino comfort food. Made fresh for Toronto.',
     caption: 'Byaringan Island, from our beach back home in Romblon.',
     closedLine: 'Sarado anay kita. The kitchen’s light is off.',
-    footerLine: 'Abang kalipay gid.',
   },
   pickup: {
     address: '180 Fairview Mall Dr, North York',
