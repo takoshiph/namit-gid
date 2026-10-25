@@ -121,7 +121,7 @@
     el._paint = paint;
     const extra = [];
     if (d.min) extra.push(make('p', { class: 'dish-fact', text: money(d.sizes[0].price) + ' each · minimum ' + d.min }));
-    if (d.gift && (!isLive || inWindow(d.gift))) extra.push(make('p', { class: 'gift-note', text: '🎀 ' + d.gift.text }));
+    if (d.gift && (!isLive || inWindow(d.gift))) extra.push(make('p', { class: 'gift-note', text: d.gift.text }));
     el.append(fig, make('div', { class: 'dish-text' }, [make('h3', { text: d.name }), make('p', { class: 'dish-desc', text: d.desc }), ...extra, dishQuote(d), d.min ? '' : chips, row]));
     return el;
   }
@@ -429,16 +429,16 @@
       make('div', { class: 'small' }, [make('span', { text: 'Deposit (half)' }), make('span', { text: money(o.deposit) })]),
       make('div', { class: 'small' }, [make('span', { text: 'At pickup' }), make('span', { text: money(o.balance) })])]);
     const when = () => make('p', { class: 'small', text: 'Pickup ' + longDay(o.pickupDate) + ' at ' + o.pickupTime + ' · ' + S.pickup.address });
-    const refresh = make('button', { type: 'button', class: 'btn btn-line', text: 'Check again', onclick: () => loadOrderPage(o.id, o.t) });
+    const refresh = make('button', { type: 'button', class: 'btn btn-line', text: 'Check for my answer', onclick: () => loadOrderPage(o.id, o.t) });
     let title = 'Your request', at = 2;
     if (o.status === 'missing' || o.status === 'offline') {
-      title = 'Hmm';
-      body.push(make('p', { text: o.status === 'offline' ? 'I couldn’t reach my order book just now. Try again in a moment.' : 'I can’t find this request. Open the latest email or message about it.' }),
+      title = o.status === 'offline' ? 'Sandali lang' : 'Hmm, where is it?';
+      body.push(make('p', { text: o.status === 'offline' ? 'I couldn’t reach my order book just now. Try again in a moment.' : 'I can’t find this request. Open the latest email or message I sent you about it.' }),
         ...(o.status === 'offline' ? [refresh] : []));
       $('sheetH').textContent = title; return $('sheetBody').replaceChildren(...body);
     }
     if (o.status === 'requested') {
-      body.push(make('p', { text: `Thanks, ${o.name}! I’ll reply within an hour.` }), lines(), sumsOf(), when(), refresh);
+      body.push(make('p', { text: `Salamat, ${o.name}! I got your request. I’ll reply within the hour.` }), lines(), sumsOf(), when(), refresh);
     } else if (o.status === 'accepted') {
       title = 'Send your deposit'; at = 3;
       const row = (label, value, copyText) => {
@@ -453,7 +453,7 @@
         ...(shot ? [make('img', { class: 'up-prev', src: URL.createObjectURL(shot), alt: '' })] : []),
         make('span', { text: shot ? '✓ ' + shot.name + ' (tap to change)' : 'Add a screenshot of your e-Transfer (optional)' })]);
       const by = o.depositDeadline ? new Date(o.depositDeadline).toLocaleTimeString('en-US', { timeZone: 'America/Toronto', hour: 'numeric', minute: '2-digit' }) : null;
-      body.push(make('p', { text: `Good news, ${o.name}! I can make it.` }),
+      body.push(make('p', { text: `Kaya ko! I can make it, ${o.name}.` }),
         make('div', { class: 'etr' }, [
           make('p', { class: 'etr-h', text: 'Send your ' + money(o.deposit) + ' deposit' }),
           make('p', { class: 'small', text: 'Half the total, by Interac e-Transfer' + (by ? ', by ' + by + '. After that the time is freed up.' : '.') }),
@@ -462,7 +462,7 @@
         make('button', { type: 'button', class: 'btn btn-sea', text: 'I’ve sent my deposit', onclick: depositSent }));
     } else if (o.status === 'verifying') {
       title = 'Checking your deposit'; at = 3;
-      body.push(make('p', { text: `Thanks, ${o.name}! I’m checking my bank for your ${money(o.deposit)}. You’ll hear from me soon.` }), lines(), sumsOf(), when(), refresh);
+      body.push(make('p', { text: `Salamat, ${o.name}! I’m checking my bank for your ${money(o.deposit)}. I’ll message you as soon as I see it.` }), lines(), sumsOf(), when(), refresh);
     } else if (o.status === 'confirmed' || o.status === 'ready') {
       title = 'Confirmed!'; at = 4;
       body.push(make('div', { class: 'receipt' }, [make('p', { class: 'stamp', text: 'Confirmed' }),
@@ -471,10 +471,10 @@
         lines(), calendarLink(o.pickupDate, o.pickupTime));
     } else if (o.status === 'declined') {
       title = 'About your request';
-      body.push(make('p', { text: `Sorry, ${o.name}, I can’t make that time. I’ll message you to find another day. Nothing was charged.` }), lines());
+      body.push(make('p', { text: `Pasensya na, ${o.name}, I can’t make that time. I’ll message you to find another day. Nothing was charged.` }), lines());
     } else if (o.status === 'expired') {
       title = 'This request expired';
-      body.push(make('p', { text: 'The deposit didn’t come in time, so the pickup time was freed up. Nothing was charged.' }),
+      body.push(make('p', { text: 'The deposit didn’t come in time, so I gave the pickup time to someone else. Nothing was charged. Order again anytime!' }),
         make('button', { type: 'button', class: 'btn btn-sea', text: 'Start a new order', onclick: () => { history.replaceState(null, '', location.pathname); sheet.close(); location.hash = 'menu'; } }));
     } else {
       body.push(make('p', { text: 'This order is ' + String(o.status).replace('_', ' ') + '.' }), lines());

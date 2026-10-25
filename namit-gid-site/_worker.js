@@ -389,11 +389,12 @@ async function mailCustomer(env, o, kind) {
 // the choice is a button on it, because mail scanners open links on their own.
 function lenyPage(title, inner, status = 200) {
   return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${escHtml(title)}</title>
-<style>body{margin:0;background:#f6efe6;font:16px/1.5 -apple-system,'Segoe UI',Roboto,sans-serif;color:#2a241f}main{max-width:480px;margin:0 auto;padding:28px 18px 40px}
-h1{font:700 26px/1.2 Georgia,serif;margin:0 0 6px}.lead{margin:0 0 14px;color:#6f645a}.card{background:#fffaf3;border:1px solid #ece0d1;border-radius:14px;padding:14px 18px;margin:14px 0}
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=Young+Serif&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#F3EADB radial-gradient(70% 40% at 85% 0,rgba(233,182,107,.22),transparent 70%);font:16px/1.5 'Atkinson Hyperlegible Next',-apple-system,'Segoe UI',sans-serif;color:#2a241f}main{max-width:480px;margin:0 auto;padding:28px 18px 40px}
+h1{font:400 28px/1.2 'Young Serif',Georgia,serif;margin:0 0 6px}.lead{margin:0 0 14px;color:#6f645a}.card{background:#FBF5EA;border:0;border-radius:10px 14px 11px 15px;box-shadow:inset 0 0 0 1px rgba(110,72,38,.2),0 2px 6px rgba(60,38,20,.08);padding:14px 18px;margin:14px 0}
 .row{display:flex;justify-content:space-between;gap:14px;padding:5px 0;font-size:15px;border-bottom:1px solid #f1e8dc}.row:last-child{border:0}.row span:first-child{color:#8a7f74;flex:none}.row span:last-child{text-align:right}
 button,.btn{display:block;width:100%;box-sizing:border-box;margin:10px 0 0;padding:16px;border-radius:12px;border:0;font-family:inherit;font-size:17px;font-weight:700;line-height:1.2;text-align:center;text-decoration:none;cursor:pointer}
-.yes{background:#1E5A63;color:#fff}.no{background:#fff;color:#A3462A;border:1.5px solid #A3462A}.wa{background:#25D366;color:#063b1b}.muted{color:#8a7f74;font-size:14px}.tag{display:inline-block;padding:3px 10px;border-radius:99px;background:#efe4d6;font-size:13px;font-weight:600}</style></head>
+.yes{color:#3B2212;text-shadow:0 1px 0 rgba(255,235,200,.6);background:linear-gradient(rgba(255,240,214,.22),rgba(90,55,25,.14)),url(/assets/img/sign-board.webp) 50% 58%/320% auto;box-shadow:inset 0 0 0 1.5px rgba(110,72,38,.55),0 3px 0 #8A5A30}.no{background:#fff;color:#A3462A;border:1.5px solid #A3462A}.wa{background:#25D366;color:#063b1b}.muted{color:#8a7f74;font-size:14px}.tag{display:inline-block;padding:3px 10px;border-radius:99px;background:#efe4d6;font-size:13px;font-weight:600}</style></head>
 <body><main>${inner}</main></body></html>`, { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } });
 }
 const STATUS_WORDS = { requested: 'Waiting for your answer', accepted: 'Waiting for their deposit', verifying: 'Deposit sent: check your bank',
