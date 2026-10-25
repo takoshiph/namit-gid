@@ -1,12 +1,11 @@
 /* Everything a seller would change lives here. The page reads window.SITE.
    Prices must match the MENU / BATCH tables in supabase/functions/submit-order,
-   which stay the price authority. Lines marked TODO-CHECK wait for Leny. */
+   which stay the price authority. */
 window.SITE = {
   brand: {
     name: 'Namit gid',
     home: 'Long Beach, Romblon',
     island: 'Byaringan Island',
-    // TODO-CHECK: Hiligaynon lines
     headline: 'Kumain ka na? Tara, nagluto ako.',
     closedLine: 'Sarado anay kita. The kitchen’s light is off.',
   },
