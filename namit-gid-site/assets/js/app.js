@@ -204,7 +204,6 @@
     const bar = $('traybar');
     bar.hidden = n === 0;
     $('bilaoCount').textContent = n;
-    $('bilao').dataset.fill = Math.min(3, n);   // food appears on the leaf as the tray fills
     if ($('kCount')) $('kCount').textContent = n;
     $('traySum').textContent = n + (n === 1 ? ' item' : ' items');
     $('trayTotal').textContent = money(total());

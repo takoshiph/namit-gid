@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=71">
+<link rel="stylesheet" href="assets/css/site.css?v=72">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -273,41 +273,8 @@
 </footer>
 
 <div class="traybar" id="traybar" hidden>
-  <button class="bilao" id="bilao" type="button" aria-label="Open your tray" data-fill="0">
-    <svg class="bilao-art" viewBox="0 0 100 100" aria-hidden="true">
-      <defs>
-        <pattern id="weave" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45 50 50)">
-          <rect width="7" height="7" fill="#b07f43"/><rect width="3.5" height="3.5" fill="#d6ab69"/><rect x="3.5" y="3.5" width="3.5" height="3.5" fill="#d6ab69"/>
-          <path d="M0 3.5h7M3.5 0v7" stroke="#8c5f2e" stroke-width=".5" opacity=".6"/>
-        </pattern>
-        <radialGradient id="bowl"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#3a2210" stop-opacity=".45"/></radialGradient>
-        <linearGradient id="leaf" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#3f6b30"/><stop offset=".55" stop-color="#6e9a4a"/><stop offset="1" stop-color="#93b763"/></linearGradient>
-      </defs>
-      <circle cx="50" cy="50" r="48" fill="url(#weave)"/>
-      <circle cx="50" cy="50" r="48" fill="url(#bowl)"/>
-      <circle cx="50" cy="50" r="45" fill="none" stroke="#8a5a2b" stroke-width="7"/>
-      <circle cx="50" cy="50" r="45" fill="none" stroke="#e0b878" stroke-width="5.5" stroke-dasharray="2.2 2.6" transform="rotate(-20 50 50)"/>
-      <circle cx="50" cy="50" r="41" fill="none" stroke="#6b4320" stroke-width="1"/>
-      <path class="bilao-leaf" fill="url(#leaf)" d="M50 16c13 0 26 7 31 19 4 10 2 21-5 29l-6-3 2 6c-6 6-14 9-22 9-17 0-32-13-33-31 0-6 2-12 5-17l5 4-1-6c6-6 14-10 24-10z"/>
-      <path d="M24 74L76 24" stroke="#cfe0a0" stroke-width="1.4" stroke-linecap="round" opacity=".85"/>
-      <path d="M34 64l-9-12M42 56l-12-16M50 48l-10-18M58 40l-6-16M38 60l12 12M46 52l16 12M54 44l18 8M62 36l14 2" stroke="#2f5524" stroke-width=".7" opacity=".45"/>
-      <g class="food f1">
-        <ellipse cx="45" cy="52" rx="17" ry="12" fill="#d99a35"/>
-        <path d="M31 52c4-5 8 2 12-3s8 3 12-2 6 3 9 0M33 57c4-4 7 1 11-2s8 2 11-1 6 2 8 0M36 47c3-3 6 1 9-1s6 2 9 0" fill="none" stroke="#f3c766" stroke-width="1.6" stroke-linecap="round"/>
-        <circle cx="40" cy="49" r="2" fill="#c8552a"/><circle cx="51" cy="55" r="1.8" fill="#c8552a"/><circle cx="47" cy="46" r="1.5" fill="#7cae4b"/><circle cx="36" cy="55" r="1.5" fill="#7cae4b"/>
-        <circle cx="53" cy="48" r="3.4" fill="#fbf4dd"/><circle cx="53" cy="48" r="1.8" fill="#f2b631"/>
-      </g>
-      <g class="food f2" transform="translate(-4 3)">
-        <rect x="57" y="31" width="20" height="7" rx="3.5" fill="#d8953a" stroke="#9c5e1e" stroke-width=".8" transform="rotate(-35 67 34.5)"/>
-        <rect x="60" y="38" width="20" height="7" rx="3.5" fill="#e0a548" stroke="#9c5e1e" stroke-width=".8" transform="rotate(-35 70 41.5)"/>
-        <path d="M61 37l3-2M65 34l3-2M64 44l3-2M68 41l3-2" stroke="#b06d25" stroke-width=".8"/>
-      </g>
-      <g class="food f3" transform="translate(-4 -2)">
-        <circle cx="64" cy="64" r="6.5" fill="#b7d45a" stroke="#5f8d26" stroke-width="1.2"/>
-        <circle cx="64" cy="64" r="4.2" fill="#e3ef9b"/>
-        <path d="M64 59.8v8.4M59.8 64h8.4M61 61l6 6M67 61l-6 6" stroke="#b7d45a" stroke-width=".8"/>
-      </g>
-    </svg>
+  <button class="bilao" id="bilao" type="button" aria-label="Open your tray">
+    <img class="bilao-art" src="assets/img/bilao.webp" width="168" height="168" alt="">
     <span class="bilao-count" id="bilaoCount">0</span></button>
   <div class="traybar-sum"><span id="traySum">Tray</span><strong id="trayTotal">$0</strong></div>
   <button class="btn btn-sea" id="trayReview" type="button">Review</button>
@@ -331,6 +298,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=54" defer></script>
+<script src="assets/js/app.js?v=55" defer></script>
 </body>
 </html>
