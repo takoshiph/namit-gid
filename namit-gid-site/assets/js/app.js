@@ -204,6 +204,8 @@
     const bar = $('traybar');
     bar.hidden = n === 0;
     $('bilaoCount').textContent = n;
+    // the bilao fills when a dish lands in it (see dip); an empty tray empties it
+    if (!n) $('bilao').classList.remove('full'); else if (!bump) $('bilao').classList.add('full');
     if ($('kCount')) $('kCount').textContent = n;
     $('traySum').textContent = n + (n === 1 ? ' item' : ' items');
     $('trayTotal').textContent = money(total());
@@ -259,7 +261,7 @@
       .finished.then(() => { outer.remove(); dip(); });
   }
   function dip() {
-    const b = $('bilao'); b.classList.remove('dip'); void b.offsetWidth; b.classList.add('dip');
+    const b = $('bilao'); b.classList.remove('dip'); void b.offsetWidth; b.classList.add('dip', 'full');
   }
 
   // ── Order sheet: Tray · Details · Leny's yes · Deposit ──────────────────
