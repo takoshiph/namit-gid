@@ -110,4 +110,56 @@ const ell = (x, y, [cx, cy, rx, ry]) => { const d = Math.hypot((x - cx) / rx, (y
   save(crop(pan, 230, 50, 480, 270), path.join(OUT, 'fuzz-jump.png'));
   save(crop(pan, 948, 430, 1150, 650), path.join(OUT, 'fuzz-wave.png'));
 }
+// ── a calico cat peeking round the dish cabinet ────────────────────────────
+{
+  const cat = load(path.join(AI, 'peaking-jiji.jpg'));
+  // plus the pocket between the top paw and the edge
+  const pocket = []; for (let y = 290; y < 370; y += 4) for (let x = 1096; x < 1142; x += 4) pocket.push([x, y]);
+  key(cat, pocket);
+  const { W, px } = cat;
+  // the edge it peeks round is the cabinet's own: drop the drawn line above and below the paws
+  for (let y = 0; y < cat.H; y++) if (y < 225 || y > 625) for (let x = 1140; x < 1165; x++) px[(y * W + x) * 4 + 3] = 0;
+  const GINGER = [214, 128, 58], CREAM = [246, 238, 224];
+  const patches = [
+    [GINGER, [770, 268, 88, 58]],    // over the left ear and brow
+    [GINGER, [1040, 500, 52, 70]],   // the shoulder
+    [CREAM, [968, 398, 56, 38]],     // muzzle and chin
+  ];
+  for (let y = 0; y < cat.H; y++) for (let x = 0; x < W; x++) {
+    const i = (y * W + x) * 4; if (px[i + 3] < 40) continue;
+    const L = lum(px, i); if (L > 95 || sat(px, i) > 40) continue;
+    for (const [C, e] of patches) {
+      const w = ell(x, y, e); if (!w) continue;
+      const t = L < 16 ? 0.45 : 0.72 + 0.28 * Math.min(1, L / 80);
+      for (let k = 0; k < 3; k++) px[i + k] = Math.round(px[i + k] * (1 - w) + C[k] * t * w);
+    }
+  }
+  save(crop(cat), path.join(OUT, 'calico-peek.png'));
+}
+
+// ── the chef: fur warmed from grey to a soft brown-grey ────────────────────
+{
+  const chef = load(path.join(AI, 'totoro-bake.jpg'));
+  key(chef);
+  const { W, px } = chef;
+  for (let p = 0; p < W * chef.H; p++) {
+    const i = p * 4; if (px[i + 3] < 40) continue;
+    const L = lum(px, i); if (sat(px, i) > 24 || L < 40 || L > 175) continue;   // grey fur only
+    px[i] = Math.min(255, px[i] + 22); px[i + 1] = Math.min(255, px[i + 1] + 8); px[i + 2] = Math.max(0, px[i + 2] - 12);
+  }
+  save(crop(chef), path.join(OUT, 'chef.png'));
+}
+
+// ── a little fire for the oven window: the flame, faded out at the edges ───
+{
+  const st = load(path.join(AI, 'oven-with-calcifer-sprite.jpg'));
+  const x0 = 600, y0 = 200, w = 250, h = 290, out = new Uint8Array(w * h * 4);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = ((y0 + y) * st.W + x0 + x) * 4, o = (y * w + x) * 4;
+    const d = Math.hypot((x - 125) / 104, (y - 190) / 118);
+    out[o] = st.px[i]; out[o + 1] = st.px[i + 1]; out[o + 2] = st.px[i + 2];
+    out[o + 3] = d >= 1 ? 0 : d < .55 ? 255 : Math.round(255 * (1 - d) / .45);
+  }
+  save({ W: w, H: h, px: out }, path.join(OUT, 'fire.png'));
+}
 console.log('done');

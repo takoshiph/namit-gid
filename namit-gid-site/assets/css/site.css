@@ -235,8 +235,8 @@ html.low-end .st-vignette { background: radial-gradient(120% 90% at 50% 45%, tra
 /* the final photo on the sign gets the same sky */
 .shore-clouds { position: absolute; inset: 0; }
 /* the bangka, afloat: the sand under it is cropped off, and it rocks a little */
-.shore-boat { position: absolute; left: 7%; bottom: 13%; width: 27%; clip-path: inset(0 0 22% 0); transform-origin: 50% 70%;
-  filter: brightness(.8) saturate(.85) sepia(.18); animation: boat-bob 5s ease-in-out infinite; }
+.shore-boat { position: absolute; left: 55%; bottom: 9%; width: 40%; clip-path: inset(0 0 22% 0); transform-origin: 50% 70%;
+  filter: brightness(.95) saturate(.95) sepia(.1); animation: boat-bob 5s ease-in-out infinite; }
 @keyframes boat-bob { 0%, 100% { translate: 0 0; rotate: -1deg; } 50% { translate: 0 2%; rotate: 1deg; } }
 @media (prefers-reduced-motion: reduce) { .shore-boat { animation: none; } }
 /* the painting's title, lettered on the water like a painter would */
@@ -971,4 +971,10 @@ html.calm .sheet.notebook .line-item { animation: none; }
 @keyframes cat-breathe { 0%, 100% { scale: 1 1; } 50% { scale: 1.01 1.02; } }
 @keyframes fuzz-sway { 0%, 100% { rotate: -6deg; } 50% { rotate: 6deg; } }
 @keyframes fuzz-hop { 0%, 60%, 100% { translate: 0 0; } 75% { translate: 0 -22%; } 85% { translate: 0 4%; } }
+.k-world > .k-fire { left: 47.2%; top: 43.2%; width: 6.5%; mix-blend-mode: screen; transform-origin: 50% 80%; animation: fire-flicker 1.8s ease-in-out infinite; }
+.k-world > .k-calico { left: 42.7%; top: 8%; width: 9%; animation: calico-peek 7s ease-in-out infinite; }
+.k-world > .k-chef { left: 63.5%; top: 68%; width: 13.2%; transform-origin: 50% 100%; animation: chef-sway 5s ease-in-out infinite; }
+@keyframes fire-flicker { 0%, 100% { scale: 1 1; } 30% { scale: 1.04 .97; } 60% { scale: .97 1.05; } }
+@keyframes calico-peek { 0%, 100% { translate: 0 0; } 45%, 60% { translate: 6% 0; } }
+@keyframes chef-sway { 0%, 100% { rotate: -1.5deg; } 50% { rotate: 1.5deg; } }
 @media (prefers-reduced-motion: reduce) { .k-world > .k-friend { animation: none; } }
