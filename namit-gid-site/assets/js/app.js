@@ -855,13 +855,6 @@
   { const c = S.contacts || {}, todo = document.querySelector('.foot .todo');
     const links = [['WhatsApp', c.whatsapp && 'https://wa.me/' + c.whatsapp], ['Facebook', c.facebook], ['Messenger', c.messenger], ['Instagram', c.instagram]].filter(x => x[1]);
     if (todo) { if (links.length) todo.replaceChildren(...links.flatMap(([t, u], i) => [i ? ' · ' : '', make('a', { href: u, target: '_blank', rel: 'noopener', text: t })])); else todo.remove(); } }
-  // The overall rating, in the footer.
-  if (showReviews && S.reviews.rating) {
-    const r = S.reviews.rating, fr = $('footRating');
-    fr.hidden = false;
-    fr.append(make('span', { class: 'stars', 'aria-hidden': 'true', text: '★★★★★' }), ' ' + r.stars + ' from ' + r.count + ' reviews');
-    if (r.url) fr.append(' · ', make('a', { href: r.url, target: '_blank', rel: 'noopener', text: 'Read them on Facebook' }));
-  }
 
   // ── Open / closed: the lighthouse in the bar ────────────────────────────
   if (!mock) {

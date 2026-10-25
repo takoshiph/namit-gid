@@ -671,8 +671,6 @@ html.calm .k-layer { transition: none; }
   background: var(--paper-grain), #FBF4E6; box-shadow: 0 2px 0 rgba(90, 58, 32, .12), 0 6px 12px -8px rgba(90, 58, 32, .45); }
 .dish-quote blockquote { margin: 0; font: italic 400 15px/1.45 var(--sans); color: var(--ink); }
 .dish-quote figcaption { margin-top: 4px; font-size: 13px; color: var(--ink-2); }
-.foot-rating { font-size: 15px; color: #e3d8c4; }
-.foot-rating .stars { color: var(--sun); letter-spacing: 1px; }
 
 /* how it works: one painted driftwood board on a rope */
 .how { padding: 40px var(--gutter) 40px; }
