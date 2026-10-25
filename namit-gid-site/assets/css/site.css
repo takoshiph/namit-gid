@@ -985,3 +985,25 @@ html.calm .sheet.notebook .line-item { animation: none; }
 @keyframes calico-peek { 0%, 100% { translate: 0 0; } 45%, 60% { translate: 6% 0; } }
 @keyframes chef-sway { 0%, 100% { rotate: -1.5deg; } 50% { rotate: 1.5deg; } }
 @media (prefers-reduced-motion: reduce) { .k-world > .k-friend { animation: none; } }
+
+/* a size can say how many it feeds, under its name and price */
+.chip:has(.feeds) { display: inline-grid; grid-template-columns: auto auto; align-content: center; row-gap: 3px; padding: 6px 14px; }
+.chip .feeds { grid-column: 1 / -1; font: 500 12px/1 var(--sans); color: var(--ink-2); }
+
+/* sheets scroll without a grey bar */
+.sheet .sheet-inner { scrollbar-width: none; }
+.sheet .sheet-inner::-webkit-scrollbar { display: none; }
+
+/* ── Dish windows: a capiz window ────────────────────────────────────────
+   A Filipino sliding window: a wooden frame, a row of pearly capiz panes in a
+   wooden lattice along the top, and the paper of the menu inside. */
+.dish-sheet { padding: 9px 9px 0; border-radius: 12px 12px 0 0;
+  background: linear-gradient(rgba(255, 236, 204, .18), rgba(70, 40, 18, .18)), url(../img/sign-board.webp) 50% 58% / 320% auto;
+  box-shadow: inset 0 0 0 1.5px rgba(90, 55, 25, .55), 0 -10px 30px rgba(60, 38, 20, .28); }
+.dish-sheet::before { display: none; }
+.dish-sheet .sheet-inner { border-radius: 6px 6px 0 0; box-shadow: inset 0 0 0 1px rgba(90, 55, 25, .35), inset 0 0 42px rgba(150, 110, 60, .12); }
+.dish-sheet .sheet-head { padding-top: 54px; }
+.dish-sheet .sheet-head::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 41px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2720%27%20height%3D%2719%27%20viewBox%3D%270%200%2020%2019%27%3E%3Cdefs%3E%3CradialGradient%20id%3D%27p%27%20cx%3D%27.3%27%20cy%3D%27.25%27%20r%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23FFF6E2%27%2F%3E%3Cstop%20offset%3D%27.5%27%20stop-color%3D%27%23EED9B4%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23D2B285%27%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%27s%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%27.2%27%20stop-color%3D%27%23DCEBF0%27%20stop-opacity%3D%270%27%2F%3E%3Cstop%20offset%3D%27.5%27%20stop-color%3D%27%23DCEBF0%27%20stop-opacity%3D%27.5%27%2F%3E%3Cstop%20offset%3D%27.68%27%20stop-color%3D%27%23F3D9DE%27%20stop-opacity%3D%27.4%27%2F%3E%3Cstop%20offset%3D%27.9%27%20stop-color%3D%27%23fff%27%20stop-opacity%3D%270%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2720%27%20height%3D%2719%27%20fill%3D%27%235E3A1B%27%2F%3E%3Crect%20x%3D%272.5%27%20y%3D%272.5%27%20width%3D%2715%27%20height%3D%2714%27%20rx%3D%27.6%27%20fill%3D%27url(%23p)%27%2F%3E%3Crect%20x%3D%272.5%27%20y%3D%272.5%27%20width%3D%2715%27%20height%3D%2714%27%20rx%3D%27.6%27%20fill%3D%27url(%23s)%27%2F%3E%3Cpath%20d%3D%27M4.5%2013.5c3-1%206-4.5%2010-6%27%20stroke%3D%27%23fff%27%20stroke-opacity%3D%27.4%27%20stroke-width%3D%27.7%27%20fill%3D%27none%27%2F%3E%3Cpath%20d%3D%27M0%20.6h20M.6%200v19%27%20stroke%3D%27%238A5A30%27%20stroke-width%3D%271.1%27%2F%3E%3C%2Fsvg%3E") 50% 0 / 20px 19px repeat-x, url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2720%27%20height%3D%2719%27%20viewBox%3D%270%200%2020%2019%27%3E%3Cdefs%3E%3CradialGradient%20id%3D%27p%27%20cx%3D%27.3%27%20cy%3D%27.25%27%20r%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23FFF6E2%27%2F%3E%3Cstop%20offset%3D%27.5%27%20stop-color%3D%27%23EED9B4%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23D2B285%27%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%27s%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%27.2%27%20stop-color%3D%27%23DCEBF0%27%20stop-opacity%3D%270%27%2F%3E%3Cstop%20offset%3D%27.5%27%20stop-color%3D%27%23DCEBF0%27%20stop-opacity%3D%27.5%27%2F%3E%3Cstop%20offset%3D%27.68%27%20stop-color%3D%27%23F3D9DE%27%20stop-opacity%3D%27.4%27%2F%3E%3Cstop%20offset%3D%27.9%27%20stop-color%3D%27%23fff%27%20stop-opacity%3D%270%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2720%27%20height%3D%2719%27%20fill%3D%27%235E3A1B%27%2F%3E%3Crect%20x%3D%272.5%27%20y%3D%272.5%27%20width%3D%2715%27%20height%3D%2714%27%20rx%3D%27.6%27%20fill%3D%27url(%23p)%27%2F%3E%3Crect%20x%3D%272.5%27%20y%3D%272.5%27%20width%3D%2715%27%20height%3D%2714%27%20rx%3D%27.6%27%20fill%3D%27url(%23s)%27%2F%3E%3Cpath%20d%3D%27M4.5%2013.5c3-1%206-4.5%2010-6%27%20stroke%3D%27%23fff%27%20stroke-opacity%3D%27.4%27%20stroke-width%3D%27.7%27%20fill%3D%27none%27%2F%3E%3Cpath%20d%3D%27M0%20.6h20M.6%200v19%27%20stroke%3D%27%238A5A30%27%20stroke-width%3D%271.1%27%2F%3E%3C%2Fsvg%3E") 50% 19px / 20px 19px repeat-x, #5E3A1B;
+  box-shadow: inset 0 -4px 0 #4A2C13, inset 0 -5px 0 rgba(255, 220, 170, .25), 0 4px 8px rgba(60, 35, 15, .22); }
+@media (min-width: 700px) { .dish-sheet { border-radius: 12px; padding-bottom: 9px; } .dish-sheet .sheet-inner { border-radius: 6px; } }

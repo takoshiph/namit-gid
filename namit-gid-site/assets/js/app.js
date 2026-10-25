@@ -98,9 +98,10 @@
       d.sizes.map(s => {
         const b = make('button', { type: 'button', class: 'chip', 'aria-pressed': String(s.label === size) });
         b.append(s.label, make('b', { text: money(s.price) }));
+        if (s.feeds) b.append(make('small', { class: 'feeds', text: 'feeds ' + s.feeds }));
         b.addEventListener('click', () => { size = s.label; chips.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c === b))); paint(); });
         return b;
-      })) : make('p', { class: 'dish-fact', text: money(d.sizes[0].price) });
+      })) : make('p', { class: 'dish-fact', text: money(d.sizes[0].price) + (d.sizes[0].feeds ? ' · feeds ' + d.sizes[0].feeds : '') });
     const row = make('div', { class: 'add-row' });
     function paint() {
       const line = tray.find(l => l.id === d.id && l.size === size);
@@ -756,7 +757,7 @@
       }
       if (dish === 'desserts') openDishes(S.menu.desserts.map(d => d.id), titles.desserts);
       else if (dish === 'holiday') openDishes(HOLIDAY.map(d => d.id), titles.holiday);
-      else openDishes([dish], (S.menu.mains.find(d => d.id === dish) || {}).name || 'From the stove');
+      else openDishes([dish], 'From the stove');
     }, calm ? 0 : 200);
   }));
   // The recipe card on the wall: how ordering works.
