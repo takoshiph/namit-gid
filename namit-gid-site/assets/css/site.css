@@ -234,6 +234,11 @@ html.low-end .st-vignette { background: radial-gradient(120% 90% at 50% 45%, tra
 
 /* the final photo on the sign gets the same sky */
 .shore-clouds { position: absolute; inset: 0; }
+/* the bangka, afloat: the sand under it is cropped off, and it rocks a little */
+.shore-boat { position: absolute; left: 7%; bottom: 13%; width: 27%; clip-path: inset(0 0 22% 0); transform-origin: 50% 70%;
+  filter: brightness(.8) saturate(.85) sepia(.18); animation: boat-bob 5s ease-in-out infinite; }
+@keyframes boat-bob { 0%, 100% { translate: 0 0; rotate: -1deg; } 50% { translate: 0 2%; rotate: 1deg; } }
+@media (prefers-reduced-motion: reduce) { .shore-boat { animation: none; } }
 /* the painting's title, lettered on the water like a painter would */
 .frame-label { position: absolute; left: 4%; bottom: 5%; font: italic 400 max(10px, 7cqh)/1 var(--serif); color: rgba(255, 240, 220, .88);
   text-shadow: 0 1px 2px rgba(20, 30, 40, .55); letter-spacing: .01em; white-space: nowrap; pointer-events: none; }
