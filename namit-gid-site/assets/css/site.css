@@ -964,7 +964,7 @@ html.calm .sheet.notebook .line-item { animation: none; }
 .line-item.plain { grid-template-columns: 1fr; }
 
 /* ── Kitchen friends ─────────────────────────────────────────────────────── */
-.k-world > img.k-friend { inset: auto; height: auto; pointer-events: none; }
+.k-world > img.k-friend { right: auto; bottom: auto; height: auto; pointer-events: none; }
 .k-world > .k-cat { left: 49.5%; top: 70.1%; width: 12%; transform-origin: 50% 100%; animation: cat-breathe 4.5s ease-in-out infinite; }
 .k-world > .k-fuzz-wave { left: 67.9%; top: 39%; width: 5%; transform-origin: 50% 100%; animation: fuzz-sway 2.6s ease-in-out infinite; }
 .k-world > .k-fuzz-jump { left: 89%; top: 32.5%; width: 5.5%; animation: fuzz-hop 3.2s ease-in-out infinite; }
