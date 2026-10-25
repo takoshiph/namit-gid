@@ -7,20 +7,20 @@ window.SITE = {
     home: 'Long Beach, Romblon',
     island: 'Byaringan Island',
     // TODO-CHECK: Hiligaynon lines
-    headline: 'Filipino comfort food. Made fresh for Toronto.',
+    headline: 'Kumain ka na? Tara, nagluto ako.',
     caption: 'Byaringan Island, from our beach back home in Romblon.',
     closedLine: 'Sarado anay kita. The kitchen’s light is off.',
   },
   pickup: {
     address: '180 Fairview Mall Dr, North York',
     mapUrl: 'https://maps.google.com/?q=180+Fairview+Mall+Dr,+North+York,+ON',
-    days: [5, 6, 0],                 // pickup days: 0 = Sunday … 6 = Saturday
+    days: [4, 5, 6, 0],              // pickup days: 0 = Sunday … 6 = Saturday (Thursday to Sunday)
     bookAheadDays: 28,               // how far ahead a pickup can be booked
     // Pickup times. Each order holds a 90-minute prep window (the order
     // function and /api/slot-load use the same 90), so times 90 minutes
     // apart means one order per time.
     times: ['11:00 AM', '12:30 PM', '2:00 PM', '3:30 PM', '5:00 PM', '6:30 PM'],
-    hours: 'Pickup Friday to Sunday, 11 AM to 7 PM', // TODO-CHECK
+    hours: 'Pickup Thursday to Sunday, 11 AM to 7 PM',
   },
   deposit: { email: 'orders@takoshi.ca' },   // the deposit is half the total, after Leny's yes
   // Cloudflare Turnstile site key (an Invisible widget). Empty means no bot check.

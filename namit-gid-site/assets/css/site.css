@@ -745,6 +745,8 @@ html.calm .k-layer { transition: none; }
 
 /* signed by Leny */
 .sig { font: 400 20px/1 var(--serif); color: var(--cliff); margin-top: -4px; rotate: -2deg; }
+/* the headline is Tagalog; this small line says it in English */
+.translation { margin-top: -4px; font-size: 16px; font-style: italic; color: var(--ink-2); }
 /* the next pickup day, with the lighthouse's warm light as its dot */
 .next-pickup { display: inline-flex; align-items: center; gap: 8px; font-size: 15px; color: var(--ink-2); }
 .next-pickup strong { color: var(--ink); }
