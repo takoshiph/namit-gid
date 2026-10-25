@@ -40,7 +40,11 @@
   const ALL = [...S.menu.mains, ...S.menu.desserts, ...HOLIDAY];
   const byId = Object.fromEntries(ALL.map(d => [d.id, d]));
   let tray = [];
-  try { tray = JSON.parse(localStorage.getItem('ng-tray') || '[]').filter(l => byId[l.id]); } catch (e) {}
+  // a saved tray keeps only dishes and sizes still on the menu ("Medium" is now "Large")
+  try {
+    tray = JSON.parse(localStorage.getItem('ng-tray') || '[]').map(l => l.size === 'Medium' ? { ...l, size: 'Large' } : l)
+      .filter(l => byId[l.id] && (byId[l.id].batch || byId[l.id].sizes.some(s => s.label === l.size)));
+  } catch (e) {}
   const save = () => { try { localStorage.setItem('ng-tray', JSON.stringify(tray)); } catch (e) {} };
   const lineKey = l => l.id + '|' + (l.size || '') + '|' + (l.box ? l.box.join(',') : '');
   const linePrice = l => {
@@ -98,10 +102,10 @@
       d.sizes.map(s => {
         const b = make('button', { type: 'button', class: 'chip', 'aria-pressed': String(s.label === size) });
         b.append(s.label, make('b', { text: money(s.price) }));
-        if (s.feeds) b.append(make('small', { class: 'feeds', text: 'feeds ' + s.feeds }));
+        if (s.feeds) b.append(make('small', { class: 'feeds', text: 'feeds ' + s.feeds + (s.extra ? ' · ' + s.extra : '') }));
         b.addEventListener('click', () => { size = s.label; chips.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c === b))); paint(); });
         return b;
-      })) : make('p', { class: 'dish-fact', text: money(d.sizes[0].price) + (d.sizes[0].feeds ? ' · feeds ' + d.sizes[0].feeds : '') });
+      })) : make('p', { class: 'dish-fact', text: d.sizes[0].label + ' · ' + money(d.sizes[0].price) + (d.sizes[0].feeds ? ' · feeds ' + d.sizes[0].feeds : '') });
     const row = make('div', { class: 'add-row' });
     function paint() {
       const line = tray.find(l => l.id === d.id && l.size === size);
@@ -409,7 +413,7 @@
     if (mock && id === 'demo') {
       // previews show any stage: ?mock=1&order=demo&t=x&status=accepted
       const st = new URLSearchParams(location.search).get('status') || 'accepted';
-      viewing = { id: 'demo', t, status: st, dish: 'Palabok (Medium) ×1 · Chocolate Dreamcake ×4', total: 145, deposit: 73, balance: 72,
+      viewing = { id: 'demo', t, status: st, dish: 'Palabok (Large) ×1 · Chocolate Dreamcake ×4', total: 145, deposit: 73, balance: 72,
         pickupDate: new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10), pickupTime: '12:30 PM', name: 'Ana',
         depositDeadline: new Date(Date.now() + 7200e3).toISOString(), depositEmail: S.deposit.email };
     } else {

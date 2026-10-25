@@ -1019,3 +1019,15 @@ html.calm .sheet.notebook .line-item { animation: none; }
   background: linear-gradient(rgba(255, 240, 214, .22), rgba(90, 55, 25, .14)), url(../img/sign-board.webp) 50% 58% / 320% auto;
   box-shadow: inset 0 0 0 1.5px rgba(110, 72, 38, .55), 0 3px 0 #8A5A30, 0 6px 12px rgba(60, 38, 20, .22); }
 .traybar .btn-sea:active { transform: translateY(2px); box-shadow: inset 0 0 0 1.5px rgba(110, 72, 38, .55), 0 1px 0 #8A5A30; }
+
+/* every main button is carved from the sign's wood, like the ones in the windows */
+.btn-sea { color: #3B2212; text-shadow: 0 1px 0 rgba(255, 235, 200, .6); font-weight: 600;
+  background: linear-gradient(rgba(255, 240, 214, .22), rgba(90, 55, 25, .14)), url(../img/sign-board.webp) 50% 58% / 320% auto;
+  box-shadow: inset 0 0 0 1.5px rgba(110, 72, 38, .55), 0 3px 0 #8A5A30, 0 6px 12px rgba(60, 38, 20, .22); }
+.btn-sea:hover { background: linear-gradient(rgba(255, 244, 224, .32), rgba(90, 55, 25, .08)), url(../img/sign-board.webp) 50% 58% / 320% auto; }
+.btn-sea:active { transform: translateY(2px); box-shadow: inset 0 0 0 1.5px rgba(110, 72, 38, .55), 0 1px 0 #8A5A30, 0 2px 5px rgba(60, 38, 20, .22); }
+/* the bar's Order button is the same wood (during the intro it stays a light outline over the sky) */
+.bar-order { color: #3B2212; text-shadow: 0 1px 0 rgba(255, 235, 200, .6); border-radius: 6px;
+  background: linear-gradient(rgba(255, 240, 214, .22), rgba(90, 55, 25, .14)), url(../img/sign-board.webp) 50% 58% / 320% auto;
+  box-shadow: inset 0 0 0 1.5px rgba(110, 72, 38, .55), 0 2px 0 #8A5A30; }
+html.intro:not(.landing) .bar-order { color: var(--sand); text-shadow: none; }
