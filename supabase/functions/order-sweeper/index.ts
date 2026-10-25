@@ -20,18 +20,35 @@ const pickupText = (o: { pickup_date?: string; pickup_time?: string }) => o.pick
   ? new Date(o.pickup_date + 'T12:00:00Z').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }) + (o.pickup_time ? ' at ' + o.pickup_time : '')
   : 'the pickup'
 
-function frame(kicker: string, heading: string, paras: string[], button?: { href: string; text: string }) {
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#f6efe6;font-family:'Helvetica Neue',Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:36px 18px;"><tr><td align="center">
-<table width="100%" style="max-width:500px;background:#fffaf3;border-radius:16px;border:1px solid #ece0d1;">
-<tr><td style="padding:28px 32px;">
-  <div style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:#1f5c3d;margin-bottom:16px;">Namit Gid</div>
-  <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#c2604a;">${esc(kicker)}</p>
-  <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;color:#2a241f;">${esc(heading)}</h1>
-  ${paras.map(p => `<p style="margin:0 0 14px;font-size:15px;color:#6f645a;line-height:1.6;">${esc(p)}</p>`).join('')}
-  ${button ? `<p style="margin:10px 0 0;text-align:center;"><a href="${esc(button.href)}" style="display:inline-block;padding:14px 24px;border-radius:12px;background:#1E5A63;color:#fff;font-size:16px;font-weight:700;text-decoration:none;">${esc(button.text)}</a></p>` : ''}
-</td></tr></table></td></tr></table></body></html>`
+// "Sat Nov 7, 12:30 PM", for Leny
+const shortPickup = (o: { pickup_date?: string; pickup_time?: string }) => o.pickup_date
+  ? new Date(o.pickup_date + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }).replace(',', '') + (o.pickup_time ? ', ' + o.pickup_time : '')
+  : 'no pickup time'
+const SANS = "'Atkinson Hyperlegible Next',Arial,Helvetica,sans-serif", SERIF = "'Young Serif',Georgia,serif"
+
+// `paras` are plain text (escaped here); `rows` values are HTML the caller escaped
+function frame(o: { heading: string; paras?: string[]; rows?: [string, string][]; button?: { href: string; text: string }; toLeny?: boolean }) {
+  const { heading, paras = [], rows = [], button, toLeny = false } = o
+  const row = ([l, v]: [string, string]) => `<tr><td valign="top" style="padding:5px 12px 5px 0;width:30%;font:13px/1.5 ${SANS};color:#6B5747;">${esc(l)}</td><td style="padding:5px 0;font:14px/1.5 ${SANS};color:#2B2119;">${v}</td></tr>`
+  const top = toLeny
+    ? `<p style="margin:0 0 14px;font:16px/1 ${SERIF};color:#A3462A;">Namit gid</p>`
+    : `<p style="margin:0 0 18px;text-align:center;"><img src="${SITE}/assets/img/email/leny.png" width="120" height="70" alt="Leny" style="display:inline-block;border:0;width:120px;height:auto;"><br><span style="font:22px/1.4 ${SERIF};color:#A3462A;">Namit gid</span></p>`
+  const sign = toLeny ? '' : `<p style="margin:26px 0 0;font:600 26px/1 Caveat,'Segoe Print','Bradley Hand',cursive;color:#A3462A;">Leny</p>
+    <p style="margin:6px 0 0;font:13px/1.6 ${SANS};color:#6B5747;">Namit Gid, near Fairview Mall<br><a href="${SITE}" style="color:#1E5A63;">namitgid.takoshi.ca</a></p>`
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&family=Young+Serif&family=Caveat:wght@600&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:#F3EADB;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3EADB;padding:28px 14px;"><tr><td align="center">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:500px;background:#FFFBF3;border:1px solid #E6D6B8;border-radius:14px 11px 13px 12px;">
+  <tr><td style="padding:${toLeny ? '22px 24px' : '26px 30px 28px'};">
+    ${top}
+    <h1 style="margin:0 0 14px;font:400 ${toLeny ? 21 : 25}px/1.25 ${SERIF};color:#2B2119;">${esc(heading)}</h1>
+    ${paras.map(p => `<p style="margin:0 0 12px;font:16px/1.6 ${SANS};color:#4A3B2F;">${esc(p)}</p>`).join('')}
+    ${rows.length ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3EADB;border-radius:10px 8px 9px 8px;margin:8px 0 6px;"><tr><td style="padding:12px 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows.map(row).join('')}</table></td></tr></table>` : ''}
+    ${button ? `<p style="margin:20px 0 0;text-align:center;"><a href="${esc(button.href)}" style="display:inline-block;padding:13px 26px;border-radius:12px 9px 11px 10px;background:#DDB582 url(${SITE}/assets/img/email/wood.jpg) 50% 50%/cover;border:1.5px solid #8A5A30;border-bottom-width:3px;color:#3B2212;font:700 16px/1.2 ${SANS};text-decoration:none;">${esc(button.text)}</a></p>` : ''}
+    ${sign}
+  </td></tr></table>
+</td></tr></table>
+</body></html>`
 }
 async function mail(to: string | null, subject: string, html: string) {
   if (!RESEND_API_KEY || !to) return
@@ -49,7 +66,7 @@ serve(async () => {
 
   // 1. reminders to Leny
   const { data: waiting } = await sb.from('orders')
-    .select('id,dish,total,customer_name,pickup_date,pickup_time,created_at,reminders_sent,last_reminder_at,admin_token')
+    .select('id,dish,total,customer_name,contact,pickup_date,pickup_time,created_at,reminders_sent,last_reminder_at,admin_token')
     .eq('status', 'requested').lt('reminders_sent', MAX_REMINDERS)
   for (const o of waiting || []) {
     if (now - Date.parse(o.last_reminder_at || o.created_at) < REMIND_EVERY_MS) continue
@@ -59,10 +76,12 @@ serve(async () => {
       .eq('id', o.id).eq('status', 'requested').eq('reminders_sent', o.reminders_sent).select('id')
     if (!claimed?.length) continue
     const hours = Math.max(1, Math.round((now - Date.parse(o.created_at)) / 3600_000))
-    await mail(LENY_EMAIL, `⏰ Still waiting: ${o.customer_name}, ${pickupText(o)}`, frame('Reminder',
-      `${first(o.customer_name)} is waiting for your answer`,
-      [`They asked ${hours} hour${hours > 1 ? 's' : ''} ago for ${pickupText(o)}: ${o.dish} ($${Number(o.total).toFixed(2)}).`],
-      { href: `${SITE}/api/decide?id=${o.id}&t=${o.admin_token}`, text: 'Answer now' }))
+    await mail(LENY_EMAIL, `Still waiting: ${o.customer_name}, ${shortPickup(o)}`, frame({ toLeny: true,
+      heading: `${first(o.customer_name)} is waiting for your answer`,
+      paras: [`Requested ${hours} hour${hours > 1 ? 's' : ''} ago. Reminder ${o.reminders_sent + 1} of ${MAX_REMINDERS}.`],
+      rows: [['Pickup', esc(shortPickup(o))], ['Order', esc(o.dish).split(' · ').join('<br>')], ['Total', '$' + Number(o.total).toFixed(2)],
+        ['Customer', [o.customer_name, o.contact].filter(Boolean).map(esc).join('<br>')]],
+      button: { href: `${SITE}/api/decide?id=${o.id}&t=${o.admin_token}`, text: 'Answer now' } }))
     reminded++
   }
 
@@ -72,14 +91,14 @@ serve(async () => {
     .eq('status', 'accepted').lt('accepted_at', new Date(now - DEPOSIT_HOURS * 3600_000).toISOString())
     .select('id,customer_name,email,pickup_date,pickup_time,deposit_amount,admin_token')
   for (const o of lapsed || []) {
-    await mail(o.email, 'Your Namit Gid request expired', frame('Request expired', `Hi ${first(o.customer_name)},`,
-      [`We didn't get the deposit in time, so ${pickupText(o)} has been freed up. Nothing was charged.`,
-        `Still hungry? Send a new request any time at ${SITE.replace('https://', '')}.`],
-      { href: SITE, text: 'Order again' }))
-    await mail(LENY_EMAIL, `Expired: ${o.customer_name}, ${pickupText(o)}`, frame('Expired',
-      `${first(o.customer_name)} didn't send the deposit`,
-      [`No deposit within ${DEPOSIT_HOURS} hours of your yes, so ${pickupText(o)} is free again. If it comes in late, you can still confirm the order.`],
-      { href: `${SITE}/api/decide?id=${o.id}&t=${o.admin_token}`, text: 'See the request' }))
+    await mail(o.email, 'Your request has expired', frame({ heading: `Hi ${first(o.customer_name)},`,
+      paras: [`I didn’t get the deposit in time, so I had to free up ${pickupText(o)} for other orders. Nothing was charged.`,
+        'I’d love to cook for you another time.'],
+      button: { href: SITE, text: 'Order again' } }))
+    await mail(LENY_EMAIL, `Expired: ${o.customer_name}, ${shortPickup(o)}`, frame({ toLeny: true,
+      heading: `${first(o.customer_name)} didn’t send the deposit`,
+      paras: [`No deposit within ${DEPOSIT_HOURS} hours of your yes. The time slot is open again.`, 'If the deposit comes in late, you can still confirm.'],
+      button: { href: `${SITE}/api/decide?id=${o.id}&t=${o.admin_token}`, text: 'Open order' } }))
     expired++
   }
 

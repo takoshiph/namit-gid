@@ -37,7 +37,7 @@ const MENU: Record<string, number> = {
   'Lumpiang Shanghai (30 pcs)': 35,
   'Lumpiang Shanghai (50 pcs)': 45,
   'Baked Sushi (Small)': 45,
-  'Baked Sushi (Large)': 60,
+  'Baked Sushi (Medium)': 60,
   'Palabok (Small)': 50,
   'Palabok (Medium)': 65,
   'Tiramisu': 25,
@@ -363,60 +363,47 @@ serve(async (req) => {
     }
     try {
       if (!RESEND_API_KEY) throw new Error('no resend key')
-      const pickupLine = pickupDate
-        ? new Date(pickupDate + 'T00:00:00').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' })
-          + (pickupTime ? ' · ' + pickupTime : '')
-        : 'Not specified'
+      // "Sat Nov 7, 12:30 PM"
+      const pickupShort = pickupDate
+        ? new Date(pickupDate + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }).replace(',', '')
+          + (pickupTime ? ', ' + pickupTime : '')
+        : 'no pickup time'
       const decide = `${SITE}/api/decide?id=${inserted.id}&t=${adminToken}`
-      const wa = waLink(contact, `Hi ${name.split(' ')[0]}! This is Leny from Namit Gid, about your order for ${pickupLine}.`)
-      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/></head>
-<body style="margin:0;padding:0;background:#9bb9af;font-family:'Helvetica Neue',Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;"><tr><td align="center">
-<table width="100%" style="max-width:460px;background:#f7f0e3;border-radius:18px;overflow:hidden;">
-<tr><td style="padding:26px 28px 16px;text-align:center;border-bottom:1px solid rgba(53,40,31,0.1);">
-  <div style="font-size:20px;font-weight:700;color:#35281f;">Namit <span style="color:#c4633c;">Gid</span></div>
-  <p style="margin:4px 0 0;font-size:12px;color:#7fa196;">${isRequest ? 'New request · please reply within an hour' : 'New order — namit gid, let\'s cook!'}</p>
-</td></tr>
-<tr><td style="padding:22px 28px 0;">
-  <table width="100%" style="background:#fff;border:1px solid rgba(53,40,31,0.1);border-radius:14px;">
-    <tr><td style="padding:18px 20px;text-align:center;">
-      <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#c4633c;font-weight:700;">Cook this</div>
-      <div style="font-size:24px;font-weight:700;color:#35281f;margin-top:6px;">${esc(dishLabel).split(' · ').join('<br>')}</div>
-      <div style="font-size:16px;color:#c4633c;margin-top:2px;">${trayPrice ? '' : `Qty ${qty} · `}$${total}</div>
-      <div style="font-size:13px;color:rgba(53,40,31,0.6);margin-top:6px;">Deposit $${deposit.toFixed(2)} · <strong>$${balanceDue.toFixed(2)}</strong> at pickup</div>
-    </td></tr>
-  </table>
-  <table width="100%" style="margin-top:10px;"><tr><td style="background:rgba(127,161,150,0.14);border:1px solid rgba(127,161,150,0.3);border-radius:10px;padding:10px 14px;text-align:center;">
-    <span style="font-size:11px;color:#5f8177;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Pickup</span>
-    <div style="font-size:14px;color:#35281f;margin-top:3px;">${esc(pickupLine)}</div>
+      const wa = waLink(contact, `Hi ${name.split(' ')[0]}! This is Leny from Namit Gid, about your order for ${pickupShort}.`)
+      const SANS = "'Atkinson Hyperlegible Next',Arial,Helvetica,sans-serif", SERIF = "'Young Serif',Georgia,serif"
+      const row = (l: string, v: string) => `<tr><td valign="top" style="padding:5px 12px 5px 0;width:30%;font:13px/1.5 ${SANS};color:#6B5747;">${l}</td><td style="padding:5px 0;font:14px/1.5 ${SANS};color:#2B2119;">${v}</td></tr>`
+      const btn = (href: string, text: string, wood: boolean) => `<a href="${href}" style="display:inline-block;margin:0 4px 8px;padding:12px 22px;border-radius:12px 9px 11px 10px;${wood
+        ? `background:#DDB582 url(${SITE}/assets/img/email/wood.jpg) 50% 50%/cover;border:1.5px solid #8A5A30;border-bottom-width:3px;color:#3B2212;`
+        : 'background:#FFFBF3;border:1.5px solid #A3462A;color:#A3462A;'}font:700 15px/1.2 ${SANS};text-decoration:none;">${text}</a>`
+      const rows = [
+        row('Pickup', esc(pickupShort)),
+        row('Order', esc(dishLabel).split(' · ').join('<br>')),
+        row('Total', isRequest ? `$${total} (deposit $${deposit.toFixed(2)}, $${balanceDue.toFixed(2)} at pickup)` : `$${total}`),
+        notesOut ? row('Notes', esc(notesOut)) : '',
+        row('Customer', [name, contact, email].filter(Boolean).map(esc).join('<br>')),
+      ].join('')
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&family=Young+Serif&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:#F3EADB;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3EADB;padding:28px 14px;"><tr><td align="center">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:500px;background:#FFFBF3;border:1px solid #E6D6B8;border-radius:14px 11px 13px 12px;">
+  <tr><td style="padding:22px 24px;">
+    <p style="margin:0 0 14px;font:16px/1 ${SERIF};color:#A3462A;">Namit gid</p>
+    <h1 style="margin:0 0 14px;font:400 21px/1.25 ${SERIF};color:#2B2119;">${isRequest ? 'Reply within the hour' : 'New order'}</h1>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3EADB;border-radius:10px 8px 9px 8px;"><tr><td style="padding:12px 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table></td></tr></table>
+    ${isRequest ? `<p style="margin:20px 0 0;text-align:center;">${btn(decide + '&d=yes', 'Yes, I can', true)}${btn(decide + '&d=no', 'No, I can’t', false)}</p>
+    <p style="margin:4px 0 0;text-align:center;font:13px/1.5 ${SANS};color:#6B5747;">Yes emails them the deposit link.${wa ? ` <a href="${wa}" style="color:#1E5A63;">WhatsApp them first?</a>` : ''}</p>` : ''}
+    <p style="margin:18px 0 0;text-align:center;font:12px/1.5 ${SANS};color:#9A8A7A;">Order #${inserted.id}</p>
   </td></tr></table>
-  ${notesOut ? `<table width="100%" style="margin-top:10px;"><tr><td style="background:rgba(196,99,60,0.1);border:1px solid rgba(196,99,60,0.25);border-radius:10px;padding:10px 14px;"><span style="font-size:11px;color:#c4633c;font-weight:700;">Notes: </span><span style="font-size:13px;color:#35281f;">${esc(notesOut)}</span></td></tr></table>` : ''}
-  ${depositUrl ? `<table width="100%" style="margin-top:10px;"><tr><td style="background:rgba(127,161,150,0.14);border:1px solid rgba(127,161,150,0.3);border-radius:10px;padding:10px 14px;text-align:center;"><a href="${esc(depositUrl)}" style="font-size:13px;color:#5f8177;font-weight:700;text-decoration:none;">📎 View deposit screenshot</a></td></tr></table>` : ''}
-</td></tr>
-${isRequest ? `<tr><td style="padding:18px 28px 0;text-align:center;">
-  <p style="margin:0 0 12px;font-size:15px;color:#35281f;">Can you make it?</p>
-  <a href="${decide}&d=yes" style="display:inline-block;margin:0 4px 8px;padding:13px 20px;border-radius:10px;background:#1E5A63;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">Yes, I can make it</a>
-  <a href="${decide}&d=no" style="display:inline-block;margin:0 4px 8px;padding:13px 20px;border-radius:10px;background:#fff;color:#A3462A;border:1.5px solid #A3462A;font-size:15px;font-weight:700;text-decoration:none;">No, I'll message them</a>
-  <p style="margin:6px 0 0;font-size:12px;color:rgba(53,40,31,0.55);">A yes asks them for the $${deposit.toFixed(2)} deposit right away.${wa ? ` To talk first: <a href="${wa}" style="color:#1E5A63;">WhatsApp them</a>.` : ''}</p>
-</td></tr>` : ''}
-<tr><td style="padding:18px 28px 24px;">
-  <p style="margin:0 0 6px;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(53,40,31,0.45);font-weight:700;">Customer</p>
-  <p style="margin:0;font-size:15px;font-weight:600;color:#35281f;">${esc(name)}</p>
-  <p style="margin:2px 0 0;font-size:13px;color:rgba(53,40,31,0.6);">${esc(contact)}${email ? ' · ' + esc(email) : ''}</p>
-  <p style="margin:18px 0 0;font-size:11px;color:rgba(53,40,31,0.35);text-align:center;">Order #${inserted.id} · © 2026 Namit Gid · Toronto</p>
-</td></tr>
-</table></td></tr></table></body></html>`
+</td></tr></table>
+</body></html>`
 
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_API_KEY}` },
         body: JSON.stringify({
-          from: 'Namit Gid Orders <orders@takoshi.ca>',
+          from: 'Namit Gid <orders@takoshi.ca>',
           to: [NOTIFY_EMAIL],
-          // a tray's qty is its number of lines, and each line carries its own count
-          subject: isRequest
-            ? `🍽️ New request · reply within an hour: ${dishLabel} ($${total}) from ${name}`
-            : `🍽️ Namit Gid — ${dishLabel} x${qty} ($${total}) from ${name}`,
+          subject: `${isRequest ? 'New request' : 'New order'}: ${name}, ${pickupShort}, $${total}`,
           html,
         }),
       })

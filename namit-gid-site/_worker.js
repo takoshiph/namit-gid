@@ -141,8 +141,6 @@ function timeToMin(t) {
   return h * 60 + min;
 }
 
-// ── Order confirmation email (Namit Gid branded, best-effort) ─────────────────
-
 // Everything a customer typed is escaped before it goes into an email: the
 // address is theirs to choose, so unescaped HTML here would let anyone send
 // formatted mail from orders@takoshi.ca.
@@ -150,109 +148,13 @@ function escHtml(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-async function sendConfirmationEmail(resendApiKey, order, result) {
-  const name = escHtml(String(order.name || '').slice(0, 120));
-  const notes = escHtml(String(order.notes || '').slice(0, 500));
-  const { email } = order;
-  // For a mixed batch the browser only sends the base name; the edge function
-  // rebuilds the real label ("Cheesecake (2 Regular, 2 Matcha)") and returns it.
-  // The server rebuilds the order label from its own price table; a tray is
-  // "Palabok (Small) ×1 · Tiramisu ×1", shown one dish per line.
-  // The older one-dish checkout sends a quantity the label doesn't carry.
-  let label = String((result && result.dish) || order.dish || '');
-  if (!Array.isArray(order.lines) && !label.includes('\u00d7') && order.qty) label += ' \u00d7' + (parseInt(order.qty, 10) || 1);
-  const dish = escHtml(label).split(' \u00b7 ').join('<br>');
-  const balance = result && result.balanceDue != null ? Number(result.balanceDue) : null;
-  const pickupLine = order.pickupDate
-    ? new Date(order.pickupDate + 'T00:00:00').toLocaleDateString('en-CA',
-        { weekday: 'long', month: 'long', day: 'numeric' })
-      + (order.pickup ? ' · ' + order.pickup : '')
-    : null;
-  const row = (label, value) =>
-    `<tr><td style="padding:6px 0;color:#8a7f74;font-size:13px;width:40%;">${label}</td><td style="padding:6px 0;font-size:13px;color:#3a332e;">${value}</td></tr>`;
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#f6efe6;font-family:'Helvetica Neue',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;padding:40px 20px;"><tr><td align="center">
-    <table width="100%" style="max-width:520px;background:#fffaf3;border-radius:16px;overflow:hidden;border:1px solid #ece0d1;">
-      <tr><td style="padding:32px 36px 20px;text-align:center;border-bottom:1px solid #efe4d6;">
-        <div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#1f5c3d;">Namit Gid</div>
-        <p style="margin:6px 0 0;font-size:13px;color:#9a8f83;">Filipino home cooking · Toronto</p>
-      </td></tr>
-      <tr><td style="padding:30px 36px;">
-        <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#c2604a;">Order received</p>
-        <h1 style="margin:0 0 18px;font-family:Georgia,serif;font-size:24px;color:#2a241f;">Salamat, ${name}!</h1>
-        <p style="margin:0 0 24px;font-size:15px;color:#6f645a;line-height:1.7;">We've got your order and we'll message you to confirm. Everything is cooked fresh, so it's made the day you pick it up.</p>
-        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;border-radius:12px;padding:18px 22px;margin-bottom:24px;">
-          <tr><td colspan="2" style="padding-bottom:12px;font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#c07a3a;">Your order</td></tr>
-          ${row('Order', dish)}
-          ${result && result.total != null ? row('Total', '$' + Number(result.total).toFixed(2)) : ''}
-          ${pickupLine ? row('Pickup', escHtml(pickupLine)) : ''}
-          ${row('Pickup at', '180 Fairview Mall Dr., North York')}
-          ${balance != null ? row('Balance at pickup', '$' + balance.toFixed(2)) : ''}
-          ${notes ? row('Notes', notes) : ''}
-        </table>
-        <p style="margin:0;font-size:13px;color:#9a8f83;">Namit gid — so delicious. 💛</p>
-      </td></tr>
-      <tr><td style="padding:18px 36px;text-align:center;border-top:1px solid #efe4d6;">
-        <p style="margin:0;font-size:11px;color:#b6a89a;">© 2026 Namit Gid · Toronto, ON</p>
-      </td></tr>
-    </table>
-  </td></tr></table>
-</body></html>`;
+// ── Review request email (admin-triggered) ─────────────────────────────────────
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: 'Namit Gid <orders@takoshi.ca>',
-      to: [email],
-      subject: 'Your Namit Gid order is in 💛',
-      html,
-    }),
-  });
-  // Resend answers a rejected send with 4xx and a JSON body rather than throwing,
-  // so an unchecked fetch here reports success for mail that never went anywhere.
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '');
-    throw new Error('resend ' + res.status + ' ' + detail.slice(0, 200));
-  }
-}
-
-// ── Review request email (admin-triggered, Namit Gid branded) ────────────────
-
-async function sendReviewRequestEmail(resendApiKey, { name: rawName, email, dish: rawDish }) {
-  const name = escHtml(rawName), dish = escHtml(rawDish);
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#f6efe6;font-family:'Helvetica Neue',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;padding:40px 20px;"><tr><td align="center">
-    <table width="100%" style="max-width:520px;background:#fffaf3;border-radius:16px;overflow:hidden;border:1px solid #ece0d1;">
-      <tr><td style="padding:32px 36px 20px;text-align:center;border-bottom:1px solid #efe4d6;">
-        <div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#1f5c3d;">Namit Gid</div>
-        <p style="margin:6px 0 0;font-size:13px;color:#9a8f83;">Filipino home cooking · Toronto</p>
-      </td></tr>
-      <tr><td style="padding:30px 36px;text-align:center;">
-        <h1 style="margin:0 0 14px;font-family:Georgia,serif;font-size:24px;color:#2a241f;">Namit gid?</h1>
-        <p style="margin:0 0 24px;font-size:15px;color:#6f645a;line-height:1.7;">Hi ${name} — thank you for ordering${dish ? ' the ' + dish : ''}. If it was good, would you tell us in a line or two? Your words help this little kitchen grow.</p>
-        <a href="mailto:orders@takoshi.ca?subject=My%20Namit%20Gid%20review" style="display:inline-block;background:#c2604a;color:#fffaf3;text-decoration:none;border-radius:99px;padding:14px 30px;font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">Leave a review</a>
-      </td></tr>
-      <tr><td style="padding:18px 36px;text-align:center;border-top:1px solid #efe4d6;">
-        <p style="margin:0;font-size:11px;color:#b6a89a;">© 2026 Namit Gid · Toronto, ON</p>
-      </td></tr>
-    </table>
-  </td></tr></table>
-</body></html>`;
-
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: 'Namit Gid <orders@takoshi.ca>',
-      to: [email],
-      subject: 'Namit gid? Tell us how it was 💛',
-      html,
-    }),
-  });
-  if (!res.ok) throw new Error('resend failed');
+async function sendReviewRequestEmail(resendApiKey, { name, email, dish }) {
+  const n = firstName(name), d = String(dish || '').trim();
+  return sendMail(resendApiKey, email, 'Was it namit gid?', emailHtml({ heading: `Was it namit gid, ${n}?`,
+    paras: [`Salamat for ordering ${d ? 'the ' + d : 'from me'}. If you enjoyed it, would you write me a line or two? It helps other people find my kitchen.`],
+    button: { href: 'mailto:orders@takoshi.ca?subject=My%20Namit%20Gid%20review', text: 'Write a review' } }));
 }
 
 // ── Main handler ──────────────────────────────────────────────────────────────
@@ -315,30 +217,33 @@ function waTo(phone, text) {
   return 'https://wa.me/' + (d.length === 10 ? '1' + d : d) + '?text=' + encodeURIComponent(text);
 }
 
-// The customer emails share one frame. `paras` are plain text (escaped here).
-function noteEmailHtml({ kicker, heading, paras = [], rows = [], button }) {
-  const row = (l, v) => `<tr><td style="padding:6px 0;color:#8a7f74;font-size:13px;width:40%;">${escHtml(l)}</td><td style="padding:6px 0;font-size:13px;color:#3a332e;">${v}</td></tr>`;
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#f6efe6;font-family:'Helvetica Neue',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;padding:40px 20px;"><tr><td align="center">
-    <table width="100%" style="max-width:520px;background:#fffaf3;border-radius:16px;overflow:hidden;border:1px solid #ece0d1;">
-      <tr><td style="padding:32px 36px 20px;text-align:center;border-bottom:1px solid #efe4d6;">
-        <div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#1f5c3d;">Namit Gid</div>
-        <p style="margin:6px 0 0;font-size:13px;color:#9a8f83;">Filipino home cooking · Toronto</p>
-      </td></tr>
-      <tr><td style="padding:30px 36px;">
-        <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#c2604a;">${escHtml(kicker)}</p>
-        <h1 style="margin:0 0 18px;font-family:Georgia,serif;font-size:24px;color:#2a241f;">${escHtml(heading)}</h1>
-        ${paras.map(p => `<p style="margin:0 0 16px;font-size:15px;color:#6f645a;line-height:1.7;">${escHtml(p)}</p>`).join('')}
-        ${rows.length ? `<table width="100%" cellpadding="0" cellspacing="0" style="background:#f6efe6;border-radius:12px;padding:18px 22px;margin:8px 0 24px;">${rows.map(([l, v]) => row(l, v)).join('')}</table>` : ''}
-        ${button ? `<p style="margin:8px 0 24px;text-align:center;"><a href="${escHtml(button.href)}" style="display:inline-block;padding:14px 26px;border-radius:12px;background:#1E5A63;color:#fff;font-size:16px;font-weight:700;text-decoration:none;">${escHtml(button.text)}</a></p>` : ''}
-        <p style="margin:0;font-size:13px;color:#9a8f83;">Namit gid — so delicious. 💛</p>
-      </td></tr>
-      <tr><td style="padding:18px 36px;text-align:center;border-top:1px solid #efe4d6;">
-        <p style="margin:0;font-size:11px;color:#b6a89a;">© 2026 Namit Gid · Toronto, ON</p>
-      </td></tr>
-    </table>
+// Every email shares one frame: paper, Leny at the top, a wooden button. Customer
+// mail is in Leny's words and signed by her; mail to Leny is the order, short.
+// `paras` are plain text (escaped here); `rows` values are HTML the caller escaped.
+const EMAIL_FONTS = '<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;700&family=Young+Serif&family=Caveat:wght@600&display=swap" rel="stylesheet">';
+const SANS = "'Atkinson Hyperlegible Next',Arial,Helvetica,sans-serif";
+const SERIF = "'Young Serif',Georgia,serif";
+function emailHtml({ heading, paras = [], rows = [], button, link, toLeny = false }) {
+  const row = (l, v) => `<tr><td valign="top" style="padding:5px 12px 5px 0;width:34%;font:13px/1.5 ${SANS};color:#6B5747;">${escHtml(l)}</td><td style="padding:5px 0;font:14px/1.5 ${SANS};color:#2B2119;">${v}</td></tr>`;
+  const top = toLeny
+    ? `<p style="margin:0 0 14px;font:16px/1 ${SERIF};color:#A3462A;">Namit gid</p>`
+    : `<p style="margin:0 0 18px;text-align:center;"><img src="${SITE}/assets/img/email/leny.png" width="120" height="70" alt="Leny" style="display:inline-block;border:0;width:120px;height:auto;"><br><span style="font:22px/1.4 ${SERIF};color:#A3462A;">Namit gid</span></p>`;
+  const sign = toLeny ? '' : `<p style="margin:26px 0 0;font:600 26px/1 Caveat,'Segoe Print','Bradley Hand',cursive;color:#A3462A;">Leny</p>
+    <p style="margin:6px 0 0;font:13px/1.6 ${SANS};color:#6B5747;">Namit Gid, near Fairview Mall<br><a href="${SITE}" style="color:#1E5A63;">namitgid.takoshi.ca</a></p>`;
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">${EMAIL_FONTS}</head>
+<body style="margin:0;padding:0;background:#F3EADB;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3EADB;padding:28px 14px;"><tr><td align="center">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:500px;background:#FFFBF3;border:1px solid #E6D6B8;border-radius:14px 11px 13px 12px;">
+  <tr><td style="padding:${toLeny ? '22px 24px' : '26px 30px 28px'};">
+    ${top}
+    <h1 style="margin:0 0 14px;font:400 ${toLeny ? 21 : 25}px/1.25 ${SERIF};color:#2B2119;">${escHtml(heading)}</h1>
+    ${paras.map(p => `<p style="margin:0 0 12px;font:16px/1.6 ${SANS};color:#4A3B2F;">${escHtml(p)}</p>`).join('')}
+    ${rows.length ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3EADB;border-radius:10px 8px 9px 8px;margin:8px 0 6px;"><tr><td style="padding:12px 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows.map(([l, v]) => row(l, v)).join('')}</table></td></tr></table>` : ''}
+    ${button ? `<p style="margin:20px 0 0;text-align:center;"><a href="${escHtml(button.href)}" style="display:inline-block;padding:13px 26px;border-radius:12px 9px 11px 10px;background:#DDB582 url(${SITE}/assets/img/email/wood.jpg) 50% 50%/cover;border:1.5px solid #8A5A30;border-bottom-width:3px;color:#3B2212;font:700 16px/1.2 ${SANS};text-decoration:none;">${escHtml(button.text)}</a></p>` : ''}
+    ${link ? `<p style="margin:12px 0 0;text-align:center;font:14px/1.5 ${SANS};"><a href="${escHtml(link.href)}" style="color:#1E5A63;">${escHtml(link.text)}</a></p>` : ''}
+    ${sign}
   </td></tr></table>
+</td></tr></table>
 </body></html>`;
 }
 async function sendMail(key, to, subject, html) {
@@ -351,39 +256,63 @@ async function sendMail(key, to, subject, html) {
   if (!res.ok) throw new Error('resend ' + res.status + ' ' + (await res.text().catch(() => '')).slice(0, 200));
   return true;
 }
+// "Saturday, November 7 at 12:30 PM" for customers, "Sat Nov 7, 12:30 PM" for Leny
+const shortPickup = o => o.pickup_date
+  ? new Date(o.pickup_date + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }).replace(',', '') + (o.pickup_time ? ', ' + o.pickup_time : '')
+  : 'no pickup time';
+const weekday = o => o.pickup_date ? new Date(o.pickup_date + 'T12:00:00Z').toLocaleDateString('en-CA', { weekday: 'long', timeZone: 'UTC' }) : 'pickup';
+const MAP_URL = 'https://maps.google.com/?q=180+Fairview+Mall+Dr,+North+York,+ON';
+const dishLines = o => escHtml(o.dish).split(' · ').join('<br>');
 const orderRows = o => [
-  ['Order', escHtml(o.dish).split(' · ').join('<br>')],
+  ['Order', dishLines(o)],
   ['Pickup', escHtml(pickupText(o))],
-  ['Pickup at', '180 Fairview Mall Dr., North York'],
+  ['Where', `<a href="${MAP_URL}" style="color:#1E5A63;">180 Fairview Mall Dr, North York</a>`],
   ['Total', money2(o.total)],
-  ['Deposit (half)', money2(o.deposit_amount)],
+  ['Deposit', money2(o.deposit_amount)],
   ['At pickup', money2(o.balance_due)],
 ];
+// "5:23 PM today", or "tomorrow" when the deadline crosses midnight in Toronto
+function deadlineText(o) {
+  const d = depositDeadline(o); if (!d) return 'soon';
+  const day = iso => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/Toronto' });
+  return torontoTime(d) + (day(d) === day(o.accepted_at) ? ' today' : ' tomorrow');
+}
 
 async function sendRequestReceivedEmail(key, order, result) {
   const o = { id: result.orderId, token: result.token, dish: result.dish, total: result.total, deposit_amount: result.deposit,
     balance_due: result.balanceDue, pickup_date: order.pickupDate, pickup_time: order.pickup };
-  return sendMail(key, order.email, 'We got your request 💛', noteEmailHtml({
-    kicker: 'Request received', heading: `Salamat, ${firstName(order.name)}!`,
-    paras: [`Leny will reply within an hour. If she can make it, you'll get a link to send the ${money2(o.deposit_amount)} deposit (half the total). The rest is paid at pickup.`,
-      'We cook at home and shop for each order, so nothing is charged until Leny says yes.'],
+  const name = firstName(order.name);
+  return sendMail(key, order.email, `I got your request, ${name}`, emailHtml({
+    heading: `Salamat, ${name}!`,
+    paras: [`I got your request for ${pickupText(o)}. I’ll reply within the hour.`,
+      `If I can make it, I’ll send you a link for the ${money2(o.deposit_amount)} deposit. That’s half, and you pay the rest at pickup. Nothing is charged until we both agree.`],
     rows: orderRows(o), button: { href: orderLink(o), text: 'See my request' } }));
 }
 const customerEmails = {
-  accepted: o => ['Leny can make it 💛', noteEmailHtml({ kicker: 'Leny can make it', heading: `Good news, ${firstName(o.customer_name)}!`,
-    paras: [`Leny can make your order for ${pickupText(o)}. To lock it in, send the ${money2(o.deposit_amount)} deposit (half the total) by ${torontoTime(depositDeadline(o))}. The rest, ${money2(o.balance_due)}, is paid at pickup.`],
+  accepted: o => ['I can make your order!', emailHtml({ heading: `It’s a deal, ${firstName(o.customer_name)}!`,
+    paras: [`I can make your order for ${pickupText(o)}.`,
+      `To hold your spot, please send the ${money2(o.deposit_amount)} deposit by e-Transfer before ${deadlineText(o)}. Once it’s in, I’ll go shopping for your order.`],
     rows: orderRows(o), button: { href: orderLink(o), text: 'Send my deposit' } })],
-  declined: o => ['About your Namit Gid request', noteEmailHtml({ kicker: 'About your request', heading: `Hi ${firstName(o.customer_name)},`,
-    paras: [`Leny can't make ${pickupText(o)}, but she'd love to cook for you. She'll message you soon to find another day or time.`, 'Nothing has been charged.'] })],
-  confirmed: o => ['Your Namit Gid order is confirmed 💛', noteEmailHtml({ kicker: 'Order confirmed', heading: `You're all set, ${firstName(o.customer_name)}!`,
-    paras: [`Leny received your deposit. See you ${pickupText(o)}.`],
-    rows: orderRows(o), button: { href: orderLink(o), text: 'See my order' } })],
+  declined: o => ['About your request', emailHtml({ heading: `Really sorry, ${firstName(o.customer_name)}`,
+    paras: [`I can’t make ${pickupText(o)}. I’d still love to cook for you, so I’ll message you soon to find another day.`, 'Nothing was charged.'] })],
+  confirmed: o => [`You’re all set for ${weekday(o)}`, emailHtml({ heading: `See you ${weekday(o)}, ${firstName(o.customer_name)}!`,
+    paras: [`I got your deposit. Salamat! Your order is booked for ${pickupText(o)}.`,
+      `Please bring the other ${money2(o.balance_due)}, cash or e-Transfer.`],
+    rows: orderRows(o), button: { href: MAP_URL, text: 'Get directions' }, link: { href: orderLink(o), text: 'See my order' } })],
 };
 async function mailCustomer(env, o, kind) {
   if (!o.email || !customerEmails[kind]) return 'no_email';
   try { const [subject, html] = customerEmails[kind](o); await sendMail(env.RESEND_API_KEY, o.email, subject, html); return 'sent'; }
   catch (e) { console.error('[namitgid] customer email failed', kind, o.id, e); return 'failed'; }
 }
+
+// What Leny needs from an order, nothing more
+const lenyRows = o => [
+  ['Pickup', escHtml(shortPickup(o))],
+  ['Order', dishLines(o)],
+  ['Total', `${money2(o.total)} (deposit ${money2(o.deposit_amount)}, ${money2(o.balance_due)} at pickup)`],
+  ['Customer', [o.customer_name, o.contact, o.email].filter(Boolean).map(escHtml).join('<br>')],
+];
 
 // Leny's pages, behind the buttons in her emails. A link only shows the page;
 // the choice is a button on it, because mail scanners open links on their own.
@@ -852,9 +781,9 @@ async function handle(request, env) {
       const moved = await moveOrder(o, ['accepted'], { status: 'verifying', deposit_sent_at: new Date().toISOString(), ...(shot ? { deposit_screenshot_url: shot } : {}) });
       if (moved) {
         try {
-          await sendMail(env.RESEND_API_KEY, env.NOTIFY_EMAIL || LENY_EMAIL_DEFAULT, `💸 Deposit sent: ${moved.customer_name}, ${pickupText(moved)}`,
-            noteEmailHtml({ kicker: 'Deposit sent', heading: `${firstName(moved.customer_name)} sent the ${money2(moved.deposit_amount)} deposit`,
-              paras: ['Check your bank, then confirm the order.'], rows: orderRows(moved), button: { href: decideLink(moved), text: 'Check and confirm' } }));
+          await sendMail(env.RESEND_API_KEY, env.NOTIFY_EMAIL || LENY_EMAIL_DEFAULT, `Deposit sent: ${moved.customer_name}, ${shortPickup(moved)}`,
+            emailHtml({ toLeny: true, heading: `${firstName(moved.customer_name)} sent the ${money2(moved.deposit_amount)} deposit`,
+              paras: ['Check your bank, then confirm.'], rows: lenyRows(moved), button: { href: decideLink(moved), text: 'Confirm order' } }));
         } catch (e) { console.error('[namitgid] deposit email to Leny failed', moved.id, e); }
       }
       return jsonResponse({ ok: true, status: 'verifying' }, 200, request);
@@ -911,9 +840,7 @@ async function handle(request, env) {
             data?.orderId, 'saved, no confirmation email sent to', body.order.email);
         } else {
           try {
-            if (data.status === 'requested') await sendRequestReceivedEmail(env.RESEND_API_KEY, body.order, data);
-            else await sendConfirmationEmail(env.RESEND_API_KEY, body.order, data);
-            confirmation = 'sent';
+            if (data.status === 'requested') { await sendRequestReceivedEmail(env.RESEND_API_KEY, body.order, data); confirmation = 'sent'; }
           } catch (e) {
             confirmation = 'failed';
             console.error('[namitgid] confirmation email failed for order', data?.orderId, e);
