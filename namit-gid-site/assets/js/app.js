@@ -332,6 +332,9 @@
     if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, select); else select();
   }
   const progress = at => make('div', { class: 'progress', 'aria-hidden': 'true' }, STEPS.map((s, i) => make('span', { class: i < at ? 'on done' : i === at ? 'on now' : '', text: s })));
+  const TRACK = ['Ordered', 'Confirmed', 'Pickup'];
+  const tracker = (at, note) => [make('div', { class: 'progress track', 'aria-hidden': 'true' }, TRACK.map((s, i) => make('span', { class: i < at ? 'on done' : i === at ? 'on now' : '', text: s }))),
+    make('p', { class: 'track-note', text: note })];
   const longDay = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' });
 
   async function sendRequest() {
@@ -500,6 +503,7 @@
     }
     renderOrderPage();
     if (!sheet.open) sheet.showModal();
+    watchOrder();
   }
   function renderOrderPage() {
     const o = viewing, body = [];
@@ -509,8 +513,8 @@
       make('div', { class: 'small' }, [make('span', { text: 'Deposit (half)' }), make('span', { text: money(o.deposit) })]),
       make('div', { class: 'small' }, [make('span', { text: 'At pickup' }), make('span', { text: money(o.balance) })])]);
     const when = () => make('p', { class: 'small', text: 'Pickup ' + longDay(o.pickupDate) + ' at ' + o.pickupTime + ' · ' + S.pickup.address });
-    const refresh = make('button', { type: 'button', class: 'btn btn-line', text: o.status === 'verifying' ? 'Check if it’s confirmed' : 'Check for my answer', onclick: () => loadOrderPage(o.id, o.t) });
-    let title = 'Your request', at = 2;
+    const refresh = make('button', { type: 'button', class: 'btn btn-line', text: 'Try again', onclick: () => loadOrderPage(o.id, o.t) });
+    let title = 'Your request', at = -1, note = '';
     if (o.status === 'missing' || o.status === 'offline') {
       title = o.status === 'offline' ? 'Sandali lang' : 'Hmm, where is it?';
       body.push(make('p', { text: o.status === 'offline' ? 'I couldn’t reach my order book just now. Try again in a moment.' : 'I can’t find this request. Open the latest email or message I sent you about it.' }),
@@ -518,9 +522,10 @@
       $('sheetH').textContent = title; return $('sheetBody').replaceChildren(...body);
     }
     if (o.status === 'requested') {
-      body.push(make('p', { text: `Salamat, ${o.name}! I got your request. I’ll reply within the hour.` }), lines(), sumsOf(), when(), refresh);
+      at = 1; note = 'Waiting for my answer';
+      body.push(make('p', { text: `Salamat, ${o.name}! I got your request. I’ll reply within the hour, and this page will change when I do.` }), lines(), sumsOf(), when());
     } else if (o.status === 'accepted') {
-      title = 'Send your deposit'; at = 3;
+      title = 'Send your deposit'; at = 1; note = 'Your deposit confirms it';
       const row = (label, value, copyText) => {
         const v = make('span', { class: 'v', text: value });
         const b = make('button', { type: 'button', class: 'copy', text: 'Copy' });
@@ -541,17 +546,17 @@
         up, sumsOf(), when(),
         make('button', { type: 'button', class: 'btn btn-sea', text: 'I’ve sent my deposit', onclick: depositSent }));
     } else if (o.status === 'verifying') {
-      title = 'Checking your deposit'; at = 3;
-      body.push(make('p', { text: `Salamat, ${o.name}! I’m checking my bank for your ${money(o.deposit)}. I’ll message you as soon as I see it.` }), lines(), sumsOf(), when(), refresh);
+      title = 'Checking your deposit'; at = 1; note = 'Checking your deposit';
+      body.push(make('p', { text: `Salamat, ${o.name}! I’m checking my bank for your ${money(o.deposit)}. This page will change as soon as I see it.` }), lines(), sumsOf(), when());
     } else if (o.status === 'completed' || o.status === 'picked_up' || (['confirmed', 'ready'].includes(o.status) && o.pickupDate && o.pickupDate < torontoNow().day.toISOString().slice(0, 10))) {
       // after pickup the page asks how it was
-      title = 'How was it?'; at = 4;
+      title = 'How was it?'; at = 3; note = 'Picked up. Salamat!';
       const ids = orderDishIds(o.dish);
       o.rv = o.rv || { order: o.id, t: o.t, name: o.name, text: '', dishes: ids.length ? ids : REVIEWABLE.map(d => d.id), dish: ids.length === 1 ? ids[0] : '' };
       if (o.reviewed || o.rv.sent) body.push(make('p', { text: `Salamat for your note, ${o.name}! I read every one.` }), lines());
       else body.push(make('p', { text: `Salamat for ordering, ${o.name}! Was it namit gid? Tell me in a line or two.` }), ...reviewFields(o.rv, renderOrderPage));
     } else if (o.status === 'confirmed' || o.status === 'ready') {
-      title = 'Confirmed!'; at = 4;
+      title = 'Confirmed!'; at = 2; note = 'See you at pickup';
       body.push(make('div', { class: 'receipt' }, [make('p', { class: 'stamp', text: 'Confirmed' }),
         make('p', { text: `You’re all set, ${o.name}! See you ${longDay(o.pickupDate)} at ${o.pickupTime}.` }),
         make('p', { class: 'small', text: money(o.balance) + ' left to pay at pickup · ' + S.pickup.address })]),
@@ -567,8 +572,31 @@
       body.push(make('p', { text: 'This order is ' + String(o.status).replace('_', ' ') + '.' }), lines());
     }
     $('sheetH').textContent = title;
-    $('sheetBody').replaceChildren(progress(at), ...body);
+    $('sheetBody').replaceChildren(...(at < 0 ? [] : tracker(at, note)), ...body);
   }
+  // While the order page is open it checks for Leny's answer on its own,
+  // every 30 seconds and whenever they come back to the tab.
+  let watchTimer = 0;
+  function watchOrder() {
+    clearInterval(watchTimer);
+    const o = viewing;
+    if (o && !mock && ['requested', 'accepted', 'verifying', 'confirmed', 'ready'].includes(o.status)) watchTimer = setInterval(checkOrder, 30e3);
+  }
+  async function checkOrder() {
+    const o = viewing;
+    if (!o || !o.t || mock || !sheet.open || document.hidden) return;
+    try {
+      const r = await fetch('/api/my-order?id=' + encodeURIComponent(o.id) + '&t=' + encodeURIComponent(o.t));
+      if (!r.ok) return;
+      const n = await r.json();
+      if (viewing !== o || !n.status || n.status === o.status) return;
+      viewing = { ...o, ...n, t: o.t };
+      renderOrderPage();
+      say($('sheetH').textContent);
+      watchOrder();
+    } catch (e) { /* try again on the next tick */ }
+  }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkOrder(); });
   async function depositSent() {
     const o = viewing, btn = [...$('sheetBody').querySelectorAll('button')].find(b => /sent my deposit/.test(b.textContent));
     if (!shot) return flag('Add a screenshot of your e-Transfer first, so I can match it to your order.');
@@ -860,7 +888,7 @@
   $('dishSheetClose').addEventListener('click', () => dishSheet.close());
   dishSheet.addEventListener('click', e => { if (e.target === dishSheet) dishSheet.close(); });
   dishSheet.addEventListener('close', closeSpot);
-  sheet.addEventListener('close', () => { reviewing = null; if (openSpot === 'register') closeSpot(); });
+  sheet.addEventListener('close', () => { reviewing = null; clearInterval(watchTimer); if (openSpot === 'register') closeSpot(); });
 
   // Pull a sheet down to close it, like any phone sheet: only once its paper
   // is scrolled to the top, so scrolling the paper itself still works.

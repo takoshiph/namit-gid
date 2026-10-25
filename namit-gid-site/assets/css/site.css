@@ -877,6 +877,8 @@ html.calm .sheet[open] { animation: none; }
 .sheet.notebook .progress span.done { color: var(--pen-soft); }
 .sheet.notebook .progress span.done::before { content: '\2713\00a0'; color: var(--pencil-red); }
 .sheet.notebook .progress span.now { color: var(--pen); font-weight: 700; background: var(--circle); }
+.track-note { margin: 6px 0 0; text-align: center; color: var(--ink-2); }
+.sheet.notebook .track-note { font: 600 20px/1.2 var(--hand); color: var(--pen-soft); }
 
 /* the tray: snapshots taped in, written in blue ink */
 .sheet.notebook .lines { gap: 14px; }

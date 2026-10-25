@@ -296,10 +296,14 @@ const customerEmails = {
   declined: o => ['About your request', emailHtml({ heading: `Really sorry, ${firstName(o.customer_name)}`,
     paras: [`I can’t make ${pickupText(o)}. I’d still love to cook for you, so I’ll message you soon to find another day.`, 'Nothing was charged.'] })],
   confirmed: o => [`You’re all set for ${weekday(o)}`, emailHtml({ heading: `See you ${weekday(o)}, ${firstName(o.customer_name)}!`,
-    paras: [`I got your deposit. Salamat! Your order is booked for ${pickupText(o)}.`,
+    paras: [`Salamat for the deposit! Your order is booked for ${pickupText(o)}.`,
       `Please bring the other ${money2(o.balance_due)}, cash or e-Transfer.`],
     rows: orderRows(o), button: { href: MAP_URL, text: 'Get directions' }, link: { href: orderLink(o), text: 'See my order' } })],
 };
+customerEmails.unpaid = o => ['About your deposit', emailHtml({ heading: `Hi ${firstName(o.customer_name)},`,
+  paras: [`I couldn’t find your ${money2(o.deposit_amount)} e-Transfer in my bank yet. Could you check that it went through?`,
+    `Please send it before ${deadlineText(o)} to keep ${pickupText(o)}.`],
+  rows: orderRows(o), button: { href: orderLink(o), text: 'See my order' } })];
 async function mailCustomer(env, o, kind) {
   if (!o.email || !customerEmails[kind]) return 'no_email';
   try { const [subject, html] = customerEmails[kind](o); await sendMail(env.RESEND_API_KEY, o.email, subject, html); return 'sent'; }
@@ -375,6 +379,11 @@ function lenyDecidePage(o, { done, focus } = {}) {
     action = `<p class="lead">${escHtml(first)} says the ${money2(o.deposit_amount)} deposit is sent. Check your bank, then confirm.</p>`
       + (o.deposit_screenshot_url ? `<p><a href="/api/deposit-shot?id=${o.id}&amp;t=${escHtml(o.admin_token)}">See their screenshot</a></p>` : '')
       + form('<button class="yes" name="d" value="paid">Deposit received: confirm the order</button>');
+  } else if (o.status === 'confirmed') {
+    action = `<p class="lead">Check your bank for the ${money2(o.deposit_amount)} deposit before you shop.</p>`
+      + (o.deposit_screenshot_url ? `<p><a href="/api/deposit-shot?id=${o.id}&amp;t=${escHtml(o.admin_token)}">See their screenshot</a></p>` : '')
+      + form('<button class="no" name="d" value="unpaid">Not received: ask them again</button>')
+      + `<p class="muted">This asks ${escHtml(first)} to check their e-Transfer and gives them ${DEPOSIT_HOURS} hours to send it.</p>`;
   }
   return lenyPage('Namit Gid · ' + o.customer_name, `
     <p class="tag">${escHtml(STATUS_WORDS[o.status] || o.status)}</p>
@@ -736,6 +745,9 @@ async function handle(request, env) {
       } else if (d === 'paid') {
         moved = await moveOrder(o, ['accepted', 'verifying', 'expired'], { status: 'confirmed', confirmed_at: now });
         if (moved) { await mailCustomer(env, moved, 'confirmed'); done = 'Confirmed. Time to shop!'; }
+      } else if (d === 'unpaid') {
+        moved = await moveOrder(o, ['confirmed', 'verifying'], { status: 'accepted', accepted_at: now, confirmed_at: null, deposit_sent_at: null });
+        if (moved) { const m = await mailCustomer(env, moved, 'unpaid'); done = m === 'sent' ? `Done. ${firstName(o.customer_name)} has been asked to check their e-Transfer.` : `Done. Ask ${firstName(o.customer_name)} on WhatsApp to check their e-Transfer.`; }
       }
       return { moved, done: moved ? done : 'This was already answered' };
     };
@@ -755,7 +767,7 @@ async function handle(request, env) {
       if (m && request.method === 'POST') {
         if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
         let b; try { b = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
-        if (!['yes', 'no', 'paid'].includes(b.d)) return jsonResponse({ error: 'Bad decision' }, 400, request);
+        if (!['yes', 'no', 'paid', 'unpaid'].includes(b.d)) return jsonResponse({ error: 'Bad decision' }, 400, request);
         const r = await fetch(`${SB}/rest/v1/orders?id=eq.${m[1]}&select=${ORDER_FIELDS}`, { headers: sbHeaders });
         const o = r.ok ? (await r.json())[0] : null;
         if (!o) return jsonResponse({ error: 'not_found' }, 404, request);
@@ -787,7 +799,7 @@ async function handle(request, env) {
       let b; try { b = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
       const o = await getOrder(b.id, 'token', b.t);
       if (!o) return jsonResponse({ error: 'not_found' }, 404, request);
-      if (o.status === 'verifying' || o.status === 'confirmed') return jsonResponse({ ok: true, status: o.status }, 200, request);
+      if (['verifying', 'confirmed', 'ready', 'completed', 'picked_up'].includes(o.status)) return jsonResponse({ ok: true, status: o.status }, 200, request);
       if (o.status !== 'accepted') return jsonResponse({ error: o.status === 'expired' ? 'expired' : 'not_accepted', status: o.status }, 409, request);
       if (Date.parse(depositDeadline(o)) < Date.now()) {
         await moveOrder(o, ['accepted'], { status: 'expired' });
@@ -796,15 +808,20 @@ async function handle(request, env) {
       // a screenshot this site uploaded is needed, so Leny can match the e-Transfer
       const shot = typeof b.screenshot === 'string' && DEPOSIT_REF.test(b.screenshot) ? b.screenshot : null;
       if (!shot) return jsonResponse({ error: 'screenshot_required' }, 400, request);
-      const moved = await moveOrder(o, ['accepted'], { status: 'verifying', deposit_sent_at: new Date().toISOString(), deposit_screenshot_url: shot });
+      // The screenshot confirms the order right away. Leny checks her bank
+      // before she shops, and "Not received" on her page undoes it.
+      const now = new Date().toISOString();
+      const moved = await moveOrder(o, ['accepted'], { status: 'confirmed', deposit_sent_at: now, confirmed_at: now, deposit_screenshot_url: shot });
       if (moved) {
+        await mailCustomer(env, moved, 'confirmed');
         try {
           await sendMail(env.RESEND_API_KEY, env.NOTIFY_EMAIL || LENY_EMAIL_DEFAULT, `Deposit sent: ${moved.customer_name}, ${shortPickup(moved)}`,
             emailHtml({ toLeny: true, heading: `${firstName(moved.customer_name)} sent the ${money2(moved.deposit_amount)} deposit`,
-              paras: ['Check your bank, then confirm.'], rows: lenyRows(moved), button: { href: decideLink(moved), text: 'Confirm order' } }));
+              paras: ['The order is confirmed. Check your bank before you shop.', 'If the money isn’t there, open the order and tap Not received.'],
+              rows: lenyRows(moved), button: { href: decideLink(moved), text: 'See the screenshot' } }));
         } catch (e) { console.error('[namitgid] deposit email to Leny failed', moved.id, e); }
       }
-      return jsonResponse({ ok: true, status: 'verifying' }, 200, request);
+      return jsonResponse({ ok: true, status: (moved || o).status }, 200, request);
     }
 
     // ── POST /api/submit-order (public) — proxy to the Supabase edge function ──
