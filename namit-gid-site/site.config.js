@@ -7,8 +7,6 @@ window.SITE = {
     home: 'Long Beach, Romblon',
     island: 'Byaringan Island',
     // TODO-CHECK: Hiligaynon lines
-    eyebrow: 'Luto sa balay · Long Beach, Romblon to North York',
-    eyebrowShort: 'Luto sa balay · Romblon to North York',
     headline: 'Filipino home cooking, made the day you pick it up.',
     caption: 'Byaringan Island, from our beach back home in Romblon.',
     closedLine: 'Sarado anay kita. The kitchen’s light is off.',

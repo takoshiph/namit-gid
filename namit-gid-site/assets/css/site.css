@@ -268,9 +268,6 @@ html.revealing body { overflow: hidden; }
 html.intro .shore, html.intro .plank, html.intro .emblem, html.intro .emblem-arms, html.intro .badge { opacity: .001; }
 
 .hero-copy { display: grid; gap: 12px; max-width: 34rem; text-align: center; justify-items: center; }
-.eyebrow { font-size: 15px; color: var(--ink-2); }
-.eyebrow .long { display: none; }
-@media (min-width: 420px) { .eyebrow .long { display: inline; } .eyebrow .short { display: none; } }
 .hero h1 { font-size: 30px; line-height: 1.08; }
 .hero h1 .line { display: block; overflow: clip; padding-bottom: .06em; }
 .hero h1 .line > span { display: inline-block; }
