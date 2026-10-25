@@ -452,6 +452,9 @@ html.intro .hero-copy > * { opacity: 0; }
 .foot a { color: var(--sand); }
 .todo { opacity: .55; }
 .foot-legal { margin-top: 16px; font-size: 14px !important; opacity: .75; }
+/* Leny's other kitchen */
+.foot-takoshi { margin-top: 14px; color: #d9ccb4; }
+.foot-takoshi a { color: var(--sun); text-underline-offset: 3px; }
 
 /* ── order sheet ─────────────────────────────────────────── */
 .sheet { border: 0; padding: 0; width: 100%; max-width: 560px; max-height: 92vh; margin: auto auto 0; border-radius: 12px 12px 0 0; background: var(--sand); color: var(--ink); }
