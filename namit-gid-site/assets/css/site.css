@@ -234,6 +234,9 @@ html.low-end .st-vignette { background: radial-gradient(120% 90% at 50% 45%, tra
 
 /* the final photo on the sign gets the same sky */
 .shore-clouds { position: absolute; inset: 0; }
+/* the painting's title, lettered on the water like a painter would */
+.frame-label { position: absolute; left: 4%; bottom: 5%; font: italic 400 max(10px, 7cqh)/1 var(--serif); color: rgba(255, 240, 220, .88);
+  text-shadow: 0 1px 2px rgba(20, 30, 40, .55); letter-spacing: .01em; white-space: nowrap; pointer-events: none; }
 
 /* the camera: viewfinder corners, the print's white border, shutter blades, flash */
 .st-finder { left: 0; top: 0; opacity: 0; }
@@ -274,7 +277,6 @@ html.intro .shore, html.intro .plank, html.intro .emblem, html.intro .emblem-arm
 .meta { font-size: 15px; color: var(--ink-2); }
 .hero-cta { display: grid; gap: 8px; justify-items: center; margin-top: 4px; }
 .hero-cta .btn { min-width: 220px; }
-.caption { font-size: 14px; color: var(--ink-2); max-width: 26rem; }
 
 /* intro: the hero copy waits for the stage to land */
 html.intro body { overflow: hidden; }

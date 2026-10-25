@@ -8,7 +8,6 @@ window.SITE = {
     island: 'Byaringan Island',
     // TODO-CHECK: Hiligaynon lines
     headline: 'Kumain ka na? Tara, nagluto ako.',
-    caption: 'Byaringan Island, from our beach back home in Romblon.',
     closedLine: 'Sarado anay kita. The kitchen’s light is off.',
   },
   pickup: {
