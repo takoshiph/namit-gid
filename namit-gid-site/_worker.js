@@ -154,7 +154,7 @@ async function sendReviewRequestEmail(resendApiKey, { name, email, dish }) {
   const n = firstName(name), d = String(dish || '').trim();
   return sendMail(resendApiKey, email, 'Was it namit gid?', emailHtml({ heading: `Was it namit gid, ${n}?`,
     paras: [`Salamat for ordering ${d ? 'the ' + d : 'from me'}. If you enjoyed it, would you write me a line or two? It helps other people find my kitchen.`],
-    button: { href: 'mailto:orders@takoshi.ca?subject=My%20Namit%20Gid%20review', text: 'Write a review' } }));
+    button: { href: `${SITE}/?review=1`, text: 'Write a review' } }));
 }
 
 // ── Main handler ──────────────────────────────────────────────────────────────
@@ -304,6 +304,22 @@ async function mailCustomer(env, o, kind) {
   if (!o.email || !customerEmails[kind]) return 'no_email';
   try { const [subject, html] = customerEmails[kind](o); await sendMail(env.RESEND_API_KEY, o.email, subject, html); return 'sent'; }
   catch (e) { console.error('[namitgid] customer email failed', kind, o.id, e); return 'failed'; }
+}
+
+const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+const randomHex = n => hex(crypto.getRandomValues(new Uint8Array(n)));
+const sha256hex = async str => hex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str)));
+const reviewLink = r => `${SITE}/api/review?id=${r.id}&t=${r.admin_token}`;
+// Leny's page for one review: read it, then show it on the site or keep it hidden
+function lenyReviewPage(r, done) {
+  const form = b => `<form method="post" action="/api/review"><input type="hidden" name="id" value="${r.id}"><input type="hidden" name="t" value="${escHtml(r.admin_token)}">${b}</form>`;
+  return lenyPage('Namit Gid · review from ' + r.name, `
+    <p class="tag">${r.visible ? 'On the site' : 'Hidden'}</p>
+    <h1>${escHtml(done || r.name + ' wrote a review')}</h1>
+    <div class="card"><p style="margin:0;font-size:18px">“${escHtml(r.review_text)}”</p>
+      <p class="muted" style="margin:8px 0 0">${escHtml(r.name)}${r.dish ? ', ' + escHtml(r.dish[0].toUpperCase() + r.dish.slice(1).replace(/-/g, ' ')) : ''} · ${r.order_id ? 'from order #' + r.order_id : 'from the website'}</p></div>
+    ${form(r.visible ? '<button class="no" name="d" value="hide">Hide it</button>' : '<button class="yes" name="d" value="show">Show on site</button><button class="no" name="d" value="hide">Keep it hidden</button>')}
+    <p class="muted">Shown reviews appear in that dish’s window with their first name.</p>`);
 }
 
 // What Leny needs from an order, nothing more
@@ -762,7 +778,8 @@ async function handle(request, env) {
       if (!o) return jsonResponse({ error: 'not_found' }, 404, request);
       return jsonResponse({ id: o.id, status: o.status, dish: o.dish, total: Number(o.total), deposit: Number(o.deposit_amount || 0),
         balance: Number(o.balance_due || 0), pickupDate: o.pickup_date, pickupTime: o.pickup_time, name: firstName(o.customer_name),
-        depositDeadline: o.status === 'accepted' ? depositDeadline(o) : null, depositEmail: 'orders@takoshi.ca' }, 200, request);
+        depositDeadline: o.status === 'accepted' ? depositDeadline(o) : null, depositEmail: 'orders@takoshi.ca',
+        reviewed: await fetch(`${SB}/rest/v1/reviews?order_id=eq.${o.id}&select=id`, { headers: sbHeaders }).then(r => r.json()).then(a => a.length > 0).catch(() => false) }, 200, request);
     }
 
     // POST /api/deposit-sent {id, t, screenshot}: the customer says the deposit is sent
@@ -869,29 +886,80 @@ async function handle(request, env) {
       }
     }
 
-    // ── GET /api/reviews (public) ─────────────────────────────────────────────
+    // ── GET /api/reviews (public): approved reviews, newest first ──────────────
     if (url.pathname === '/api/reviews' && request.method === 'GET') {
-      const res = await fetch(`${SB}/rest/v1/reviews?visible=eq.true&order=display_order.asc`, { headers: sbHeaders });
-      const data = await res.json().catch(() => []);
-      return jsonResponse(data, res.ok ? 200 : 500, request);
+      const res = await fetch(`${SB}/rest/v1/reviews?visible=eq.true&select=name,review_text,dish,order_id,created_at&order=created_at.desc&limit=200`, { headers: sbHeaders });
+      const rows = await res.json().catch(() => []);
+      if (!res.ok) return jsonResponse([], 500, request);
+      return jsonResponse(rows.map(r => ({ name: r.name, text: r.review_text, dish: r.dish, verified: !!r.order_id })), 200, request);
     }
 
-    // ── POST /api/submit-review (public) — saved hidden until admin approves ──
+    // ── POST /api/submit-review (public): saved hidden; Leny approves by email ──
+    // From an order page it carries the order's id and secret, and counts once
+    // per order. From the site it needs the bot check, and one address can
+    // send three a day.
     if (url.pathname === '/api/submit-review' && request.method === 'POST') {
-      let body;
-      try { body = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
-      if (!body.name || !body.text) return jsonResponse({ error: 'name and text required' }, 400, request);
+      let b;
+      try { b = await request.json(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
+      const text = String(b.text || '').trim().slice(0, 600);
+      const dish = /^[a-z0-9-]{1,40}$/.test(String(b.dish || '')) ? b.dish : null;
+      const dishName = String(b.dishName || '').trim().slice(0, 60);
+      let name = String(b.name || '').trim().split(/\s+/)[0].slice(0, 40);
+      let o = null;
+      if (b.order) {
+        o = await getOrder(b.order, 'token', b.t);
+        if (!o) return jsonResponse({ error: 'not_found' }, 404, request);
+        if (!name) name = firstName(o.customer_name);
+      } else if (env.TURNSTILE_SECRET_KEY) {
+        const fd = new FormData();
+        fd.append('secret', env.TURNSTILE_SECRET_KEY);
+        fd.append('response', b.token || '');
+        const cf = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: fd });
+        if (!(await cf.json().catch(() => ({}))).success) return jsonResponse({ error: 'bot_check' }, 403, request);
+      }
+      if (!name || text.length < 3) return jsonResponse({ error: 'name and text required' }, 400, request);
+      const ip = request.headers.get('CF-Connecting-IP') || '';
+      const ipHash = ip ? await sha256hex('namitgid-review:' + ip) : null;
+      if (!o && ipHash) {
+        const since = new Date(Date.now() - 864e5).toISOString();
+        const recent = await fetch(`${SB}/rest/v1/reviews?ip_hash=eq.${ipHash}&created_at=gt.${since}&select=id`, { headers: sbHeaders }).then(r => r.json()).catch(() => []);
+        if (recent.length >= 3) return jsonResponse({ error: 'too_many' }, 429, request);
+      }
       const res = await fetch(`${SB}/rest/v1/reviews`, {
-        method: 'POST', headers: sbWrite,
-        body: JSON.stringify({
-          name: String(body.name).slice(0, 60),
-          review_text: String(body.text).slice(0, 400),
-          stars: Math.min(5, Math.max(1, parseInt(body.stars, 10) || 5)),
-          visible: false,
-        }),
+        method: 'POST', headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify({ name, review_text: text, dish, order_id: o ? o.id : null, admin_token: randomHex(24), ip_hash: ipHash, visible: false }),
       });
-      if (!res.ok) return jsonResponse({ error: 'Failed to save review' }, 500, request);
+      if (res.status === 409) return jsonResponse({ error: 'already' }, 409, request);
+      if (!res.ok) return jsonResponse({ error: 'save_failed' }, 500, request);
+      const r = (await res.json())[0];
+      try {
+        await sendMail(env.RESEND_API_KEY, env.NOTIFY_EMAIL || LENY_EMAIL_DEFAULT, `New review from ${name}${dishName ? ', ' + dishName : ''}`,
+          emailHtml({ toLeny: true, heading: `${name} wrote a review`, paras: ['“' + text + '”'],
+            rows: [['Dish', escHtml(dishName || 'Not picked')], ['From', o ? `Order #${o.id}, ${escHtml(o.customer_name)}` : 'The website']],
+            button: { href: reviewLink(r), text: 'Show or hide it' } }));
+      } catch (e) { console.error('[namitgid] review email to Leny failed', r.id, e); }
       return jsonResponse({ ok: true }, 201, request);
+    }
+
+    // GET /api/review?id=&t=: Leny's page for one review. The choice is a
+    // button on the page, because mail scanners open links on their own.
+    if (url.pathname === '/api/review' && (request.method === 'GET' || request.method === 'POST')) {
+      let id, t, d;
+      if (request.method === 'POST') {
+        let fd; try { fd = await request.formData(); } catch { return lenyPage('Namit Gid', '<h1>Something went wrong</h1>', 400); }
+        id = fd.get('id'); t = fd.get('t'); d = fd.get('d');
+      } else { id = url.searchParams.get('id'); t = url.searchParams.get('t'); }
+      if (!/^\d+$/.test(String(id || '')) || !/^[0-9a-f]{48}$/.test(String(t || ''))) return lenyPage('Namit Gid', '<h1>This link isn\'t valid</h1>', 404);
+      const q = `${SB}/rest/v1/reviews?id=eq.${id}&admin_token=eq.${t}`;
+      let r = (await fetch(q + '&select=*', { headers: sbHeaders }).then(x => x.json()).catch(() => []))[0];
+      if (!r) return lenyPage('Namit Gid', '<h1>This link isn\'t valid</h1><p class="lead">The review may have been deleted.</p>', 404);
+      let done;
+      if (d === 'show' || d === 'hide') {
+        const up = await fetch(q, { method: 'PATCH', headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+          body: JSON.stringify({ visible: d === 'show' }) });
+        if (up.ok) { r = (await up.json())[0] || r; done = d === 'show' ? 'It’s on the site now' : 'It’s hidden'; }
+      }
+      return lenyReviewPage(r, done);
     }
 
     // ── GET /api/reviews/all (admin) ──────────────────────────────────────────

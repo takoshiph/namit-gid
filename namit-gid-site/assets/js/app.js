@@ -64,13 +64,22 @@
   const total = () => tray.reduce((a, l) => a + linePrice(l), 0);
 
   const STEAM = 'M30 70 C20 55 40 45 30 30 S40 10 32 0';
-  // Placeholder reviews never reach the live site.
-  const showReviews = S.reviews && (!S.reviews.placeholder || location.hostname !== 'namitgid.takoshi.ca');
+  // Each dish shows its newest approved review (loadReviews fills them in),
+  // and anyone can write one.
+  const REVIEWABLE = [...S.menu.mains, ...S.menu.desserts, ...(S.menu.holiday || [])];
+  const liveQuotes = {};
+  function fillQuote(slot) {
+    const d = REVIEWABLE.find(x => x.id === slot.dataset.dish), q = liveQuotes[d.id];
+    slot.replaceChildren(...(q ? [make('figure', { class: 'dish-quote' }, [make('blockquote', { text: '“' + q.text + '”' }),
+      make('figcaption', { text: q.name + ', ordered ' + d.name })])] : []),
+      make('button', { type: 'button', class: 'quote-ask', text: q ? 'Tried it too? Tell me how it was' : 'Tried it? Tell me how it was',
+        onclick: () => { dishSheet.close(); openReview({ dish: d.id }); } }));
+  }
   function dishQuote(d) {
-    const q = showReviews && S.reviews.quotes && S.reviews.quotes[d.id];
-    if (!q) return '';
-    return make('figure', { class: 'dish-quote' }, [make('blockquote', { text: '“' + q.text + '”' }),
-      make('figcaption', { text: q.name + (q.ordered ? ', ordered ' + q.ordered : '') })]);
+    const slot = make('div', { class: 'quote-slot' });
+    slot.dataset.dish = d.id;
+    fillQuote(slot);
+    return slot;
   }
   function dishFig(d) {
     const fig = make('figure', { class: 'dish-fig' + (d.photo ? ' is-photo' : '') });
@@ -337,8 +346,9 @@
     place();
   }
 
-  function openSheet(at) { viewing = null; step = at || 0; refreshSheet(); if (!sheet.open) sheet.showModal(); }
+  function openSheet(at) { viewing = null; reviewing = null; step = at || 0; refreshSheet(); if (!sheet.open) sheet.showModal(); }
   function refreshSheet() {
+    if (reviewing) return renderReview();
     if (viewing) return renderOrderPage();
     if (!sheet.open && step === undefined) return;
     if (!count() && step < SENT) { $('sheetH').textContent = 'Your tray'; $('sheetBody').replaceChildren(make('p', { text: 'Your tray is empty.' })); return; }
@@ -408,6 +418,72 @@
     $('sheetBody').replaceChildren(progress(step), ...body);
   }
 
+  // ── Reviews: a line or two to Leny ──────────────────────────────────────
+  // From an order page the form carries the order's id and secret; from the
+  // site it carries the bot check. Leny reads each one before it goes up.
+  let reviewing = null;
+  async function loadReviews() {
+    let list = [];
+    if (mock) list = [{ name: 'Marites', text: 'Lasang luto ni lola. We finished the tray before we got home.', dish: 'palabok' }];
+    else try { const r = await fetch('/api/reviews'); if (r.ok) list = await r.json(); } catch (e) { /* the windows just invite one */ }
+    list.forEach(q => { if (q.dish && !liveQuotes[q.dish]) liveQuotes[q.dish] = q; });   // newest first
+    document.querySelectorAll('.quote-slot').forEach(fillQuote);
+  }
+  function openReview(opts = {}) {
+    viewing = null;
+    reviewing = { name: String(order.name || '').trim().split(/\s+/)[0], text: '', dish: '', dishes: REVIEWABLE.map(d => d.id), ...opts };
+    renderReview();
+    if (!sheet.open) sheet.showModal();
+    startTurnstile();
+  }
+  function renderReview() {
+    const r = reviewing;
+    $('sheetH').textContent = r.sent ? 'Salamat!' : 'Was it namit gid?';
+    $('sheetBody').replaceChildren(...(r.sent
+      ? [make('p', { text: `Salamat, ${r.name}! I’ll read it tonight.` }), make('button', { type: 'button', class: 'btn btn-line', text: 'Done', onclick: () => sheet.close() })]
+      : [make('p', { text: 'Tell me in a line or two. I read every one.' }), ...reviewFields(r, renderReview)]));
+  }
+  // name, dish and the note; `after` redraws the page once it's sent
+  function reviewFields(r, after) {
+    const field = (id, label, el) => make('div', { class: 'field' }, [make('label', { for: id, text: label }), el]);
+    const name = make('input', { id: 'rvName', type: 'text', autocomplete: 'given-name', maxlength: '40', value: r.name || '' });
+    name.addEventListener('input', () => { r.name = name.value; });
+    const pick = make('select', { id: 'rvDish' }, [make('option', { value: '', text: 'Pick one' }),
+      ...r.dishes.map(id => { const d = REVIEWABLE.find(x => x.id === id), o = make('option', { value: id, text: d.name }); if (id === r.dish) o.selected = true; return o; })]);
+    pick.addEventListener('change', () => { r.dish = pick.value; });
+    const text = make('textarea', { id: 'rvText', rows: '4', maxlength: '600', placeholder: 'What did you like? How did it go at the party?' });
+    text.value = r.text || '';
+    text.addEventListener('input', () => { r.text = text.value; });
+    const btn = make('button', { type: 'button', class: 'btn btn-sea', text: 'Send to Leny' });
+    btn.addEventListener('click', () => sendReview(r, btn, after));
+    return [...(r.order ? [] : [field('rvName', 'Your first name', name)]),
+      ...(r.dishes.length > 1 ? [field('rvDish', 'What you had', pick)] : []),
+      field('rvText', 'Your note', text),
+      make('p', { class: 'small', text: 'Some notes go on the site, with your first name.' }), btn];
+  }
+  async function sendReview(r, btn, after) {
+    if (r.dishes.length === 1) r.dish = r.dishes[0];
+    if (!String(r.name || '').trim()) return flag('Add your first name, so I know who it’s from.');
+    if (!r.dish) return flag('Pick what you had, so it goes in the right window.');
+    if (String(r.text || '').trim().length < 3) return flag('Write a line or two first.');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    const d = REVIEWABLE.find(x => x.id === r.dish);
+    try {
+      const token = r.order ? '' : await turnstileToken(btn);
+      const res = mock ? { ok: true } : await fetch('/api/submit-review', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: r.name, text: r.text, dish: r.dish, dishName: d ? d.name : '', order: r.order, t: r.t, token }) });
+      if (res.ok || res.status === 409) { r.sent = true; return after(); }
+      throw new Error(res.status === 429 ? 'That’s a lot of notes for one day! Try again tomorrow.' : '');
+    } catch (e) {
+      btn.disabled = false; btn.textContent = 'Send to Leny';
+      if (!r.order) startTurnstile(true);
+      flag(e.message || 'That didn’t go through. Try again in a moment.');
+    }
+  }
+  // the menu dishes in an order's label ("Palabok (Medium) ×1 · Tiramisu ×1")
+  const orderDishIds = label => [...new Set(String(label || '').split(' · ')
+    .map(l => REVIEWABLE.find(d => l.startsWith(d.name))).filter(Boolean).map(d => d.id))];
+
   // ── The customer's order page (?order=…&t=…) ────────────────────────────
   async function loadOrderPage(id, t) {
     if (mock && id === 'demo') {
@@ -457,7 +533,7 @@
         ...(shot ? [make('img', { class: 'up-prev', src: URL.createObjectURL(shot), alt: '' })] : []),
         make('span', { text: shot ? '✓ ' + shot.name + ' (tap to change)' : 'Add a screenshot of your e-Transfer (optional)' })]);
       const by = o.depositDeadline ? new Date(o.depositDeadline).toLocaleTimeString('en-US', { timeZone: 'America/Toronto', hour: 'numeric', minute: '2-digit' }) : null;
-      body.push(make('p', { text: `Kaya ko! I can make it, ${o.name}.` }),
+      body.push(make('p', { text: `It’s a deal, ${o.name}! I can make it.` }),
         make('div', { class: 'etr' }, [
           make('p', { class: 'etr-h', text: 'Send your ' + money(o.deposit) + ' deposit' }),
           make('p', { class: 'small', text: 'Half the total, by Interac e-Transfer' + (by ? ', by ' + by + '. After that the time is freed up.' : '.') }),
@@ -467,6 +543,13 @@
     } else if (o.status === 'verifying') {
       title = 'Checking your deposit'; at = 3;
       body.push(make('p', { text: `Salamat, ${o.name}! I’m checking my bank for your ${money(o.deposit)}. I’ll message you as soon as I see it.` }), lines(), sumsOf(), when(), refresh);
+    } else if (o.status === 'completed' || o.status === 'picked_up' || (['confirmed', 'ready'].includes(o.status) && o.pickupDate && o.pickupDate < torontoNow().day.toISOString().slice(0, 10))) {
+      // after pickup the page asks how it was
+      title = 'How was it?'; at = 4;
+      const ids = orderDishIds(o.dish);
+      o.rv = o.rv || { order: o.id, t: o.t, name: o.name, text: '', dishes: ids.length ? ids : REVIEWABLE.map(d => d.id), dish: ids.length === 1 ? ids[0] : '' };
+      if (o.reviewed || o.rv.sent) body.push(make('p', { text: `Salamat for your note, ${o.name}! I read every one.` }), lines());
+      else body.push(make('p', { text: `Salamat for ordering, ${o.name}! Was it namit gid? Tell me in a line or two.` }), ...reviewFields(o.rv, renderOrderPage));
     } else if (o.status === 'confirmed' || o.status === 'ready') {
       title = 'Confirmed!'; at = 4;
       body.push(make('div', { class: 'receipt' }, [make('p', { class: 'stamp', text: 'Confirmed' }),
@@ -475,10 +558,10 @@
         lines(), calendarLink(o.pickupDate, o.pickupTime));
     } else if (o.status === 'declined') {
       title = 'About your request';
-      body.push(make('p', { text: `Pasensya na, ${o.name}, I can’t make that time. I’ll message you to find another day. Nothing was charged.` }), lines());
+      body.push(make('p', { text: `Really sorry, ${o.name}, I can’t make that time. I’ll message you to find another day. Nothing was charged.` }), lines());
     } else if (o.status === 'expired') {
       title = 'This request expired';
-      body.push(make('p', { text: 'The deposit didn’t come in time, so I gave the pickup time to someone else. Nothing was charged. Order again anytime!' }),
+      body.push(make('p', { text: 'I didn’t get the deposit in time, so I had to free up the pickup time for other orders. Nothing was charged. I’d love to cook for you another time.' }),
         make('button', { type: 'button', class: 'btn btn-sea', text: 'Start a new order', onclick: () => { history.replaceState(null, '', location.pathname); sheet.close(); location.hash = 'menu'; } }));
     } else {
       body.push(make('p', { text: 'This order is ' + String(o.status).replace('_', ' ') + '.' }), lines());
@@ -512,6 +595,9 @@
   {
     const q = new URLSearchParams(location.search);
     if (q.get('order') && q.get('t')) setTimeout(() => loadOrderPage(q.get('order'), q.get('t')), 300);
+    else if (q.get('review')) setTimeout(() => openReview(), 300);
+    $('footReview').addEventListener('click', e => { e.preventDefault(); openReview(); });
+    loadReviews();
   }
 
   // An .ics file for the pickup, so it lands in their calendar.
@@ -774,7 +860,7 @@
   $('dishSheetClose').addEventListener('click', () => dishSheet.close());
   dishSheet.addEventListener('click', e => { if (e.target === dishSheet) dishSheet.close(); });
   dishSheet.addEventListener('close', closeSpot);
-  sheet.addEventListener('close', () => { if (openSpot === 'register') closeSpot(); });
+  sheet.addEventListener('close', () => { reviewing = null; if (openSpot === 'register') closeSpot(); });
 
   // Pull a sheet down to close it, like any phone sheet: only once its paper
   // is scrolled to the top, so scrolling the paper itself still works.

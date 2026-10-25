@@ -1,11 +1,13 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-// Runs every 5 minutes (pg_cron → pg_net). Two jobs:
+// Runs every 5 minutes (pg_cron → pg_net). Three jobs:
 //  1. A request Leny hasn't answered gets a reminder an hour after it came in,
 //     then hourly, three at most.
 //  2. A request she said yes to, with no deposit sent within two hours, expires:
 //     the pickup time frees up and both sides hear about it.
+//  3. The day after pickup, from 11 AM in Toronto, a customer who gave an email
+//     gets one "was it namit gid?" note linking to their order page's review form.
 // Every step is gated on the order's state, so running it early or twice does
 // nothing extra; that is why it needs no secret to call.
 const RESEND_API_KEY = Deno.env.get('NOTIFY_RESEND_API_KEY') ?? Deno.env.get('RESEND_API_KEY') ?? ''
@@ -62,7 +64,7 @@ async function mail(to: string | null, subject: string, html: string) {
 serve(async () => {
   const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
   const now = Date.now()
-  let reminded = 0, expired = 0
+  let reminded = 0, expired = 0, asked = 0
 
   // 1. reminders to Leny
   const { data: waiting } = await sb.from('orders')
@@ -102,5 +104,29 @@ serve(async () => {
     expired++
   }
 
-  return new Response(JSON.stringify({ reminded, expired }), { headers: { 'Content-Type': 'application/json' } })
+  // 3. the day after pickup: was it namit gid?
+  const tz = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false })
+    .formatToParts(new Date(now)).map(p => [p.type, p.value]))
+  const today = `${tz.year}-${tz.month}-${tz.day}`, hour = +tz.hour % 24
+  if (hour >= 11 && hour < 20) {
+    // only pickups from the last three days, so an old order never gets a late ask
+    const since = new Date(Date.parse(today + 'T12:00:00Z') - 3 * 864e5).toISOString().slice(0, 10)
+    const { data: done } = await sb.from('orders').select('id,dish,customer_name,email,token')
+      .in('status', ['confirmed', 'ready', 'completed', 'picked_up']).is('review_asked_at', null).not('email', 'is', null)
+      .lt('pickup_date', today).gte('pickup_date', since)
+    for (const o of done || []) {
+      const { data: claimed } = await sb.from('orders').update({ review_asked_at: new Date(now).toISOString() })
+        .eq('id', o.id).is('review_asked_at', null).select('id')
+      if (!claimed?.length) continue
+      // "Palabok (Medium) ×1 · Tiramisu ×1" → "Palabok and Tiramisu"
+      const names = [...new Set(String(o.dish).split(' · ').map(l => l.replace(/ \(.*$| ×.*$/, '')))]
+      const what = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0]
+      await mail(o.email, 'Was it namit gid?', frame({ heading: `Was it namit gid, ${first(o.customer_name)}?`,
+        paras: [`Salamat for ordering the ${what}. If you enjoyed it, would you write me a line or two? It helps other people find my kitchen.`],
+        button: { href: `${SITE}/?order=${o.id}&t=${o.token}`, text: 'Write a review' } }))
+      asked++
+    }
+  }
+
+  return new Response(JSON.stringify({ reminded, expired, asked }), { headers: { 'Content-Type': 'application/json' } })
 })

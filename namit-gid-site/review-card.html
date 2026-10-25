@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Review cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600&family=Young+Serif&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<!-- Cards for Leny to tuck in the bag: print on letter paper (4 to a page,
+     no scaling, background graphics on) and cut along the faint lines. The
+     QR opens the review form: namitgid.takoshi.ca/?review=1 -->
+<style>
+  @page { size: letter; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #d8cdbd; font: 15px/1.45 'Atkinson Hyperlegible Next', Arial, sans-serif; color: #2B2119;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .help { max-width: 8.5in; margin: 18px auto 0; padding: 0 16px; font-size: 15px; }
+  .help button { font: 600 16px/1 inherit; padding: 10px 18px; border-radius: 10px; border: 1.5px solid #8A5A30; background: #DDB582; cursor: pointer; }
+  .page { width: 8.5in; height: 11in; margin: 18px auto; display: grid; grid-template: 1fr 1fr / 1fr 1fr; background: #fff; }
+  .card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    padding: .45in .4in; background: #F3EADB; outline: 1px dashed rgba(110, 82, 56, .25); outline-offset: -1px; }
+  .card::before { content: ""; position: absolute; inset: .18in; border: 1.5px solid rgba(138, 90, 48, .45); border-radius: 14px 11px 13px 12px; pointer-events: none; }
+  .leny { width: 1.35in; height: auto; }
+  .brand { margin: 2px 0 0; font: 18px/1 'Young Serif', Georgia, serif; color: #A3462A; }
+  h1 { margin: .16in 0 .06in; font: 400 27px/1.15 'Young Serif', Georgia, serif; }
+  .lead { margin: 0 0 .16in; max-width: 2.9in; color: #4A3B2F; }
+  .qr { width: 1.3in; height: 1.3in; padding: .08in; background: #FFFBF3; border-radius: 8px; box-shadow: 0 0 0 1.5px rgba(138, 90, 48, .45); }
+  .url { margin: .1in 0 0; font-size: 12px; color: #6B5747; }
+  .sign { margin: .1in 0 0; font: 600 25px/1 Caveat, 'Segoe Print', cursive; color: #A3462A; }
+  @media print { body { background: none; } .help { display: none; } .page { margin: 0; } }
+  @media screen and (max-width: 8.6in) { .page { width: 100%; height: auto; grid-template: auto / 1fr; } .card { min-height: 5.5in; } .page .card:nth-child(n+2) { display: none; } }
+</style>
+</head>
+<body>
+<p class="help">Print on letter paper with <b>no scaling</b> and <b>background graphics on</b>, then cut along the faint lines. Four cards a page. <button type="button" onclick="print()">Print</button></p>
+<div class="page">
+  <section class="card">
+    <img class="leny" src="assets/img/email/leny.png" alt="Leny">
+    <p class="brand">Namit gid</p>
+    <h1>Was it namit gid?</h1>
+    <p class="lead">Tell me in a line or two. Scan this and it comes straight to me.</p>
+    <img class="qr" src="assets/img/review-qr.svg" alt="QR code for the review form">
+    <p class="url">or visit namitgid.takoshi.ca, Leave a review</p>
+    <p class="sign">Salamat! Leny</p>
+  </section>
+</div>
+<script>
+  // one card in the markup, four on the page
+  const page = document.querySelector('.page'), card = page.querySelector('.card');
+  for (let i = 0; i < 3; i++) page.append(card.cloneNode(true));
+</script>
+</body>
+</html>
