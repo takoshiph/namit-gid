@@ -233,7 +233,7 @@ async function sendReviewRequestEmail(resendApiKey, { name: rawName, email, dish
       <tr><td style="padding:30px 36px;text-align:center;">
         <h1 style="margin:0 0 14px;font-family:Georgia,serif;font-size:24px;color:#2a241f;">Namit gid?</h1>
         <p style="margin:0 0 24px;font-size:15px;color:#6f645a;line-height:1.7;">Hi ${name} — thank you for ordering${dish ? ' the ' + dish : ''}. If it was good, would you tell us in a line or two? Your words help this little kitchen grow.</p>
-        <a href="https://namitgid.takoshi.ca/#reviews" style="display:inline-block;background:#c2604a;color:#fffaf3;text-decoration:none;border-radius:99px;padding:14px 30px;font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">Leave a review</a>
+        <a href="mailto:orders@takoshi.ca?subject=My%20Namit%20Gid%20review" style="display:inline-block;background:#c2604a;color:#fffaf3;text-decoration:none;border-radius:99px;padding:14px 30px;font-size:13px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;">Leave a review</a>
       </td></tr>
       <tr><td style="padding:18px 36px;text-align:center;border-top:1px solid #efe4d6;">
         <p style="margin:0;font-size:11px;color:#b6a89a;">© 2026 Namit Gid · Toronto, ON</p>

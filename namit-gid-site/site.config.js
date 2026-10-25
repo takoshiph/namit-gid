@@ -29,7 +29,9 @@ window.SITE = {
   // Cloudflare Turnstile site key (an Invisible widget). Empty means no bot check.
   // The secret goes in Cloudflare Pages as TURNSTILE_SECRET_KEY, never here.
   turnstileSiteKey: '0x4AAAAAAFjQpVGHv8gHp7IU',   // widget "Namit Gid Request Form"
-  contacts: { facebook: '', messenger: '', instagram: '' }, // TODO: links from the owner
+  // Leny's contacts, shared with Takoshi (same business). WhatsApp is the number
+  // without + or spaces, as wa.me wants it.
+  contacts: { whatsapp: '16476840916', facebook: 'https://www.facebook.com/takoshiPH/', messenger: '', instagram: '' },
   menu: {
     mains: [
       { id: 'shawarma', name: 'Shawarma Rice', short: 'Shawarma', img: 'images/shawarma.webp', w: 620, h: 607, warm: true,

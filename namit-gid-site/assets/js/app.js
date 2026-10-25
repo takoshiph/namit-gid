@@ -587,7 +587,8 @@
         cp.addEventListener('click', () => { navigator.clipboard && navigator.clipboard.writeText(orderText()).then(() => { cp.textContent = 'Copied'; }); });
         box.append(cp);
         const c = S.contacts || {};
-        if (c.messenger) box.append(make('a', { class: 'btn btn-sea', href: c.messenger, target: '_blank', rel: 'noopener', text: 'Send it on Messenger' }));
+        if (c.whatsapp) box.append(make('a', { class: 'btn btn-sea', href: 'https://wa.me/' + c.whatsapp + '?text=' + encodeURIComponent(orderText()), target: '_blank', rel: 'noopener', text: 'Send it on WhatsApp' }));
+        else if (c.messenger) box.append(make('a', { class: 'btn btn-sea', href: c.messenger, target: '_blank', rel: 'noopener', text: 'Send it on Messenger' }));
         else box.append(make('p', { class: 'small' }, ['Or email it to ', make('a', { href: 'mailto:' + S.deposit.email, text: S.deposit.email }), '.']));
       }
       $('sheetBody').append(box);
@@ -740,7 +741,7 @@
       if (spot === 'register') { openSheet(0); return; }
       if (spot === 'phone') {
         const c = S.contacts || {};
-        const links = [c.messenger && ['Message me on Messenger', c.messenger], c.facebook && ['Facebook', c.facebook], c.instagram && ['Instagram', c.instagram]].filter(Boolean);
+        const links = [c.whatsapp && ['Message me on WhatsApp', 'https://wa.me/' + c.whatsapp], c.messenger && ['Message me on Messenger', c.messenger], c.facebook && ['Facebook', c.facebook], c.instagram && ['Instagram', c.instagram]].filter(Boolean);
         dishBody.replaceChildren(make('div', { class: 'phone-card' }, [
           make('p', { text: 'Party tray? Allergy question? Or just kumusta? Message me.' }),
           ...links.map(([t, u]) => make('p', {}, [make('a', { class: 'btn btn-sea', href: u, target: '_blank', rel: 'noopener', text: t })])),
@@ -852,7 +853,7 @@
   }
   // Footer socials, only those that exist.
   { const c = S.contacts || {}, todo = document.querySelector('.foot .todo');
-    const links = [['Facebook', c.facebook], ['Messenger', c.messenger], ['Instagram', c.instagram]].filter(x => x[1]);
+    const links = [['WhatsApp', c.whatsapp && 'https://wa.me/' + c.whatsapp], ['Facebook', c.facebook], ['Messenger', c.messenger], ['Instagram', c.instagram]].filter(x => x[1]);
     if (todo) { if (links.length) todo.replaceChildren(...links.flatMap(([t, u], i) => [i ? ' · ' : '', make('a', { href: u, target: '_blank', rel: 'noopener', text: t })])); else todo.remove(); } }
   // The overall rating, in the footer.
   if (showReviews && S.reviews.rating) {
