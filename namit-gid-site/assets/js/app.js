@@ -40,9 +40,9 @@
   const ALL = [...S.menu.mains, ...S.menu.desserts, ...HOLIDAY];
   const byId = Object.fromEntries(ALL.map(d => [d.id, d]));
   let tray = [];
-  // a saved tray keeps only dishes and sizes still on the menu ("Medium" is now "Large")
+  // a saved tray keeps only dishes and sizes still on the menu (the big size is "Medium")
   try {
-    tray = JSON.parse(localStorage.getItem('ng-tray') || '[]').map(l => l.size === 'Medium' ? { ...l, size: 'Large' } : l)
+    tray = JSON.parse(localStorage.getItem('ng-tray') || '[]').map(l => l.size === 'Large' ? { ...l, size: 'Medium' } : l)
       .filter(l => byId[l.id] && (byId[l.id].batch || byId[l.id].sizes.some(s => s.label === l.size)));
   } catch (e) {}
   const save = () => { try { localStorage.setItem('ng-tray', JSON.stringify(tray)); } catch (e) {} };
@@ -413,7 +413,7 @@
     if (mock && id === 'demo') {
       // previews show any stage: ?mock=1&order=demo&t=x&status=accepted
       const st = new URLSearchParams(location.search).get('status') || 'accepted';
-      viewing = { id: 'demo', t, status: st, dish: 'Palabok (Large) ×1 · Chocolate Dreamcake ×4', total: 145, deposit: 73, balance: 72,
+      viewing = { id: 'demo', t, status: st, dish: 'Palabok (Medium) ×1 · Chocolate Dreamcake ×4', total: 145, deposit: 73, balance: 72,
         pickupDate: new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10), pickupTime: '12:30 PM', name: 'Ana',
         depositDeadline: new Date(Date.now() + 7200e3).toISOString(), depositEmail: S.deposit.email };
     } else {
