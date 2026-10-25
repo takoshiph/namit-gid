@@ -689,26 +689,6 @@ async function handle(request, env) {
       return jsonResponse({ url: 'deposit:' + filename }, 200, request);
     }
 
-    // ── POST /api/upload-review-photo (admin) ─────────────────────────────────
-    if (url.pathname === '/api/upload-review-photo' && request.method === 'POST') {
-      if (!(await requireAuth(request, env))) return jsonResponse({ error: 'Unauthorized' }, 401, request);
-      let formData;
-      try { formData = await request.formData(); } catch { return jsonResponse({ error: 'Bad request' }, 400, request); }
-      const file = formData.get('file');
-      if (!file || typeof file === 'string') return jsonResponse({ error: 'No file provided' }, 400, request);
-      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      if (!['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext)) return jsonResponse({ error: 'Invalid file type' }, 400, request);
-      const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const arrayBuffer = await file.arrayBuffer();
-      const uploadRes = await fetch(`${SB}/storage/v1/object/reviews/${filename}`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': file.type || 'image/jpeg', 'x-upsert': 'false' },
-        body: arrayBuffer,
-      });
-      if (!uploadRes.ok) return jsonResponse({ error: 'Upload failed' }, 500, request);
-      return jsonResponse({ url: `${SB}/storage/v1/object/public/reviews/${filename}` }, 200, request);
-    }
-
     // ── Order requests: Leny's decision, the customer's page, the deposit ─────
     const getOrder = async (id, field, value) => {
       if (!/^\d+$/.test(String(id || '')) || !/^[0-9a-f]{48}$/.test(String(value || ''))) return null;

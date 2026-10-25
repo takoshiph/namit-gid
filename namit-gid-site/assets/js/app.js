@@ -992,7 +992,7 @@
 
   // ── Little life, after the intro ───────────────────────────────────────
   // Steam curls off a warm dish every few seconds while it's on screen;
-  // boards swing when touched; notes flutter as they come into view; the
+  // notes flutter as they come into view; the
   // footer's lighthouse and fireflies only run while the footer is visible.
   const lowEndDevice = (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
   if (!calm && 'IntersectionObserver' in window) {
@@ -1007,10 +1007,6 @@
       setTimeout(puff, 5000 + Math.random() * 3000);
     };
     setTimeout(puff, 4000);
-    document.querySelectorAll('.board').forEach(b => b.addEventListener('pointerenter', e => {
-      if (e.pointerType !== 'mouse') return;
-      b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge');
-    }));
     const noteIO = new IntersectionObserver(es => es.forEach(e => {
       if (!e.isIntersecting) return;
       e.target.classList.add('flutter'); setTimeout(() => e.target.classList.remove('flutter'), 700); noteIO.unobserve(e.target);
