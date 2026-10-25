@@ -793,9 +793,10 @@ async function handle(request, env) {
         await moveOrder(o, ['accepted'], { status: 'expired' });
         return jsonResponse({ error: 'expired', status: 'expired' }, 409, request);
       }
-      // only a screenshot this site uploaded is kept
+      // a screenshot this site uploaded is needed, so Leny can match the e-Transfer
       const shot = typeof b.screenshot === 'string' && DEPOSIT_REF.test(b.screenshot) ? b.screenshot : null;
-      const moved = await moveOrder(o, ['accepted'], { status: 'verifying', deposit_sent_at: new Date().toISOString(), ...(shot ? { deposit_screenshot_url: shot } : {}) });
+      if (!shot) return jsonResponse({ error: 'screenshot_required' }, 400, request);
+      const moved = await moveOrder(o, ['accepted'], { status: 'verifying', deposit_sent_at: new Date().toISOString(), deposit_screenshot_url: shot });
       if (moved) {
         try {
           await sendMail(env.RESEND_API_KEY, env.NOTIFY_EMAIL || LENY_EMAIL_DEFAULT, `Deposit sent: ${moved.customer_name}, ${shortPickup(moved)}`,

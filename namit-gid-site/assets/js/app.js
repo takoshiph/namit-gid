@@ -509,7 +509,7 @@
       make('div', { class: 'small' }, [make('span', { text: 'Deposit (half)' }), make('span', { text: money(o.deposit) })]),
       make('div', { class: 'small' }, [make('span', { text: 'At pickup' }), make('span', { text: money(o.balance) })])]);
     const when = () => make('p', { class: 'small', text: 'Pickup ' + longDay(o.pickupDate) + ' at ' + o.pickupTime + ' · ' + S.pickup.address });
-    const refresh = make('button', { type: 'button', class: 'btn btn-line', text: 'Check for my answer', onclick: () => loadOrderPage(o.id, o.t) });
+    const refresh = make('button', { type: 'button', class: 'btn btn-line', text: o.status === 'verifying' ? 'Check if it’s confirmed' : 'Check for my answer', onclick: () => loadOrderPage(o.id, o.t) });
     let title = 'Your request', at = 2;
     if (o.status === 'missing' || o.status === 'offline') {
       title = o.status === 'offline' ? 'Sandali lang' : 'Hmm, where is it?';
@@ -531,7 +531,7 @@
       pick.addEventListener('change', () => { shot = pick.files[0] || null; renderOrderPage(); });
       const up = make('label', { class: 'upload' + (shot ? ' has' : '') }, [pick,
         ...(shot ? [make('img', { class: 'up-prev', src: URL.createObjectURL(shot), alt: '' })] : []),
-        make('span', { text: shot ? '✓ ' + shot.name + ' (tap to change)' : 'Add a screenshot of your e-Transfer (optional)' })]);
+        make('span', { text: shot ? '✓ ' + shot.name + ' (tap to change)' : 'Add a screenshot of your e-Transfer' })]);
       const by = o.depositDeadline ? new Date(o.depositDeadline).toLocaleTimeString('en-US', { timeZone: 'America/Toronto', hour: 'numeric', minute: '2-digit' }) : null;
       body.push(make('p', { text: `It’s a deal, ${o.name}! I can make it.` }),
         make('div', { class: 'etr' }, [
@@ -571,25 +571,25 @@
   }
   async function depositSent() {
     const o = viewing, btn = [...$('sheetBody').querySelectorAll('button')].find(b => /sent my deposit/.test(b.textContent));
+    if (!shot) return flag('Add a screenshot of your e-Transfer first, so I can match it to your order.');
     if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
     try {
       if (mock && o.id === 'demo') { await new Promise(r => setTimeout(r, 400)); viewing = { ...o, status: 'verifying' }; shot = null; return renderOrderPage(); }
+      if (btn) btn.textContent = 'Uploading screenshot…';
       let screenshot = null;
-      if (shot) {
-        if (btn) btn.textContent = 'Uploading screenshot…';
-        try {
-          const fd = new FormData(); fd.append('file', shot);
-          const upr = await (await fetch('/api/upload-deposit', { method: 'POST', body: fd })).json();
-          if (upr.url) screenshot = upr.url;
-        } catch (e) { /* send without it */ }
-      }
+      try {
+        const fd = new FormData(); fd.append('file', shot);
+        const upr = await (await fetch('/api/upload-deposit', { method: 'POST', body: fd })).json();
+        if (upr.url) screenshot = upr.url;
+      } catch (e) { /* told below */ }
+      if (!screenshot) throw new Error('shot');
       const r = await fetch('/api/deposit-sent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: o.id, t: o.t, screenshot }) });
       const d = await r.json().catch(() => ({}));
       if (r.ok || d.status) { viewing = { ...o, status: d.status || 'verifying' }; shot = null; return renderOrderPage(); }
       throw new Error('send');
     } catch (e) {
       if (btn) { btn.disabled = false; btn.textContent = 'I’ve sent my deposit'; }
-      flag('That didn’t go through. Try again in a moment, or message me on WhatsApp.');
+      flag(e.message === 'shot' ? 'Your screenshot didn’t upload. Try another picture, or send it to me on WhatsApp.' : 'That didn’t go through. Try again in a moment, or message me on WhatsApp.');
     }
   }
   {
