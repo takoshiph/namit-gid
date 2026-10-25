@@ -181,6 +181,7 @@ export default {
 // secret: `token` for the customer's page, `admin_token` for Leny's buttons.
 const SITE = 'https://namitgid.takoshi.ca';
 const LENY_EMAIL_DEFAULT = 'takoshi.phstore@gmail.com';   // same default as the order function
+const REPLY_TO = 'takoshi.phstore@gmail.com';   // nobody reads orders@, so replies go to the inbox Leny checks
 const DEPOSIT_HOURS = 2;    // after a yes, how long the customer has to send the deposit
 const ACTIVE_STATUSES = ['requested', 'accepted', 'verifying', 'confirmed', 'pending', 'ready'];
 const ORDER_FIELDS = 'id,status,dish,total,deposit_amount,balance_due,customer_name,contact,email,notes,pickup_date,pickup_time,created_at,accepted_at,deposit_sent_at,deposit_screenshot_url,token,admin_token';
@@ -251,7 +252,7 @@ async function sendMail(key, to, subject, html) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: 'Namit Gid <orders@takoshi.ca>', to: [to], subject, html }),
+    body: JSON.stringify({ from: 'Namit Gid <orders@takoshi.ca>', to: [to], reply_to: REPLY_TO, subject, html }),
   });
   if (!res.ok) throw new Error('resend ' + res.status + ' ' + (await res.text().catch(() => '')).slice(0, 200));
   return true;

@@ -52,11 +52,13 @@ function frame(o: { heading: string; paras?: string[]; rows?: [string, string][]
 </td></tr></table>
 </body></html>`
 }
+// nobody reads orders@, so replies go to the inbox Leny checks
+const REPLY_TO = 'takoshi.phstore@gmail.com'
 async function mail(to: string | null, subject: string, html: string) {
   if (!RESEND_API_KEY || !to) return
   const r = await fetch('https://api.resend.com/emails', {
     method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_API_KEY}` },
-    body: JSON.stringify({ from: 'Namit Gid <orders@takoshi.ca>', to: [to], subject, html }),
+    body: JSON.stringify({ from: 'Namit Gid <orders@takoshi.ca>', to: [to], reply_to: REPLY_TO, subject, html }),
   })
   if (!r.ok) console.error('[namitgid] sweeper email failed', r.status, await r.text().catch(() => ''))
 }
