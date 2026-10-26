@@ -29,7 +29,7 @@ window.SITE = {
   contacts: { whatsapp: '16476840916', facebook: 'https://www.facebook.com/takoshiPH/', messenger: '', instagram: '' },
   menu: {
     mains: [
-      { id: 'shawarma', name: 'Shawarma Rice', short: 'Shawarma', img: 'images/shawarma.webp', w: 620, h: 607, warm: true,
+      { id: 'shawarma', name: 'Shawarma Rice', short: 'Shawarma', img: 'images/shawarma-photo.webp', w: 720, h: 720, photo: true,
         desc: 'Spiced beef shawarma on turmeric rice, cucumber and cherry tomato round the edge, plenty of garlic sauce on top.',
         sizes: [{ label: 'Small', price: 50, feeds: '3–4' }, { label: 'Medium', price: 65, feeds: '5–6' }] },
       { id: 'lumpia', name: 'Lumpiang Shanghai', short: 'Lumpia', img: 'images/lumpia.webp', w: 607, h: 620, warm: true,
