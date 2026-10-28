@@ -187,20 +187,10 @@
   const repaintDishes = () => document.querySelectorAll('.dish').forEach(n => n._paint && n._paint());
 
   // ── Tray ────────────────────────────────────────────────────────────────
-  // The board settles a little whenever the tray changes.
-  let signSeen = true;
-  if ('IntersectionObserver' in window) new IntersectionObserver(es => { signSeen = es[0].isIntersecting; }).observe($('signWrap'));
-  function kickSign() {
-    if (calm || !window.gsap || !signSeen) return;
-    gsap.killTweensOf(plank, 'y');
-    gsap.fromTo(plank, { y: -3 }, { y: 0, duration: .45, ease: 'back.out(3)' });
-  }
-
   function add(line, fig) {
     const hit = tray.find(l => lineKey(l) === lineKey(line));
     if (hit) hit.qty += line.qty; else tray.push(line);
     save(); renderTray(true);
-    kickSign();
     if (fig) fly(fig);
     const d = byId[line.id];
     say(`Added ${d.name}${line.size && d.sizes.length > 1 ? ', ' + line.size : ''}. ${count()} in your tray, ${money(total())}.`);
@@ -210,7 +200,6 @@
     const dm = byId[line.id] && byId[line.id].min;
     if (line.qty <= 0 || (dm && line.qty < dm)) tray = tray.filter(l => l !== line);
     save(); renderTray(false);
-    kickSign();
     say(`${count()} in your tray, ${money(total())}.`);
   }
 
@@ -1032,39 +1021,67 @@
     n.classList.add('pre'); n.style.animationDelay = (i % 4) * 90 + 'ms'; io.observe(n);
   });
 
-  const plank = $('plank');
-
-  // ── Intro: a camera pulls back from the lighthouse at dawn, a bird and a
-  // cloud pass the lens, the beam writes the name, a shutter takes the photo
-  // and the photo lands on the sign. One GSAP timeline; transforms, opacity
-  // and one clip only. Afterwards the page waits for a scroll.
-  const emblem = $('emblem');
-  let tl = null, amb = null, done = false, revealed = false;
-
-  function reveal() {
-    if (revealed) return; revealed = true;
-    root.classList.remove('held');
-    const cue = $('scrollCue'); if (cue) cue.remove();
-    if (calm || !window.gsap) return;
-    // The first scroll only opens the page; it starts moving once the sign has risen.
-    root.classList.add('revealing'); scrollTo(0, 0);
-    setTimeout(() => root.classList.remove('revealing'), 900);
-    // The sign glides up from the middle of the screen and the words follow it.
-    gsap.to('#signWrap', { x: 0, y: 0, duration: .9, ease: 'power3.inOut', clearProps: 'transform' });
-    gsap.fromTo('.hero h1 .line > span', { yPercent: 105 }, { yPercent: 0, duration: .9, delay: .35, ease: 'expo.out', stagger: .09, clearProps: 'transform' });
-    gsap.fromTo('#heroCopy > *', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .7, delay: .3, ease: 'power2.out', stagger: .07, clearProps: 'all' });
+  // ── The beach at dusk: the door on the sand ─────────────────────────────
+  // All in fractions of the painting (1584 x 672). DOOR is the bottom-centre
+  // of the door on the wet sand and its width. Wide screens crop the painting
+  // like object-fit: cover around CROP_WIDE; tall ones show a band of its full
+  // height, CROP_TALL's window across the screen, the door base at 70% down.
+  const PAINT = 1584 / 672;
+  const DOOR = { x: .41, y: .82, w: .05 };
+  const CROP_WIDE = { cx: .47, keep: [.365, .715], cy: .66 };
+  const CROP_TALL = { win: .35, left: .365, base: .70, below: .825 };
+  const dusk = $('dusk');
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  function placeDusk() {
+    const W = dusk.clientWidth, H = dusk.clientHeight, aspect = W / H;
+    let w, x, y;
+    const band = aspect < CROP_TALL.below;
+    if (band) {
+      w = W / CROP_TALL.win; x = -CROP_TALL.left * w;
+      y = CROP_TALL.base * H - DOOR.y * (w / PAINT);
+    } else if (aspect <= PAINT) {
+      // cover: the window shows win of the width; keep the door and island in it
+      const win = aspect / PAINT;
+      const L = clamp(clamp(CROP_WIDE.cx - win / 2, CROP_WIDE.keep[1] - win, CROP_WIDE.keep[0]), 0, 1 - win);
+      w = H * PAINT; x = -L * w; y = 0;
+    } else {
+      // wider than the painting: full width, cropped top and bottom around y .66
+      const vis = PAINT / aspect;
+      w = W; x = 0; y = -clamp((CROP_WIDE.cy - vis / 2) / (1 - vis), 0, 1) * (w / PAINT - H);
+    }
+    const h = w / PAINT, px = n => n.toFixed(2) + 'px';
+    dusk.classList.toggle('band', band);
+    const st = dusk.style;
+    st.setProperty('--art-x', px(x)); st.setProperty('--art-y', px(y));
+    st.setProperty('--art-w', px(w)); st.setProperty('--art-h', px(h));
+    st.setProperty('--door-x', px(x + DOOR.x * w)); st.setProperty('--door-y', px(y + DOOR.y * h));
+    st.setProperty('--door-w', px(DOOR.w * w));
+  }
+  placeDusk();
+  addEventListener('resize', placeDusk);
+  // The idle life runs only while the beach is on screen.
+  if (!calm && 'IntersectionObserver' in window) {
+    new IntersectionObserver(es => dusk.classList.toggle('live', es[0].isIntersecting)).observe(dusk);
   }
 
-  function finish() {
+  // ── Intro: a camera pulls back from the lighthouse at dawn, a bird and a
+  // cloud pass the lens, and the beam writes the name. One GSAP timeline;
+  // transforms and opacity only. Then the stage gives way to the beach, where
+  // the door waits (html.at-door) until the visitor goes on.
+  let tl = null, amb = null, done = false;
+
+  function toDoor() {
     if (done) return; done = true;
     if (tl) tl.kill();
     if (amb) amb.kill();
     if (window.gsap) gsap.ticker.remove(flyBirds);
-    root.classList.remove('intro', 'landing');
+    root.classList.remove('intro');
     const st = $('stage'); if (st) st.remove();
     const sk = $('introSkip'); if (sk) sk.remove();
-    if (window.gsap) gsap.set([plank, emblem, '#lenyArms', '#shore', '#badge', '#badge .disc', '#badge .ring'], { clearProps: 'all' });
+    root.classList.add('at-door');
   }
+  // Until the door opens (a later step), going on just lets the page scroll.
+  const leaveDoor = () => root.classList.remove('at-door');
 
   // A cumulus, painted once onto a canvas: soft puffs (a low row along the
   // base, a taller crown), then one gradient laid across the whole shape, lit
@@ -1103,10 +1120,6 @@
     host.append(cv);
     return cv;
   }
-  // The painted sign shows the same sky.
-  makeCloud($('shoreClouds'), { l: 3, t: 10, w: 34, seed: 7 });
-  makeCloud($('shoreClouds'), { l: 64, t: 4, w: 24, seed: 3, kind: 'far' });
-
   function buildSea(lowEnd) {
     // Wave lines: closer together and fainter toward the horizon, each one
     // broken into strokes of different lengths so it reads as drawn.
@@ -1176,15 +1189,12 @@
     { el: 'farA', cx: 30, cy: 22, s: .3, beats: 2, beat: .38, glide: 1.1, offset: .7 },
     { el: 'farB', cx: 66, cy: 12, s: .26, beats: 4, beat: .34, glide: .6, offset: 1.9 },
   ];
-  let birdsFrozen = false, birdClock = 0;
   function flyBirds(time) {
-    if (birdsFrozen) return;
-    birdClock = time;
     FLOCK.forEach(b => { const el = $(b.el); if (el) el.setAttribute('d', birdPath(b.cx, b.cy, b.s, time, b)); });
   }
 
   async function playIntro() {
-    if (!window.gsap) { finish(); return reveal(); }
+    if (!window.gsap) return toDoor();
     await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 900))]);
     if (done) return;
 
@@ -1210,37 +1220,19 @@
     });
 
     // ── reads ──
-    const sr = $('signWrap').getBoundingClientRect();
     const ir = isle.getBoundingClientRect();
     const wW = word.offsetWidth, wH = word.offsetHeight;
-    const hold = Math.max(0, vh * .47 - (sr.top - sr.width * .3 + sr.bottom) / 2);
-    const holdX = vw / 2 - (sr.left + sr.width / 2);
-    const frame0 = $('frameSlot').getBoundingClientRect();
-    const tIsland0 = $('island').getBoundingClientRect(), tWord0 = $('wordmark').getBoundingClientRect();
 
     // ── writes ──
-    // Until the visitor scrolls, the sign waits in the middle of the screen.
-    gsap.set('#signWrap', { x: holdX, y: hold });
-    const shift = r => ({ left: r.left + holdX, top: r.top + hold, width: r.width, height: r.height, right: r.right + holdX, bottom: r.bottom + hold });
-    const frame = shift(frame0), tIsland = shift(tIsland0), tWord = shift(tWord0);
     // The name sits in the sky well above the island, leaving the lamp clear.
     const wordTop = ir.top - wH - vh * .05;
     gsap.set(word, { top: wordTop, left: (vw - wW) / 2 });
     const L = { x: ir.left + ir.width * .78, y: ir.top + ir.height * .047 };
-    const cIsle = ir, cWord = { left: (vw - wW) / 2, top: wordTop, width: wW, height: wH };
     // Letter angles from the lamp, computed from the split before any transform.
     const letterRects = chars.map(c => c.getBoundingClientRect());
     gsap.set('#stBeam', { x: L.x, y: L.y, rotation: 185 });
     gsap.set('#stFlare', { x: L.x, y: L.y });
     gsap.set('#stLampRef', { left: L.x + vw * .2 - vw * .0175 });
-
-    // The photo: the frame's shape, around the island and the name.
-    // The photo holds the whole group; its shape need not match the frame.
-    const gTop = cWord.top - 14, gBot = ir.bottom + ir.height * .18;
-    const pw = Math.min(vw - 16, (gBot - gTop) * 1.9), ph = Math.max(gBot - gTop, pw / 1.9);
-    const photo = { left: (vw - pw) / 2, top: (gTop + gBot) / 2 - ph / 2, width: pw, height: ph };
-    const inset = r => `inset(${r.top}px ${vw - r.left - r.width}px ${vh - r.top - r.height}px ${r.left}px round 3px)`;
-    gsap.set('#stFinder', { x: photo.left, y: photo.top, width: photo.width, height: photo.height });
 
     // The camera: every plane starts zoomed toward the lamp by its own depth,
     // so near things move more than far things. The zoom is capped by what
@@ -1262,7 +1254,7 @@
     };
 
     gsap.ticker.add(flyBirds);
-    tl = gsap.timeline({ onComplete: () => { finish(); root.classList.add('held'); }, defaults: { ease: 'power2.out' } });
+    tl = gsap.timeline({ onComplete: toDoor, defaults: { ease: 'power2.out' } });
     window.__ngIntro = tl; // for frame-by-frame checks
 
     // ── 0–3.9 s: dawn, and the pull-back ──
@@ -1290,7 +1282,7 @@
     amb.fromTo('#stFrond', { skewX: -1 }, { skewX: 1.5, duration: 2.4, ease: 'sine.inOut', yoyo: true, repeat: -1 }, 0);
     amb.to('#stBird', { x: '+=18', y: '-=6', duration: 7, ease: 'none' }, 2.4)
       .to(near, { x: '+=16', duration: 8, ease: 'none' }, 3.6);
-    // The two distant birds flap and drift; they freeze when the shutter fires.
+    // The two distant birds flap and drift.
     amb.fromTo('#farA', { x: 0, y: 0 }, { x: 14, y: -3, duration: 9, ease: 'none' }, 0)
       .fromTo('#farB', { x: 0, y: 0 }, { x: 10, y: 2, duration: 9, ease: 'none' }, 0);
     gsap.utils.toArray('#stWaves svg').forEach((s, i) => {
@@ -1306,7 +1298,7 @@
 
     // The camera backs away past a bird: it fills the top-left of the frame at
     // first, then shrinks into the sky as we pull back and stays there,
-    // flapping, until the shutter freezes it.
+    // flapping.
     tl.set('#stBird', { opacity: 1, x: vw * .02, y: vh * .08, scale: 6, rotation: 8 }, .6)
       .to('#stBird', { x: vw * .36, y: vh * .3, scale: .32, rotation: -2, duration: 1.7, ease: 'power3.out' }, .6);
     // Then past a cloud: its edges sweep in from the sides of the frame, and it
@@ -1328,65 +1320,30 @@
       tl.fromTo(c, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: .45, force3D: false }, BEAM_AT + t * BEAM);
     });
 
-    // ── the viewfinder, then the shutter ──
-    const SHOT = BEAM_AT + BEAM + .55;
-    tl.fromTo('#stFinder', { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: .35, ease: 'power2.out', immediateRender: false }, SHOT - .5)
-      .set(['#bladeTop', '#bladeBot', '#stFlash'], { display: 'block' }, SHOT - .1)
-      .to(['#bladeTop', '#bladeBot'], { scaleY: 1, duration: .09, ease: 'power2.in' }, SHOT)
-      .add(() => { root.classList.add('landing'); amb.pause(); birdsFrozen = true; }, SHOT)
-      .set('#stage', { clipPath: inset(photo) }, SHOT + .09)
-      .set(['#stSand', '#stFinder', '#stFlare', '#stBangka'], { opacity: 0 }, SHOT + .09)
-      .to(['#bladeTop', '#bladeBot'], { scaleY: 0, duration: .14, ease: 'power2.out' }, SHOT + .1)
-      .fromTo('#stFlash', { opacity: .85 }, { opacity: 0, duration: .45, ease: 'power2.out', immediateRender: false }, SHOT + .1);
-
-    // ── the photo flies onto the sign ──
-    const FLY = SHOT + .45, fly = { duration: 1.15, ease: 'power3.inOut' };
-    // the photo lands on the picture and the name on the wood above it
-    const lt = Math.min(frame.top, tWord.top) - 6, ll = Math.min(frame.left, tWord.left) - 6;
-    const landing = { left: ll, top: lt, width: Math.max(frame.left + frame.width, tWord.left + tWord.width) + 6 - ll, height: frame.top + frame.height - lt };
-    // The photo flies as one picture: the whole stage scales and moves so the
-    // photo lands on the board, sky, island and name together. Only small
-    // corrections are left for the island and the name to reach their spots.
-    const k = landing.width / photo.width;
-    const sx = landing.left - photo.left * k, sy = landing.top + landing.height / 2 - (photo.top + photo.height / 2) * k;
-    const local = r => ({ left: (r.left - sx) / k, top: (r.top - sy) / k, width: r.width / k, height: r.height / k });
-    const lIsland = local(tIsland), lWord = local(tWord);
-    tl.set('#stage', { willChange: 'transform', transformOrigin: '0 0' }, SHOT + .09)
-      .set([isle, word], { willChange: 'transform' }, SHOT + .09)
-      .fromTo('#stage', { x: 0, y: 0, scale: 1 }, { x: sx, y: sy, scale: k, ...fly, immediateRender: false }, FLY)
-      .fromTo('#stage', { clipPath: inset(photo) }, { clipPath: inset(local(landing)), ...fly, immediateRender: false }, FLY)
-      // as it lands, the light-written name darkens into the wood like a burn
-      .to(['#stWord', '#stWord span'], { color: '#3B2212', textShadow: '0 0 5px rgba(110,55,18,.45)', duration: fly.duration, ease: 'power2.in' }, FLY)
-      .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: lIsland.left - cIsle.left, y: lIsland.top - cIsle.top, scale: lIsland.width / cIsle.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
-      .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: lWord.left - cWord.left, y: lWord.top - cWord.top, scale: lWord.width / cWord.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
-      .to(['#stSun', '#stFrond'], { opacity: .5, duration: fly.duration }, FLY)
-      .fromTo(plank, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: .5, immediateRender: false }, FLY + .7);
-
-    // ── the board takes the photo and settles; Leny rises ──
-    const LAND = FLY + 1.2;
-    tl.set('#shore', { opacity: 1 }, LAND)
-      .to('#stage', { opacity: 0, duration: .25 }, LAND)
-      .fromTo(plank, { y: -6 }, { y: 0, duration: .5, ease: 'back.out(2.5)', immediateRender: false }, LAND)
-      .set('#badge', { opacity: 1 }, LAND)
-      .fromTo('#badge .disc', { scale: .6, opacity: 0, transformOrigin: '50% 50%' }, { scale: 1, opacity: 1, duration: .7, ease: 'back.out(1.6)', immediateRender: false }, LAND + .05)
-      .fromTo('#badge .ring', { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: .8, ease: 'power2.inOut', stagger: .12, immediateRender: false }, LAND + .15)
-      // Leny rises from behind the board
-      .fromTo(emblem, { opacity: 0, yPercent: 70 }, { opacity: 1, yPercent: 0, duration: 1.1, ease: 'expo.out', immediateRender: false }, LAND + .35)
-      // once she has risen, her arms come forward over the rail
-      .set('#lenyArms', { opacity: 1 }, LAND + 1.3);
+    // ── the beach takes over ──
+    // For now the stage fades away a little after the name is written and the
+    // door is there underneath. (The time-of-day wipe comes later.)
+    const END = BEAM_AT + BEAM + .9;
+    tl.to('#stage', { opacity: 0, duration: .5, ease: 'sine.inOut' }, END - .5);
   }
 
-  // A scroll, swipe or key shows the page; during the intro it also finishes it.
-  const onScrollIntent = () => {
-    if (!done) { if (tl) tl.progress(1); finish(); }
-    reveal();
+  // A scroll, swipe or key goes on from the door: for now the page just
+  // scrolls. During the intro it first ends the intro, like Skip.
+  const SCROLL_KEYS = ['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar'];
+  const onScrollIntent = e => {
+    if (!done) toDoor();
+    else if (e && e.type === 'keydown' && !SCROLL_KEYS.includes(e.key)) return;
+    leaveDoor();
   };
   ['wheel', 'touchmove', 'keydown'].forEach(ev => addEventListener(ev, onScrollIntent, { passive: true }));
   $('scrollCue').addEventListener('click', onScrollIntent);
-  // Skip ends the intro but still waits for the scroll.
-  $('introSkip').addEventListener('click', () => { if (tl) tl.progress(1); finish(); root.classList.add('held'); });
+  // Skip ends the intro on the beach, at the door.
+  $('introSkip').addEventListener('click', toDoor);
+  // Order and "Skip to the menu" always go straight to the kitchen.
   document.querySelectorAll('a[href="#menu"]').forEach(a => a.addEventListener('click', onScrollIntent));
+  // Until the entrance is built, the door simply leads to the menu.
+  $('door').addEventListener('click', () => { leaveDoor(); $('menu').scrollIntoView({ behavior: calm ? 'auto' : 'smooth' }); });
 
   if (root.classList.contains('intro')) playIntro();
-  else { finish(); reveal(); }
+  else toDoor();
 })();

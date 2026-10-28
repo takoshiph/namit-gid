@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=83">
+<link rel="stylesheet" href="assets/css/site.css?v=84">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -105,9 +105,6 @@
   <img class="st-bangka" id="stBangka" data-depth="2.2" src="assets/img/bangka-painted.webp" width="1000" height="356" alt="">
   <img class="st-frond" id="stFrond" data-depth="2.2" src="assets/img/frond-painted.webp" width="1200" height="427" alt="">
   <div class="st-vignette" id="stVignette"></div>
-  <div class="st-finder" id="stFinder"><i></i><i></i><i></i><i></i></div>
-  <div class="st-blade" id="bladeTop"></div><div class="st-blade bot" id="bladeBot"></div>
-  <div class="st-flash" id="stFlash"></div>
 </div>
 <div class="scroll-cue" id="scrollCue" aria-hidden="true"><span>Scroll</span><i></i></div>
 
@@ -141,57 +138,36 @@
 <button class="intro-skip" id="introSkip" type="button">Skip</button>
 
 <main id="top">
-  <section class="hero" id="hero" aria-labelledby="heroH">
-    <img class="hero-frond" src="assets/img/frond-painted.webp" width="1200" height="427" alt="" aria-hidden="true">
-    <div class="sign-wrap" id="signWrap">
-      <!-- The badge behind Leny, painted in rings that draw themselves in. -->
-      <svg class="badge" id="badge" viewBox="-52 -52 104 104" aria-hidden="true">
-        <defs>
-          <filter id="paintEdge" x="-10%" y="-10%" width="120%" height="120%">
-            <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="n"/>
-            <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
-          </filter>
-          <radialGradient id="discPaint" cx="42%" cy="36%" r="70%">
-            <stop offset="0" stop-color="#F0A066"/><stop offset=".55" stop-color="#DD7E45"/><stop offset="1" stop-color="#C2602F"/>
-          </radialGradient>
-        </defs>
-        <g filter="url(#paintEdge)">
-          <circle class="disc" r="40" fill="url(#discPaint)"/>
-          <circle class="ring r1" r="42.6" pathLength="1"/>
-          <circle class="ring r2" r="46" pathLength="1"/>
-          <circle class="ring r3" r="49.6" pathLength="1"/>
-        </g>
-      </svg>
-      <div class="leny-clip"><img class="emblem" id="emblem" src="assets/img/leny-painted.webp?v=2" width="380" height="1010" alt="Leny, who cooks at Namit Gid"></div>
-      <div class="plank" id="plank" aria-hidden="true">
-        <img class="sign-img" src="assets/img/sign-board.webp?v=2" width="1000" height="809" alt="">
-        <p class="wordmark" id="wordmark">Namit <span>gid</span></p>
-        <!-- The Long Beach view, mounted on the board. The intro lands on this. -->
-        <div class="frame-slot" id="frameSlot">
-          <div class="shore" id="shore">
-            <div class="shore-sky"></div>
-            <div class="shore-sun"></div>
-            <div class="shore-clouds" id="shoreClouds"></div>
-            <div class="shore-sea"><i></i></div>
-            <img class="shore-island" id="island" src="assets/img/byaringan-painted-840.webp" width="840" height="288" alt="">
-            <div class="shore-lamp"></div>
-            <img class="shore-boat" src="assets/img/bangka-painted.webp" width="1000" height="356" alt="" loading="lazy">
-            <span class="frame-label">Byaringan Island, Romblon</span>
-          </div>
-        </div>
+  <!-- The beach at dusk, and a door on the sand. The painting fills the
+       screen; the island, boat, lamp and door are layers placed in fractions
+       of the painting, inside one box that placeDusk() sizes for the screen. -->
+  <section class="dusk" id="dusk" aria-labelledby="duskH">
+    <div class="dusk-sky" aria-hidden="true"></div>
+    <div class="dusk-art" id="duskArt">
+      <img class="dusk-beach" id="duskBeach" src="assets/img/dusk/beach-2400.webp" srcset="assets/img/dusk/beach-2400.webp 2400w, assets/img/dusk/beach-4096.webp 4096w" sizes="(max-aspect-ratio: 33/40) 286vw, max(100vw, 236vh)" width="2400" height="1018" alt="" aria-hidden="true" fetchpriority="high">
+      <img class="dusk-isle" id="duskIsle" src="assets/img/byaringan-painted-840.webp" width="840" height="288" alt="" aria-hidden="true">
+      <i class="dusk-lamp" aria-hidden="true"></i>
+      <img class="dusk-boat" src="assets/img/bangka-painted.webp" width="1000" height="356" alt="" aria-hidden="true">
+      <i class="dusk-fade" aria-hidden="true"></i>
+      <div class="fireflies" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <!-- The door: an opening of 100 x 200 units (1 unit = door width / 100),
+           every layer placed in those units (see the anchors further down
+           site.css). Back to front: reflection, light, Leny, frame, leaf, sign. -->
+      <div class="dusk-door" id="duskDoor">
+        <img class="door-reflect" src="assets/img/dusk/door-reflect.svg" alt="" aria-hidden="true">
+        <img class="door-light" id="doorLight" src="assets/img/dusk/door-light.svg" alt="" aria-hidden="true">
+        <div class="door-way" aria-hidden="true"><img class="door-leny" id="doorLeny" src="assets/img/dusk/leny-door.webp" width="597" height="1500" alt="" loading="lazy"></div>
+        <img class="door-frame" src="assets/img/dusk/door-frame.svg" alt="" aria-hidden="true">
+        <img class="door-leaf" id="doorLeaf" src="assets/img/dusk/door-leaf.svg" alt="" aria-hidden="true">
+        <img class="door-sign" id="doorSign" src="assets/img/dusk/sign.svg" alt="" aria-hidden="true">
+        <button class="door" id="door" type="button" aria-label="Come inside"></button>
       </div>
-      <img class="emblem-arms" id="lenyArms" src="assets/img/leny-painted.webp?v=2" width="380" height="1010" alt="" aria-hidden="true">
     </div>
-
-    <div class="hero-copy" id="heroCopy">
-      <h1 id="heroH" lang="tl"><span class="line"><span>Kumain ka na?</span></span> <span class="line"><span>Tara, nagluto ako.</span></span></h1>
-      <p class="translation">Have you eaten? Come, I cooked.</p>
-      <p class="sig">~Leny</p>
+    <p class="door-hint" id="doorHint" aria-hidden="true">Tap the door</p>
+    <div class="dusk-caption">
+      <h1 id="duskH">Namit Gid · Filipino food in North York</h1>
       <p class="meta">Pickup near Fairview Mall · Thursday to Sunday</p>
-      <div class="hero-cta">
-        <a class="btn btn-sea" href="#menu">See the menu</a>
-        <p class="next-pickup" id="nextPickup" hidden></p>
-      </div>
+      <p class="next-pickup" id="nextPickup" hidden></p>
     </div>
   </section>
 
@@ -316,6 +292,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=67" defer></script>
+<script src="assets/js/app.js?v=68" defer></script>
 </body>
 </html>
