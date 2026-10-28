@@ -22,7 +22,7 @@ const NIGHT = [0x1B, 0x1F, 0x32];
 //            width fills the phone; sky and night colour extend above and below it).
 const CANDIDATES = [
   { id: 'A', name: 'under the lighthouse', door: { x: 0.575, y: 0.80, w: 0.045 }, wide: { cx: 0.56 }, tall: { cx: 0.60, win: 0.28 } },
-  { id: 'B', name: 'pool left shore',      door: { x: 0.410, y: 0.82, w: 0.050 }, wide: { cx: 0.47 }, tall: { cx: 0.54, win: 0.32 } },
+  { id: 'B', name: 'pool left shore',      door: { x: 0.410, y: 0.82, w: 0.050 }, wide: { cx: 0.47 }, tall: { cx: 0.54, win: 0.35 } },
   { id: 'C', name: 'near the water line',  door: { x: 0.500, y: 0.85, w: 0.060 }, wide: { cx: 0.54 }, tall: { cx: 0.59, win: 0.28 } },
 ];
 const TALL_W = 750, TALL_H = 1624;      // 2x of 375x812
@@ -144,7 +144,9 @@ function tall(cand) {
     } else for (let k = 0; k < 3; k++) c.d[o + k] = NIGHT[k];         // below the band: footer night colour
   }
   drawDoor(c, (d.x * PW - cx) * s, top + d.y * bandH, d.w * PW * s);
-  return { c, doorCssPx: d.w * PW * s / 2, cx: cx / PW, win: winPx / PW, bandCss: bandH / 2, topCss: top / 2 };
+  const hex = (x, m = 1) => '#' + [0, 1, 2].map((k) => Math.round(sky[x * 4 + k] * m).toString(16).padStart(2, '0')).join('');
+  const skyHex = [0.05, 0.5, 0.95].map((f) => hex(Math.round(f * (TALL_W - 1)))), skyDarkHex = [0.05, 0.5, 0.95].map((f) => hex(Math.round(f * (TALL_W - 1)), 0.78));
+  return { skyHex, skyDarkHex, c, doorCssPx: d.w * PW * s / 2, cx: cx / PW, win: winPx / PW, bandCss: bandH / 2, topCss: top / 2 };
 }
 
 const info = {};
@@ -153,7 +155,7 @@ for (const cand of CANDIDATES) {
   encode(w.c.d, w.c.w, w.c.h, path.join(out, `candidate-${cand.id}-wide.png`));
   encode(t.c.d, t.c.w, t.c.h, path.join(out, `candidate-${cand.id}-tall.png`));
   info[cand.id] = { ...cand, wideCrop: { left: +w.cx.toFixed(3), width: +w.cw.toFixed(3) }, wideDoorWidthPx1280: +(w.doorCssPx * 2).toFixed(0),
-    tallCrop: { left: +t.cx.toFixed(3), width: +t.win.toFixed(3) }, tallDoorWidthCssPx375: +(t.doorCssPx * 2 / 2).toFixed(1), tallBandCssH: t.bandCss, tallBandTopCss: t.topCss };
+    tallCrop: { left: +t.cx.toFixed(3), width: +t.win.toFixed(3) }, tallDoorWidthCssPx375: +(t.doorCssPx * 2 / 2).toFixed(1), skyHex: t.skyHex, skyDarkHex: t.skyDarkHex, tallBandCssH: t.bandCss, tallBandTopCss: t.topCss };
 }
 console.log(JSON.stringify(info, null, 1));
 
