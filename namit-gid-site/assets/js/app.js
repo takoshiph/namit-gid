@@ -1007,6 +1007,9 @@
     document.querySelectorAll('.note').forEach(n => noteIO.observe(n));
     if (!lowEndDevice) {
       new IntersectionObserver(es => $('foot').classList.toggle('live', es[0].isIntersecting), { threshold: .25 }).observe($('foot'));
+      // the first time the footer is half in view, the light under the door dims once, as if someone walked past inside
+      const dimIO = new IntersectionObserver(es => { if (!es[0].isIntersecting) return; $('foot').querySelector('.foot-glow').classList.add('dim'); dimIO.disconnect(); }, { threshold: .5 });
+      dimIO.observe($('foot'));
     }
   }
 

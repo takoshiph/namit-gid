@@ -611,13 +611,23 @@ h2 { letter-spacing: 0; line-height: 1.05; }
 @keyframes steam-puff { 0% { stroke-dashoffset: 1; opacity: 0; transform: translateY(8px) skewX(0); } 30% { opacity: .8; } 100% { stroke-dashoffset: 0; opacity: 0; transform: translateY(-14px) skewX(3deg); } }
 
 
+/* the night bookend: the same beach and DOOR {x .41, y .82, w .05}, now shut.
+   door-closed-night.svg: top-left at opening (-30,-14), 160u x 304u, u = .05% of the scene width
+   (left 41% - 80u, top 82% of the height - 214u). The glow is the light spilling onto the sand and breathes. */
+.foot-door { position: absolute; left: 37%; top: calc(82% - 25.22%); width: 8%; height: auto; }
+.foot-glow { position: absolute; left: 37.1%; top: 82%; width: 7.8%; aspect-ratio: 156 / 76; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 213, 138, .55), rgba(255, 183, 102, .2) 55%, rgba(255, 176, 96, 0)); }
+.foot.live .foot-glow { animation: door-breathe 2.6s var(--ease-loop) infinite; }
+.foot.live .foot-glow.dim { animation: foot-dim 1.2s ease-in-out, door-breathe 2.6s var(--ease-loop) 1.2s infinite; }
+@keyframes foot-dim { 50% { opacity: .55; } }
+
 /* the dusk footer: a real lighthouse rhythm, and fireflies by the palms */
 .foot-lamp { animation: lamp-flash 6s linear infinite !important; }
 @keyframes lamp-flash { 0%, 86%, 100% { opacity: .45; scale: .8; } 88% { opacity: 1; scale: 1.3; } 90% { opacity: .5; scale: .85; } 93% { opacity: 1; scale: 1.25; } 95% { opacity: .5; scale: .85; } }
 .fireflies { position: absolute; left: 0; top: 30%; width: 34%; height: 55%; pointer-events: none; }
 .fireflies i { position: absolute; width: 4px; height: 4px; border-radius: 50%; opacity: 0;
   background: radial-gradient(circle, #fff8c8 0, rgba(255, 228, 120, .9) 40%, rgba(255, 220, 110, 0) 70%); box-shadow: 0 0 6px 2px rgba(255, 226, 130, .45); }
-.foot.live .fireflies i { animation: firefly 8s var(--ease-loop) infinite; }
+:where(.foot.live) .fireflies i { animation: firefly 8s var(--ease-loop) infinite; }
 .fireflies i:nth-child(1) { left: 12%; top: 30%; animation-delay: 0s; animation-duration: 7s; }
 .fireflies i:nth-child(2) { left: 30%; top: 60%; animation-delay: 1.4s; }
 .fireflies i:nth-child(3) { left: 48%; top: 22%; animation-delay: 2.6s; animation-duration: 9s; }
