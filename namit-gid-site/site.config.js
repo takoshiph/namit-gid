@@ -32,7 +32,7 @@ window.SITE = {
       { id: 'shawarma', name: 'Shawarma Rice', short: 'Shawarma', img: 'images/shawarma-photo.webp', w: 720, h: 720, photo: true,
         desc: 'Spiced beef shawarma on turmeric rice, cucumber and cherry tomato round the edge, plenty of garlic sauce on top.',
         sizes: [{ label: 'Small', price: 50, feeds: '3–4' }, { label: 'Medium', price: 65, feeds: '5–6' }] },
-      { id: 'lumpia', name: 'Lumpiang Shanghai', short: 'Lumpia', img: 'images/lumpia.webp', w: 607, h: 620, warm: true,
+      { id: 'lumpia', name: 'Lumpiang Shanghai', short: 'Lumpia', img: 'images/lumpia-photo.webp', w: 720, h: 720, photo: true,
         desc: 'Pork spring rolls, rolled by hand and packed tight. Sweet chili sauce on the side.',
         sizes: [{ label: '30 pcs', price: 35 }, { label: '50 pcs', price: 45 }] },
       { id: 'sushi', name: 'Baked Sushi', short: 'Sushi', img: 'images/sushi.webp', w: 620, h: 611, warm: true,
