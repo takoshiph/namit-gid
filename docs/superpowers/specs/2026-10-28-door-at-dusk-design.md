@@ -120,8 +120,8 @@ Paintings should be delivered at sizes that stay sharp after the zoom in shot 4.
 
 - Keep the current technical approach: GSAP, transforms and opacity only, with layers that are painted once and then only moved. The animation must hold 60 fps on a mid-range phone.
 - Respect `prefers-reduced-motion` and data saver as today.
-- Bump `?v=` on changed assets, plus `CACHE_NAME` and `PRECACHE` in `sw.js`. Add the new images to `PRECACHE` if they're needed for first paint.
-- Work on the `redesign-preview` branch. Elvin approves before anything goes to `main`, because `main` deploys live immediately.
+- Bump `?v=` on changed CSS and JS. This site has no service worker.
+- Work on the `redesign-preview` branch only. It deploys to https://redesign-preview.namit-gid.pages.dev, which is not indexed and doesn't send real orders. Nothing goes to `main` (the live namitgid.takoshi.ca) until Elvin has seen the preview and says so.
 
 ## Left to the builder
 
