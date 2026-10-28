@@ -1,0 +1,20 @@
+<!-- sign: hangs from the FRAME's lintel, in front of the door and the leaf (it does not move with the leaf). viewBox 0 0 80 38, HANG POINT = top centre (40,0), a small nail on the lintel: two cords run from it to the board's top corners. Sway by rotating the whole image about it (transform-origin: 50% 0). 1 unit = door width/100, so it is 80% of the door width. Place it with its hang point at opening (50,-8). Text uses Young Serif if loaded, else Georgia. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 38" width="800" height="380">
+<defs>
+<filter id="soft" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".12" numOctaves="2" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.2"/></filter>
+<filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".5 .02" numOctaves="3" seed="2"/><feColorMatrix values="0 0 0 0 .16  0 0 0 0 .1  0 0 0 0 .1  0 0 0 .5 -.1"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+<linearGradient id="w" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9B7552"/><stop offset="1" stop-color="#7A5A45"/></linearGradient>
+<filter id="gl" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="1.4"/></filter>
+</defs>
+<g filter="url(#soft)">
+<path d="M40 1 L12 11 M40 1 L68 11" stroke="#3E2D26" stroke-width="1" fill="none" stroke-linecap="round"/>
+<rect x="3" y="10" width="74" height="26" rx="2.5" fill="url(#w)"/>
+<path d="M3 18.5H77M3 27.5H77" stroke="#4A352C" stroke-width=".6" opacity=".6"/>
+</g>
+<circle cx="40" cy="1" r="1.6" fill="#2F2428"/>
+<rect x="3" y="10" width="74" height="26" rx="2.5" filter="url(#grain)" opacity=".7"/>
+<rect x="3.4" y="10.4" width="73.2" height="25.2" rx="2.3" fill="none" stroke="#3A2A2A" stroke-width=".8" opacity=".6"/>
+<circle cx="11" cy="11.5" r=".9" fill="#2F2428"/><circle cx="69" cy="11.5" r=".9" fill="#2F2428"/>
+<text x="40" y="29.2" text-anchor="middle" font-family="'Young Serif', Georgia, serif" font-size="12.5" fill="#FFB766" opacity=".55" filter="url(#gl)">Namit gid</text>
+<text x="40" y="29.2" text-anchor="middle" font-family="'Young Serif', Georgia, serif" font-size="12.5" fill="#FBF3E2">Namit <tspan fill="#f6c97a">gid</tspan></text>
+</svg>

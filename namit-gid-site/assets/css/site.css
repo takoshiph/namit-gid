@@ -437,6 +437,27 @@ html.intro .hero-copy > * { opacity: 0; }
 
 /* ── pickup ──────────────────────────────────────────────── */
 
+/* ── dusk door scene: art anchors (no rules yet; assets/img/dusk/) ──
+   DOOR = {x .41, y .82, w .05} of the painting = bottom-centre of the door on the sand.
+   One door unit u = door width / 100 = .0005 x painting width. "Opening" box = 100 x 200 u, its
+   origin O (0,0) = top-left: O.x = DOOR.x - 50u, O.y = DOOR.y - 200u (door base = O + (50,200)).
+   In the painting's own px (1584 x 672): u = .79 px, opening 79 x 158 px at (590.5, 391.6).
+   Every door SVG states its box in OPENING UNITS (viewBox origin = O); to place one, set
+   left = O.x + vbX*u, top = O.y + vbY*u, width = vbW*u, height = vbH*u. Swap for a webp at the same box.
+   door-frame.svg   viewBox -14 -14 128 228. Opening = 0,0 -> 100,200. Overhangs 14u each side.
+   door-leaf.svg    viewBox 0 0 100 200 (= the opening). HINGE = left edge x=0, transform-origin 0 50%. Handle (85,105).
+   door-light.svg   viewBox -60 -20 220 330. Interior fills 0..100 x 0..200 (sits behind Leny and the leaf);
+                    halo around; pool on the sand y 200..285 (door base y=200).
+   door-reflect.svg viewBox -14 0 128 90, TOP edge = door base (y 200 in opening units): place at top = O.y + 200u.
+   sign.svg         viewBox 0 0 80 38 (80% of the door width). Hangs from the FRAME lintel, in front of the leaf, and does NOT
+                    move with the leaf. HANGING POINT = top centre (40,0), a nail on the lintel at opening (50,-8); two cords run to the
+                    board corners. Sway by rotating about 50% 0. Board sits at opening y 2..28, above Leny's head.
+   leny-door.webp   597 x 1500 px (aspect .398, so width 67u). Feet bottom-centre at opening (50,198); height 168u; clip to the opening box
+                    so frame/leaf overlap her. Layer order, back to front: reflect, light, Leny (clipped), frame, leaf, sign.
+   door-closed-night.svg  viewBox -30 -14 160 304; frame + leaf in one, shut. Window glows at opening (36..64, 32..64);
+                    light strip under the door at y 195..200; sand pool below. Door base = (50,200) as above.
+   beach-night-2400.webp  same 2400 x 1018 frame as beach-2400.webp; island/boat/lamp overlay with the footer CSS. */
+
 /* ── footer: the beach at dusk ──────────────────────────── */
 .foot { position: relative; background: #1B1F32; color: var(--sand); padding: 0 0 calc(40px + env(safe-area-inset-bottom)); }
 /* the dusk beach, with Byaringan just off the tip of the headland */

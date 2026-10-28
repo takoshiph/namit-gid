@@ -1,0 +1,20 @@
+<!-- door-frame: origin (0,0) = top-left of the door OPENING (100 x 200 units, 1 unit = door width / 100). Frame overhangs to -14..114 x -14..214. Swap 1:1 for a webp with the same box. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -14 128 228" width="1280" height="2280">
+<defs>
+<filter id="soft" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/></filter>
+<filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".45 .012" numOctaves="3" seed="7"/><feColorMatrix values="0 0 0 0 .16  0 0 0 0 .1  0 0 0 0 .12  0 0 0 .55 -.12"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+<linearGradient id="w" x1="0" x2="1"><stop offset="0" stop-color="#8A6648"/><stop offset=".5" stop-color="#6E5240"/><stop offset="1" stop-color="#5A4350"/></linearGradient>
+<linearGradient id="wl" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#7E5E46"/><stop offset="1" stop-color="#5C4552"/></linearGradient>
+</defs>
+<g filter="url(#soft)">
+<path d="M-12 -12 H112 L110 0 H-10Z" fill="url(#wl)"/>
+<path d="M-14 -14 H114 V-9 H-14Z" fill="#8F6D4D"/>
+<path d="M-12 -10 L0 0 V200 H-12Z" fill="url(#w)"/>
+<path d="M112 -10 L100 0 V200 H112Z" fill="url(#w)"/>
+<path d="M-14 200 H114 V212 H-14Z" fill="#5B4552"/>
+<path d="M-14 200 H114 V203 H-14Z" fill="#8F7357" opacity=".7"/>
+</g>
+<g filter="url(#grain)" opacity=".6"><rect x="-12" y="-12" width="124" height="14"/><rect x="-12" y="0" width="12" height="200"/><rect x="100" y="0" width="12" height="200"/></g>
+<path d="M0 0 V200 M100 0 V200" stroke="#3A2A2E" stroke-width="1.2" opacity=".7"/>
+<path d="M0 0 H100" stroke="#3A2A2E" stroke-width="1.6" opacity=".6"/>
+</svg>

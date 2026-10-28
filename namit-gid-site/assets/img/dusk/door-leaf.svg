@@ -1,0 +1,18 @@
+<!-- door-leaf (closed): viewBox 0 0 100 200 = the door opening. HINGE is the LEFT edge, x=0 (transform-origin: 0 50%). Handle at x~85,y~105. Swap 1:1 for a webp of the same box. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200" width="1000" height="2000">
+<defs>
+<filter id="soft" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".09" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/></filter>
+<filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".45 .012" numOctaves="3" seed="7"/><feColorMatrix values="0 0 0 0 .16  0 0 0 0 .1  0 0 0 0 .12  0 0 0 .55 -.12"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+<linearGradient id="p" x1="0" x2="1"><stop offset="0" stop-color="#9A7352"/><stop offset=".6" stop-color="#7A5B45"/><stop offset="1" stop-color="#65495A"/></linearGradient>
+</defs>
+<g filter="url(#soft)">
+<rect x="0" y="0" width="100" height="200" fill="url(#p)"/>
+<g stroke="#3D2B2E" stroke-width=".9" opacity=".75"><path d="M20 0V200M40 0V200M60 0V200M80 0V200"/></g>
+<g fill="#6A4E3C"><rect x="0" y="22" width="100" height="9"/><rect x="0" y="100" width="100" height="9"/><rect x="0" y="170" width="100" height="9"/></g>
+<g fill="#A98259" opacity=".55"><rect x="0" y="22" width="100" height="1.6"/><rect x="0" y="100" width="100" height="1.6"/><rect x="0" y="170" width="100" height="1.6"/></g>
+</g>
+<rect width="100" height="200" filter="url(#grain)" opacity=".7"/>
+<g fill="#2F2428"><rect x="0" y="14" width="13" height="5" rx="1.5"/><rect x="0" y="118" width="13" height="5" rx="1.5"/><rect x="0" y="178" width="13" height="5" rx="1.5"/></g>
+<rect x="83" y="97" width="4.5" height="16" rx="2.2" fill="#2F2428"/><circle cx="85" cy="105" r="3.6" fill="#C9A15B"/><circle cx="84.2" cy="104.2" r="1.2" fill="#F2D79A" opacity=".8"/>
+<rect x=".6" y=".6" width="98.8" height="198.8" fill="none" stroke="#3A2A2E" stroke-width="1.2" opacity=".55"/>
+</svg>

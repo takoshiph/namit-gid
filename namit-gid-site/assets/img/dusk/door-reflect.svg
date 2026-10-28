@@ -1,0 +1,14 @@
+<!-- door-reflect: reflection of the door in wet sand. The door's base is the TOP edge of this image (y=0); x=0..100 is the door opening. viewBox -14 0 128 90, 1 unit = door width/100. Sits directly below the door base; fades out. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 0 128 90" width="1280" height="900">
+<defs>
+<linearGradient id="f" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<mask id="m"><rect x="-14" y="0" width="128" height="90" fill="url(#f)"/></mask>
+<filter id="r" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".004 .12" numOctaves="2" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="1.4 .7"/></filter>
+</defs>
+<g mask="url(#m)" filter="url(#r)" opacity=".55">
+<rect x="-12" y="0" width="12" height="90" fill="#6A4F44"/><rect x="100" y="0" width="12" height="90" fill="#6A4F44"/>
+<rect x="0" y="0" width="100" height="90" fill="#FFCB7C"/>
+<rect x="0" y="0" width="100" height="90" fill="#8A6A4E" opacity=".45"/>
+<rect x="-14" y="0" width="128" height="3" fill="#5B4552"/>
+</g>
+</svg>
