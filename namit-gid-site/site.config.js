@@ -35,7 +35,7 @@ window.SITE = {
       { id: 'lumpia', name: 'Lumpiang Shanghai', short: 'Lumpia', img: 'images/lumpia-photo.webp', w: 720, h: 720, photo: true,
         desc: 'Pork spring rolls, rolled by hand and packed tight. Sweet chili sauce on the side.',
         sizes: [{ label: '30 pcs', price: 35 }, { label: '50 pcs', price: 45 }] },
-      { id: 'sushi', name: 'Baked Sushi', short: 'Sushi', img: 'images/sushi.webp', w: 620, h: 611, warm: true,
+      { id: 'sushi', name: 'Baked Sushi', short: 'Sushi', img: 'images/sushi-photo.webp', w: 720, h: 720, photo: true,
         desc: 'Sushi rice, kani, cream cheese and torched mayo, baked hot in a tray. Comes with nori sheets: scoop and eat with your hands.',
         sizes: [{ label: 'Small', price: 45, feeds: '3–4', extra: '+2 nori' }, { label: 'Medium', price: 60, feeds: '5–6', extra: '+4 nori' }] },
       { id: 'palabok', name: 'Palabok', img: 'images/palabok-photo.webp', w: 720, h: 720, photo: true,
