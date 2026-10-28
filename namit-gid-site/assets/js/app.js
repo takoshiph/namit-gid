@@ -146,22 +146,23 @@
     const slots = make('div', { class: 'cbox-slots', role: 'group', 'aria-label': 'Your box of four' });
     const note = make('p', { class: 'cbox-note' });
     const addBtn = make('button', { type: 'button', class: 'btn btn-sea', text: 'Add box · ' + money(d.batch.price) });
-    const COL = { Regular: '#f1dfb4', Matcha: '#97b366', Pistachio: '#c4c585' };
+    // each flavour button carries a little painted cake, the same one that drops into the box
     const flav = make('div', { class: 'flavours' }, d.batch.flavours.map(f => {
-      const b = make('button', { type: 'button', class: 'flavour' }, [make('i'), f]);
-      b.firstChild.style.background = COL[f];
-      b.addEventListener('click', () => { if (box.length < 4) { box.push(f); paint(); } });
+      const b = make('button', { type: 'button', class: 'flavour' },
+        [make('img', { src: 'assets/img/cheesecake/' + f.toLowerCase() + '.webp', alt: '', width: 28, height: 28 }), f]);
+      b.addEventListener('click', () => { if (box.length < 4) { box.push(f); paint(box.length - 1); } });
       return b;
     }));
-    function paint() {
+    // dropped: the slot just filled, so only that cake drops in
+    function paint(dropped = -1) {
       slots.replaceChildren(...[0, 1, 2, 3].map(i => {
         const f = box[i];
-        const s = make('button', { type: 'button', class: 'slot', 'aria-label': f ? f + ', tap to empty' : 'Empty slot' });
+        const s = make('button', { type: 'button', class: 'slot' + (i === dropped ? ' drop' : ''), 'aria-label': f ? f + ', tap to empty' : 'Empty cup' });
         if (f) { s.dataset.f = f; s.addEventListener('click', () => { box.splice(i, 1); paint(); }); }
         return s;
       }));
       const left = 4 - box.length;
-      note.textContent = left ? `Pick ${left} more` : 'Box full';
+      note.textContent = left ? `Pick ${left} more` : 'Box full, salamat!';
       addBtn.disabled = !!left;
       const inTray = tray.filter(l => l.id === d.id).reduce((a, l) => a + l.qty, 0);
       if (inTray) note.textContent += ` · ${inTray} ${inTray > 1 ? 'boxes' : 'box'} in your tray`;

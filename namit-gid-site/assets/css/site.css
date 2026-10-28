@@ -343,22 +343,41 @@ html.intro .hero-copy > * { opacity: 0; }
 .stepper button:hover { background: rgba(243, 234, 219, .12); }
 .stepper output { min-width: 84px; text-align: center; font-weight: 600; }
 
-/* cheesecake box: four slots, filled by flavour */
-.cbox { display: grid; gap: 10px; justify-items: center; }
+/* cheesecake box: a kraft bakery box seen from above, four parchment cups
+   that Leny's painted cakes drop into */
+.cbox { display: grid; gap: 12px; justify-items: center; }
 .cbox-slots {
-  display: grid; grid-template-columns: repeat(4, 48px); gap: 8px; padding: 10px;
-  background: #e9dcc4; border-radius: 6px; box-shadow: inset 0 0 0 1.5px rgba(110, 82, 56, .35);
+  display: grid; grid-template-columns: repeat(2, 72px); gap: 10px; padding: 14px; rotate: -1.2deg;
+  border-radius: 5px;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 240, 210, .35), transparent 45%),
+    repeating-linear-gradient(97deg, rgba(120, 82, 44, .05) 0 2px, transparent 2px 7px),
+    #C99E6B;
+  box-shadow: inset 0 0 0 6px #D5AE7D, inset 0 0 0 7.5px rgba(110, 72, 38, .35),
+    inset 0 2px 10px rgba(90, 55, 25, .3), 0 3px 0 #A97C4C, 0 8px 16px rgba(60, 38, 20, .2);
 }
-.slot { width: 48px; height: 48px; border-radius: 50%; border: 1.5px dashed rgba(110, 82, 56, .45); background: transparent; cursor: pointer; padding: 0; position: relative; }
-.slot[data-f] { border: 0; box-shadow: 0 2px 0 rgba(43,33,25,.18); animation: drop-in 320ms var(--ease-hang); }
-.slot[data-f="Regular"] { background: radial-gradient(circle at 40% 35%, #fbf1d9, #e8cf9c); }
-.slot[data-f="Matcha"] { background: radial-gradient(circle at 40% 35%, #c9dba0, #7f9a52); }
-.slot[data-f="Pistachio"] { background: radial-gradient(circle at 40% 35%, #e3e2b2, #a9ad6a); }
-@keyframes drop-in { from { transform: translateY(-10px) scale(.8); } }
+.slot { width: 72px; height: 72px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; position: relative;
+  /* an empty crinkled parchment cup */
+  background: radial-gradient(circle, #F6EBD3 0 52%, transparent 53%),
+    repeating-conic-gradient(#EFE0BF 0 7deg, #E2CEA4 7deg 14deg);
+  box-shadow: inset 0 2px 5px rgba(90, 55, 25, .28), 0 1px 0 rgba(255, 240, 214, .5); }
+.slot[data-f] { background: center / 112% no-repeat; box-shadow: none; filter: drop-shadow(0 2px 2px rgba(60, 38, 20, .3)); }
+.slot.drop { animation: drop-in 320ms var(--ease-hang); }
+.slot[data-f="Regular"] { background-image: url(../img/cheesecake/regular.webp); }
+.slot[data-f="Matcha"] { background-image: url(../img/cheesecake/matcha.webp); }
+.slot[data-f="Pistachio"] { background-image: url(../img/cheesecake/pistachio.webp); }
+@keyframes drop-in { from { transform: translateY(-14px) scale(.8); } }
 .flavours { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-.flavour { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid rgba(110,82,56,.4); background: var(--sand); cursor: pointer; font-weight: 600; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; }
-.flavour i { width: 14px; height: 14px; border-radius: 50%; }
-.cbox-note { font-size: 15px; color: var(--ink-2); }
+/* flavour buttons: small wooden tokens from the sign, each with its cake */
+.flavour { min-height: 44px; padding: 0 14px 0 8px; border-radius: 999px; border: 0; cursor: pointer;
+  font-weight: 600; font-size: 15px; color: #3B2212; text-shadow: 0 1px 0 rgba(255, 235, 200, .6);
+  display: inline-flex; align-items: center; gap: 7px;
+  background: linear-gradient(rgba(255, 240, 214, .38), rgba(90, 55, 25, .08)), url(../img/sign-board.webp) 50% 58% / 320% auto;
+  box-shadow: inset 0 0 0 1.5px rgba(110, 72, 38, .5), 0 2px 0 #8A5A30, 0 4px 8px rgba(60, 38, 20, .16); }
+.flavour:active { transform: translateY(2px); box-shadow: inset 0 0 0 1.5px rgba(110, 72, 38, .5), 0 0 0 #8A5A30; }
+.flavour img { width: 28px; height: 28px; filter: drop-shadow(0 1px 1px rgba(60, 38, 20, .3)); }
+/* Leny's handwriting */
+.cbox-note { margin: 0; font: 600 23px/1.1 var(--hand); color: var(--pen); rotate: -1.5deg; }
 
 /* the flying copy of a dish on its way to the bilao */
 .flyer { position: fixed; z-index: 80; width: 72px; height: 72px; left: 0; top: 0; pointer-events: none; }
