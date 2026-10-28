@@ -403,6 +403,9 @@ serve(async (req) => {
         body: JSON.stringify({
           from: 'Namit Gid <orders@takoshi.ca>',
           to: [NOTIFY_EMAIL],
+          // Leny's Reply goes straight to the customer. Only a plain-looking
+          // address: Resend rejects the whole send over a bad reply_to.
+          ...(email && /^[^\s@<>,;"]+@[^\s@<>,;"]+\.[a-z]{2,}$/i.test(email) ? { reply_to: email } : {}),
           subject: `${isRequest ? 'New request' : 'New order'}: ${name}, ${pickupShort}, $${total}`,
           html,
         }),
