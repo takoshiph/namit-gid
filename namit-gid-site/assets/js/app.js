@@ -1177,6 +1177,8 @@
       for (let n = menu; n; n = n.offsetParent) top += n.offsetTop;
       scrollTo({ top: top - bar.offsetHeight, behavior: 'instant' });
       greet.focus({ preventScroll: true });
+      // the greeting waits, out of sight, to rise as the light lifts
+      if (!calm) { gsap.set(lines, { yPercent: 105 }); gsap.set(after, { opacity: 0, y: 8 }); }
     };
     // A slow kitchen holds the bloom at its peak until the painting is in,
     // or for 4 s at most.
@@ -1239,7 +1241,7 @@
         .to(leaf, { scale: 1, duration: .5, ease: 'power2.out' }, .15)
         .to([hint, caption], { opacity: 0, duration: .35, ease: 'sine.out' }, 0)
         .to(cam, { p: 1, duration: PEAK - PUSH, ease: pushEase, onUpdate: setCam }, PUSH)
-        .to(cam, { q: 1, duration: 1.2, ease: 'power2.inOut' }, PUSH)
+        .to(cam, { q: 1, duration: 1.2, ease: 'power2.inOut', onUpdate: setCam }, PUSH)
         // the door swings open into the house, and Leny is there in the light
         .to(leaf, { rotationY: 75, duration: .9, ease: 'power2.out' }, PUSH + .1)
         .to(light, { opacity: 1, duration: .6, ease: 'sine.out' }, PUSH + .1)
@@ -1254,10 +1256,10 @@
       // jump can take a frame or a few, and it happens here, unseen.
       const LIFT = PEAK + .3;
       gsap.set(menu, { transformOrigin: `50% ${(vh - bar.offsetHeight) / 2}px`, willChange: 'transform' });
-      tl.to(bloom, { autoAlpha: 0, duration: .6, ease: 'power2.out' }, LIFT)
-        .fromTo(menu, { scale: 1.03 }, { scale: 1, duration: .6, ease: 'power3.out', immediateRender: false }, LIFT - .1)
-        .fromTo(lines, { yPercent: 105 }, { yPercent: 0, duration: .7, ease: 'expo.out', stagger: .08, immediateRender: false }, LIFT + .04)
-        .fromTo(after, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .45, ease: 'power2.out', stagger: .08, immediateRender: false }, LIFT + .2)
+      tl.to(bloom, { autoAlpha: 0, duration: .45, ease: 'power2.out' }, LIFT)
+        .fromTo(menu, { scale: 1.03 }, { scale: 1, duration: .5, ease: 'power3.out', immediateRender: false }, LIFT - .1)
+        .fromTo(lines, { yPercent: 105 }, { yPercent: 0, duration: .4, ease: 'expo.out', stagger: .06, immediateRender: false }, LIFT)
+        .fromTo(after, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .3, ease: 'power2.out', stagger: .05, immediateRender: false }, LIFT + .1)
         .addLabel('settled', tl.duration());
     });
     return entering;
@@ -1599,10 +1601,15 @@
     if (!done) { toDoor(); hold(); return; }
     if (root.classList.contains('hold')) { hold(); return; }
     if (e.type === 'keydown' && (!SCROLL_KEYS.includes(e.key) || e.altKey || e.ctrlKey || e.metaKey)) return;
+    // Space is a scroll key only on the page itself or on the door
+    if (e.type === 'keydown' && (e.key === ' ' || e.key === 'Spacebar') && !(e.target === document.body || e.target === root || e.target.id === 'door')) return;
     if (e.type === 'wheel' && e.ctrlKey) return;
     if (e.type === 'touchmove' && e.touches.length !== 1) return;
     if (entering) { if (e.cancelable) e.preventDefault(); return; }
     if (!root.classList.contains('at-door')) return;
+    // Once inside (by the door, Order or a #menu link), back at the door a
+    // scroll is just a scroll; the door itself still opens on a tap.
+    if (root.classList.contains('inside')) return;
     if (e.cancelable) e.preventDefault();
     const down = e.type === 'wheel' ? e.deltaY > 0 : e.type === 'touchmove' ? touchY !== null && e.touches[0].clientY < touchY - 6 : true;
     if (down) enterKitchen();
@@ -1616,7 +1623,7 @@
     if (done && !entering && y <= 0 && lastY > 0) {
       root.classList.add('at-door');
       if (window.gsap) gsap.to('.dusk-caption', { opacity: 1, duration: .6, ease: 'sine.out', clearProps: 'opacity' });
-    }
+    } else if (y > 0 && !entering && root.classList.contains('inside')) root.classList.remove('at-door'); // scrolling on from the door
     lastY = y;
   }, { passive: true });
   // Skip ends the intro on the beach, at the door.
