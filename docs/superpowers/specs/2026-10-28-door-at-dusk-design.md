@@ -114,6 +114,21 @@ Paintings should be delivered at sizes that stay sharp after the zoom in shot 4.
 
 - The dusk painting is wide (1584×672) and phones are tall, so on a phone the frame crops to the door and the island. The palms may be cut off. The door's position in the painting has to work for both shapes. Both the wide and tall crops are decided before the door art is made.
 - The door is easy to tap on a 375 px wide screen.
+
+### Chosen door position and crops (approved by Elvin: candidate B, "pool left shore")
+
+All numbers are fractions of the painting (1584x672, x from the left, y from the top).
+
+- **DOOR = { x: 0.41, y: 0.82, w: 0.05 }**. x and y are the bottom-centre of the door on the wet sand left of the tide pool; w is the door's width (about 79 px of the painting). The door leaf is 1:2 (w:h), so it is about 158 px tall and its top sits just under the horizon (horizon y = 0.558). The hanging sign is in front of it near its top; the reflection falls on the wet sand below y = 0.82. It clears the island (x 0.505-0.695) and the boat (x 0.63-0.85).
+- **CROP_WIDE** (16:9, plain `object-fit: cover`): full painting height, 75.4% of the width. Focal centre x = 0.47, so the window spans x 0.093-0.847 (palms stay on the left, island and door both visible). Minimum visible box: x 0.38-0.70, full height (door plus island). Door is about 85 px wide at 1280 px viewport width.
+- **CROP_TALL** (phones, 9:19.5): a plain cover crop would show only 19.6% of the width, narrower than the island, so phones use a **band layout**, not cover:
+  - Visible window: width = 0.32 of the painting, focal centre x = 0.54, so it spans x 0.38-0.70 (this is also the minimum visible box; it holds the door on the left and the whole island on the right). Scale the painting so that this window fills the screen width: painting rendered at width = 100vw / 0.32 (about 313vw), offset left by 0.38 of that width. Full painting height shows, so the band is 672/507 x the screen width = about 1.33 x width tall (497 px on a 375 px phone).
+  - Vertical placement: the band is positioned so the door's base (y = 0.82 of the painting) sits at 70% of the screen height (on 375x812, band top at about 161 px).
+  - Above the band: the sky is extended upward with the painting's top-edge colour (average of the top few rows across the window, smoothed, no streaks) blended to about 22% darker over roughly 130 px, reaching the top of the screen. In CSS: a background colour or gradient on the scene container, with the band's top edge faded into it.
+  - Below the band: solid footer night colour #1B1F32 to the bottom of the screen. The painting's existing bottom fade (the bottom 30% fading to #1B1F32, as in `.foot-scene::after`) blends into it. This is the room for the "Tap the door" hint.
+  - Door width on a 375 px phone is about 59 CSS px (at least 44 px for tapping).
+  - Mock reference: `Claude outputs/door-mocks/candidate-B-wide.png` and `candidate-B-tall.png`; reproduce with `node tools/door-mock.mjs`.
+- **Door art, first pass:** the door will first be a simple drawn door as layered SVG (frame, door leaf, light, reflection, sign), placed at the DOOR anchors above. It is swapped for the AI-painted door later at the same anchors, so keep the layer boundaries and anchors the same.
 - Shot 1 already handles phone sizes. Its final framing has to land on the phone crop of the painting, not the desktop one.
 
 ## Constraints
