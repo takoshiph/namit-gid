@@ -106,7 +106,7 @@ html.intro .intro-skip { display: block; }
 /* Dawn at a Philippine beach is lilac over coral over pale gold, backlit:
    the sun sits low behind Byaringan, so the island reads dark with a warm rim. */
 .stage { display: none; }
-/* --hz (the horizon), --sun-x and the island's box are set by playIntro()
+/* --hz (the horizon), --shore, --sun-x and the island's box are set by playIntro()
    from the dusk painting, so the pull-back ends on its framing. */
 .stage { --hz: 64%; --sun-x: 62%; }
 html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; overflow: hidden; background: #14213D; contain: strict; }
@@ -143,7 +143,7 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
 .st-glitter { inset: 0; will-change: transform; }
 .st-glitter i { position: absolute; height: 2px; border-radius: 2px; background: #FFC48A; opacity: 0; }
 
-.st-isle { --iw: min(90vw, 72vh); left: var(--isle-x, calc(50% - var(--iw) * .44)); width: var(--iw); aspect-ratio: 1680 / 576; top: calc(var(--hz) - var(--iw) * .343 * .985); }
+.st-isle { --iw: min(90vw, 72vh); left: var(--isle-x, calc(50% - var(--iw) * .44)); width: var(--iw); aspect-ratio: 1680 / 576; top: var(--isle-y, calc(var(--hz) - var(--iw) * .343 * .985)); }
 /* The island's silhouette for the rim and tint masks, inlined: a CSS mask is
    fetched separately from the <img>, and Chrome re-fetched it on every
    restyle while the page scrolled (100+ downloads of the painting a visit). */
@@ -177,7 +177,7 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
   text-shadow: 0 0 28px rgba(255, 200, 140, .45), 0 1px 0 rgba(122, 62, 36, .55); }
 .st-word span { color: #F6C97A; }
 .st-word .ch { display: inline-block; opacity: 0; }
-.st-sand { left: 0; right: 0; bottom: 0; height: 20%;
+.st-sand { left: 0; right: 0; bottom: 0; top: var(--shore, 80%);
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .32 0 0 0 0 .25 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
     linear-gradient(#b98f7a, #dcbfa2 35%, #ead2b4); }
@@ -203,9 +203,12 @@ html.intro .bar, html.intro .preview-strip { opacity: 0; pointer-events: none; }
 html.intro main > section:not(.dusk), html.intro .foot { visibility: hidden; }
 
 .meta { font-size: 15px; color: var(--ink-2); }
-html.intro body { overflow: hidden; }
+html.intro, html.intro body { overflow: hidden; } /* on html too: its overflow-x: clip stops body passing overflow to the page */
+/* no scrollbar on the beach: one appearing as the intro ends (or on a return
+   visit) would narrow the page under the painting */
+html.intro, html.at-door { scrollbar-width: none; }
 /* the rest of a scroll that ended the intro is held at the door */
-html.hold body { overflow: hidden; }
+html.hold, html.hold body { overflow: hidden; }
 
 
 /* ── sections ────────────────────────────────────────────── */

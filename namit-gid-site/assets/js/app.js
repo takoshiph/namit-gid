@@ -1072,12 +1072,13 @@
   let tl = null, amb = null, done = false;
 
   // Ends the intro: the stage goes and the beach is the page's first screen.
-  function endIntro() {
+  // settling: the timeline runs on to ease the painting's drift out.
+  function endIntro(settling) {
     if (done) return false; done = true;
     if (amb) amb.kill();
     if (window.gsap) {
       gsap.ticker.remove(flyBirds);
-      gsap.set(['#duskWipe', '#duskStill'], { clearProps: 'transform' });
+      gsap.set(settling ? '#duskWipe' : ['#duskWipe', '#duskStill'], { clearProps: 'transform,willChange' });
     }
     root.classList.remove('intro');
     const st = $('stage'); if (st) st.remove();
@@ -1086,10 +1087,12 @@
   }
   // Ends the intro at the door, idle, and remembers that it has been seen.
   // The wipe's own end calls it with settling = true and lets the timeline
-  // run on for the last of the sign's swing; anything else stops it there.
+  // run on for the last of the sign's swing and the drift; anything else
+  // stops it there.
   function toDoor(settling) {
-    if (!endIntro()) return;
-    if (tl && settling !== true) {
+    settling = settling === true;
+    if (!endIntro(settling)) return;
+    if (tl && !settling) {
       tl.kill();
       if (window.gsap) gsap.set('#doorSign', { clearProps: 'transform,filter' });
     }
@@ -1224,16 +1227,20 @@
     const wipe = $('duskWipe'), still = $('duskStill'), sign = $('doorSign');
 
     // The match cut: at rest, the stage's island is exactly the dusk
-    // painting's island (same art, same box), and the horizon, sun and sea
-    // follow it. The camera's pull-back ends at rest, so the last frame of the
-    // dawn has the painting's composition and the wipe only changes the time
-    // of day. (.dusk-wipe and .dusk-still cancel out, so this rect is true.)
-    const dr = $('duskIsle').getBoundingClientRect();
+    // painting's island (same art, same box), its sea starts at the
+    // painting's horizon and its sand at the painting's waterline. The
+    // camera's pull-back ends at rest, so the last frame of the dawn has the
+    // painting's composition and the wipe only changes the time of day.
+    // (.dusk-wipe and .dusk-still cancel out, so these rects are true.)
+    const HORIZON = .558, SHORE = .74; // fractions of the painting's height
+    const dr = $('duskIsle').getBoundingClientRect(), art = $('duskBeach').getBoundingClientRect();
     const iw0 = Math.min(vw * .9, vh * .72); // the island's old size, for the opening zoom
     const sunX = dr.left + dr.width * .71;   // behind the island, as before
     isle.style.setProperty('--iw', dr.width + 'px');
     isle.style.setProperty('--isle-x', dr.left + 'px');
-    stage.style.setProperty('--hz', (dr.top + dr.width * .343 * .985) + 'px');
+    isle.style.setProperty('--isle-y', dr.top + 'px');
+    stage.style.setProperty('--hz', (art.top + art.height * HORIZON) + 'px');
+    stage.style.setProperty('--shore', (art.top + art.height * SHORE) + 'px');
     stage.style.setProperty('--sun-x', sunX + 'px');
 
     // Build the scene, then read every measurement in one pass before writing.
@@ -1257,6 +1264,7 @@
     const wW = word.offsetWidth, wH = word.offsetHeight;
     const W = $('dusk').clientWidth, E = wipe.offsetWidth - W; // E: the brush edge's width
     const sr = sign.getBoundingClientRect();
+    const w0 = innerWidth, h0 = innerHeight;
 
     // ── writes ──
     // The name sits in the sky well above the island, leaving the lamp clear.
@@ -1268,6 +1276,8 @@
     gsap.set('#stBeam', { rotation: 185 });
     gsap.set('#stLampRef', { left: L.x + vw * .2 - vw * .0175 });
 
+    // A new size or orientation mid-intro would break the match cut: go to the door.
+    addEventListener('resize', () => { if (!done && (innerWidth !== w0 || Math.abs(innerHeight - h0) > 150)) toDoor(); });
     gsap.ticker.add(flyBirds);
     tl = gsap.timeline({ onComplete: toDoor, defaults: { ease: 'power2.out' } });
     window.__ngIntro = tl; // for frame-by-frame checks
@@ -1307,6 +1317,16 @@
     camera(['#stBeam', '#stFlare'], { x: L.x + z1.x, y: L.y + z1.y }, { x: L.x, y: L.y });
     requestAnimationFrame(() => planes.forEach(p => { p.style.willChange = 'transform'; }));
     tl.set(planes, { willChange: 'auto' }, PULL_END + .05);
+    // The drift: one slow pull further back (2.5% of scale) and a little pan,
+    // about the door, applied in lockstep to the dawn stage and to the
+    // painting, from inside the pull-back until after the wipe. So the camera
+    // never stops dead, the two pictures move as one while the edge crosses,
+    // and it eases out on the door, at rest (the at-door layout).
+    // Set after the planes are measured: it scales the whole stage.
+    const DRIFT_AT = 3.9, DRIFT_END = 8.2;
+    const drift = [stage, still];
+    gsap.set(drift, { transformOrigin: `${art.left + art.width * DOOR.x}px ${art.top + art.height * DOOR.y}px`, willChange: 'transform' });
+    tl.fromTo(drift, { scale: 1.025, xPercent: -1 }, { scale: 1, xPercent: 0, duration: DRIFT_END - DRIFT_AT, ease: 'sine.inOut', clearProps: 'transform,willChange' }, DRIFT_AT);
 
     const A0 = 185, A1 = 335, BEAM = 1.4;
     const angleOf = r => {
