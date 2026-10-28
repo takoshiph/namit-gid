@@ -101,6 +101,8 @@ html.intro .bar-status, html.at-door .bar-status { color: #FBF3E2; }
   font: 600 15px/1 var(--sans); cursor: pointer; display: none;
 }
 html.intro .intro-skip { display: block; }
+/* on a phone it sits bottom right, clear of the bangka */
+@media (max-width: 599px) { .intro-skip { left: auto; right: var(--gutter); translate: none; } }
 
 /* ── intro stage: a camera pulling back from the lighthouse at dawn ─── */
 /* Dawn at a Philippine beach is lilac over coral over pale gold, backlit:
@@ -206,7 +208,7 @@ html.intro main > section:not(.dusk), html.intro .foot { visibility: hidden; }
 html.intro, html.intro body { overflow: hidden; } /* on html too: its overflow-x: clip stops body passing overflow to the page */
 /* no scrollbar on the beach: one appearing as the intro ends (or on a return
    visit) would narrow the page under the painting */
-html.intro, html.at-door { scrollbar-width: none; }
+html.intro, html.at-door:not(.inside) { scrollbar-width: none; }
 /* the rest of a scroll that ended the intro is held at the door */
 html.hold, html.hold body { overflow: hidden; }
 
@@ -214,6 +216,12 @@ html.hold, html.hold body { overflow: hidden; }
 /* ── sections ────────────────────────────────────────────── */
 .sec-head { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 0 var(--gutter); }
 .sec-sub { max-width: 34rem; color: var(--ink-2); font-size: 16px; }
+/* Leny's greeting heads the kitchen, in the old hero's type: two lines, each
+   rising out of its own clip as the kitchen settles (app.js splits them) */
+#menuH { font-size: 30px; line-height: 1.08; }
+#menuH .line { display: block; overflow: clip; padding-bottom: .06em; }
+#menuH .line > span { display: inline-block; text-wrap: balance; }
+#menuH:focus { outline: none; }
 .menu { padding: 56px 0 24px; background: var(--paper-grain), radial-gradient(60% 40% at 85% 10%, rgba(233, 182, 107, .12), transparent 70%), radial-gradient(50% 40% at 10% 60%, rgba(62, 99, 55, .07), transparent 70%), #F4ECDD; }
 .dishes { display: grid; gap: 52px; }
 
@@ -412,6 +420,10 @@ html.intro .wipe-gold { display: block; }
 .dusk-art > *, .dusk-door > * { position: absolute; }
 .dusk-art img { max-width: none; }
 .dusk-beach { inset: 0; width: 100%; height: 100%; }
+/* DOOR_CROP {x .335, y .52, w .15, h .42}: the door's surroundings, painted
+   finer, laid exactly over the beach while the camera pushes in */
+.dusk-crop { left: 33.5%; top: 52%; width: 15%; height: 42%; }
+.dusk-crop[hidden] { display: none; }
 /* the island, the lamp and the bangka sit where the footer puts them */
 .dusk-isle { left: 50.5%; width: 19%; top: 41.4%; filter: brightness(.55) saturate(.75) sepia(.15) hue-rotate(-12deg); }
 .dusk-lamp { left: calc(50.5% + 19% * .78); top: 42.1%; width: 2.2%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; opacity: .45; scale: .8;
@@ -467,6 +479,19 @@ html:not(.intro) .dusk.live .dusk-lamp { animation: lamp-flash 6s linear infinit
    starts from 0 so the swing settles straight into the sway */
 @keyframes sign-sway { 0%, 100% { rotate: 0deg; } 25% { rotate: 2deg; } 75% { rotate: -2deg; } }
 @keyframes door-breathe { 50% { opacity: .75; } }
+/* the fireflies sit by the palms, off the side of the band on a phone */
+.dusk.band .fireflies { display: none; }
+
+/* ── going in (enterKitchen() in app.js) ── */
+/* The page holds still under the move; the idle breathing of the light and
+   the hint step aside so GSAP can fade them (an animation beats inline styles). */
+html.entering .door-light, html.entering .door-hint { animation: none !important; }
+/* The warm light from the doorway: a soft disc of #FFF4DC centred on the
+   door, scaled up until it fills the screen. #bloom carries the opacity. */
+.bloom { position: fixed; inset: 0; z-index: 65; pointer-events: none; overflow: hidden; opacity: 0; visibility: hidden; }
+.bloom i { position: absolute; left: 0; top: 0; width: 100vmax; height: 100vmax; border-radius: 50%;
+  background: radial-gradient(closest-side, #FFF4DC 0, #FFF4DC 40%, rgba(255, 236, 198, .88) 56%, rgba(255, 222, 168, .4) 76%, rgba(255, 214, 150, 0) 100%); }
+
 /* the tray waits inside: no tray bar on the beach */
 html.at-door .traybar { display: none !important; }
 
@@ -541,6 +566,7 @@ html.at-door .traybar { display: none !important; }
 @media (min-width: 900px) {
   :root { --gutter: 48px; }
   h2 { font-size: 44px; }
+  #menuH { font-size: 52px; }
   h3 { font-size: 28px; }
   body { font-size: 18px; }
   .dishes { grid-template-columns: 1fr 1fr; gap: 64px 40px; }

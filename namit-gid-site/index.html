@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=86">
+<link rel="stylesheet" href="assets/css/site.css?v=87">
 <script>
   /* Decide the intro before first paint so nothing flashes. The intro plays
      once per device (localStorage 'ng-seen-intro'); after that, and with
@@ -141,6 +141,9 @@
 </header>
 
 <button class="intro-skip" id="introSkip" type="button">Skip</button>
+<!-- going in: the warm light from the doorway fills the screen while the page
+     moves to the kitchen; the <i> is the light, centred on the door -->
+<div class="bloom" id="bloom" aria-hidden="true"><i id="bloomLight"></i></div>
 
 <main id="top">
   <!-- The beach at dusk, and a door on the sand. The painting fills the
@@ -156,6 +159,9 @@
     <div class="dusk-sky" aria-hidden="true"></div>
     <div class="dusk-art" id="duskArt">
       <img class="dusk-beach" id="duskBeach" src="assets/img/dusk/beach-2400.webp" srcset="assets/img/dusk/beach-2400.webp 2400w, assets/img/dusk/beach-4096.webp 4096w" sizes="(max-aspect-ratio: 33/40) 286vw, max(100vw, 236vh)" width="2400" height="1018" alt="" aria-hidden="true" fetchpriority="high">
+      <!-- a sharper painting of the door's surroundings (DOOR_CROP), laid over
+           the beach for the push in through the door -->
+      <img class="dusk-crop" id="duskCrop" width="950" height="1129" alt="" aria-hidden="true" hidden>
       <img class="dusk-isle" id="duskIsle" src="assets/img/byaringan-painted-840.webp" width="840" height="288" alt="" aria-hidden="true">
       <i class="dusk-lamp" aria-hidden="true"></i>
       <img class="dusk-boat" src="assets/img/bangka-painted.webp" width="1000" height="356" alt="" aria-hidden="true">
@@ -187,7 +193,9 @@
 
   <section class="menu" id="menu" aria-labelledby="menuH">
     <header class="sec-head">
-      <h2 id="menuH">Smells good in here.</h2>
+      <h2 id="menuH" lang="tl">Kumain ka na? Tara, nagluto ako.</h2>
+      <p class="translation">Have you eaten? Come, I cooked.</p>
+      <p class="sig">~Leny</p>
       <p class="sec-sub">Follow your nose. Lift a lid to see what’s inside.</p>
     </header>
 
@@ -306,6 +314,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=70" defer></script>
+<script src="assets/js/app.js?v=71" defer></script>
 </body>
 </html>

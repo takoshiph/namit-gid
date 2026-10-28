@@ -1058,7 +1058,9 @@
     st.setProperty('--door-w', px(DOOR.w * w));
   }
   placeDusk();
-  addEventListener('resize', placeDusk);
+  // ResizeObserver also catches the page's scrollbar coming or going
+  if ('ResizeObserver' in window) new ResizeObserver(() => placeDusk()).observe(dusk);
+  else addEventListener('resize', placeDusk);
   // The idle life runs only while the beach is on screen.
   if (!calm && 'IntersectionObserver' in window) {
     new IntersectionObserver(es => dusk.classList.toggle('live', es[0].isIntersecting)).observe(dusk);
@@ -1098,9 +1100,169 @@
     }
     root.classList.add('at-door');
     try { localStorage.setItem('ng-seen-intro', '1'); } catch (e) { /* private mode: the intro plays again */ }
+    window.preloadKitchen();
   }
-  // Until the door opens (a later step), going on just lets the page scroll.
-  const leaveDoor = () => root.classList.remove('at-door');
+  // Leaving the door without going through it (Order, #menu links). From
+  // then on the page keeps its scrollbar, even back up at the door.
+  const leaveDoor = () => { root.classList.remove('at-door'); root.classList.add('inside'); };
+
+  // ── Going in ──────────────────────────────────────────────────────────
+  // The kitchen painting, decoded, so the page can swap to it under the
+  // bloom. Starts with the wipe, or on landing at the door. Also fetches the
+  // finer crop of the door's surroundings for the push in.
+  let kitchenP = null, kitchenReady = false;
+  window.preloadKitchen = function preloadKitchen() {
+    if (!kitchenP) {
+      const img = document.querySelector('.k-wall');
+      kitchenP = (img && img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => { kitchenReady = true; });
+      // the rest of the kitchen's pictures, decoded ahead too, so its first
+      // paint after the jump is quick
+      document.querySelectorAll('#kWorld img').forEach(i => { if (i !== img && i.decode) i.decode().catch(() => {}); });
+      const crop = $('duskCrop');
+      if (crop && !crop.getAttribute('src')) crop.src = 'assets/img/dusk/beach-door-crop.webp';
+    }
+    return kitchenP;
+  };
+
+  // Leny's greeting: two lines, each rising out of its own clip.
+  const greet = $('menuH');
+  greet.setAttribute('tabindex', '-1');
+  const said = greet.textContent.match(/^(.*?\?)\s+(.*)$/);
+  if (said) greet.replaceChildren(make('span', { class: 'line' }, [make('span', { text: said[1] })]), ' ',
+    make('span', { class: 'line' }, [make('span', { text: said[2] })]));
+
+  // The camera's push, as one move: it eases in, slows (never stops) for a
+  // beat on Leny in the doorway, then speeds up through the opening. The
+  // speed is drawn as keys (progress 0..1, relative speed), smoothed and
+  // integrated into an ease.
+  const PUSH_SPEED = [[0, 0], [.3, 1], [.5, .42], [.66, .42], [1, 3.2]];
+  const pushEase = (() => {
+    const N = 240, v = [], acc = [0], smooth = t => t * t * (3 - 2 * t);
+    for (let i = 0; i <= N; i++) {
+      const u = i / N, k = PUSH_SPEED.findIndex(([x]) => x >= u) || 1, [x0, s0] = PUSH_SPEED[k - 1], [x1, s1] = PUSH_SPEED[k];
+      v.push(s0 + (s1 - s0) * smooth((u - x0) / (x1 - x0)));
+    }
+    for (let i = 1; i <= N; i++) acc.push(acc[i - 1] + (v[i - 1] + v[i]) / 2);
+    return u => { const f = Math.min(N, Math.max(0, u * N)), i = Math.min(N - 1, Math.floor(f)); return (acc[i] + (acc[i + 1] - acc[i]) * (f - i)) / acc[N]; };
+  })();
+
+  // Through the door into the kitchen. One timeline (__ngEnter): the door
+  // gives a little, the camera pushes in while the door swings open on Leny
+  // in the light, a beat on her, then on through the doorway into a warm
+  // bloom; under the full bloom the page moves to the kitchen, and the bloom
+  // lifts on it with her greeting. A second call while it runs gets the same
+  // promise. Calm: the bloom just crossfades, no camera.
+  let entering = null;
+  function enterKitchen() {
+    if (entering) return entering;
+    if (!window.gsap) { leaveDoor(); $('menu').scrollIntoView(); return Promise.resolve(); }
+    window.preloadKitchen();
+    const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
+    const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
+    const hint = $('doorHint'), caption = document.querySelector('.dusk-caption'), crop = $('duskCrop');
+    const lines = greet.querySelectorAll('.line > span'), after = document.querySelectorAll('#menu .translation, #menu .sig');
+    let swapped = false, tl;
+
+    // Under the full bloom: put the door back as it was (out of sight above,
+    // for a visit back up), move to the kitchen and give it the focus. The
+    // scrollbar comes back here too, where it can't be seen.
+    const swap = () => {
+      if (swapped) return; swapped = true;
+      // (the caption stays faded: it would show through the bar above the
+      // kitchen; it comes back with the door, at the top)
+      gsap.set([still, leaf, leny, light, hint], { clearProps: 'all' });
+      if (crop) crop.hidden = true;
+      root.classList.remove('at-door', 'entering'); root.classList.add('inside');
+      let top = 0; // the menu's place in the page, whatever its settle transform is doing
+      for (let n = menu; n; n = n.offsetParent) top += n.offsetTop;
+      scrollTo({ top: top - bar.offsetHeight, behavior: 'instant' });
+      greet.focus({ preventScroll: true });
+    };
+    // A slow kitchen holds the bloom at its peak until the painting is in,
+    // or for 4 s at most.
+    const atPeak = () => {
+      if (kitchenReady || swapped) return swap(); // (resuming passes the peak again)
+      const playing = !tl.paused();
+      if (playing) tl.pause('bloomPeak', true); // exactly on the peak, not a frame past it
+      Promise.race([kitchenP, new Promise(r => setTimeout(r, 4000))]).then(() => { swap(); if (playing) tl.resume(); });
+    };
+
+    entering = new Promise(resolve => {
+      const finish = () => {
+        swap();
+        gsap.set([bloom, glow, menu, ...lines, ...after], { clearProps: 'all' });
+        entering = null; resolve();
+      };
+      tl = gsap.timeline({ onComplete: finish });
+      window.__ngEnter = tl; // for frame-by-frame checks
+      gsap.set(bloom, { autoAlpha: 0 });
+
+      if (calm) {
+        // a plain crossfade through the warm light
+        gsap.set(glow, { xPercent: -50, yPercent: -50, x: innerWidth / 2, y: innerHeight / 2, scale: 3 });
+        tl.addLabel('push', 0)
+          .to(bloom, { autoAlpha: 1, duration: .4, ease: 'sine.inOut' }, 0)
+          .addLabel('bloomPeak', .4).call(atPeak, null, 'bloomPeak')
+          .to(bloom, { autoAlpha: 0, duration: .4, ease: 'sine.inOut' }, .42)
+          .addLabel('settled', .82);
+        root.classList.add('entering');
+        return;
+      }
+
+      // The idle light and hint hand their opacity to GSAP as they are now.
+      gsap.set([light, hint], { opacity: (i, el) => getComputedStyle(el).opacity });
+      root.classList.add('entering');
+      // The finer painting of the door's surroundings, once it has decoded.
+      if (crop && crop.getAttribute('src')) crop.decode().then(() => { if (!swapped) crop.hidden = false; }).catch(() => {});
+
+      // The camera: scaled about the middle of the doorway, panning it to the
+      // middle of the screen, until the opening is 1.35 screens tall.
+      const vw = innerWidth, vh = innerHeight;
+      const dr = $('duskDoor').getBoundingClientRect(), sr = still.getBoundingClientRect();
+      const O = { x: dr.left + dr.width / 2, y: dr.top + dr.height / 2 };
+      const T = { x: vw / 2 - O.x, y: vh / 2 - O.y }, lnS = Math.log(Math.max(3, 1.35 * vh / dr.height));
+      // p drives the zoom; q, the pan, brings the doorway to the middle by
+      // the beat on Leny, so the camera goes straight on through it.
+      const cam = { p: 0, q: 0 };
+      const setCam = () => {
+        gsap.set(still, { scale: Math.exp(cam.p * lnS), x: T.x * cam.q, y: T.y * cam.q });
+        gsap.set(glow, { x: O.x + T.x * cam.q, y: O.y + T.y * cam.q });
+      };
+      gsap.set(still, { transformOrigin: `${O.x - sr.left}px ${O.y - sr.top}px`, willChange: 'transform' });
+      gsap.set(glow, { xPercent: -50, yPercent: -50, x: O.x, y: O.y, scale: .3 });
+      gsap.set(leaf, { rotationY: 14, transformOrigin: '0% 50%' });
+
+      const PUSH = .1, PEAK = 1.65;
+      tl.addLabel('push', PUSH)
+        // anticipation: a hand on the door, it gives a little
+        .to(leaf, { scale: .98, duration: .15, ease: 'power2.out' }, 0)
+        .to(leaf, { scale: 1, duration: .5, ease: 'power2.out' }, .15)
+        .to([hint, caption], { opacity: 0, duration: .35, ease: 'sine.out' }, 0)
+        .to(cam, { p: 1, duration: PEAK - PUSH, ease: pushEase, onUpdate: setCam }, PUSH)
+        .to(cam, { q: 1, duration: 1.2, ease: 'power2.inOut' }, PUSH)
+        // the door swings open into the house, and Leny is there in the light
+        .to(leaf, { rotationY: 75, duration: .9, ease: 'power2.out' }, PUSH + .1)
+        .to(light, { opacity: 1, duration: .6, ease: 'sine.out' }, PUSH + .1)
+        .fromTo(leny, { opacity: 0 }, { opacity: 1, duration: .5, ease: 'sine.out' }, PUSH + .2)
+        // then she steps aside to let you in, and the light fills the screen
+        .to(leny, { xPercent: -42, duration: .55, ease: 'power2.inOut' }, 1.0)
+        .to(glow, { scale: 6, duration: .5, ease: 'power2.in' }, PEAK - .5)
+        .to(bloom, { autoAlpha: 1, duration: .45, ease: 'power2.in' }, PEAK - .45)
+        .addLabel('bloomPeak', PEAK).call(atPeak, null, 'bloomPeak');
+      // The kitchen, under the lifting bloom, settles and Leny says hello.
+      // The light holds a moment first: the kitchen's first paint after the
+      // jump can take a frame or a few, and it happens here, unseen.
+      const LIFT = PEAK + .3;
+      gsap.set(menu, { transformOrigin: `50% ${(vh - bar.offsetHeight) / 2}px`, willChange: 'transform' });
+      tl.to(bloom, { autoAlpha: 0, duration: .6, ease: 'power2.out' }, LIFT)
+        .fromTo(menu, { scale: 1.03 }, { scale: 1, duration: .6, ease: 'power3.out', immediateRender: false }, LIFT - .1)
+        .fromTo(lines, { yPercent: 105 }, { yPercent: 0, duration: .7, ease: 'expo.out', stagger: .08, immediateRender: false }, LIFT + .04)
+        .fromTo(after, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .45, ease: 'power2.out', stagger: .08, immediateRender: false }, LIFT + .2)
+        .addLabel('settled', tl.duration());
+    });
+    return entering;
+  }
+  window.enterKitchen = enterKitchen;
 
   // A cumulus, painted once onto a canvas: soft puffs (a low row along the
   // base, a taller crown), then one gradient laid across the whole shape, lit
@@ -1423,30 +1585,49 @@
   // A scroll, swipe or key during the intro is the same as Skip: it lands at
   // the door and stops there. The rest of that gesture (a trackpad keeps
   // sending wheel events for a second or more) is held, so it doesn't carry
-  // on into the kitchen. At the door, going on for now just lets the page
-  // scroll.
+  // on into the kitchen. At the door, scrolling on goes in through the door,
+  // and the page itself doesn't scroll (nor while going in). Pinch zoom and
+  // scrolling back up are left alone.
   const SCROLL_KEYS = ['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar'];
-  let holdT = 0;
+  let holdT = 0, touchY = null;
   const hold = () => {
     root.classList.add('hold'); clearTimeout(holdT);
     holdT = setTimeout(() => root.classList.remove('hold'), 450);
   };
+  addEventListener('touchstart', e => { touchY = e.touches.length === 1 ? e.touches[0].clientY : null; }, { passive: true });
   const onScrollIntent = e => {
     if (!done) { toDoor(); hold(); return; }
     if (root.classList.contains('hold')) { hold(); return; }
-    if (e && e.type === 'keydown' && !SCROLL_KEYS.includes(e.key)) return;
-    leaveDoor();
+    if (e.type === 'keydown' && (!SCROLL_KEYS.includes(e.key) || e.altKey || e.ctrlKey || e.metaKey)) return;
+    if (e.type === 'wheel' && e.ctrlKey) return;
+    if (e.type === 'touchmove' && e.touches.length !== 1) return;
+    if (entering) { if (e.cancelable) e.preventDefault(); return; }
+    if (!root.classList.contains('at-door')) return;
+    if (e.cancelable) e.preventDefault();
+    const down = e.type === 'wheel' ? e.deltaY > 0 : e.type === 'touchmove' ? touchY !== null && e.touches[0].clientY < touchY - 6 : true;
+    if (down) enterKitchen();
   };
-  ['wheel', 'touchmove', 'keydown'].forEach(ev => addEventListener(ev, onScrollIntent, { passive: true }));
+  ['wheel', 'touchmove', 'keydown'].forEach(ev => addEventListener(ev, onScrollIntent, { passive: false }));
+  // Back up at the top after going in (or after Order), the door is there
+  // again as it was, ajar, ready to tap. It doesn't replay anything.
+  let lastY = scrollY;
+  addEventListener('scroll', () => {
+    const y = scrollY;
+    if (done && !entering && y <= 0 && lastY > 0) {
+      root.classList.add('at-door');
+      if (window.gsap) gsap.to('.dusk-caption', { opacity: 1, duration: .6, ease: 'sine.out', clearProps: 'opacity' });
+    }
+    lastY = y;
+  }, { passive: true });
   // Skip ends the intro on the beach, at the door.
   $('introSkip').addEventListener('click', toDoor);
   // Order and "Skip to the menu" always go straight to the kitchen.
   const toKitchen = () => { if (!done) toDoor(); leaveDoor(); };
   document.querySelectorAll('a[href="#menu"]').forEach(a => a.addEventListener('click', toKitchen));
-  // Until the entrance is built, the door simply leads to the menu.
-  $('door').addEventListener('click', () => { leaveDoor(); $('menu').scrollIntoView({ behavior: calm ? 'auto' : 'smooth' }); });
+  // The door: a click, Enter or Space goes in.
+  $('door').addEventListener('click', () => enterKitchen());
 
   if (root.classList.contains('intro')) playIntro();
   else if (root.classList.contains('at-door')) toDoor();
-  else { endIntro(); $('menu').scrollIntoView(); } // opened on a link to #menu: straight into the kitchen
+  else { endIntro(); leaveDoor(); $('menu').scrollIntoView(); } // opened on a link to #menu: straight into the kitchen
 })();
