@@ -979,11 +979,14 @@
     if (todo) { if (links.length) todo.replaceChildren(...links.flatMap(([t, u], i) => [i ? ' · ' : '', make('a', { href: u, target: '_blank', rel: 'noopener', text: t })])); else todo.remove(); } }
 
   // ── Open / closed: the lighthouse in the bar ────────────────────────────
-  if (!mock) {
-    fetch('/api/availability').then(r => r.json()).then(a => {
-      if (a.available === false) $('navLamp').classList.remove('is-on');
-    }).catch(() => $('navLamp').classList.remove('is-on'));
-  }
+  const showOpen = on => {
+    const text = on ? 'Taking orders' : 'Closed for orders', st = $('barStatus');
+    $('navLamp').classList.toggle('is-on', on);
+    st.textContent = text; st.classList.toggle('closed', !on); st.classList.add('shown');
+    document.querySelector('.bar-brand').setAttribute('aria-label', `Namit gid, ${text.toLowerCase()}, back to top`);
+  };
+  if (mock) showOpen(true);
+  else fetch('/api/availability').then(r => r.json()).then(a => showOpen(a.available !== false)).catch(() => showOpen(false));
 
   // Previews and local copies stay out of search results.
   if (!isLive) {

@@ -72,15 +72,23 @@ html.intro:not(.landing) .bar-order { background: rgba(251, 243, 226, .16); box-
 .bar-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); margin-right: auto; min-height: 44px; }
 .bar-name { font: 22px/1 var(--serif); }
 .bar-name em, .foot-name em { font-style: normal; color: var(--cliff); }
-.lamp { width: 20px; height: 28px; display: block; }
+.bar-words { display: flex; flex-direction: column; gap: 4px; }
+/* open or closed, in words, under the name; the lamp says the same */
+.bar-status { font: 600 12px/1 var(--sans); letter-spacing: .01em; color: var(--sea); min-height: 12px; opacity: 0; transition: opacity 400ms var(--ease-out); }
+.bar-status.shown { opacity: 1; }
+.bar-status.closed { color: var(--ink-2); }
+html.intro:not(.landing) .bar-status { color: #FBF3E2; }
+.lamp { width: 24px; height: 34px; display: block; flex: none; }
 .lamp svg { width: 100%; height: 100%; overflow: visible; }
-.lamp-tower { fill: #F3EADB; stroke: var(--ink); stroke-width: 1.2; }
-.lamp-band { fill: var(--cliff); }
-.lamp-room { fill: #3b3127; }
-.lamp-roof { fill: var(--cliff); stroke: var(--ink); stroke-width: 1; stroke-linejoin: round; }
-.lamp-light { fill: var(--sun); opacity: 0; transform-origin: 10px 7.5px; transition: opacity 600ms var(--ease-out); }
-.lamp.is-on .lamp-light { opacity: .55; animation: lamp-breathe 6s var(--ease-loop) infinite; }
-.lamp.is-on .lamp-room { fill: #ffd879; }
+.lamp-wall { fill: url(#lmWall); stroke: var(--driftwood); stroke-width: .8; stroke-linejoin: round; }
+.lamp-band { fill: url(#lmRust); }
+.lamp-room { fill: #4A3A2E; stroke: var(--driftwood); stroke-width: .7; transition: fill 600ms var(--ease-out); }
+.lamp-bar { stroke: var(--driftwood); stroke-width: .5; }
+.lamp-roof { fill: url(#lmRust); stroke: #7A3020; stroke-width: .7; stroke-linejoin: round; }
+.lamp-light { opacity: 0; transform-origin: 12px 8.3px; transition: opacity 600ms var(--ease-out); }
+.lamp.is-on .lamp-light { opacity: 1; animation: lamp-glow 5s var(--ease-loop) infinite; }
+.lamp.is-on .lamp-room { fill: #FFD879; }
+@keyframes lamp-glow { 50% { opacity: .6; transform: scale(.82); } }
 @keyframes lamp-breathe { 50% { opacity: .3; transform: scale(.85); } }
 .bar-order {
   min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: 4px;

@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=82">
+<link rel="stylesheet" href="assets/css/site.css?v=83">
 <script>
   /* Decide the intro before first paint so nothing flashes. The full intro
      plays on every visit; only reduced motion or data saver skip it. */
@@ -116,8 +116,24 @@
 
 <header class="bar" id="bar">
   <a class="bar-brand" href="#top" aria-label="Namit gid, back to top">
-    <span class="lamp is-on" id="navLamp" title="Taking orders"><svg viewBox="0 0 20 28" aria-hidden="true"><circle class="lamp-light" cx="10" cy="7.5" r="6"/><path class="lamp-tower" d="M7 11h6l1.6 15H5.4z"/><path class="lamp-band" d="M6.5 16h7l.35 3h-7.7z"/><rect class="lamp-room" x="7" y="5.5" width="6" height="5" rx="1"/><path class="lamp-roof" d="M6 5.5l4-4 4 4z"/></svg></span>
-    <span class="bar-name">Namit <em>gid</em></span>
+    <!-- the island's lighthouse in miniature: white tower, two rust bands, red cap -->
+    <span class="lamp is-on" id="navLamp"><svg viewBox="0 0 24 34" aria-hidden="true">
+      <defs>
+        <linearGradient id="lmWall" x1="0" x2="1"><stop offset=".15" stop-color="#FFFDF8"/><stop offset=".6" stop-color="#F1E6D4"/><stop offset="1" stop-color="#D6C3A8"/></linearGradient>
+        <linearGradient id="lmRust" x1="0" x2="1"><stop offset=".1" stop-color="#C45C3F"/><stop offset="1" stop-color="#8C3824"/></linearGradient>
+        <radialGradient id="lmGlow"><stop offset="0" stop-color="#FFEDB5"/><stop offset=".4" stop-color="#F5C35E" stop-opacity=".8"/><stop offset="1" stop-color="#E3B04B" stop-opacity="0"/></radialGradient>
+      </defs>
+      <circle class="lamp-light" cx="12" cy="8.3" r="11" fill="url(#lmGlow)"/>
+      <path class="lamp-wall" d="M8.6 12h6.8l2 19H6.6z"/>
+      <path class="lamp-band" d="M8.13 16.5h7.74l.32 3H7.81zM7.44 23h9.12l.37 3.5H7.07z"/>
+      <rect class="lamp-wall" x="5.8" y="30.6" width="12.4" height="2.2" rx=".6"/>
+      <rect class="lamp-wall" x="7.6" y="10.3" width="8.8" height="1.8" rx=".5"/>
+      <rect class="lamp-room" x="9.4" y="6.3" width="5.2" height="4" rx=".6"/>
+      <path class="lamp-bar" d="M12 6.3v4"/>
+      <path class="lamp-roof" d="M8.6 6.4 12 2.8l3.4 3.6z"/>
+      <circle class="lamp-roof" cx="12" cy="2.3" r=".7"/>
+    </svg></span>
+    <span class="bar-words"><span class="bar-name">Namit <em>gid</em></span><span class="bar-status" id="barStatus"></span></span>
   </a>
   <a class="bar-order" href="#menu">Order</a>
 </header>
@@ -300,6 +316,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=66" defer></script>
+<script src="assets/js/app.js?v=67" defer></script>
 </body>
 </html>
