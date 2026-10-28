@@ -1,7 +1,7 @@
 // Door-at-dusk, task 1: mock candidate door spots on the dusk-beach painting in a
 // wide (16:9) and a tall (9:19.5 phone) crop. Placeholder door only, to judge
 // position and scale. Needs ffmpeg on PATH (no npm deps).
-//   node tools/door-mock.mjs [out folder]
+//   [DUSK_BASE=painting.png] node tools/door-mock.mjs [out folder]
 import { execFileSync } from 'child_process';
 import { mkdirSync, rmSync } from 'fs';
 import path from 'path';
@@ -34,7 +34,8 @@ const decode = (f) => ff(['-i', f, '-f', 'rawvideo', '-pix_fmt', 'rgba', '-']);
 const encode = (buf, w, h, file) => ff(['-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', `${w}x${h}`, '-i', '-', file], buf);
 
 // ---- base composite: painting + island + boat (as the footer lays them out) + bottom fade
-const base = decode(img('dusk-beach.webp'));
+// DUSK_BASE=path samples a different painting (e.g. the high-res repaint), scaled to PWxPH
+const base = process.env.DUSK_BASE ? ff(['-i', process.env.DUSK_BASE, '-vf', `scale=${PW}:${PH}:flags=lanczos`, '-f', 'rawvideo', '-pix_fmt', 'rgba', '-']) : decode(img('dusk-beach.webp'));
 function overlay(file, left, topFrac, wFrac, { bright, sat, tint = [1, 1, 1], clipBottom = 0 }) {
   const w = Math.round(PW * wFrac);
   const raw = ff(['-i', img(file), '-vf', `scale=${w}:-1:flags=lanczos`, '-f', 'rawvideo', '-pix_fmt', 'rgba', '-']);
