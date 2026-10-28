@@ -1341,12 +1341,21 @@
     // the photo lands on the picture and the name on the wood above it
     const lt = Math.min(frame.top, tWord.top) - 6, ll = Math.min(frame.left, tWord.left) - 6;
     const landing = { left: ll, top: lt, width: Math.max(frame.left + frame.width, tWord.left + tWord.width) + 6 - ll, height: frame.top + frame.height - lt };
-    tl.fromTo('#stage', { clipPath: inset(photo) }, { clipPath: inset(landing), ...fly, immediateRender: false }, FLY)
+    // The photo flies as one picture: the whole stage scales and moves so the
+    // photo lands on the board, sky, island and name together. Only small
+    // corrections are left for the island and the name to reach their spots.
+    const k = landing.width / photo.width;
+    const sx = landing.left - photo.left * k, sy = landing.top + landing.height / 2 - (photo.top + photo.height / 2) * k;
+    const local = r => ({ left: (r.left - sx) / k, top: (r.top - sy) / k, width: r.width / k, height: r.height / k });
+    const lIsland = local(tIsland), lWord = local(tWord);
+    tl.set('#stage', { willChange: 'transform', transformOrigin: '0 0' }, SHOT + .09)
+      .set([isle, word], { willChange: 'transform' }, SHOT + .09)
+      .fromTo('#stage', { x: 0, y: 0, scale: 1 }, { x: sx, y: sy, scale: k, ...fly, immediateRender: false }, FLY)
+      .fromTo('#stage', { clipPath: inset(photo) }, { clipPath: inset(local(landing)), ...fly, immediateRender: false }, FLY)
       // as it lands, the light-written name darkens into the wood like a burn
       .to(['#stWord', '#stWord span'], { color: '#3B2212', textShadow: '0 0 5px rgba(110,55,18,.45)', duration: fly.duration, ease: 'power2.in' }, FLY)
-      .set([isle, word], { willChange: 'transform' }, FLY - .05)
-      .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: tIsland.left - cIsle.left, y: tIsland.top - cIsle.top, scale: tIsland.width / cIsle.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
-      .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: tWord.left - cWord.left, y: tWord.top - cWord.top, scale: tWord.width / cWord.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
+      .fromTo(isle, { x: 0, y: 0, scale: 1 }, { x: lIsland.left - cIsle.left, y: lIsland.top - cIsle.top, scale: lIsland.width / cIsle.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
+      .fromTo(word, { x: 0, y: 0, scale: 1 }, { x: lWord.left - cWord.left, y: lWord.top - cWord.top, scale: lWord.width / cWord.width, transformOrigin: '0 0', ...fly, immediateRender: false }, FLY)
       .to(['#stSun', '#stFrond'], { opacity: .5, duration: fly.duration }, FLY)
       .fromTo(plank, { opacity: 0, scale: 1.05 }, { opacity: 1, scale: 1, duration: .5, immediateRender: false }, FLY + .7);
 
