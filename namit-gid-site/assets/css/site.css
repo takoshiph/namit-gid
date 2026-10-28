@@ -442,20 +442,22 @@ html.intro .hero-copy > * { opacity: 0; }
    One door unit u = door width / 100 = .0005 x painting width. "Opening" box = 100 x 200 u, its
    origin O (0,0) = top-left: O.x = DOOR.x - 50u, O.y = DOOR.y - 200u (door base = O + (50,200)).
    In the painting's own px (1584 x 672): u = .79 px, opening 79 x 158 px at (590.5, 391.6).
-   Every door SVG states its box in OPENING UNITS (viewBox origin = O); to place one, set
-   left = O.x + vbX*u, top = O.y + vbY*u, width = vbW*u, height = vbH*u. Swap for a webp at the same box.
-   door-frame.svg   viewBox -14 -14 128 228. Opening = 0,0 -> 100,200. Overhangs 14u each side.
-   door-leaf.svg    viewBox 0 0 100 200 (= the opening). HINGE = left edge x=0, transform-origin 0 50%. Handle (85,105).
-   door-light.svg   viewBox -60 -20 220 330. Interior fills 0..100 x 0..200 (sits behind Leny and the leaf);
-                    halo around; pool on the sand y 200..285 (door base y=200).
-   door-reflect.svg viewBox -14 0 128 90, TOP edge = door base (y 200 in opening units): place at top = O.y + 200u.
-   sign.svg         viewBox 0 0 80 38 (80% of the door width). Hangs from the FRAME lintel, in front of the leaf, and does NOT
-                    move with the leaf. HANGING POINT = top centre (40,0), a nail on the lintel at opening (50,-8); two cords run to the
-                    board corners. Sway by rotating about 50% 0. Board sits at opening y 2..28, above Leny's head.
-   leny-door.webp   597 x 1500 px (aspect .398, so width 67u). Feet bottom-centre at opening (50,198); height 168u; clip to the opening box
-                    so frame/leaf overlap her. Layer order, back to front: reflect, light, Leny (clipped), frame, leaf, sign.
-   door-closed-night.svg  viewBox -30 -14 160 304; frame + leaf in one, shut. Window glows at opening (36..64, 32..64);
-                    light strip under the door at y 195..200; sand pool below. Door base = (50,200) as above.
+   Swap any layer for a webp at the same box.
+   PLACEMENT, per file (u = door width / 100; O = opening top-left; sizes in u; "at" = where the file's top-left goes, in opening units):
+   door-frame.svg   viewBox -14 -14 128 228 (origin = O): at (-14,-14), size 128 x 228. Opening = 0,0 -> 100,200; overhangs 14u each side.
+   door-leaf.svg    viewBox 0 0 100 200 (origin = O): at (0,0), size 100 x 200. HINGE = left edge x=0, transform-origin 0 50%. Handle (85,105).
+   door-light.svg   viewBox -60 -20 220 330 (origin = O): at (-60,-20), size 220 x 330. Interior fills 0..100 x 0..200 (behind Leny and the leaf);
+                    halo around; pool on the sand y 200..285.
+   door-reflect.svg viewBox -14 0 128 90 (x origin = O, y 0 = door base): at (-14,200), size 128 x 90. Its top edge is the door base.
+   door-closed-night.svg  viewBox -30 -14 160 304 (origin = O): at (-30,-14), size 160 x 304. Frame + leaf in one, shut; window at
+                    (36..64, 32..64); light strip under the door y 195..200; sand pool below. Door base = (50,200).
+   EXCEPTIONS (their own box, not the opening origin):
+   sign.svg         viewBox 0 0 80 38, its OWN top-left, size 80 x 38. Place its top-left at opening (10,-8) so its hang point (40,0) lands
+                    on (50,-8), a nail on the lintel. Hangs from the FRAME lintel, in front of the leaf, and does NOT move with the leaf; two
+                    cords run to the board. Sway by rotating about 50% 0. Board sits at opening y 2..28, above Leny's head.
+   leny-door.webp   597 x 1500 px, NOT on the opening origin: size 67 x 168 (aspect .398), feet bottom-centre at opening (50,198), so its
+                    top-left is at (16.5,30). Clip to the opening box so frame/leaf overlap her.
+   Layer order, back to front: reflect, light, Leny (clipped), frame, leaf, sign.
    beach-night-2400.webp  same 2400 x 1018 frame as beach-2400.webp; island/boat/lamp overlay with the footer CSS. */
 
 /* ── footer: the beach at dusk ──────────────────────────── */
