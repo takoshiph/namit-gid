@@ -14,14 +14,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=84">
+<link rel="stylesheet" href="assets/css/site.css?v=85">
 <script>
-  /* Decide the intro before first paint so nothing flashes. The full intro
-     plays on every visit; only reduced motion or data saver skip it. */
+  /* Decide the intro before first paint so nothing flashes. The intro plays
+     once per device (localStorage 'ng-seen-intro'); after that, and with
+     reduced motion or data saver, the page opens at the door. A link to
+     #menu opens in the kitchen. */
   (function () {
     var d = document.documentElement, rm = matchMedia('(prefers-reduced-motion: reduce)').matches,
-        sd = navigator.connection && navigator.connection.saveData;
-    d.classList.add(rm || sd ? 'calm' : 'intro');
+        sd = navigator.connection && navigator.connection.saveData, seen = false,
+        menu = location.hash === '#menu';
+    try { seen = localStorage.getItem('ng-seen-intro') === '1'; } catch (e) {}
+    if (rm || sd) d.classList.add('calm');
+    else if (!seen && !menu) { d.classList.add('intro'); return; }
+    if (!menu) d.classList.add('at-door');
   })();
 </script>
 <script src="site.config.js?v=27"></script>
@@ -106,7 +112,6 @@
   <img class="st-frond" id="stFrond" data-depth="2.2" src="assets/img/frond-painted.webp" width="1200" height="427" alt="">
   <div class="st-vignette" id="stVignette"></div>
 </div>
-<div class="scroll-cue" id="scrollCue" aria-hidden="true"><span>Scroll</span><i></i></div>
 
 <a class="skip-link" href="#menu">Skip to the menu</a>
 <div class="preview-strip" id="previewStrip" hidden>Preview: orders are not sent</div>
@@ -142,6 +147,12 @@
        screen; the island, boat, lamp and door are layers placed in fractions
        of the painting, inside one box that placeDusk() sizes for the screen. -->
   <section class="dusk" id="dusk" aria-labelledby="duskH">
+    <!-- The sunset wipe: .dusk-wipe slides in from the left with a soft
+         watercolour edge (its mask) and a gold band on that edge, while
+         .dusk-still slides the other way, so the painting itself never moves.
+         Both rest at 0 once the intro is over. -->
+    <div class="dusk-wipe" id="duskWipe">
+    <div class="dusk-still" id="duskStill">
     <div class="dusk-sky" aria-hidden="true"></div>
     <div class="dusk-art" id="duskArt">
       <img class="dusk-beach" id="duskBeach" src="assets/img/dusk/beach-2400.webp" srcset="assets/img/dusk/beach-2400.webp 2400w, assets/img/dusk/beach-4096.webp 4096w" sizes="(max-aspect-ratio: 33/40) 286vw, max(100vw, 236vh)" width="2400" height="1018" alt="" aria-hidden="true" fetchpriority="high">
@@ -168,6 +179,9 @@
       <h1 id="duskH">Namit Gid · Filipino food in North York</h1>
       <p class="meta">Pickup near Fairview Mall · Thursday to Sunday</p>
       <p class="next-pickup" id="nextPickup" hidden></p>
+    </div>
+    </div>
+    <i class="wipe-gold" id="wipeGold" aria-hidden="true"></i>
     </div>
   </section>
 
@@ -292,6 +306,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=68" defer></script>
+<script src="assets/js/app.js?v=69" defer></script>
 </body>
 </html>

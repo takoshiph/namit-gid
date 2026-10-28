@@ -106,29 +106,32 @@ html.intro .intro-skip { display: block; }
 /* Dawn at a Philippine beach is lilac over coral over pale gold, backlit:
    the sun sits low behind Byaringan, so the island reads dark with a warm rim. */
 .stage { display: none; }
+/* --hz (the horizon), --sun-x and the island's box are set by playIntro()
+   from the dusk painting, so the pull-back ends on its framing. */
+.stage { --hz: 64%; --sun-x: 62%; }
 html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; overflow: hidden; background: #14213D; contain: strict; }
 .stage > * { position: absolute; }
-.st-sky { inset: 0; background: linear-gradient(#14213D 0%, #2E3A63 30%, #6B5B86 48%, #C9787A 58%, #F2A36B 62%, #FCD9A0 64%); }
-.st-day { inset: 0; opacity: 0; background: linear-gradient(#3C5677 0%, #8C7FA3 30%, #E79A7C 52%, #F7C089 60%, #FFE6BC 64%); }
+.st-sky { inset: 0; background: linear-gradient(#14213D 0%, #2E3A63 30%, #6B5B86 48%, #C9787A calc(var(--hz) - 6%), #F2A36B calc(var(--hz) - 2%), #FCD9A0 var(--hz)); }
+.st-day { inset: 0; opacity: 0; background: linear-gradient(#3C5677 0%, #8C7FA3 30%, #E79A7C calc(var(--hz) - 12%), #F7C089 calc(var(--hz) - 4%), #FFE6BC var(--hz)); }
 .st-stars { inset: 0 0 50% 0; opacity: .8;
   background:
     radial-gradient(1.2px 1.2px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 28% 8%, #fff 50%, transparent 51%),
     radial-gradient(1.4px 1.4px at 44% 26%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 63% 12%, #fff 50%, transparent 51%),
     radial-gradient(1.2px 1.2px at 78% 30%, #ffe9cf 50%, transparent 51%), radial-gradient(1px 1px at 88% 6%, #fff 50%, transparent 51%),
     radial-gradient(1px 1px at 8% 40%, #ffe2c4 50%, transparent 51%); }
-.st-rays { left: calc(62% - 60vmax); top: calc(64% - 60vmax); width: 120vmax; height: 120vmax; opacity: 0; border-radius: 50%;
+.st-rays { left: calc(var(--sun-x) - 60vmax); top: calc(var(--hz) - 60vmax); width: 120vmax; height: 120vmax; opacity: 0; border-radius: 50%;
   background: repeating-conic-gradient(from 0deg, rgba(255, 214, 160, 0) 0deg 7deg, rgba(255, 214, 160, .24) 9deg 10deg, rgba(255, 214, 160, 0) 12deg 17deg);
   -webkit-mask-image: radial-gradient(circle, #000 0, rgba(0,0,0,.5) 27%, transparent 69%); mask-image: radial-gradient(circle, #000 0, rgba(0,0,0,.5) 27%, transparent 69%); }
-.st-sun { left: calc(62% - 60vmin); top: calc(64% - 60vmin); width: 120vmin; height: 120vmin; border-radius: 50%; opacity: 0;
+.st-sun { left: calc(var(--sun-x) - 60vmin); top: calc(var(--hz) - 60vmin); width: 120vmin; height: 120vmin; border-radius: 50%; opacity: 0;
   background: radial-gradient(circle, rgba(255, 238, 200, 1) 0, rgba(255, 196, 138, .65) 12%, rgba(242, 163, 107, .22) 32%, rgba(242, 163, 107, 0) 58%); }
-.st-range { left: 0; width: 100%; top: calc(64% - 3.6vh); height: 3.8vh; fill: #8E8AAE; opacity: .55; }
+.st-range { left: 0; width: 100%; top: calc(var(--hz) - 3.6vh); height: 3.8vh; fill: #8E8AAE; opacity: .55; }
 .st-skyclouds { inset: 0; }
 .cloud { position: absolute; display: block; }
 
 /* the sea: sky colour at the horizon, deep blue-green toward the shore */
-.st-sea { left: -20%; right: -20%; top: 64%; height: 60%; overflow: hidden;
+.st-sea { left: -20%; right: -20%; top: var(--hz); height: 60%; overflow: hidden;
   background: linear-gradient(#E3A98C 0%, #9C8A96 1.5%, #4E6475 6%, #2C4F63 16%, #24455A 45%, #1F3A4A 100%); }
-.st-path { left: calc(58.6% - 22vmin); top: 0; width: 44vmin; height: 100%; opacity: .25;
+.st-path { left: calc(var(--sun-x) + 20vw - 22vmin); top: 0; width: 44vmin; height: 100%; opacity: .25;
   background: radial-gradient(45% 90% at 50% 0, rgba(255, 196, 138, .9), rgba(255, 196, 138, .25) 55%, rgba(255, 196, 138, 0) 85%); }
 .st-lampref { top: 0; width: 3.5vw; height: 34%; opacity: .8;
   background: repeating-linear-gradient(transparent 0 7px, rgba(255, 217, 160, .8) 7px 9px), repeating-linear-gradient(transparent 0 11px, rgba(255, 217, 160, .55) 11px 12px);
@@ -140,7 +143,7 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
 .st-glitter { inset: 0; will-change: transform; }
 .st-glitter i { position: absolute; height: 2px; border-radius: 2px; background: #FFC48A; opacity: 0; }
 
-.st-isle { --iw: min(90vw, 72vh); left: calc(50% - var(--iw) * .44); width: var(--iw); aspect-ratio: 1680 / 576; top: calc(64% - var(--iw) * .343 * .985); }
+.st-isle { --iw: min(90vw, 72vh); left: var(--isle-x, calc(50% - var(--iw) * .44)); width: var(--iw); aspect-ratio: 1680 / 576; top: calc(var(--hz) - var(--iw) * .343 * .985); }
 /* The island's silhouette for the rim and tint masks, inlined: a CSS mask is
    fetched separately from the <img>, and Chrome re-fetched it on every
    restyle while the page scrolled (100+ downloads of the painting a visit). */
@@ -157,7 +160,7 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
   -webkit-mask: var(--isle-mask) center / 100% 100% no-repeat; mask: var(--isle-mask) center / 100% 100% no-repeat; }
 .st-glow { left: calc(78% - 6%) !important; top: calc(4.7% - 18%) !important; right: auto !important; bottom: auto !important; width: 12% !important; height: auto !important; aspect-ratio: 1; border-radius: 50%;
   background: radial-gradient(circle, #fffbe6 0, rgba(255, 222, 150, .85) 14%, rgba(255, 200, 120, .25) 38%, rgba(255, 200, 120, 0) 68%); }
-.st-haze { left: -20%; right: -20%; top: calc(64% - 5vh); height: 9vh; opacity: 0;
+.st-haze { left: -20%; right: -20%; top: calc(var(--hz) - 5vh); height: 9vh; opacity: 0;
   background: linear-gradient(rgba(255, 214, 170, 0), rgba(255, 220, 182, .5) 50%, rgba(255, 214, 170, 0)); }
 .st-far { left: 18%; top: 34%; width: 22vw; fill: #2A2238; stroke: #2A2238; stroke-width: .6; stroke-linejoin: round; opacity: .75; overflow: visible; }
 
@@ -196,16 +199,13 @@ html.low-end .st-vignette { background: radial-gradient(120% 90% at 50% 45%, tra
 html.intro .bar, html.intro .preview-strip { opacity: 0; pointer-events: none; }
 .bar, .preview-strip { transition: opacity 600ms var(--ease-out); }
 
-/* after the intro, the rest waits for a scroll */
-.scroll-cue { display: none; position: fixed; left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); z-index: 45; translate: -50% 0;
-  flex-direction: column; align-items: center; gap: 8px; color: var(--ink-2); font: 600 14px/1 var(--sans); letter-spacing: .02em; }
-.scroll-cue i { width: 1.5px; height: 34px; background: linear-gradient(var(--ink-2), transparent); transform-origin: 50% 0; animation: cue 1.8s var(--ease-loop) infinite; }
-@keyframes cue { 0% { transform: scaleY(0); opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
 /* during the intro only the beach waits under the stage; the rest of the page is hidden */
 html.intro main > section:not(.dusk), html.intro .foot { visibility: hidden; }
 
 .meta { font-size: 15px; color: var(--ink-2); }
 html.intro body { overflow: hidden; }
+/* the rest of a scroll that ended the intro is held at the door */
+html.hold body { overflow: hidden; }
 
 
 /* ── sections ────────────────────────────────────────────── */
@@ -381,7 +381,25 @@ html.intro body { overflow: hidden; }
    Wide screens crop the painting like object-fit: cover; tall ones (.band)
    show its full height as a band with the door base at 70% of the screen,
    a sky above sampled from the painting's top edge and night below. */
-.dusk { position: relative; height: 100svh; overflow: hidden; background: #1B1F32; color: #FBF3E2; }
+.dusk { --edge: max(80px, 14vw); position: relative; height: 100svh; overflow: hidden; background: #1B1F32; color: #FBF3E2; }
+/* .dusk-still is the scene, the size of .dusk; .dusk-wipe holds it with room
+   for the brush edge on the right. Both only move during the intro's wipe. */
+.dusk-wipe { position: absolute; left: 0; top: 0; bottom: 0; width: calc(100% + var(--edge)); }
+.dusk-still { position: absolute; left: 0; top: 0; bottom: 0; width: calc(100% - var(--edge)); background: #1B1F32; }
+/* The sunset wipe (intro only): the beach lies over the dawn stage, and
+   .dusk-wipe slides in from the left behind a wet brush edge (a mask: solid,
+   then a turbulence-ragged, blurred edge) while .dusk-still slides back the
+   same amount, so only the edge moves across a painting that stays put.
+   Transforms only; the mask moves with its layer and is never repainted. */
+html.intro .dusk { z-index: 41; background: transparent; }
+html.intro .dusk-wipe { transform: translateX(-100%); will-change: transform;
+  -webkit-mask: linear-gradient(#000, #000) 0 0 / calc(100% - var(--edge) + 2px) 100% no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'%3E%3Cfilter id='w' filterUnits='userSpaceOnUse' x='-100' y='-100' width='300' height='1200'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.025 .011' numOctaves='4' seed='7' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='52' xChannelSelector='R' yChannelSelector='G'/%3E%3CfeGaussianBlur stdDeviation='7 3'/%3E%3C/filter%3E%3Crect x='-80' y='-60' width='126' height='1120' filter='url(%23w)'/%3E%3C/svg%3E") 100% 0 / var(--edge) 100% no-repeat;
+  mask: linear-gradient(#000, #000) 0 0 / calc(100% - var(--edge) + 2px) 100% no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'%3E%3Cfilter id='w' filterUnits='userSpaceOnUse' x='-100' y='-100' width='300' height='1200'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.025 .011' numOctaves='4' seed='7' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='52' xChannelSelector='R' yChannelSelector='G'/%3E%3CfeGaussianBlur stdDeviation='7 3'/%3E%3C/filter%3E%3Crect x='-80' y='-60' width='126' height='1120' filter='url(%23w)'/%3E%3C/svg%3E") 100% 0 / var(--edge) 100% no-repeat; }
+html.intro .dusk-still { transform: translateX(calc(100% + var(--edge))); will-change: transform; }
+/* the sunset's gold riding the edge: #F5C35E fading out behind it over 6vw */
+.wipe-gold { display: none; position: absolute; top: 0; bottom: 0; right: calc(var(--edge) * .36); width: 6vw; pointer-events: none;
+  background: linear-gradient(to right, rgba(245, 195, 94, 0), #F5C35E 82%, rgba(245, 195, 94, 0)); opacity: .7; }
+html.intro .wipe-gold { display: block; }
 /* the sky over the band: the painting's top-edge colours, darkening by 22%
    (a .22 black veil, i.e. each channel x .78) over the 130 px above it */
 .dusk-sky { display: none; position: absolute; left: 0; right: 0; top: 0; height: calc(var(--art-y, 0px) + 1px);
@@ -442,7 +460,9 @@ html:not(.intro) .dusk.live .door-light { animation: door-breathe 2.6s var(--eas
 html:not(.intro) .dusk.live .dusk-lamp { animation: lamp-flash 6s linear infinite; }
 /* :where() keeps this below the per-firefly delays and durations */
 :where(html:not(.intro) .dusk.live) .fireflies i { animation: firefly 8s var(--ease-loop) infinite; }
-@keyframes sign-sway { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+/* rotate, not transform: it adds to the wipe's swing (a GSAP transform), and
+   starts from 0 so the swing settles straight into the sway */
+@keyframes sign-sway { 0%, 100% { rotate: 0deg; } 25% { rotate: 2deg; } 75% { rotate: -2deg; } }
 @keyframes door-breathe { 50% { opacity: .75; } }
 /* the tray waits inside: no tray bar on the beach */
 html.at-door .traybar { display: none !important; }

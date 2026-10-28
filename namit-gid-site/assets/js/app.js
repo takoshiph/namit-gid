@@ -1065,20 +1065,36 @@
   }
 
   // ── Intro: a camera pulls back from the lighthouse at dawn, a bird and a
-  // cloud pass the lens, and the beam writes the name. One GSAP timeline;
-  // transforms and opacity only. Then the stage gives way to the beach, where
-  // the door waits (html.at-door) until the visitor goes on.
+  // cloud pass the lens, and the beam writes the name. The pull-back lands
+  // on the dusk painting's framing, and a sunset wipe turns the dawn into the
+  // painting, where the door waits (html.at-door) until the visitor goes on.
+  // One GSAP timeline; transforms and opacity only.
   let tl = null, amb = null, done = false;
 
-  function toDoor() {
-    if (done) return; done = true;
-    if (tl) tl.kill();
+  // Ends the intro: the stage goes and the beach is the page's first screen.
+  function endIntro() {
+    if (done) return false; done = true;
     if (amb) amb.kill();
-    if (window.gsap) gsap.ticker.remove(flyBirds);
+    if (window.gsap) {
+      gsap.ticker.remove(flyBirds);
+      gsap.set(['#duskWipe', '#duskStill'], { clearProps: 'transform' });
+    }
     root.classList.remove('intro');
     const st = $('stage'); if (st) st.remove();
     const sk = $('introSkip'); if (sk) sk.remove();
+    return true;
+  }
+  // Ends the intro at the door, idle, and remembers that it has been seen.
+  // The wipe's own end calls it with settling = true and lets the timeline
+  // run on for the last of the sign's swing; anything else stops it there.
+  function toDoor(settling) {
+    if (!endIntro()) return;
+    if (tl && settling !== true) {
+      tl.kill();
+      if (window.gsap) gsap.set('#doorSign', { clearProps: 'transform,filter' });
+    }
     root.classList.add('at-door');
+    try { localStorage.setItem('ng-seen-intro', '1'); } catch (e) { /* private mode: the intro plays again */ }
   }
   // Until the door opens (a later step), going on just lets the page scroll.
   const leaveDoor = () => root.classList.remove('at-door');
@@ -1120,7 +1136,7 @@
     host.append(cv);
     return cv;
   }
-  function buildSea(lowEnd) {
+  function buildSea(lowEnd, sunPct) {
     // Wave lines: closer together and fainter toward the horizon, each one
     // broken into strokes of different lengths so it reads as drawn.
     const waves = $('stWaves'), ns = 'http://www.w3.org/2000/svg';
@@ -1142,7 +1158,7 @@
       const depth = Math.pow(Math.random(), 1.6);
       const s = document.createElement('i');
       s.style.top = (1 + depth * 45) + '%';
-      s.style.left = (58.6 + (Math.random() - .5) * (4 + depth * 22)) + '%';
+      s.style.left = (sunPct + (Math.random() - .5) * (4 + depth * 22)) + '%';
       s.style.width = (3 + depth * 14) + 'px';
       g.append(s);
     }
@@ -1197,14 +1213,31 @@
     if (!window.gsap) return toDoor();
     await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 900))]);
     if (done) return;
+    // The wipe reveals the beach where it sits at the top of the page.
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    scrollTo(0, 0);
 
     const vw = innerWidth, vh = innerHeight, dpr = devicePixelRatio || 1;
     const lowEnd = (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
     if (lowEnd) root.classList.add('low-end');
-    const isle = $('stIsle'), island = $('stIsland'), word = $('stWord');
+    const stage = $('stage'), isle = $('stIsle'), word = $('stWord');
+    const wipe = $('duskWipe'), still = $('duskStill'), sign = $('doorSign');
+
+    // The match cut: at rest, the stage's island is exactly the dusk
+    // painting's island (same art, same box), and the horizon, sun and sea
+    // follow it. The camera's pull-back ends at rest, so the last frame of the
+    // dawn has the painting's composition and the wipe only changes the time
+    // of day. (.dusk-wipe and .dusk-still cancel out, so this rect is true.)
+    const dr = $('duskIsle').getBoundingClientRect();
+    const iw0 = Math.min(vw * .9, vh * .72); // the island's old size, for the opening zoom
+    const sunX = dr.left + dr.width * .71;   // behind the island, as before
+    isle.style.setProperty('--iw', dr.width + 'px');
+    isle.style.setProperty('--isle-x', dr.left + 'px');
+    stage.style.setProperty('--hz', (dr.top + dr.width * .343 * .985) + 'px');
+    stage.style.setProperty('--sun-x', sunX + 'px');
 
     // Build the scene, then read every measurement in one pass before writing.
-    buildSea(lowEnd);
+    buildSea(lowEnd, (sunX + vw * .2) / (vw * 1.4) * 100);
     const skyc = $('stSkyClouds');
     [{ l: -10, t: 20, w: 52, seed: 2 }, { l: 56, t: 27, w: 40, seed: 5 }, { l: 24, t: 44, w: 24, seed: 9, kind: 'far', alpha: .8 }, { l: 70, t: 10, w: 30, seed: 4 }]
       .forEach(o => makeCloud(skyc, o));
@@ -1222,30 +1255,58 @@
     // ── reads ──
     const ir = isle.getBoundingClientRect();
     const wW = word.offsetWidth, wH = word.offsetHeight;
+    const W = $('dusk').clientWidth, E = wipe.offsetWidth - W; // E: the brush edge's width
+    const sr = sign.getBoundingClientRect();
 
     // ── writes ──
     // The name sits in the sky well above the island, leaving the lamp clear.
-    const wordTop = ir.top - wH - vh * .05;
-    gsap.set(word, { top: wordTop, left: (vw - wW) / 2 });
+    const wordTop = ir.top - wH - vh * .05, wordLeft = (vw - wW) / 2;
+    gsap.set(word, { top: wordTop, left: wordLeft });
     const L = { x: ir.left + ir.width * .78, y: ir.top + ir.height * .047 };
     // Letter angles from the lamp, computed from the split before any transform.
     const letterRects = chars.map(c => c.getBoundingClientRect());
-    gsap.set('#stBeam', { x: L.x, y: L.y, rotation: 185 });
-    gsap.set('#stFlare', { x: L.x, y: L.y });
+    gsap.set('#stBeam', { rotation: 185 });
     gsap.set('#stLampRef', { left: L.x + vw * .2 - vw * .0175 });
 
+    gsap.ticker.add(flyBirds);
+    tl = gsap.timeline({ onComplete: toDoor, defaults: { ease: 'power2.out' } });
+    window.__ngIntro = tl; // for frame-by-frame checks
+
     // The camera: every plane starts zoomed toward the lamp by its own depth,
-    // so near things move more than far things. The zoom is capped by what
-    // the island art can resolve on this screen.
-    const Zwant = vw < 700 ? 2.8 : 2.3;
+    // so near things move more than far things, and pulls back to rest by
+    // PULL_END. It eases in (power2.in) and hands over at T1, at the same
+    // speed, to a long power3.out, so it is still drifting as the wipe begins
+    // and never stops dead. The zoom is capped by what the island art can
+    // resolve on this screen.
+    const Zwant = (vw < 700 ? 2.8 : 2.3) * iw0 / ir.width;
     const Z = Math.max(1.6, Math.min(Zwant, 1680 * 1.6 / (ir.width * dpr)));
+    const T1 = 2.4, PULL_END = 6.3, T2 = PULL_END - T1;
+    const f = (3 / T2) / (2 / T1 + 3 / T2); // power2.in ends at 2x speed, power3.out starts at 3x
+    const camera = (el, from, to) => {
+      const mid = {};
+      for (const k in to) mid[k] = from[k] + (to[k] - from[k]) * f;
+      gsap.set(el, from);
+      tl.to(el, { ...mid, duration: T1, ease: 'power2.in' }, 0)
+        .to(el, { ...to, duration: T2, ease: 'power3.out' }, T1);
+    };
+    const REST = { scale: 1, x: 0, y: 0, rotation: 0 };
+    const zoomed = d => ({ scale: 1 + (Z - 1) * d, x: (vw / 2 - L.x) * d, y: (vh * .42 - L.y) * d, rotation: -2.5 * Math.min(d, 1) });
     const planes = gsap.utils.toArray('#stage [data-depth]');
     planes.forEach(p => {
       const d = parseFloat(p.dataset.depth);
       const r = p.getBoundingClientRect();
-      gsap.set(p, { transformOrigin: `${L.x - r.left}px ${L.y - r.top}px`, scale: 1 + (Z - 1) * d, x: (vw / 2 - L.x) * d, y: (vh * .42 - L.y) * d, rotation: -2.5 * Math.min(d, 1) });
+      gsap.set(p, { transformOrigin: `${L.x - r.left}px ${L.y - r.top}px` });
+      camera(p, zoomed(d), REST);
     });
+    // The name rides with the island (depth 1), scaled about the lamp, so the
+    // beam's angles to its letters hold while the camera is still moving;
+    // the beam and the flare stay on the lamp.
+    gsap.set(word, { transformOrigin: `${L.x - wordLeft}px ${L.y - wordTop}px` });
+    camera(word, zoomed(1), REST);
+    const z1 = zoomed(1);
+    camera(['#stBeam', '#stFlare'], { x: L.x + z1.x, y: L.y + z1.y }, { x: L.x, y: L.y });
     requestAnimationFrame(() => planes.forEach(p => { p.style.willChange = 'transform'; }));
+    tl.set(planes, { willChange: 'auto' }, PULL_END + .05);
 
     const A0 = 185, A1 = 335, BEAM = 1.4;
     const angleOf = r => {
@@ -1253,15 +1314,8 @@
       return a < 0 ? a + 360 : a;
     };
 
-    gsap.ticker.add(flyBirds);
-    tl = gsap.timeline({ onComplete: toDoor, defaults: { ease: 'power2.out' } });
-    window.__ngIntro = tl; // for frame-by-frame checks
-
-    // ── 0–3.9 s: dawn, and the pull-back ──
-    const PULL = 3.9;
-    tl.to(planes, { scale: 1, x: 0, y: 0, rotation: 0, duration: PULL, ease: 'power3.inOut' }, 0)
-      .set(planes, { willChange: 'auto' }, PULL + .05)
-      .to('#stStars', { opacity: 0, duration: 2, ease: 'sine.inOut' }, .4)
+    // ── 0–4 s: dawn, while the camera pulls back ──
+    tl.to('#stStars', { opacity: 0, duration: 2, ease: 'sine.inOut' }, .4)
       .to('#stDay', { opacity: 1, duration: 3.2, ease: 'sine.inOut' }, .3)
       .fromTo('#stSun', { opacity: 0, yPercent: 8 }, { opacity: 1, yPercent: 0, duration: 3.4, ease: 'sine.out' }, .5)
       .to('#stRays', { opacity: .75, duration: 2.6, ease: 'sine.inOut' }, 1.4)
@@ -1307,7 +1361,7 @@
     tl.fromTo(near, { scale: 3.6, opacity: 0, x: 0, y: 0 }, { opacity: .95, duration: .35, ease: 'sine.in', immediateRender: false }, 1.9)
       .to(near, { scale: .42, x: -vw * .22, y: -vh * .16, duration: 1.6, ease: 'power3.out' }, 1.9);
 
-    // ── 3.7–5.3 s: the lamp flares, the beam writes the name ──
+    // ── 3.6–5.7 s: the lamp flares, the beam writes the name ──
     const BEAM_AT = 3.8;
     tl.fromTo('#stFlare', { opacity: 0, scale: .2 }, { opacity: 1, scale: 1.5, duration: .35, ease: 'power3.out' }, 3.55)
       .to('#stFlare', { scale: .8, opacity: .9, duration: .5, ease: 'sine.inOut' }, 3.9)
@@ -1320,30 +1374,59 @@
       tl.fromTo(c, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: .45, force3D: false }, BEAM_AT + t * BEAM);
     });
 
-    // ── the beach takes over ──
-    // For now the stage fades away a little after the name is written and the
-    // door is there underneath. (The time-of-day wipe comes later.)
-    const END = BEAM_AT + BEAM + .9;
-    tl.to('#stage', { opacity: 0, duration: .5, ease: 'sine.inOut' }, END - .5);
+    // ── the sunset wipe, PULL_END - .3 to + 1.2 ──
+    // .dusk-wipe brings the beach in from the left behind its brush edge while
+    // .dusk-still moves back by as much, so the painting holds still and only
+    // the edge (with the gold riding it) travels. The edge's middle is at
+    // screen x = p (W + E) - E / 2, p the eased progress.
+    const WIPE = 1.5, WIPE_AT = PULL_END - .3, WIPE_END = WIPE_AT + WIPE;
+    const inOut = y => y < .5 ? Math.sqrt(y / 2) : 1 - Math.sqrt((1 - y) / 2); // invert power2.inOut
+    const edgeAt = x => WIPE_AT + WIPE * inOut(Math.min(1, Math.max(0, (x + E / 2) / (W + E))));
+    tl.addLabel('pullEnd', PULL_END)
+      .call(() => window.preloadKitchen?.(), null, WIPE_AT)
+      .fromTo(wipe, { x: -(W + E) }, { x: 0, duration: WIPE, ease: 'power2.inOut' }, WIPE_AT)
+      .fromTo(still, { x: W + E }, { x: 0, duration: WIPE, ease: 'power2.inOut' }, WIPE_AT);
+    // The light-written name fades as the edge reaches it: it lives on the sign now.
+    const wordIn = edgeAt(wordLeft) - .2, wordOut = edgeAt(wordLeft + wW);
+    tl.to(word, { opacity: 0, duration: Math.max(.3, wordOut - wordIn), ease: 'sine.in' }, wordIn);
+    // As the edge passes the door, the sign takes the name with a brief glow,
+    // and gives one swing, as if the sweep had brushed it, and settles.
+    const signAt = edgeAt(sr.left + sr.width / 2);
+    tl.fromTo(sign, { rotation: 7 }, { rotation: 0, duration: 1.2, ease: 'elastic.out(1, .4)' }, signAt)
+      .fromTo(sign, { filter: 'brightness(1) drop-shadow(0 0 0px rgba(245, 195, 94, 0))' },
+        { filter: 'brightness(1.3) drop-shadow(0 0 7px rgba(245, 195, 94, .95))', duration: .25, ease: 'sine.out', immediateRender: false }, signAt)
+      .to(sign, { filter: 'brightness(1) drop-shadow(0 0 0px rgba(245, 195, 94, 0))', duration: .9, ease: 'sine.inOut', clearProps: 'filter' }, signAt + .25);
+    tl.addLabel('wipeEnd', WIPE_END)
+      .call(toDoor, [true], 'wipeEnd');
   }
 
-  // A scroll, swipe or key goes on from the door: for now the page just
-  // scrolls. During the intro it first ends the intro, like Skip.
+  // A scroll, swipe or key during the intro is the same as Skip: it lands at
+  // the door and stops there. The rest of that gesture (a trackpad keeps
+  // sending wheel events for a second or more) is held, so it doesn't carry
+  // on into the kitchen. At the door, going on for now just lets the page
+  // scroll.
   const SCROLL_KEYS = ['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar'];
+  let holdT = 0;
+  const hold = () => {
+    root.classList.add('hold'); clearTimeout(holdT);
+    holdT = setTimeout(() => root.classList.remove('hold'), 450);
+  };
   const onScrollIntent = e => {
-    if (!done) toDoor();
-    else if (e && e.type === 'keydown' && !SCROLL_KEYS.includes(e.key)) return;
+    if (!done) { toDoor(); hold(); return; }
+    if (root.classList.contains('hold')) { hold(); return; }
+    if (e && e.type === 'keydown' && !SCROLL_KEYS.includes(e.key)) return;
     leaveDoor();
   };
   ['wheel', 'touchmove', 'keydown'].forEach(ev => addEventListener(ev, onScrollIntent, { passive: true }));
-  $('scrollCue').addEventListener('click', onScrollIntent);
   // Skip ends the intro on the beach, at the door.
   $('introSkip').addEventListener('click', toDoor);
   // Order and "Skip to the menu" always go straight to the kitchen.
-  document.querySelectorAll('a[href="#menu"]').forEach(a => a.addEventListener('click', onScrollIntent));
+  const toKitchen = () => { if (!done) toDoor(); leaveDoor(); };
+  document.querySelectorAll('a[href="#menu"]').forEach(a => a.addEventListener('click', toKitchen));
   // Until the entrance is built, the door simply leads to the menu.
   $('door').addEventListener('click', () => { leaveDoor(); $('menu').scrollIntoView({ behavior: calm ? 'auto' : 'smooth' }); });
 
   if (root.classList.contains('intro')) playIntro();
-  else toDoor();
+  else if (root.classList.contains('at-door')) toDoor();
+  else { endIntro(); $('menu').scrollIntoView(); } // opened on a link to #menu: straight into the kitchen
 })();
