@@ -1419,13 +1419,32 @@
     stage.style.setProperty('--hz', (art.top + art.height * HORIZON) + 'px');
     stage.style.setProperty('--shore', (art.top + art.height * SHORE) + 'px');
     stage.style.setProperty('--sun-x', sunX + 'px');
+    // The rest of the dawn comes to rest where the painting has the same
+    // thing, so the wipe changes only the light: the bangka on the painting's
+    // bangka (same art, same box), the frond on the crown of the near palm,
+    // the far range on the headland, the clouds on the painting's clouds.
+    // Boxes are fractions of the painting (x, y, width).
+    const at = (fx, fy) => ({ x: art.left + art.width * fx, y: art.top + art.height * fy });
+    const br = document.querySelector('.dusk-boat').getBoundingClientRect();
+    Object.assign($('stBangka').style, { left: br.left + 'px', top: br.top + 'px', bottom: 'auto', width: br.width + 'px', clipPath: 'inset(0 0 22% 0)' });
+    const crown = at(.02, .01);
+    Object.assign($('stFrond').style, { left: crown.x + 'px', top: crown.y + 'px', right: 'auto', width: art.width * .34 + 'px' });
+    const head = at(0, .49);
+    Object.assign($('stRange').style, { left: head.x + 'px', top: head.y + 'px', width: art.width * .5 + 'px', height: art.height * (HORIZON - .49) + 'px' });
 
     // Build the scene, then read every measurement in one pass before writing.
     buildSea(lowEnd, (sunX + vw * .2) / (vw * 1.4) * 100);
     const skyc = $('stSkyClouds');
-    [{ l: -10, t: 20, w: 52, seed: 2 }, { l: 56, t: 27, w: 40, seed: 5 }, { l: 24, t: 44, w: 24, seed: 9, kind: 'far', alpha: .8 }, { l: 70, t: 10, w: 30, seed: 4 }]
+    // A cloud of width fw centred on the painting's cloud at (fx, fy), as % of the stage.
+    const cloudAt = (fx, fy, fw, o) => {
+      const c = at(fx, fy), w = art.width * fw;
+      return { l: (c.x - w / 2) / vw * 100, t: (c.y - w / 1.7 / 2) / vh * 100, w: w / vw * 100, ...o };
+    };
+    [cloudAt(.59, .3, .2, { seed: 2 }), cloudAt(.76, .17, .22, { seed: 5 }), cloudAt(.08, .44, .18, { seed: 9, kind: 'far', alpha: .8 }), cloudAt(.93, .27, .14, { seed: 4 })]
       .forEach(o => makeCloud(skyc, o));
     const near = makeCloud($('stNear'), { l: 0, t: 0, w: 120, seed: 11, kind: 'near' });
+    // The cloud the camera passes ends on the small cloud just right of the palms.
+    const nearEnd = at(.36, .43), nearScale = art.width * .12 / (vw * 1.2);
     const chars = [];
     [...word.childNodes].forEach(node => {
       const frag = document.createDocumentFragment();
@@ -1556,7 +1575,7 @@
     // shrinks into an ordinary cloud in the sky, where it stays and drifts.
     gsap.set(near, { left: '50%', top: '40%', xPercent: -50, yPercent: -50, transformOrigin: '50% 50%', opacity: 0 });
     tl.fromTo(near, { scale: 3.6, opacity: 0, x: 0, y: 0 }, { opacity: .95, duration: .35, ease: 'sine.in', immediateRender: false }, 1.9)
-      .to(near, { scale: .42, x: -vw * .22, y: -vh * .16, duration: 1.6, ease: 'power3.out' }, 1.9);
+      .to(near, { scale: nearScale, x: nearEnd.x - vw * .5, y: nearEnd.y - vh * .4, duration: 1.6, ease: 'power3.out' }, 1.9);
 
     // ── 3.6–5.7 s: the lamp flares, the beam writes the name ──
     const BEAM_AT = 3.8;
