@@ -1795,22 +1795,57 @@
     host.append(cv);
     return cv;
   }
-  function buildSea(lowEnd, sunPct) {
-    // Wave lines: closer together and fainter toward the horizon, each one
-    // broken into strokes of different lengths so it reads as drawn.
-    const waves = $('stWaves'), ns = 'http://www.w3.org/2000/svg';
-    const rows = [[.03, .6, 1], [.07, .8, 1.2], [.13, 1, 1.5], [.22, 1.3, 1.9], [.35, 1.6, 2.4], [.52, 2, 3], [.74, 2.4, 3.6]];
-    rows.forEach(([top, amp, w], i) => {
-      const svg = document.createElementNS(ns, 'svg');
-      svg.setAttribute('viewBox', '0 0 800 10'); svg.setAttribute('preserveAspectRatio', 'none');
-      svg.style.top = (top * 100) + '%'; svg.style.height = (6 + i * 3) + 'px';
-      let d = 'M0 5';
-      for (let x = 0; x < 800; x += 50) d += ` Q${x + 12.5} ${5 - amp * 2} ${x + 25} 5 T${x + 50} 5`;
-      const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); p.setAttribute('stroke-width', w); p.setAttribute('vector-effect', 'non-scaling-stroke');
-      p.setAttribute('stroke-dasharray', `${60 + i * 9} ${14 + i * 3} ${22 + i * 4} ${9 + i * 2}`);
-      svg.append(p); waves.append(svg);
-    });
-    if (lowEnd) return;
+  // The dawn's sea and sand are the painting's own, regraded to dawn
+  // (tools/dawn-grade.js), laid on the painting's box (art) so that at
+  // nightfall they become the painting's waves, pool and sand.
+  // hz, shore: fractions of the painting's height. Returns the wave bands.
+  function buildSea(lowEnd, sunPct, art, hz, shore) {
+    const vw = innerWidth, seaH = art.height * (shore - hz);
+    // Waves: the painting's brushwork in bands down the sea. Each band swells
+    // toward the shore by scaling about the vanishing point on the horizon,
+    // so strokes near the horizon are small and slow and those near the beach
+    // larger and further apart. Two copies of a band (the second mirrored, so
+    // its strokes differ) take turns, each fading in as it rolls in and out
+    // as it reaches its next stroke. Low-end: fewer bands, one copy each.
+    const waves = $('stWaves'), E = .06;
+    const cuts = lowEnd ? [0, .3, .65, 1] : [0, .2, .45, .72, 1];
+    const bands = [];
+    for (let b = 0; b < cuts.length - 1; b++) {
+      const f0 = Math.max(0, cuts[b] - E), f1 = cuts[b + 1] + (b === cuts.length - 2 ? .1 : E);
+      const top = f0 * seaH, h = (f1 - f0) * seaH, depth = (b + 1) / (cuts.length - 1);
+      const fade = `linear-gradient(${b ? 'transparent' : '#000'}, #000 ${b ? E / (f1 - f0) * 200 : 0}%, #000 ${100 - E / (f1 - f0) * 200}%, transparent)`;
+      const copies = [];
+      for (let c = 0; c < (lowEnd ? 1 : 2); c++) {
+        const el = document.createElement('div');
+        el.className = 'st-wave' + (c ? ' alt' : '');
+        Object.assign(el.style, {
+          left: (art.left + vw * .2) + 'px', top: top + 'px', width: art.width + 'px', height: h + 'px',
+          backgroundSize: `${art.width}px ${seaH}px`, backgroundPosition: `0 ${-top}px`,
+          transformOrigin: `${vw / 2 - art.left}px ${-top}px`, webkitMaskImage: fade, maskImage: fade,
+        });
+        waves.append(el); copies.push(el);
+      }
+      bands.push({ copies, period: 8.5 - depth * 4, k: .035, y: (1 + depth * 3) * seaH / 130 });
+    }
+    // The pool on the sand, on the painting's pool (x .2–.8, y .74–.85), and
+    // the sand's texture under it. Built here so only the intro fetches them.
+    const sand = $('stSand'), sandArt = new Image(), pool = new Image();
+    sandArt.className = 'st-sand-art'; sandArt.alt = ''; sandArt.decoding = 'async';
+    sandArt.src = 'assets/img/dusk/dawn-sand.webp?v=1';
+    Object.assign(sandArt.style, { left: art.left + 'px', width: art.width + 'px', height: art.height * (1 - shore) + 'px' });
+    pool.className = 'st-pool'; pool.id = 'stPool'; pool.alt = ''; pool.decoding = 'async';
+    pool.src = 'assets/img/dusk/dawn-pool.webp?v=1';
+    const poolBox = { left: art.left + art.width * .2 + 'px', top: art.height * (.74 - shore) + 'px', width: art.width * .6 + 'px', height: art.height * .11 + 'px' };
+    Object.assign(pool.style, poolBox);
+    sand.prepend(sandArt, pool);
+    if (!lowEnd) {
+      // the swash's shimmer: light streaks in the pool as each wave runs in
+      const shine = document.createElement('i');
+      shine.className = 'st-shine'; shine.id = 'stShine';
+      Object.assign(shine.style, poolBox);
+      pool.after(shine);
+    }
+    if (lowEnd) return bands;
     // Glitter along the sun's path, wider as it comes closer.
     const g = $('stGlitter');
     for (let i = 0; i < 26; i++) {
@@ -1821,6 +1856,7 @@
       s.style.width = (3 + depth * 14) + 'px';
       g.append(s);
     }
+    return bands;
   }
 
   // ── Birds: a jointed wing, not a bending line. Each wing has a shoulder and
@@ -1912,7 +1948,7 @@
     Object.assign($('stRange').style, { left: head.x + 'px', top: head.y + 'px', width: art.width * .5 + 'px', height: art.height * (HORIZON - .49) + 'px' });
 
     // Build the scene, then read every measurement in one pass before writing.
-    buildSea(lowEnd, (sunX + vw * .2) / (vw * 1.4) * 100);
+    const bands = buildSea(lowEnd, (sunX + vw * .2) / (vw * 1.4) * 100, art, HORIZON, SHORE);
     const skyc = $('stSkyClouds');
     // A cloud of width fw centred on the painting's cloud at (fx, fy), as % of the stage.
     const cloudAt = (fx, fy, fw, o) => {
@@ -2020,10 +2056,7 @@
       .to('#stLampRef', { opacity: .25, duration: 2, ease: 'sine.inOut' }, 2.2)
       .fromTo('#stGlow', { scale: .7, opacity: 1 }, { scale: 1.15, duration: .9, ease: 'sine.inOut', repeat: 3, yoyo: true }, 0)
       .to('#stGlow', { opacity: .35, scale: .8, duration: .8 }, 3.2)
-      .fromTo('#stSand', { yPercent: 35 }, { yPercent: 0, duration: 2.6, ease: 'power2.out' }, 1.2)
-      .fromTo(['#stWash', '#stLip'], { y: 30 }, { y: -2, duration: 1.2, ease: 'power2.out' }, 1.6)
-      .to(['#stWash', '#stLip'], { y: 9, duration: 1.4, ease: 'sine.inOut' }, 2.8)
-      .to('#stWet', { opacity: 1, duration: .9 }, 2.9);
+      .fromTo('#stSand', { yPercent: 35 }, { yPercent: 0, duration: 2.6, ease: 'power2.out' }, 1.2);
 
     // Ambient motion runs on its own clock so it doesn't stretch the intro.
     amb = gsap.timeline();
@@ -2033,9 +2066,36 @@
     // The two distant birds flap and drift.
     amb.fromTo('#farA', { x: 0, y: 0 }, { x: 14, y: -3, duration: 9, ease: 'none' }, 0)
       .fromTo('#farB', { x: 0, y: 0 }, { x: 10, y: 2, duration: 9, ease: 'none' }, 0);
-    gsap.utils.toArray('#stWaves svg').forEach((s, i) => {
-      amb.fromTo(s, { xPercent: 0 }, { xPercent: -6.25 * (i % 2 ? 1 : -1), duration: 9 - i * .6, ease: 'none' }, 0);
+    // The swells roll in: phase p 0..1 through a band's period. Each copy
+    // grows from 1 - k to 1 + k about the horizon while sinking by its y,
+    // and fades in and out as sin²(πp), so the two copies, half a period
+    // apart, always add up to one. At p = .5 a copy is exactly the painting's.
+    bands.forEach((b, i) => {
+      const set = b.copies.map(el => ({ s: gsap.quickSetter(el, 'scaleY'), sx: gsap.quickSetter(el, 'scaleX'), y: gsap.quickSetter(el, 'y', 'px'), o: gsap.quickSetter(el, 'opacity') }));
+      const ph = (i * .37) % 1, roll = { p: ph };
+      amb.fromTo(roll, { p: ph }, { p: ph + 1, duration: b.period, ease: 'none', repeat: -1, onUpdate: () => set.forEach((q, c) => {
+        if (lowEnd) { // one copy: a gentle swell in place, no fade
+          const w = Math.sin(roll.p * Math.PI * 2);
+          q.s(1 + b.k * .6 * w); q.sx(1 + b.k * .6 * w); q.y(b.y * .6 * w); return;
+        }
+        const p = (roll.p + c * .5) % 1, u = p * 2 - 1, sc = 1 + b.k * u;
+        q.s(sc); q.sx(c ? -sc : sc); q.y(b.y * u); q.o(Math.sin(Math.PI * p) ** 2);
+      }) }, 0);
     });
+    // The shore: a broken foam edge runs up the sand and draws back, about
+    // every 3 s; where it reached, the sand stays wet and darker, then dries.
+    const R = Math.max(7, art.height * .018);
+    gsap.set('#stWet', { y: R, opacity: 0 });
+    const swash = gsap.timeline({ repeat: -1 });
+    swash.fromTo(['#stWash', '#stLip'], { y: 0 }, { y: R, duration: 1.25, ease: 'power2.out' }, 0)
+      .fromTo('#stLip', { opacity: .95 }, { opacity: .55, duration: 1.25, ease: 'sine.in' }, 0)
+      .to('#stWet', { opacity: .85, duration: .3, ease: 'sine.out' }, 1)
+      .to(['#stWash', '#stLip'], { y: 0, duration: 1.75, ease: 'sine.inOut' }, 1.25)
+      .to('#stLip', { opacity: .95, duration: 1.75, ease: 'sine.inOut' }, 1.25)
+      .to('#stWet', { opacity: 0, duration: 1.5, ease: 'sine.in' }, 1.4);
+    if (!lowEnd) swash.fromTo('#stShine', { opacity: 0, y: -1 }, { opacity: .55, y: 1, duration: .6, ease: 'sine.out' }, .8)
+      .to('#stShine', { opacity: 0, y: 2, duration: 1.2, ease: 'sine.in' }, 1.4);
+    amb.add(swash, 1.6);
     if (!lowEnd) {
       amb.fromTo('#stSkyClouds .cloud', { x: -10 }, { x: 24, duration: 10, ease: 'none', stagger: .5 }, 0)
         .fromTo('#stRays', { rotation: -4 }, { rotation: 6, duration: 10, ease: 'none' }, 0);

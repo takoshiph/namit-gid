@@ -155,8 +155,9 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
   -webkit-mask-image: radial-gradient(50% 100% at 50% 0, #000 30%, transparent); mask-image: radial-gradient(50% 100% at 50% 0, #000 30%, transparent); }
 .st-sea > * { position: absolute; }
 .st-waves { inset: 0; }
-.st-waves svg { position: absolute; left: 0; width: 200%; overflow: visible; }
-.st-waves path { fill: none; stroke: rgba(240, 214, 196, .2); stroke-linecap: round; }
+/* the painting's wave strokes, regraded to dawn (tools/dawn-grade.js); placed and rolled by buildSea() */
+.st-wave { position: absolute; background: url("../img/dusk/dawn-waves.webp?v=1") no-repeat; will-change: transform, opacity; }
+html.low-end .st-wave { will-change: transform; }
 .st-glitter { inset: 0; will-change: transform; }
 .st-glitter i { position: absolute; height: 2px; border-radius: 2px; background: #FFC48A; opacity: 0; }
 
@@ -194,14 +195,21 @@ html.intro .stage { display: block; position: fixed; inset: 0; z-index: 40; over
   text-shadow: 0 0 28px rgba(255, 200, 140, .45), 0 1px 0 rgba(122, 62, 36, .55); }
 .st-word span { color: #F6C97A; }
 .st-word .ch { display: inline-block; opacity: 0; }
-.st-sand { left: 0; right: 0; bottom: 0; top: var(--shore, 80%);
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .32 0 0 0 0 .25 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(#b98f7a, #dcbfa2 35%, #ead2b4); }
+/* the sand: the painting's own (dawn-sand, with its pool), laid on the painting's box by
+   buildSea(); below the painting, its bottom colour carries on */
+.st-sand { left: 0; right: 0; bottom: 0; top: var(--shore, 80%); background: linear-gradient(#C9A78E, #A27D6E 40%); }
+.st-sand > img, .st-shine { position: absolute; top: 0; max-width: none; }
+.st-sand-art { -webkit-mask-image: linear-gradient(#000 92%, transparent); mask-image: linear-gradient(#000 92%, transparent); }
+/* the swash's shimmer on the pool: light streaks, only where the pool is */
+.st-shine { opacity: 0; background: repeating-linear-gradient(rgba(255, 244, 222, 0) 0 5px, rgba(255, 244, 222, .75) 5px 6px, rgba(255, 244, 222, 0) 6px 11px);
+  -webkit-mask: url("../img/dusk/dawn-pool.webp?v=1") 0 0 / 100% 100% no-repeat; mask: url("../img/dusk/dawn-pool.webp?v=1") 0 0 / 100% 100% no-repeat; }
+html.low-end .st-shine { display: none; }
 .st-foam { position: absolute; left: 0; width: 100%; top: -22px; height: 48px; overflow: visible; }
-.st-foam .wash { fill: rgba(176, 150, 150, .5); }
-.st-foam .wet { fill: rgba(120, 92, 80, .35); opacity: 0; }
-.st-foam .lip { fill: none; stroke: rgba(255, 240, 226, .7); stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 120 5 40 3 160 7 60 4; }
+.st-foam .wash { fill: url(#stWashG); }
+.st-foam .wet { fill: url(#stWetG); opacity: 0; }
+.st-foam .lip { fill: none; stroke: rgba(255, 244, 232, .85); stroke-width: 2.2; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  stroke-dasharray: 34 6 12 4 58 9 7 5 22 3 41 8 15 6; }
+.st-foam .lip2 { stroke: rgba(255, 244, 232, .5); stroke-width: 1.3; stroke-dasharray: 9 7 26 5 4 11 31 6 13 9; }
 /* the near plane: against the dawn, so both sit a little in shadow */
 .st-bangka { left: -8vw; bottom: .5vh; width: min(72vw, 540px); height: auto; filter: brightness(.74) saturate(.85) sepia(.12); }
 .st-frond { right: -10vw; top: -2vh; width: min(118vw, 780px); height: auto; filter: brightness(.9); }
