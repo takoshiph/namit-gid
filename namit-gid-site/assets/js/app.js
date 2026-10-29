@@ -1056,13 +1056,96 @@
       w = W; x = 0; y = -clamp((CROP_WIDE.cy - vis / 2) / (1 - vis), 0, 1) * (w / PAINT - H);
     }
     const h = w / PAINT, px = n => n.toFixed(2) + 'px';
+    // The same point of the painting stays in the middle of the screen
+    // through a resize or a turn of the phone, as far as the new range
+    // allows. The first placing is on the door view.
+    const mid = pan === null || !geo.w ? null : (geo.W / 2 - pan) / geo.w;
+    geo = { x, w, W };
     dusk.classList.toggle('band', band);
     const st = dusk.style;
-    st.setProperty('--art-x', px(x)); st.setProperty('--art-y', px(y));
+    st.setProperty('--art-x0', px(x)); st.setProperty('--art-y', px(y));
     st.setProperty('--art-w', px(w)); st.setProperty('--art-h', px(h));
-    st.setProperty('--door-x', px(x + DOOR.x * w)); st.setProperty('--door-y', px(y + DOOR.y * h));
+    st.setProperty('--door-y', px(y + DOOR.y * h));
     st.setProperty('--door-w', px(DOOR.w * w));
+    const { min, max } = panRange(), on = max - min >= PAN_MIN;
+    dusk.classList.toggle('pans', on);
+    stopPan();
+    writePan(mid === null || !on ? x : clamp(W / 2 - mid * w, min, max));
   }
+
+  // ── Walking along the beach ─────────────────────────────────────────────
+  // Where the painting is wider than the screen, it pans sideways. pan is
+  // the painting's left edge on the screen, in px; placeDusk()'s x is the
+  // door view. --pan is how far that is from the door view (the art box
+  // moves by translate, so a pan is a transform), and --art-x and --door-x
+  // include it. Less than PAN_MIN to see and there is no pan at all.
+  const PAN_MIN = 24;
+  let pan = null, geo = { x: 0, w: 0, W: 0 };
+  const panRange = () => ({ min: Math.min(0, geo.W - geo.w), max: 0 });
+  const doorPan = () => geo.x;
+  const canPan = () => { const r = panRange(); return r.max - r.min >= PAN_MIN; };
+  function writePan(p) {
+    pan = p;
+    const st = dusk.style, px = n => n.toFixed(2) + 'px';
+    st.setProperty('--pan', px(Math.round((p - geo.x) * 100) / 100 + 0)); // (+ 0: never "-0.00px")
+    st.setProperty('--art-x', px(p));
+    st.setProperty('--door-x', px(p + DOOR.x * geo.w));
+  }
+  // Past either end the painting gives less and less (a rubber band); rubber()
+  // maps how far the finger has gone past the end to how far the painting
+  // goes, unrubber() the other way.
+  const RUB = .55;
+  const rubber = raw => {
+    const { min, max } = panRange(), W = geo.W || 1;
+    const rub = d => (1 - 1 / (d * RUB / W + 1)) * W;
+    return raw > max ? max + rub(raw - max) : raw < min ? min - rub(min - raw) : raw;
+  };
+  const unrubber = p => {
+    const { min, max } = panRange(), W = geo.W || 1;
+    const un = o => (W / RUB) * o / Math.max(1, W - o);
+    return p > max ? max + un(p - max) : p < min ? min - un(min - p) : p;
+  };
+
+  // The painting in motion after a release: it glides on and slows down
+  // (friction), or, past an end, a spring brings it back without a bounce.
+  // One loop on GSAP's ticker; any new touch, wheel or key stops it.
+  let glide = null, panEase = null;
+  const FRICTION = 325, SPRING = .014; // ms; per ms
+  function stopPan() {
+    if (glide) { gsap.ticker.remove(glide); glide = null; }
+    if (panEase) { panEase.kill(); panEase = null; }
+    dusk.classList.remove('panning');
+  }
+  function momentum(v) {
+    stopPan();
+    if (!window.gsap) return writePan(clamp(pan, panRange().min, panRange().max));
+    let p = pan;
+    dusk.classList.add('panning');
+    glide = (time, dt) => {
+      dt = Math.min(dt || 16, 40);
+      const { min, max } = panRange(), o = p > max ? p - max : p < min ? p - min : 0;
+      if (o) v += (-SPRING * SPRING * o - 2 * SPRING * v) * dt;
+      else v *= Math.exp(-dt / FRICTION);
+      p += v * dt;
+      const o2 = p > max ? p - max : p < min ? p - min : 0;
+      if (Math.abs(v) < .02 && Math.abs(o2) < .3) { writePan(clamp(p, min, max)); stopPan(); return; }
+      writePan(p);
+    };
+    gsap.ticker.add(glide);
+  }
+  // To a place on the beach: at once, gliding from a speed (px/ms), or eased
+  // there (at once when calm).
+  function panTo(x, { instant = false, velocity } = {}) {
+    stopPan();
+    if (velocity !== undefined) { writePan(x); return momentum(velocity); }
+    const { min, max } = panRange(), to = clamp(x, min, max);
+    if (instant || calmNow() || !window.gsap) return writePan(to);
+    const s = { p: pan };
+    dusk.classList.add('panning');
+    panEase = gsap.to(s, { p: to, duration: .55, ease: 'power3.out', onUpdate: () => writePan(s.p), onComplete: () => { panEase = null; dusk.classList.remove('panning'); } });
+  }
+  Object.assign(window, { panRange, doorPan, panTo });
+
   placeDusk();
   // ResizeObserver also catches the page's scrollbar coming or going
   if ('ResizeObserver' in window) new ResizeObserver(() => placeDusk()).observe(dusk);
@@ -1070,6 +1153,125 @@
   // The idle life runs only while the beach is on screen.
   if (!calm && 'IntersectionObserver' in window) {
     new IntersectionObserver(es => dusk.classList.toggle('live', es[0].isIntersecting)).observe(dusk);
+  }
+
+  // The beach pans only once you are at the door, settled: not in the
+  // intro, not while going in or stepping out, and not for the tail of a
+  // gesture that just ended the intro (html.hold).
+  const panReady = () => root.classList.contains('at-door') && canPan() &&
+    !['hold', 'entering', 'leaving'].some(c => root.classList.contains(c));
+
+  // Touch and mouse: the painting follows the finger 1:1 from the first
+  // pixel (past the ends, the rubber band) and glides on at the finger's
+  // speed when it lets go. A press that moves less than TAP_SLOP is still a
+  // tap on whatever is under it (the door); one that moves more is a walk
+  // and clicks nothing.
+  const TAP_SLOP = 8;
+  let walk = null, noClick = false;
+  dusk.addEventListener('pointerdown', e => {
+    if (walk || !e.isPrimary || e.button !== 0 || !panReady()) return;
+    stopPan(); aim = null;
+    walk = { id: e.pointerId, x0: e.clientX, raw0: unrubber(pan), moved: false, trail: [[e.timeStamp, e.clientX]] };
+  });
+  dusk.addEventListener('pointermove', e => {
+    if (!walk || e.pointerId !== walk.id) return;
+    if (e.pointerType === 'mouse' && !e.buttons) return endDrag(e); // let go outside the window
+    const dx = e.clientX - walk.x0;
+    if (!walk.moved && Math.abs(dx) >= TAP_SLOP) {
+      walk.moved = true; hintOff();
+      dusk.classList.add('panning');
+      // only now, so a tap still lands on the door
+      try { dusk.setPointerCapture(e.pointerId); } catch (err) { /* a synthetic pointer */ }
+    }
+    writePan(rubber(walk.raw0 + dx));
+    walk.trail.push([e.timeStamp, e.clientX]);
+    while (walk.trail.length > 2 && e.timeStamp - walk.trail[0][0] > 100) walk.trail.shift();
+  });
+  // The speed is the finger's over its last 100 ms; a finger that rested
+  // before letting go has none, and the painting just settles.
+  function endDrag(e) {
+    if (!walk || e.pointerId !== walk.id) return;
+    const t = walk.trail, a = t[0], b = t[t.length - 1];
+    const v = e.type !== 'pointercancel' && e.timeStamp - b[0] < 60 && b[0] > a[0] ? (b[1] - a[1]) / (b[0] - a[0]) : 0;
+    if (walk.moved) { noClick = true; setTimeout(() => { noClick = false; }, 0); }
+    walk = null;
+    panTo(pan, { velocity: clamp(v, -6, 6) });
+  }
+  ['pointerup', 'pointercancel'].forEach(t => dusk.addEventListener(t, endDrag));
+  dusk.addEventListener('click', e => { if (noClick) { e.preventDefault(); e.stopPropagation(); noClick = false; } }, true);
+  // Images and text on the beach are never dragged or selected by a walk.
+  dusk.addEventListener('dragstart', e => e.preventDefault());
+
+  // The wheel. A trackpad's sideways scroll moves the painting 1:1 (the
+  // trackpad brings its own glide), with the rubber band at the ends, which
+  // springs back once the fingers stop. A mouse wheel (lines or pages, or a
+  // big notch with no sideways part) glides the painting along, down being
+  // further along the beach. A trackpad's up and down does nothing here:
+  // only the door and Order go in.
+  let aim = null, wheelRaw = null, wheelIdle = 0;
+  dusk.addEventListener('wheel', e => {
+    if (!panReady()) return;
+    const { deltaX: dx, deltaY: dy, deltaMode: m } = e, { min, max } = panRange();
+    const unit = m === 1 ? 40 : m === 2 ? geo.W * .8 : 1;
+    if (m !== 0 || (Math.abs(dy) >= 50 && !dx)) {
+      e.preventDefault(); hintOff(); wheelRaw = null;
+      aim = clamp((panEase && aim !== null ? aim : pan) - (Math.abs(dx) > Math.abs(dy) ? dx : dy) * unit, min, max);
+      return panTo(aim);
+    }
+    if (!dx || Math.abs(dx) < Math.abs(dy)) return;
+    e.preventDefault(); hintOff(); aim = null; // (and no swipe back through history)
+    if (wheelRaw === null || glide || panEase) { stopPan(); wheelRaw = unrubber(pan); }
+    wheelRaw -= dx;
+    writePan(rubber(wheelRaw));
+    clearTimeout(wheelIdle);
+    wheelIdle = setTimeout(() => { wheelRaw = null; panTo(pan, { velocity: 0 }); }, 140);
+  }, { passive: false });
+
+  // ← and → walk a quarter of the screen each, eased; held down, they go on.
+  addEventListener('keydown', e => {
+    if ((e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    if (!panReady() || (e.target.closest && e.target.closest('input, textarea, select, dialog, [contenteditable]'))) return;
+    e.preventDefault(); hintOff();
+    const { min, max } = panRange();
+    aim = clamp((panEase && aim !== null ? aim : pan) + (e.key === 'ArrowLeft' ? 1 : -1) * geo.W / 4, min, max);
+    panTo(aim);
+  });
+  // Tabbing to something off the screen walks to it. The browser may also
+  // have scrolled the beach's boxes to show it; they never scroll.
+  dusk.addEventListener('focusin', e => {
+    [dusk, $('duskWipe'), $('duskStill')].forEach(n => { n.scrollLeft = 0; n.scrollTop = 0; });
+    if (!panReady()) return;
+    const r = e.target.getBoundingClientRect();
+    if (r.left < 0 || r.right > geo.W) panTo(pan + geo.W / 2 - (r.left + r.width / 2));
+  });
+
+  // The gesture hint: the first time panning is possible on this device, a
+  // soft fingertip glides sideways once with a fading trail, 3.5 s after
+  // landing at the door, then never again. Any walk, or a tap on the door,
+  // is as good as having seen it. Never when calm.
+  const panHint = $('panHint');
+  let hintT = 0, hintTl = null, panSeen = false;
+  const seenPan = () => { try { return localStorage.getItem('ng-seen-pan') === '1'; } catch (e) { return false; } };
+  function hintOff(seen = true) {
+    clearTimeout(hintT); hintT = 0;
+    if (hintTl) { hintTl.kill(); hintTl = null; gsap.to(panHint, { opacity: 0, '--trail': 0, duration: .2, ease: 'sine.out' }); }
+    if (seen && !panSeen) { panSeen = true; try { localStorage.setItem('ng-seen-pan', '1'); } catch (e) { /* private mode */ } }
+  }
+  function landed() {
+    clearTimeout(hintT); hintT = 0;
+    if (!panHint || hintTl || panSeen || !window.gsap || calmNow() || seenPan()) return;
+    hintT = setTimeout(() => {
+      hintT = 0;
+      if (!panReady() || calmNow() || seenPan()) return; // gone in: again on the way out
+      gsap.set(panHint, { x: 0, opacity: 0, '--trail': 0 });
+      hintTl = gsap.timeline({ onComplete: () => { hintTl = null; hintOff(); } })
+        .to(panHint, { opacity: .85, duration: .35, ease: 'sine.out' }, 0)
+        .to(panHint, { x: -.22 * innerWidth, duration: 1.1, ease: 'power2.inOut' }, .25)
+        .to(panHint, { '--trail': 1, duration: .55, ease: 'sine.out' }, .25)
+        .to(panHint, { '--trail': 0, duration: .55, ease: 'sine.in' }, .8)
+        .to(panHint, { opacity: 0, duration: .45, ease: 'sine.in' }, 1.2);
+      window.__ngHint = hintTl; // for checks
+    }, 3500);
   }
 
   // ── Intro: a camera pulls back from the lighthouse at dawn, a bird and a
@@ -1111,6 +1313,7 @@
     root.classList.add('at-door');
     try { localStorage.setItem('ng-seen-intro', '1'); } catch (e) { /* private mode: the intro plays again */ }
     window.preloadKitchen();
+    landed();
   }
   // The two places: the beach (html.at-door) and the kitchen (html.inside).
   // You are always in exactly one, and the focus goes with you: to Leny's
@@ -1206,6 +1409,8 @@
   function enterKitchen() {
     if (entering) return entering;
     if (leaving) return (entering = leaving.then(() => { entering = null; return enterKitchen(); }));
+    // the beach stops where it is, and the camera finds the door there
+    stopPan(); hintOff(false);
     if (!window.gsap) { setPlace('kitchen', { push: true }); return Promise.resolve(); }
     const quiet = calmNow();
     window.preloadKitchen();
@@ -1331,14 +1536,13 @@
 
     // Under the full bloom: the beach comes back, placed for this screen now
     // (not on the next frame) and on the door view, whatever the pan was;
-    // the camera takes its place in the doorway. (Task 3's
-    // panTo(doorPan(), { instant: true }) goes here.) A sheet still open
+    // the camera takes its place in the doorway. A sheet still open
     // inside is closed, so the beach never shows under one.
     const swap = () => {
       if (swapped) return; swapped = true;
       document.querySelectorAll('dialog[open]').forEach(d => d.close());
       gsap.set(menu, { clearProps: 'all' });
-      setPlace('beach'); placeDusk();
+      setPlace('beach'); placeDusk(); panTo(doorPan(), { instant: true });
       if (quiet) return;
       const c = doorCamera();
       setCam = () => { c.cam.p = cam.p; c.cam.q = cam.q; c.setCam(); };
@@ -1354,6 +1558,7 @@
         if (crop) crop.hidden = true;
         root.classList.remove('leaving');
         leaving = null; resolve();
+        landed();
       };
       const tl = gsap.timeline({ onComplete: finish });
       window.__ngLeave = tl; // for frame-by-frame checks
@@ -1800,7 +2005,7 @@
   // too. The URL already has its step in history, so nothing more is pushed.
   addEventListener('hashchange', () => { if (location.hash === '#menu') goIn({ push: false }); });
   // The door: a click, Enter or Space goes in.
-  $('door').addEventListener('click', () => enterKitchen());
+  $('door').addEventListener('click', () => { hintOff(); enterKitchen(); });
 
   // Outside, in the bar inside. If this page load added the kitchen's step
   // to history (the visitor came in through the door), it is Back, so the

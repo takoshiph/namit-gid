@@ -426,7 +426,9 @@ html.inside:has(#traybar:not([hidden])) .menu { padding-bottom: 96px; }
 /* ── the beach at dusk: the first screen, with the door on the sand ── */
 /* placeDusk() (app.js) sizes .dusk-art for the screen and sets, in px:
    --art-x/--art-y/--art-w/--art-h (the painting's box), --door-x/--door-y
-   (the door's base on the sand) and --door-w. Every layer inside the art box
+   (the door's base on the sand) and --door-w. Walking along the beach
+   moves the box by --pan from the door view (--art-x0), a translate, and
+   --art-x and --door-x include it. Every layer inside the art box
    is placed in fractions of the painting, so they move as one picture.
    Wide screens crop the painting like object-fit: cover; tall ones (.band)
    show its full height as a band with the door base at 70% of the screen,
@@ -452,7 +454,15 @@ html.intro .dusk-still { width: 100%; bottom: auto; height: calc(100% - var(--fa
 .dusk-sky { display: none; position: absolute; left: 0; right: 0; top: 0; height: calc(var(--art-y, 0px) + 1px);
   background: linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 0, 0, .22) 130px), linear-gradient(to right, #9587c2 5%, #9c8dc7 50%, #a391ca 95%); }
 .dusk.band .dusk-sky { display: block; }
-.dusk-art { position: absolute; left: var(--art-x, 0); top: var(--art-y, 0); width: var(--art-w, 100%); height: var(--art-h, 100%); }
+.dusk-art { position: absolute; left: var(--art-x0, 0); top: var(--art-y, 0); width: var(--art-w, 100%); height: var(--art-h, 100%); translate: var(--pan, 0px) 0; }
+/* While the beach pans, sideways is the page's (app.js), up and down and
+   pinching the browser's; the art box gets its own layer only while it moves,
+   so the push in through the door stays sharp. A walk never selects or
+   drags anything. The caption and the © line are outside the art box, so
+   they stay put on the screen. */
+html.at-door .dusk.pans { touch-action: pan-y pinch-zoom; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.dusk.pans img { -webkit-user-drag: none; }
+.dusk.panning .dusk-art { will-change: translate; }
 .dusk-art > *, .dusk-door > * { position: absolute; }
 .dusk-art img { max-width: none; }
 .dusk-beach { inset: 0; width: 100%; height: 100%; }
@@ -484,13 +494,26 @@ html.intro .dusk-still { width: 100%; bottom: auto; height: calc(100% - var(--fa
 .door { inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 2px; }
 .door:focus-visible { outline-color: #FFD58A; outline-offset: 4px; }
 
-/* "Tap the door", under the reflection, if nothing happens for 3 s */
-.door-hint { position: absolute; left: clamp(60px, var(--door-x, 50%), calc(100% - 60px)); top: calc(var(--art-y, 0px) + var(--art-h, 100svh) * .905); translate: -50% 0;
+/* "Tap the door", under the reflection, if nothing happens for 3 s. It
+   keeps 60 px clear of the screen's edges while the door is near one, and
+   walks off with the door when the beach pans it away (continuously: past
+   that, it rides 40 px inside the door). */
+.door-hint { position: absolute; left: min(max(var(--door-x, 50%), min(60px, var(--door-x, 50%) + 40px)), max(calc(100% - 60px), var(--door-x, 50%) - 40px)); top: calc(var(--art-y, 0px) + var(--art-h, 100svh) * .905); translate: -50% 0;
   font: 600 14px/1 var(--sans); letter-spacing: .02em; color: #FBF3E2; text-shadow: 0 1px 3px rgba(15, 18, 32, .8); white-space: nowrap;
   opacity: 0; pointer-events: none; }
 html.at-door .door-hint { animation: hint-in 800ms var(--ease-out) 3s both; }
 html.calm.at-door .door-hint { opacity: 1; }
 @keyframes hint-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* The gesture hint (app.js plays it once per device): a soft white fingertip
+   that glides sideways with a fading trail behind it, never an arrow. GSAP
+   moves it (x, opacity) and stretches the trail (--trail, a scale). */
+.pan-hint { position: absolute; left: 66%; top: 46%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; z-index: 2;
+  background: radial-gradient(circle, rgba(255, 255, 255, .95) 0, rgba(255, 255, 255, .7) 45%, rgba(255, 255, 255, 0) 72%);
+  box-shadow: 0 0 18px rgba(255, 246, 225, .5); opacity: 0; pointer-events: none; --trail: 0; }
+.pan-hint::after { content: ""; position: absolute; left: 50%; top: 50%; width: 22vw; height: 14px; margin-top: -7px; border-radius: 7px;
+  background: linear-gradient(to right, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0)); transform-origin: 0 50%; transform: scaleX(var(--trail)); }
+html.calm .pan-hint, html:not(.at-door) .pan-hint { display: none; }
 
 /* the name and the pickup line, quiet, at the foot of the screen (clear of
    the kitchen paper's torn edge, which overlaps the last 24 px) */
