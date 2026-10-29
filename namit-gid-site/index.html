@@ -19,12 +19,14 @@
   /* Decide the intro before first paint so nothing flashes. The intro plays
      once per device (localStorage 'ng-seen-intro'); after that, and with
      reduced motion or data saver, the page opens at the door. A link to
-     #menu opens in the kitchen. */
+     #menu opens in the kitchen. On the redesign preview, or with ?intro in
+     the URL, it plays on every visit for review. */
   (function () {
     var d = document.documentElement, rm = matchMedia('(prefers-reduced-motion: reduce)').matches,
         sd = navigator.connection && navigator.connection.saveData, seen = false,
         menu = location.hash === '#menu';
     try { seen = localStorage.getItem('ng-seen-intro') === '1'; } catch (e) {}
+    if (/^redesign-preview\./.test(location.hostname) || /[?&]intro\b/.test(location.search)) seen = false;
     if (rm || sd) d.classList.add('calm');
     else if (!seen && !menu) { d.classList.add('intro'); return; }
     if (!menu) d.classList.add('at-door');
