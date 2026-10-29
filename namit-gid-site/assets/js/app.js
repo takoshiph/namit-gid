@@ -1332,9 +1332,11 @@
     // Under the full bloom: the beach comes back, placed for this screen now
     // (not on the next frame) and on the door view, whatever the pan was;
     // the camera takes its place in the doorway. (Task 3's
-    // panTo(doorPan(), { instant: true }) goes here.)
+    // panTo(doorPan(), { instant: true }) goes here.) A sheet still open
+    // inside is closed, so the beach never shows under one.
     const swap = () => {
       if (swapped) return; swapped = true;
+      document.querySelectorAll('dialog[open]').forEach(d => d.close());
       gsap.set(menu, { clearProps: 'all' });
       setPlace('beach'); placeDusk();
       if (quiet) return;
@@ -1815,26 +1817,44 @@
   });
   // Back (the button, Android's gesture, iOS's edge swipe) from the kitchen
   // steps outside; Forward onto the kitchen's step goes straight back in.
-  // A sheet open inside takes Back for itself first, as a dialog does.
+  // A sheet open inside takes Back for itself first: Android's Back closes
+  // the dialog without navigating, but iOS's edge swipe and a desktop's Back
+  // do navigate, so then the sheet closes and the kitchen's step is put
+  // back, and the visitor stays inside; the next Back steps outside.
   addEventListener('popstate', () => {
     backing = false;
     const toKitchen = history.state?.place === 'kitchen';
+    const sheets = [...document.querySelectorAll('dialog[open]')];
+    if (!toKitchen && sheets.length && root.classList.contains('inside') && !leaving) {
+      sheets.forEach(d => d.close());
+      history.pushState({ place: 'kitchen' }, '', location.pathname + location.search + '#menu'); pushedIn = true;
+      return;
+    }
     if (!toKitchen && (root.classList.contains('inside') || entering)) leaveKitchen();
     else if (toKitchen) (leaving || Promise.resolve()).then(() => {
       if (root.classList.contains('at-door') && !entering && history.state?.place === 'kitchen') setPlace('kitchen');
     });
   });
-  // The name in the bar is not a way between the places: it stays put.
-  document.querySelector('.bar-brand').addEventListener('click', e => e.preventDefault());
+  // The name in the bar is not a way between the places, and adds no step
+  // to history. Inside, it takes the kitchen room back to its top; at the
+  // beach it does nothing.
+  document.querySelector('.bar-brand').addEventListener('click', e => {
+    e.preventDefault();
+    if (root.classList.contains('inside')) $('menu').scrollTo({ top: 0, behavior: calmNow() ? 'auto' : 'smooth' });
+  });
 
   // "Start a new order", from an old order's page: the order's address is
   // cleared (a preview keeps its ?mock) and the visitor goes into the
-  // kitchen on one kitchen step in history, so Back from there steps
-  // outside once.
+  // kitchen with no animation. Wherever the page was, that leaves one beach
+  // step under exactly one kitchen step, so Back from there steps outside
+  // once.
   function startOver() {
     const mockQ = new URLSearchParams(location.search).get('mock'), url = location.pathname + (mockQ ? '?mock=' + encodeURIComponent(mockQ) : '');
-    if (root.classList.contains('inside')) { history.replaceState({ place: 'kitchen' }, '', url + '#menu'); setPlace('kitchen'); }
-    else { history.replaceState(null, '', url); goIn(); }
+    (leaving || Promise.resolve()).then(() => {
+      if (!done) toDoor();
+      history.replaceState(null, '', url);
+      setPlace('kitchen', { push: true });
+    });
   }
 
   if (root.classList.contains('intro')) playIntro();
