@@ -847,7 +847,7 @@
     // bring the spot near the top so it stays in view above the sheet
     const r = btn.getBoundingClientRect(), sr = scroller.getBoundingClientRect();
     scroller.scrollBy({ left: (r.left + r.width / 2) - (sr.left + sr.width / 2), behavior: calm ? 'auto' : 'smooth' });
-    window.scrollBy({ top: r.top - innerHeight * .12, behavior: calm ? 'auto' : 'smooth' });
+    $('menu').scrollBy({ top: r.top - innerHeight * .12, behavior: calm ? 'auto' : 'smooth' }); // the room, on a screen too short for it
     // the sheet starts rising while the lid is still lifting (it fades in over 450 ms)
     setTimeout(() => {
       if (spot === 'register') { openSheet(0); return; }
@@ -1917,9 +1917,6 @@
     if (!window.gsap) return toDoor();
     await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 900))]);
     if (done) return;
-    // Nightfall reveals the beach where it sits at the top of the page.
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    scrollTo(0, 0);
 
     const vw = innerWidth, vh = innerHeight, dpr = devicePixelRatio || 1;
     const lowEnd = (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
