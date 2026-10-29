@@ -557,7 +557,7 @@
     } else if (o.status === 'expired') {
       title = 'This request expired';
       body.push(make('p', { text: 'I didn’t get the deposit in time, so I had to free up the pickup time for other orders. Nothing was charged. I’d love to cook for you another time.' }),
-        make('button', { type: 'button', class: 'btn btn-sea', text: 'Start a new order', onclick: () => { history.replaceState(null, '', location.pathname); sheet.close(); location.hash = 'menu'; } }));
+        make('button', { type: 'button', class: 'btn btn-sea', text: 'Start a new order', onclick: () => { sheet.close(); startOver(); } }));
     } else {
       body.push(make('p', { text: 'This order is ' + String(o.status).replace('_', ' ') + '.' }), lines());
     }
@@ -974,7 +974,7 @@
     const text = on ? 'Taking orders' : 'Closed for orders', st = $('barStatus');
     $('navLamp').classList.toggle('is-on', on);
     st.textContent = text; st.classList.toggle('closed', !on); st.classList.add('shown');
-    document.querySelector('.bar-brand').setAttribute('aria-label', `Namit gid, ${text.toLowerCase()}, back to top`);
+    document.querySelector('.bar-brand').setAttribute('aria-label', `Namit gid, ${text.toLowerCase()}`);
   };
   if (mock) showOpen(true);
   else fetch('/api/availability').then(r => r.json()).then(a => showOpen(a.available !== false)).catch(() => showOpen(false));
@@ -1116,13 +1116,18 @@
   // You are always in exactly one, and the focus goes with you: to Leny's
   // greeting inside, to the door outside. push adds the step into the
   // kitchen to the browser's history, so #menu is in the URL and Back has
-  // something to undo.
+  // something to undo. pushedIn remembers that this page load added that
+  // step, so stepping outside can be Back rather than a step of its own.
+  let pushedIn = false;
   function setPlace(place, { push = false } = {}) {
     const inside = place === 'kitchen';
     root.classList.toggle('inside', inside); root.classList.toggle('at-door', !inside);
-    if (push) history.pushState({ place: 'kitchen' }, '', '#menu');
+    if (push) { history.pushState({ place: 'kitchen' }, '', '#menu'); pushedIn = true; }
     $(inside ? 'menuH' : 'door').focus({ preventScroll: true });
   }
+  // Reduced motion or data saver, as the head script decided it (or as a
+  // check sets it later on html): crossfades instead of camera moves.
+  const calmNow = () => calm || root.classList.contains('calm');
 
   // ── Going in ──────────────────────────────────────────────────────────
   // The kitchen painting, decoded, so the page can swap to it under the
@@ -1165,16 +1170,44 @@
     return u => { const f = Math.min(N, Math.max(0, u * N)), i = Math.min(N - 1, Math.floor(f)); return (acc[i] + (acc[i + 1] - acc[i]) * (f - i)) / acc[N]; };
   })();
 
+  // The camera on the doorway, shared by going in and stepping outside: the
+  // beach is scaled about the middle of the doorway and panned to bring it
+  // to the middle of the screen, until the opening is 1.35 screens tall.
+  // cam.p drives the zoom (0 at rest, 1 in the doorway); cam.q, the pan,
+  // brings the doorway to the middle. The warm light rides on the doorway.
+  // Measured now, so the beach must be shown and at rest.
+  function doorCamera() {
+    const still = $('duskStill'), glow = $('bloomLight');
+    const vw = innerWidth, vh = innerHeight;
+    const dr = $('duskDoor').getBoundingClientRect(), sr = still.getBoundingClientRect();
+    const O = { x: dr.left + dr.width / 2, y: dr.top + dr.height / 2 };
+    const T = { x: vw / 2 - O.x, y: vh / 2 - O.y }, lnS = Math.log(Math.max(3, 1.35 * vh / dr.height));
+    const cam = { p: 0, q: 0 };
+    const setCam = () => {
+      gsap.set(still, { scale: Math.exp(cam.p * lnS), x: T.x * cam.q, y: T.y * cam.q });
+      gsap.set(glow, { x: O.x + T.x * cam.q, y: O.y + T.y * cam.q });
+    };
+    // No will-change here: Chrome keeps a will-change layer's raster at its
+    // first scale, and the beach and the door would go soft as the push
+    // nears 8x. Re-rastering as it scales costs nothing measurable here.
+    gsap.set(still, { transformOrigin: `${O.x - sr.left}px ${O.y - sr.top}px` });
+    gsap.set(glow, { xPercent: -50, yPercent: -50 });
+    return { cam, setCam };
+  }
+
   // Through the door into the kitchen. One timeline (__ngEnter): the door
   // gives a little, the camera pushes in while the door swings open on Leny
   // in the light, a beat on her, then on through the doorway into a warm
   // bloom; under the full bloom the page swaps to the kitchen, and the bloom
   // lifts on it with her greeting. A second call while it runs gets the same
-  // promise. Calm: the bloom just crossfades, no camera.
-  let entering = null, finishEntering = null;
+  // promise; called while stepping outside, it waits for that to finish
+  // first. Calm: the bloom just crossfades, no camera.
+  let entering = null, finishEntering = null, leaving = null;
   function enterKitchen() {
     if (entering) return entering;
+    if (leaving) return (entering = leaving.then(() => { entering = null; return enterKitchen(); }));
     if (!window.gsap) { setPlace('kitchen', { push: true }); return Promise.resolve(); }
+    const quiet = calmNow();
     window.preloadKitchen();
     const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
     const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
@@ -1192,7 +1225,7 @@
       root.classList.remove('entering');
       setPlace('kitchen', { push: true });
       // the greeting waits, out of sight, to rise as the light lifts
-      if (!calm) { gsap.set(lines, { yPercent: 105 }); gsap.set(after, { opacity: 0, y: 8 }); }
+      if (!quiet) { gsap.set(lines, { yPercent: 105 }); gsap.set(after, { opacity: 0, y: 8 }); }
     };
     // A slow kitchen holds the bloom at its peak until the painting is in,
     // or for 4 s at most.
@@ -1217,7 +1250,7 @@
       window.__ngEnter = tl; // for frame-by-frame checks
       gsap.set(bloom, { autoAlpha: 0 });
 
-      if (calm) {
+      if (quiet) {
         // a plain crossfade through the warm light
         gsap.set(glow, { xPercent: -50, yPercent: -50, x: innerWidth / 2, y: innerHeight / 2, scale: 3 });
         tl.addLabel('push', 0)
@@ -1235,24 +1268,10 @@
       // The finer painting of the door's surroundings, once it has decoded.
       if (crop && crop.getAttribute('src')) crop.decode().then(() => { if (!swapped) crop.hidden = false; }).catch(() => {});
 
-      // The camera: scaled about the middle of the doorway, panning it to the
-      // middle of the screen, until the opening is 1.35 screens tall.
-      const vw = innerWidth, vh = innerHeight;
-      const dr = $('duskDoor').getBoundingClientRect(), sr = still.getBoundingClientRect();
-      const O = { x: dr.left + dr.width / 2, y: dr.top + dr.height / 2 };
-      const T = { x: vw / 2 - O.x, y: vh / 2 - O.y }, lnS = Math.log(Math.max(3, 1.35 * vh / dr.height));
-      // p drives the zoom; q, the pan, brings the doorway to the middle by
+      // The camera, from rest; the pan brings the doorway to the middle by
       // the beat on Leny, so the camera goes straight on through it.
-      const cam = { p: 0, q: 0 };
-      const setCam = () => {
-        gsap.set(still, { scale: Math.exp(cam.p * lnS), x: T.x * cam.q, y: T.y * cam.q });
-        gsap.set(glow, { x: O.x + T.x * cam.q, y: O.y + T.y * cam.q });
-      };
-      // No will-change here: Chrome keeps a will-change layer's raster at its
-      // first scale, and the beach and the door would go soft as the push
-      // nears 8x. Re-rastering as it scales costs nothing measurable here.
-      gsap.set(still, { transformOrigin: `${O.x - sr.left}px ${O.y - sr.top}px` });
-      gsap.set(glow, { xPercent: -50, yPercent: -50, x: O.x, y: O.y, scale: .3 });
+      const { cam, setCam } = doorCamera(), vh = innerHeight;
+      setCam(); gsap.set(glow, { scale: .3 });
       gsap.set(leaf, { rotationY: 14, transformOrigin: '0% 50%' });
 
       const PUSH = .1, PEAK = 1.65;
@@ -1286,6 +1305,104 @@
     return entering;
   }
   window.enterKitchen = enterKitchen;
+
+  // ── Stepping outside ──────────────────────────────────────────────────
+  // The entrance played backwards, as one timeline (__ngLeave): the warm
+  // light rises over the kitchen; under it the page swaps back to the beach
+  // and the camera starts where the push in ended, in the doorway with Leny
+  // stepped aside. She steps back into the doorway, the door swings to rest
+  // in front of her, and the camera pulls out onto the beach, centred on the
+  // door: quick out of the doorway, slow past Leny, easing to a stop. A
+  // second call while it runs gets the same promise; called while going in,
+  // it waits for the entrance to finish first. Calm: the bloom crossfades.
+  const pullEase = u => 1 - pushEase(1 - u);
+  function leaveKitchen() {
+    if (leaving) return leaving;
+    if (entering) return (leaving = entering.then(() => { leaving = null; return leaveKitchen(); }));
+    if (!root.classList.contains('inside')) return Promise.resolve();
+    if (!window.gsap) { setPlace('beach'); return Promise.resolve(); }
+    const quiet = calmNow();
+    window.preloadKitchen(); // (also fetches the finer crop of the door, after a load on #menu)
+    const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
+    const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
+    const caption = document.querySelector('.dusk-caption'), crop = $('duskCrop');
+    const cam = { p: 1, q: 1 };
+    let swapped = false, over = false, setCam = () => {};
+
+    // Under the full bloom: the beach comes back, placed for this screen now
+    // (not on the next frame) and on the door view, whatever the pan was;
+    // the camera takes its place in the doorway. (Task 3's
+    // panTo(doorPan(), { instant: true }) goes here.)
+    const swap = () => {
+      if (swapped) return; swapped = true;
+      gsap.set(menu, { clearProps: 'all' });
+      setPlace('beach'); placeDusk();
+      if (quiet) return;
+      const c = doorCamera();
+      setCam = () => { c.cam.p = cam.p; c.cam.q = cam.q; c.setCam(); };
+      setCam();
+      if (crop && crop.getAttribute('src')) crop.decode().then(() => { if (!over) crop.hidden = false; }).catch(() => {});
+    };
+
+    leaving = new Promise(resolve => {
+      const finish = () => {
+        if (over) return; over = true;
+        swap();
+        gsap.set([bloom, glow, still, leaf, leny, light, caption], { clearProps: 'all' });
+        if (crop) crop.hidden = true;
+        root.classList.remove('leaving');
+        leaving = null; resolve();
+      };
+      const tl = gsap.timeline({ onComplete: finish });
+      window.__ngLeave = tl; // for frame-by-frame checks
+      // the door's light stops breathing so GSAP can fade it
+      root.classList.add('leaving');
+      gsap.set(bloom, { autoAlpha: 0 });
+
+      if (quiet) {
+        // a plain crossfade through the warm light
+        gsap.set(glow, { xPercent: -50, yPercent: -50, x: innerWidth / 2, y: innerHeight / 2, scale: 3 });
+        tl.to(bloom, { autoAlpha: 1, duration: .4, ease: 'sine.inOut' }, 0)
+          .addLabel('bloomPeak', .4).call(swap, null, 'bloomPeak')
+          .addLabel('closed', .4)
+          .to(bloom, { autoAlpha: 0, duration: .4, ease: 'sine.inOut' }, .42)
+          .addLabel('settled', .82);
+        return;
+      }
+
+      // The beach waits, out of sight, as the push in left it: the door wide
+      // open, Leny in the light and stepped aside, the caption gone. The
+      // light fills the screen from the middle, where the doorway will be.
+      const restLight = getComputedStyle(light).opacity;
+      gsap.set(leaf, { rotationY: 75, transformOrigin: '0% 50%' });
+      gsap.set(leny, { opacity: 1, xPercent: -42 });
+      gsap.set(light, { opacity: 1 });
+      gsap.set(caption, { opacity: 0 });
+      gsap.set(glow, { xPercent: -50, yPercent: -50, x: innerWidth / 2, y: innerHeight / 2, scale: 6 });
+      gsap.set(menu, { transformOrigin: `50% ${(innerHeight - bar.offsetHeight) / 2}px`, willChange: 'transform' });
+
+      const PEAK = .3, CAM = 1.1, SETTLED = PEAK + CAM, moveCam = () => setCam();
+      // the kitchen leans away a touch as the light rises over it
+      tl.to(bloom, { autoAlpha: 1, duration: PEAK, ease: 'power2.in' }, 0)
+        .to(menu, { scale: 1.03, duration: PEAK, ease: 'power2.in' }, 0)
+        .addLabel('bloomPeak', PEAK).call(swap, null, 'bloomPeak')
+        // the light lifts, drawing back into the doorway, as the camera pulls out
+        .to(bloom, { autoAlpha: 0, duration: .45, ease: 'power2.out' }, PEAK + .05)
+        .to(glow, { scale: .3, duration: .6, ease: 'power2.out' }, PEAK)
+        .to(cam, { p: 0, duration: CAM, ease: pullEase, onUpdate: moveCam }, PEAK)
+        .to(cam, { q: 0, duration: .9, ease: 'power2.inOut', onUpdate: moveCam }, SETTLED - .9)
+        // Leny steps back into the doorway, and the door swings to in front of her
+        .to(leny, { xPercent: 0, duration: .5, ease: 'power2.inOut' }, PEAK + .05)
+        .to(leaf, { rotationY: 14, duration: .6, ease: 'power2.inOut' }, PEAK + .35)
+        .to(leny, { opacity: 0, duration: .35, ease: 'sine.in' }, PEAK + .55)
+        .to(light, { opacity: restLight, duration: .5, ease: 'sine.inOut' }, PEAK + .45)
+        .addLabel('closed', PEAK + .95)
+        .to(caption, { opacity: 1, duration: .4, ease: 'sine.out' }, SETTLED - .4)
+        .addLabel('settled', SETTLED);
+    });
+    return leaving;
+  }
+  window.leaveKitchen = leaveKitchen;
 
   // A cumulus, painted once onto a canvas: soft puffs (a low row along the
   // base, a taller crown), then one gradient laid across the whole shape, lit
@@ -1663,8 +1780,10 @@
   // Order, at the beach, plays the same entrance as the door. "Skip to the
   // menu" and any other link to #menu go straight in, with no animation.
   // Either one while going in just finishes the entrance, and inside they
-  // only bring the focus back to Leny's greeting.
+  // only bring the focus back to Leny's greeting. While stepping outside,
+  // they wait for the visitor to be out first.
   const goIn = ({ animate = false, push = true } = {}) => {
+    if (leaving) { leaving.then(() => goIn({ animate, push })); return; }
     if (!done) toDoor();
     if (finishEntering) finishEntering();
     else if (!root.classList.contains('at-door')) setPlace('kitchen');
@@ -1675,11 +1794,48 @@
     e.preventDefault(); // the link itself would add a second step to history
     goIn({ animate: a.classList.contains('bar-order') });
   }));
-  // A change of URL to #menu ("Start a new order" sets it) goes in too. The
-  // URL already has its step in history, so nothing more is pushed.
+  // A change of URL to #menu (typed in, or Forward onto the kitchen) goes in
+  // too. The URL already has its step in history, so nothing more is pushed.
   addEventListener('hashchange', () => { if (location.hash === '#menu') goIn({ push: false }); });
   // The door: a click, Enter or Space goes in.
   $('door').addEventListener('click', () => enterKitchen());
+
+  // Outside, in the bar inside. If this page load added the kitchen's step
+  // to history (the visitor came in through the door), it is Back, so the
+  // history stays one step deep and the popstate below walks them out.
+  // Otherwise (opened on /#menu) the kitchen's URL becomes the beach's and
+  // the walk out plays. Pressed while going in, it waits for the entrance.
+  let backing = false;
+  $('barOut').addEventListener('click', () => {
+    (entering || Promise.resolve()).then(() => {
+      if (!root.classList.contains('inside') || leaving || backing) return;
+      if (history.state?.place === 'kitchen' && pushedIn) { backing = true; history.back(); }
+      else { history.replaceState(null, '', location.pathname + location.search); leaveKitchen(); }
+    });
+  });
+  // Back (the button, Android's gesture, iOS's edge swipe) from the kitchen
+  // steps outside; Forward onto the kitchen's step goes straight back in.
+  // A sheet open inside takes Back for itself first, as a dialog does.
+  addEventListener('popstate', () => {
+    backing = false;
+    const toKitchen = history.state?.place === 'kitchen';
+    if (!toKitchen && (root.classList.contains('inside') || entering)) leaveKitchen();
+    else if (toKitchen) (leaving || Promise.resolve()).then(() => {
+      if (root.classList.contains('at-door') && !entering && history.state?.place === 'kitchen') setPlace('kitchen');
+    });
+  });
+  // The name in the bar is not a way between the places: it stays put.
+  document.querySelector('.bar-brand').addEventListener('click', e => e.preventDefault());
+
+  // "Start a new order", from an old order's page: the order's address is
+  // cleared (a preview keeps its ?mock) and the visitor goes into the
+  // kitchen on one kitchen step in history, so Back from there steps
+  // outside once.
+  function startOver() {
+    const mockQ = new URLSearchParams(location.search).get('mock'), url = location.pathname + (mockQ ? '?mock=' + encodeURIComponent(mockQ) : '');
+    if (root.classList.contains('inside')) { history.replaceState({ place: 'kitchen' }, '', url + '#menu'); setPlace('kitchen'); }
+    else { history.replaceState(null, '', url); goIn(); }
+  }
 
   if (root.classList.contains('intro')) playIntro();
   else if (root.classList.contains('at-door')) toDoor();

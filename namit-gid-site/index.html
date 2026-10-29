@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=90">
+<link rel="stylesheet" href="assets/css/site.css?v=91">
 <script>
   /* Decide the intro before first paint so nothing flashes. The intro plays
      once per device (localStorage 'ng-seen-intro'); after that, and with
@@ -119,7 +119,7 @@
 <div class="preview-strip" id="previewStrip" hidden>Preview: orders are not sent</div>
 
 <header class="bar" id="bar">
-  <a class="bar-brand" href="#top" aria-label="Namit gid, back to top">
+  <a class="bar-brand" href="#top" aria-label="Namit gid">
     <!-- the island's lighthouse in miniature: white tower, two rust bands, red cap -->
     <span class="lamp is-on" id="navLamp"><svg viewBox="0 0 24 34" aria-hidden="true">
       <defs>
@@ -140,6 +140,11 @@
     <span class="bar-words"><span class="bar-name">Namit <em>gid</em></span><span class="bar-status" id="barStatus"></span></span>
   </a>
   <a class="bar-order" href="#menu">Order</a>
+  <!-- inside, the same slot steps back out: a small doorway, its door ajar -->
+  <button class="bar-out" id="barOut" type="button">
+    <svg viewBox="0 0 20 24" aria-hidden="true"><path class="bar-out-light" d="M3.5 2.5h13v20h-13z"/><path class="bar-out-frame" d="M3.5 22.5V2.5h13v20M1.5 22.5h17"/><path class="bar-out-leaf" d="M3.5 2.5 10 4.6v17.9H3.5z"/><circle cx="8.4" cy="13" r=".9"/></svg>
+    <span>Outside</span>
+  </button>
 </header>
 
 <button class="intro-skip" id="introSkip" type="button">Skip</button>
@@ -316,6 +321,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=77" defer></script>
+<script src="assets/js/app.js?v=78" defer></script>
 </body>
 </html>

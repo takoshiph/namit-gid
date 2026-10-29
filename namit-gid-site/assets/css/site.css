@@ -94,6 +94,21 @@ html.intro .bar-status, html.at-door .bar-status { color: #FBF3E2; }
   min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: 4px;
   background: var(--sea); color: var(--sand); font-weight: 600; text-decoration: none; font-size: 15px;
 }
+/* Inside, Order's slot steps back out: "Outside", with a small doorway, its
+   door ajar on the warm light. Order is only at the beach. */
+.bar-out {
+  display: none; min-height: 44px; align-items: center; gap: 8px; padding: 0 14px 0 12px; border: 0; border-radius: 4px;
+  background: none; box-shadow: inset 0 0 0 1.5px rgba(30, 90, 99, .45); color: var(--sea);
+  font: inherit; font-weight: 600; font-size: 15px; cursor: pointer;
+}
+.bar-out:hover { background: rgba(30, 90, 99, .07); }
+.bar-out svg { width: 18px; height: 22px; flex: none; }
+.bar-out-light { fill: #F5C35E; }
+.bar-out-frame { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.bar-out-leaf { fill: currentColor; }
+.bar-out circle { fill: #F5C35E; }
+html.inside .bar-out { display: inline-flex; }
+html.inside .bar-order { display: none; }
 .intro-skip {
   position: fixed; z-index: 70; left: 50%; bottom: max(24px, env(safe-area-inset-bottom));
   translate: -50% 0; min-height: 44px; padding: 0 22px; border-radius: 999px;
@@ -489,13 +504,14 @@ html.calm.at-door .door-hint { opacity: 1; }
 .dusk:not(.band) .dusk-caption { left: auto; max-width: max(50vw, 20rem); justify-items: end; text-align: right; }
 @media (min-width: 900px) { .dusk h1 { font-size: 22px; } }
 
-/* idle life, only while the beach is on screen after the intro: the sign
-   sways, the light breathes, the lighthouse flashes, fireflies drift */
-html:not(.intro) .dusk.live .door-sign { animation: sign-sway 3.2s var(--ease-loop) infinite; }
-html:not(.intro) .dusk.live .door-light { animation: door-breathe 2.6s var(--ease-loop) infinite; }
-html:not(.intro) .dusk.live .dusk-lamp { animation: lamp-flash 6s linear infinite; }
+/* idle life, only while the beach is on screen after the intro (a hidden
+   beach, inside, counts as off screen): the sign sways, the light breathes,
+   the lighthouse flashes, fireflies drift */
+html:not(.intro):not(.inside) .dusk.live .door-sign { animation: sign-sway 3.2s var(--ease-loop) infinite; }
+html:not(.intro):not(.inside) .dusk.live .door-light { animation: door-breathe 2.6s var(--ease-loop) infinite; }
+html:not(.intro):not(.inside) .dusk.live .dusk-lamp { animation: lamp-flash 6s linear infinite; }
 /* :where() keeps this below the per-firefly delays and durations */
-:where(html:not(.intro) .dusk.live) .fireflies i { animation: firefly 8s var(--ease-loop) infinite; }
+:where(html:not(.intro):not(.inside) .dusk.live) .fireflies i { animation: firefly 8s var(--ease-loop) infinite; }
 /* rotate, not transform: it adds to the wipe's swing (a GSAP transform), and
    starts from 0 so the swing settles straight into the sway */
 @keyframes sign-sway { 0%, 100% { rotate: 0deg; } 25% { rotate: 2deg; } 75% { rotate: -2deg; } }
@@ -503,10 +519,10 @@ html:not(.intro) .dusk.live .dusk-lamp { animation: lamp-flash 6s linear infinit
 /* the fireflies sit by the palms, off the side of the band on a phone */
 .dusk.band .fireflies { display: none; }
 
-/* ── going in (enterKitchen() in app.js) ── */
+/* ── going in and stepping outside (enterKitchen(), leaveKitchen() in app.js) ── */
 /* The page holds still under the move; the idle breathing of the light and
    the hint step aside so GSAP can fade them (an animation beats inline styles). */
-html.entering .door-light, html.entering .door-hint { animation: none !important; }
+html.entering .door-light, html.entering .door-hint, html.leaving .door-light, html.leaving .door-hint { animation: none !important; }
 /* The warm light from the doorway: a soft disc of #FFF4DC centred on the
    door, scaled up until it fills the screen. #bloom carries the opacity. */
 .bloom { position: fixed; inset: 0; z-index: 65; pointer-events: none; overflow: hidden; opacity: 0; visibility: hidden; }
