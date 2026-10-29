@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=88">
+<link rel="stylesheet" href="assets/css/site.css?v=89">
 <script>
   /* Decide the intro before first paint so nothing flashes. The intro plays
      once per device (localStorage 'ng-seen-intro'); after that, and with
@@ -152,10 +152,9 @@
        screen; the island, boat, lamp and door are layers placed in fractions
        of the painting, inside one box that placeDusk() sizes for the screen. -->
   <section class="dusk" id="dusk" aria-labelledby="duskH">
-    <!-- The sunset wipe: .dusk-wipe slides in from the left with a soft
-         watercolour edge (its mask) and a gold band on that edge, while
-         .dusk-still slides the other way, so the painting itself never moves.
-         Both rest at 0 once the intro is over. -->
+    <!-- Nightfall: .dusk-wipe comes down from the sky through a tall soft
+         fade (its mask), while .dusk-still moves the other way, so the
+         painting itself never moves. Both rest at 0 once the intro is over. -->
     <div class="dusk-wipe" id="duskWipe">
     <div class="dusk-still" id="duskStill">
     <div class="dusk-sky" aria-hidden="true"></div>
@@ -189,7 +188,6 @@
       <p class="next-pickup" id="nextPickup" hidden></p>
     </div>
     </div>
-    <i class="wipe-gold" id="wipeGold" aria-hidden="true"></i>
     </div>
   </section>
 
@@ -318,6 +316,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=75" defer></script>
+<script src="assets/js/app.js?v=76" defer></script>
 </body>
 </html>

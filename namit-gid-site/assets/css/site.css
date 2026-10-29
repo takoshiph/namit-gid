@@ -397,20 +397,17 @@ html.hold, html.hold body { overflow: hidden; }
    for the brush edge on the right. Both only move during the intro's wipe. */
 .dusk-wipe { position: absolute; left: 0; top: 0; bottom: 0; width: calc(100% + var(--edge)); }
 .dusk-still { position: absolute; left: 0; top: 0; bottom: 0; width: calc(100% - var(--edge)); background: #1B1F32; }
-/* The sunset wipe (intro only): the beach lies over the dawn stage, and
-   .dusk-wipe slides in from the left behind a wet brush edge (a mask: solid,
-   then a turbulence-ragged, blurred edge) while .dusk-still slides back the
-   same amount, so only the edge moves across a painting that stays put.
-   Transforms only; the mask moves with its layer and is never repainted. */
-html.intro .dusk { z-index: 41; background: transparent; }
-html.intro .dusk-wipe { transform: translateX(-100%); will-change: transform;
-  -webkit-mask: linear-gradient(#000, #000) 0 0 / calc(100% - var(--edge) + 2px) 100% no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'%3E%3Cfilter id='w' filterUnits='userSpaceOnUse' x='-100' y='-100' width='300' height='1200'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.025 .011' numOctaves='4' seed='7' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='52' xChannelSelector='R' yChannelSelector='G'/%3E%3CfeGaussianBlur stdDeviation='7 3'/%3E%3C/filter%3E%3Crect x='-80' y='-60' width='126' height='1120' filter='url(%23w)'/%3E%3C/svg%3E") 100% 0 / var(--edge) 100% no-repeat;
-  mask: linear-gradient(#000, #000) 0 0 / calc(100% - var(--edge) + 2px) 100% no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 1000' preserveAspectRatio='none'%3E%3Cfilter id='w' filterUnits='userSpaceOnUse' x='-100' y='-100' width='300' height='1200'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.025 .011' numOctaves='4' seed='7' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='52' xChannelSelector='R' yChannelSelector='G'/%3E%3CfeGaussianBlur stdDeviation='7 3'/%3E%3C/filter%3E%3Crect x='-80' y='-60' width='126' height='1120' filter='url(%23w)'/%3E%3C/svg%3E") 100% 0 / var(--edge) 100% no-repeat; }
-html.intro .dusk-still { transform: translateX(calc(100% + var(--edge))); will-change: transform; }
-/* the sunset's gold riding the edge: #F5C35E fading out behind it over 6vw */
-.wipe-gold { display: none; position: absolute; top: 0; bottom: 0; right: calc(var(--edge) * .36); width: 6vw; pointer-events: none;
-  background: linear-gradient(to right, rgba(245, 195, 94, 0), #F5C35E 82%, rgba(245, 195, 94, 0)); opacity: .7; }
-html.intro .wipe-gold { display: block; }
+/* Nightfall (intro only): the beach lies over the dawn stage and comes down
+   from the sky through a fade taller than the screen (--fall), so the sky
+   turns first, then the sea, then the sand, and no edge is ever seen.
+   .dusk-wipe moves down while .dusk-still moves up by as much, so the
+   painting stays put. Transforms only; the mask moves with its layer and is
+   never repainted. */
+html.intro .dusk { --fall: 120svh; z-index: 41; background: transparent; }
+html.intro .dusk-wipe { width: 100%; bottom: auto; height: calc(100% + var(--fall)); transform: translateY(-100%); will-change: transform;
+  -webkit-mask: linear-gradient(to top, transparent 0, rgba(0, 0, 0, .15) calc(var(--fall) * .25), rgba(0, 0, 0, .5) calc(var(--fall) * .5), rgba(0, 0, 0, .85) calc(var(--fall) * .75), #000 var(--fall));
+  mask: linear-gradient(to top, transparent 0, rgba(0, 0, 0, .15) calc(var(--fall) * .25), rgba(0, 0, 0, .5) calc(var(--fall) * .5), rgba(0, 0, 0, .85) calc(var(--fall) * .75), #000 var(--fall)); }
+html.intro .dusk-still { width: 100%; bottom: auto; height: calc(100% - var(--fall)); transform: translateY(calc(100% + var(--fall))); will-change: transform; }
 /* the sky over the band: the painting's top-edge colours, darkening by 22%
    (a .22 black veil, i.e. each channel x .78) over the 130 px above it */
 .dusk-sky { display: none; position: absolute; left: 0; right: 0; top: 0; height: calc(var(--art-y, 0px) + 1px);

@@ -1071,7 +1071,7 @@
 
   // ── Intro: a camera pulls back from the lighthouse at dawn, a bird and a
   // cloud pass the lens, and the beam writes the name. The pull-back lands
-  // on the dusk painting's framing, and a sunset wipe turns the dawn into the
+  // on the dusk painting's framing, and nightfall turns the dawn into the
   // painting, where the door waits (html.at-door) until the visitor goes on.
   // One GSAP timeline; transforms and opacity only.
   let tl = null, amb = null, done = false;
@@ -1094,7 +1094,7 @@
     return true;
   }
   // Ends the intro at the door, idle, and remembers that it has been seen.
-  // The wipe's own end calls it with settling = true and lets the timeline
+  // Nightfall's own end calls it with settling = true and lets the timeline
   // run on for the last of the sign's swing and the drift; anything else
   // stops it there.
   function toDoor(settling) {
@@ -1102,7 +1102,11 @@
     if (!endIntro(settling)) return;
     if (tl && !settling) {
       tl.kill();
-      if (window.gsap) gsap.set('#doorSign', { clearProps: 'transform,filter' });
+      if (window.gsap) {
+        // the door as nightfall left it, back to the stylesheet
+        gsap.set(['#doorSign', '#doorLight', '#doorLeaf', '#duskDoor .door-frame', '#duskDoor .door-reflect'], { clearProps: 'opacity,filter' });
+        gsap.set(['#doorSign', '#doorLight'], { clearProps: 'transform,transformOrigin' });
+      }
     }
     root.classList.add('at-door');
     try { localStorage.setItem('ng-seen-intro', '1'); } catch (e) { /* private mode: the intro plays again */ }
@@ -1114,7 +1118,7 @@
 
   // ── Going in ──────────────────────────────────────────────────────────
   // The kitchen painting, decoded, so the page can swap to it under the
-  // bloom. Starts with the wipe, or on landing at the door. Also fetches the
+  // bloom. Starts with nightfall, or on landing at the door. Also fetches the
   // finer crop of the door's surroundings for the push in.
   let kitchenP = null, kitchenReady = false;
   window.preloadKitchen = function preloadKitchen() {
@@ -1393,7 +1397,7 @@
     if (!window.gsap) return toDoor();
     await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 900))]);
     if (done) return;
-    // The wipe reveals the beach where it sits at the top of the page.
+    // Nightfall reveals the beach where it sits at the top of the page.
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     scrollTo(0, 0);
 
@@ -1401,13 +1405,13 @@
     const lowEnd = (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
     if (lowEnd) root.classList.add('low-end');
     const stage = $('stage'), isle = $('stIsle'), word = $('stWord');
-    const wipe = $('duskWipe'), still = $('duskStill'), sign = $('doorSign');
+    const wipe = $('duskWipe'), still = $('duskStill'), sign = $('doorSign'), light = $('doorLight');
 
     // The match cut: at rest, the stage's island is exactly the dusk
     // painting's island (same art, same box), its sea starts at the
     // painting's horizon and its sand at the painting's waterline. The
     // camera's pull-back ends at rest, so the last frame of the dawn has the
-    // painting's composition and the wipe only changes the time of day.
+    // painting's composition and nightfall only changes the time of day.
     // (.dusk-wipe and .dusk-still cancel out, so these rects are true.)
     const HORIZON = .558, SHORE = .74; // fractions of the painting's height
     const dr = $('duskIsle').getBoundingClientRect(), art = $('duskBeach').getBoundingClientRect();
@@ -1420,7 +1424,7 @@
     stage.style.setProperty('--shore', (art.top + art.height * SHORE) + 'px');
     stage.style.setProperty('--sun-x', sunX + 'px');
     // The rest of the dawn comes to rest where the painting has the same
-    // thing, so the wipe changes only the light: the bangka on the painting's
+    // thing, so nightfall changes only the light: the bangka on the painting's
     // bangka (same art, same box), the frond on the crown of the near palm,
     // the far range on the headland, the clouds on the painting's clouds.
     // Boxes are fractions of the painting (x, y, width).
@@ -1458,8 +1462,7 @@
     // ── reads ──
     const ir = isle.getBoundingClientRect();
     const wW = word.offsetWidth, wH = word.offsetHeight;
-    const W = $('dusk').clientWidth, E = wipe.offsetWidth - W; // E: the brush edge's width
-    const sr = sign.getBoundingClientRect();
+    const FALL = wipe.offsetHeight; // the nightfall's travel: the screen plus its fade
     const w0 = innerWidth, h0 = innerHeight;
 
     // ── writes ──
@@ -1481,7 +1484,7 @@
     // The camera: every plane starts zoomed toward the lamp by its own depth,
     // so near things move more than far things, and pulls back to rest by
     // PULL_END. It eases in (power2.in) and hands over at T1, at the same
-    // speed, to a long power3.out, so it is still drifting as the wipe begins
+    // speed, to a long power3.out, so it is still drifting as nightfall begins
     // and never stops dead. The zoom is capped by what the island art can
     // resolve on this screen.
     const Zwant = (vw < 700 ? 2.8 : 2.3) * iw0 / ir.width;
@@ -1515,14 +1518,14 @@
     tl.set(planes, { willChange: 'auto' }, PULL_END + .05);
     // The drift: one slow pull further back (2.5% of scale) and a little pan,
     // about the door, applied in lockstep to the dawn stage and to the
-    // painting, from inside the pull-back until after the wipe. So the camera
-    // never stops dead, the two pictures move as one while the edge crosses,
+    // painting, from inside the pull-back until after nightfall. So the camera
+    // never stops dead, the two pictures move as one while night comes down,
     // and it eases out on the door, at rest (the at-door layout).
     // Set after the planes are measured: it scales the whole stage.
     const DRIFT_AT = 3.9, DRIFT_END = 8.2;
     const drift = [stage, still];
     gsap.set(drift, { transformOrigin: `${art.left + art.width * DOOR.x}px ${art.top + art.height * DOOR.y}px`, willChange: 'transform' });
-    tl.fromTo(drift, { scale: 1.025, xPercent: -1 }, { scale: 1, xPercent: 0, duration: DRIFT_END - DRIFT_AT, ease: 'sine.inOut', clearProps: 'transform,willChange' }, DRIFT_AT);
+    tl.fromTo(drift, { scale: 1.025, xPercent: -1 }, { scale: 1, xPercent: 0, duration: DRIFT_END - DRIFT_AT, ease: 'sine.inOut' }, DRIFT_AT);
 
     const A0 = 185, A1 = 335, BEAM = 1.4;
     const angleOf = r => {
@@ -1590,30 +1593,45 @@
       tl.fromTo(c, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: .45, force3D: false }, BEAM_AT + t * BEAM);
     });
 
-    // ── the sunset wipe, PULL_END - .3 to + 1.2 ──
-    // .dusk-wipe brings the beach in from the left behind its brush edge while
-    // .dusk-still moves back by as much, so the painting holds still and only
-    // the edge (with the gold riding it) travels. The edge's middle is at
-    // screen x = p (W + E) - E / 2, p the eased progress.
-    const WIPE = 1.5, WIPE_AT = PULL_END - .3, WIPE_END = WIPE_AT + WIPE;
-    const inOut = y => y < .5 ? Math.sqrt(y / 2) : 1 - Math.sqrt((1 - y) / 2); // invert power2.inOut
-    const edgeAt = x => WIPE_AT + WIPE * inOut(Math.min(1, Math.max(0, (x + E / 2) / (W + E))));
+    // ── nightfall, PULL_END - .5 to + 1.8: a sunset, sped up ──
+    // The sun sinks behind the sea and its light goes, while the dusk comes
+    // down from the sky through a fade taller than the screen: the sky turns
+    // first, then the sea, then the sand. .dusk-wipe moves down while
+    // .dusk-still moves up by as much, so the painting holds still.
+    const SET_AT = PULL_END - .5, FALL_AT = PULL_END - .3, FALL_T = 2.1, FALL_END = FALL_AT + FALL_T;
     tl.addLabel('pullEnd', PULL_END)
-      .call(() => window.preloadKitchen?.(), null, WIPE_AT)
-      .fromTo(wipe, { x: -(W + E) }, { x: 0, duration: WIPE, ease: 'power2.inOut' }, WIPE_AT)
-      .fromTo(still, { x: W + E }, { x: 0, duration: WIPE, ease: 'power2.inOut' }, WIPE_AT);
-    // The light-written name fades as the edge reaches it: it lives on the sign now.
-    const wordIn = edgeAt(wordLeft) - .2, wordOut = edgeAt(wordLeft + wW);
-    tl.to(word, { opacity: 0, duration: Math.max(.3, wordOut - wordIn), ease: 'sine.in' }, wordIn);
-    // As the edge passes the door, the sign takes the name with a brief glow,
-    // and gives one swing, as if the sweep had brushed it, and settles.
-    const signAt = edgeAt(sr.left + sr.width / 2);
-    tl.fromTo(sign, { rotation: 7 }, { rotation: 0, duration: 1.2, ease: 'elastic.out(1, .4)' }, signAt)
+      .call(() => window.preloadKitchen?.(), null, FALL_AT)
+      .to('#stSun', { yPercent: 22, opacity: 0, duration: 1.6, ease: 'sine.in' }, SET_AT)
+      .to(['#stRays', '#stPath', '#stLampRef'], { opacity: 0, duration: 1.2, ease: 'sine.inOut' }, SET_AT + .2)
+      .fromTo(wipe, { y: -FALL }, { y: 0, duration: FALL_T, ease: 'sine.inOut' }, FALL_AT)
+      .fromTo(still, { y: FALL }, { y: 0, duration: FALL_T, ease: 'sine.inOut' }, FALL_AT)
+      // The light-written name fades with the daylight: it lives on the sign now.
+      .to(word, { opacity: 0, duration: .9, ease: 'sine.in' }, FALL_AT);
+    // When it is nearly dark, a light comes on by the shore, like a lamp lit
+    // at dusk: a flicker, then it grows into the light spilling round a door
+    // ajar, the door takes shape around it, and the sign gives one swing as
+    // it takes the name, with a brief glow, and settles.
+    const LAMP_AT = FALL_AT + 1.35, FORM_AT = LAMP_AT + .45, SIGN_AT = FORM_AT + .35;
+    const doorParts = ['#duskDoor .door-reflect', '#duskDoor .door-frame', '#doorLeaf'];
+    gsap.set([...doorParts, sign], { opacity: 0 });
+    gsap.set(light, { opacity: 0, scale: .12, transformOrigin: '50% 75%' });
+    tl.to(light, { keyframes: [{ opacity: .55, duration: .08 }, { opacity: .15, duration: .07 }, { opacity: .8, duration: .1 }, { opacity: .5, duration: .2 }], ease: 'none' }, LAMP_AT)
+      .to(light, { scale: 1, opacity: 1, duration: .9, ease: 'power2.out' }, FORM_AT)
+      .to(doorParts, { opacity: 1, duration: .7, ease: 'sine.out', stagger: .06 }, FORM_AT + .1)
+      .to(sign, { opacity: 1, duration: .4, ease: 'sine.out' }, SIGN_AT)
+      .fromTo(sign, { rotation: 7 }, { rotation: 0, duration: 1.2, ease: 'elastic.out(1, .4)', immediateRender: false }, SIGN_AT)
       .fromTo(sign, { filter: 'brightness(1) drop-shadow(0 0 0px rgba(245, 195, 94, 0))' },
-        { filter: 'brightness(1.3) drop-shadow(0 0 7px rgba(245, 195, 94, .95))', duration: .25, ease: 'sine.out', immediateRender: false }, signAt)
-      .to(sign, { filter: 'brightness(1) drop-shadow(0 0 0px rgba(245, 195, 94, 0))', duration: .9, ease: 'sine.inOut', clearProps: 'filter' }, signAt + .25);
-    tl.addLabel('wipeEnd', WIPE_END)
-      .call(toDoor, [true], 'wipeEnd');
+        { filter: 'brightness(1.3) drop-shadow(0 0 7px rgba(245, 195, 94, .95))', duration: .25, ease: 'sine.out', immediateRender: false }, SIGN_AT + .1)
+      .to(sign, { filter: 'brightness(1) drop-shadow(0 0 0px rgba(245, 195, 94, 0))', duration: .9, ease: 'sine.inOut', clearProps: 'filter' }, SIGN_AT + .35)
+      // hand the door back to the stylesheet (the sign keeps its swing)
+      .set(light, { clearProps: 'opacity,transform,transformOrigin' }, FORM_AT + 1)
+      .set([...doorParts, sign], { clearProps: 'opacity' }, FORM_AT + 1);
+    const DOOR_END = Math.max(FALL_END, FORM_AT + 1);
+    // The painting's transform is cleared only once the intro's styles have
+    // gone (toDoor), or they would send it back off screen.
+    tl.addLabel('duskEnd', DOOR_END)
+      .call(toDoor, [true], 'duskEnd')
+      .set(still, { clearProps: 'transform,willChange' }, Math.max(DOOR_END, DRIFT_END));
   }
 
   // A scroll, swipe or key during the intro is the same as Skip: it lands at
