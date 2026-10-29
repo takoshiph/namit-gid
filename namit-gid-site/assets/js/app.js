@@ -1141,6 +1141,12 @@
   }
   Object.assign(window, { panRange, doorPan, panTo });
 
+  // At the beach and settled: not in the intro, not going in or stepping
+  // out, and not in the tail of a gesture that just ended the intro (hold).
+  function settledAtDoor() {
+    return root.classList.contains('at-door') && !['hold', 'entering', 'leaving'].some(c => root.classList.contains(c));
+  }
+
   // ── Four things on the sand ─────────────────────────────────────────────
   // Each .beach-spot is a point of the painting (--x, --y) with its item, a
   // label above it and, but for the sand, a card. They move with the pan; the
@@ -1224,25 +1230,27 @@
     sp.classList.remove('open'); card.hidden = true; btn.setAttribute('aria-expanded', 'false');
     if (refocus) btn.focus({ preventScroll: true });
   }
-  // A tap opens an item; a press that moves 8 px or lasts 300 ms doesn't
-  // (one that moves is a walk along the beach). Keyboard clicks have no press.
+  // A tap opens an item; a press that moves 8 px doesn't (it is a walk along
+  // the beach), nor a touch or pen press that lasts 300 ms. Keyboard and
+  // assistive-tech clicks have no press.
   let press = null;
   document.addEventListener('pointerdown', e => {
     const btn = e.target.closest && e.target.closest('.beach-item');
-    press = btn && e.isPrimary ? { btn, id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp, ok: false } : null;
+    press = btn && e.isPrimary ? { btn, id: e.pointerId, type: e.pointerType, x: e.clientX, y: e.clientY, t: e.timeStamp, ok: false } : null;
     if (beachOpen && !beachOpen.contains(e.target)) closeCard();
   }, true);
   document.addEventListener('pointerup', e => {
-    if (press && e.pointerId === press.id) press.ok = Math.hypot(e.clientX - press.x, e.clientY - press.y) < TAP_SLOP && e.timeStamp - press.t < 300;
+    if (press && e.pointerId === press.id) press.ok = Math.hypot(e.clientX - press.x, e.clientY - press.y) < TAP_SLOP && (press.type === 'mouse' || e.timeStamp - press.t < 300);
   }, true);
   dusk.addEventListener('click', e => {
     const x = e.target.closest('.beach-card-x');
     if (x) return closeCard(true);
     const btn = e.target.closest('.beach-item');
     if (!btn) return;
-    const tapped = !e.detail || (press && press.btn === btn && press.ok);
+    // only a press recorded on this item can veto it: assistive tech clicks with no press at all
+    const tapped = !e.detail || !press || press.btn !== btn || press.ok;
     press = null;
-    if (!tapped || !root.classList.contains('at-door') || ['hold', 'entering', 'leaving'].some(c => root.classList.contains(c))) return;
+    if (!tapped || !settledAtDoor()) return;
     hintOff(false);
     if (btn.dataset.item === 'sand') { closeCard(); openReview(); return; }
     openCard(btn.closest('.beach-spot'));
@@ -1264,7 +1272,7 @@
   function flyVisit() {
     setTimeout(flyVisit, 9000 + Math.random() * 7000);
     if (!flyEl || !window.gsap || flyTl || calmNow() || lowEndDevice || document.hidden || beachOpen || !dusk.classList.contains('live')) return;
-    if (!root.classList.contains('at-door') || ['hold', 'entering', 'leaving'].some(c => root.classList.contains(c))) return;
+    if (!settledAtDoor()) return;
     const seen = spots.filter(sp => { const a = pan + sp.offsetLeft; return a > 20 && a < geo.W - 20; });
     if (!seen.length) return;
     const sp = seen[Math.floor(Math.random() * seen.length)], side = Math.random() < .5 ? -1 : 1;
@@ -1293,8 +1301,7 @@
   // The beach pans only once you are at the door, settled: not in the
   // intro, not while going in or stepping out, and not for the tail of a
   // gesture that just ended the intro (html.hold).
-  const panReady = () => root.classList.contains('at-door') && canPan() &&
-    !['hold', 'entering', 'leaving'].some(c => root.classList.contains(c));
+  const panReady = () => settledAtDoor() && canPan();
 
   // Touch and mouse: the painting follows the finger 1:1 from the first
   // pixel (past the ends, the rubber band) and glides on at the finger's

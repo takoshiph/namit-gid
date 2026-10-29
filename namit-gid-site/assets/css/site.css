@@ -566,10 +566,10 @@ html:not(.intro):not(.inside) .dusk.live .beach-item::before { animation: item-g
 html.calm .beach-fly, html.low-end .beach-fly { display: none; }
 
 /* © and Privacy · Terms: a faint line along the bottom edge, fixed to the
-   screen like the caption (each link's tap area is 44 px tall) */
+   screen like the caption (each link's tap area is at least 44 x 44 px) */
 .dusk-legal { position: absolute; left: 0; right: 0; bottom: max(6px, env(safe-area-inset-bottom)); width: max-content; margin: 0 auto; white-space: nowrap;
   font: 400 12px/16px var(--sans); color: rgba(227, 216, 196, .66); text-shadow: 0 1px 2px rgba(15, 18, 32, .8); }
-.dusk-legal a { display: inline-block; padding: 14px 4px; margin: -14px 0; color: inherit; text-underline-offset: 2px; }
+.dusk-legal a { display: inline-block; padding: 14px 12px; margin: -14px -8px; color: inherit; text-underline-offset: 2px; }
 
 /* the name and the pickup line, quiet, at the foot of the screen (clear of
    the kitchen paper's torn edge, which overlaps the last 24 px) */
