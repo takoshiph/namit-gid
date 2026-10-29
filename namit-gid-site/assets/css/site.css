@@ -516,7 +516,13 @@ html.calm .pan-hint, html:not(.at-door) .pan-hint { display: none; }
    and moves with the pan. On it: the item (a real button, at least 48 px),
    its label above it, and its card. .beach-item-art is the painted item, a
    box of --aw x --ah items (the art's own aspect) centred on the spot, and
-   may reach past the button; the button's ::before is its glow: a warm copy
+   may reach past the round button. The painting itself ignores the
+   pointer; the button's ::after, an invisible layer over the same box
+   clipped to the painted object's outline (--hit: its convex hull, padded
+   ~6% for a fingertip and the 3 px lift, in % of the art box), takes taps
+   for the button. So the bottle's neck, an octopus tentacle or either end
+   of the sand writing opens the item, and the art's transparent corners
+   don't. The button's ::before is its glow: a warm copy
    of the same art behind it, haloed by drop-shadows, so the glow follows the
    item's shape. Only its opacity moves. */
 .beach-spot { --s: clamp(48px, calc(var(--art-w, 1600px) * .03), 80px); left: calc(var(--x) * 100%); top: calc(var(--ly, var(--y)) * 100%); width: 0; height: 0;
@@ -526,9 +532,10 @@ html.intro .beach-spot { opacity: 0; visibility: hidden; }
 .beach-item { position: absolute; left: calc(var(--s) / -2); top: calc(var(--s) / -2); width: var(--s); height: var(--s); padding: 0; border: 0; border-radius: 50%;
   background: none; color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .beach-item:focus-visible { outline: 3px solid #FFD58A; outline-offset: 2px; }
-.beach-item::before, .beach-item-art { position: absolute; left: 50%; top: 50%; width: calc(var(--s) * var(--aw)); height: calc(var(--s) * var(--ah));
+.beach-item::before, .beach-item::after, .beach-item-art { position: absolute; left: 50%; top: 50%; width: calc(var(--s) * var(--aw)); height: calc(var(--s) * var(--ah));
   margin: calc(var(--s) * var(--ah) / -2) 0 0 calc(var(--s) * var(--aw) / -2); pointer-events: none; transition: translate 250ms var(--ease-out), scale 150ms var(--ease-out); }
 .beach-item-art { display: block; max-width: none; }
+.beach-item::after { content: ''; clip-path: var(--hit); pointer-events: auto; }
 .beach-item::before { content: ''; opacity: .55; transition: opacity 250ms, translate 250ms var(--ease-out), scale 150ms var(--ease-out);
   background: var(--art) center / 100% 100% no-repeat;
   filter: brightness(0) invert(88%) sepia(60%) saturate(300%) hue-rotate(-14deg) blur(1.5px) drop-shadow(0 0 4px rgba(255, 220, 160, .9)) drop-shadow(0 0 10px rgba(255, 206, 140, .55)); }
@@ -541,11 +548,12 @@ html.intro .beach-spot { opacity: 0; visibility: hidden; }
 html:not(.intro):not(.inside) .dusk.live .beach-item::before { animation: item-glow 3.6s var(--ease-loop) var(--gd, 0s) infinite; }
 .beach-spot[data-item="shell"] { --gd: -.9s; } .beach-spot[data-item="sand"] { --gd: -1.8s; } .beach-spot[data-item="octopus"] { --gd: -2.7s; }
 @keyframes item-glow { 50% { opacity: .9; } }
-/* the art: its file (for the glow) and its box, in --s (the art's own aspect) */
-.beach-spot[data-item="bottle"] { --art: url(../img/dusk/item-bottle.webp); --aw: 1.5; --ah: .641; }
-.beach-spot[data-item="shell"] { --art: url(../img/dusk/item-shell.webp); --aw: 1.2; --ah: .908; }
-.beach-spot[data-item="sand"] { --art: url(../img/dusk/item-sand.webp); --aw: 2.6; --ah: .934; }
-.beach-spot[data-item="octopus"] { --art: url(../img/dusk/item-octopus.webp); --aw: 1.5; --ah: 1.041; }
+/* the art: its file (for the glow), its tap outline (--hit) and its box
+   in --s (the art's own aspect) */
+.beach-spot[data-item="bottle"] { --art: url(../img/dusk/item-bottle.webp); --hit: polygon(-1.6% 44.9%, 18.6% 16.7%, 28.7% 8.2%, 56.1% -6%, 94% -3.7%, 96.1% 2.6%, 104.1% 60.8%, 91.3% 90%, 90.4% 90.5%, 35.7% 91.9%, 34.5% 91.4%, -1.6% 53%); --aw: 1.5; --ah: .641; }
+.beach-spot[data-item="shell"] { --art: url(../img/dusk/item-shell.webp); --hit: polygon(-5.6% 66.9%, 13.5% 9.8%, 51.4% -5.4%, 55.6% -5.4%, 68.6% 7.8%, 76.5% 17.9%, 104.8% 73.6%, 104.6% 79.3%, 98.9% 89.6%, 82% 97.7%, 5.7% 92.1%, -2.3% 77.8%); --aw: 1.2; --ah: .908; }
+.beach-spot[data-item="sand"] { --art: url(../img/dusk/item-sand.webp); --hit: polygon(-4.7% 96.3%, -0.2% 61.4%, 0.7% 55.5%, 1.6% 52%, 98.2% -4.4%, 99.2% -3.9%, 100% -2.1%, 105.2% 87.9%, 104.7% 89.8%, 103.3% 90.3%, -3.3% 103.3%, -4.6% 102.8%); --aw: 2.6; --ah: .934; }
+.beach-spot[data-item="octopus"] { --art: url(../img/dusk/item-octopus.webp); --hit: polygon(16.2% 16.2%, 21.2% 12.5%, 80.8% 3.7%, 92.1% 23.8%, 101.2% 49.9%, 95.5% 70.6%, 86.7% 88.4%, 62.9% 99.8%, 43.4% 99.3%, 14.8% 87.9%, 7% 76.3%, 1.5% 57.1%); --aw: 1.5; --ah: 1.041; }
 /* the label: short, glowing, above its item */
 .beach-tag { position: absolute; left: 50%; bottom: calc(100% + 2px); translate: -50% 0; white-space: nowrap; padding: 4px 9px 5px; border-radius: 999px;
   font: 600 13px/1 var(--sans); letter-spacing: .01em; color: #FBF3E2; background: rgba(24, 26, 44, .42);
