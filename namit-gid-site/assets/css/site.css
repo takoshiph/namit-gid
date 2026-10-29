@@ -71,7 +71,7 @@ html.intro .bar-name, html.at-door .bar-name { color: #FBF3E2; }
 html.intro .bar-order, html.at-door .bar-order { background: rgba(251, 243, 226, .16); box-shadow: inset 0 0 0 1.5px rgba(251, 243, 226, .55); }
 .bar-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); margin-right: auto; min-height: 44px; }
 .bar-name { font: 22px/1 var(--serif); }
-.bar-name em, .foot-name em { font-style: normal; color: var(--cliff); }
+.bar-name em { font-style: normal; color: var(--cliff); }
 .bar-words { display: flex; flex-direction: column; gap: 4px; }
 /* open or closed, in words, under the name; the lamp says the same */
 .bar-status { font: 600 12px/1 var(--sans); letter-spacing: .01em; color: var(--sea); min-height: 12px; opacity: 0; transition: opacity 400ms var(--ease-out); }
@@ -217,7 +217,7 @@ html.intro .bar, html.intro .preview-strip { opacity: 0; pointer-events: none; }
 .bar, .preview-strip { transition: opacity 600ms var(--ease-out); }
 
 /* during the intro only the beach waits under the stage; the rest of the page is hidden */
-html.intro main > section:not(.dusk), html.intro .foot { visibility: hidden; }
+html.intro main > section:not(.dusk) { visibility: hidden; }
 
 .meta { font-size: 15px; color: var(--ink-2); }
 html.intro, html.intro body { overflow: hidden; } /* on html too: its overflow-x: clip stops body passing overflow to the page */
@@ -225,10 +225,9 @@ html.intro, html.intro body { overflow: hidden; } /* on html too: its overflow-x
 /* ── two places ── */
 /* After the intro you are in one of two places: the beach (html.at-door) or
    the kitchen (html.inside). Each fills the screen and the page itself never
-   scrolls, so nothing slides you from one to the other. The footer's things
-   are moving to the beach; meanwhile it is not shown. */
+   scrolls, so nothing slides you from one to the other. */
 html.at-door, html.at-door body, html.inside, html.inside body { overflow: hidden; }
-html.at-door .menu, html.at-door .foot, html.inside .dusk, html.inside .foot { display: none; }
+html.at-door .menu, html.inside .dusk { display: none; }
 /* The kitchen is a room under the bar, sized to fit one screen: the wall
    takes the height the greeting leaves (--above: the greeting, the gaps and
    the room's padding; --strip: the preview strip, when it shows). If a short
@@ -412,16 +411,13 @@ html.inside:has(#traybar:not([hidden])) .menu { padding-bottom: 96px; }
    door-light.svg   viewBox -60 -20 220 330 (origin = O): at (-60,-20), size 220 x 330. Interior fills 0..100 x 0..200 (behind Leny and the leaf);
                     halo around; pool on the sand y 200..285.
    door-reflect.svg viewBox -14 0 128 90 (x origin = O, y 0 = door base): at (-14,200), size 128 x 90. Its top edge is the door base.
-   door-closed-night.svg  viewBox -30 -14 160 304 (origin = O): at (-30,-14), size 160 x 304. Frame + leaf in one, shut; window at
-                    (36..64, 32..64); light strip under the door y 195..200; sand pool below. Door base = (50,200).
    EXCEPTIONS (their own box, not the opening origin):
    sign.svg         viewBox 0 0 80 38, its OWN top-left, size 80 x 38. Place its top-left at opening (10,-8) so its hang point (40,0) lands
                     on (50,-8), a nail on the lintel. Hangs from the FRAME lintel, in front of the leaf, and does NOT move with the leaf; two
                     cords run to the board. Sway by rotating about 50% 0. Board sits at opening y 2..28, above Leny's head.
    leny-door.webp   597 x 1500 px, NOT on the opening origin: size 67 x 168 (aspect .398), feet bottom-centre at opening (50,198), so its
                     top-left is at (16.5,30). Clip to the opening box so frame/leaf overlap her.
-   Layer order, back to front: reflect, light, Leny (clipped), frame, leaf, sign.
-   beach-night-2400.webp  same 2400 x 1018 frame as beach-2400.webp; island/boat/lamp overlay with the footer CSS. */
+   Layer order, back to front: reflect, light, Leny (clipped), frame, leaf, sign. */
 
 /* ── the beach at dusk: the first screen, with the door on the sand ── */
 /* placeDusk() (app.js) sizes .dusk-art for the screen and sets, in px:
@@ -470,13 +466,12 @@ html.at-door .dusk.pans { touch-action: pan-y pinch-zoom; -webkit-user-select: n
    finer, laid exactly over the beach while the camera pushes in */
 .dusk-crop { left: 33.5%; top: 52%; width: 15%; height: 42%; }
 .dusk-crop[hidden] { display: none; }
-/* the island, the lamp and the bangka sit where the footer puts them */
+/* the island, the lamp and the bangka, placed on the painting */
 .dusk-isle { left: 50.5%; width: 19%; top: 41.4%; filter: brightness(.55) saturate(.75) sepia(.15) hue-rotate(-12deg); }
 .dusk-lamp { left: calc(50.5% + 19% * .78); top: 42.1%; width: 2.2%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; opacity: .45; scale: .8;
   background: radial-gradient(circle, #fff6d8 0, rgba(255, 210, 140, .8) 30%, rgba(255, 200, 120, 0) 70%); }
 .dusk-boat { left: 63%; width: 22%; top: 69.6%; clip-path: inset(0 0 22% 0); filter: brightness(.6) saturate(.7) sepia(.2) hue-rotate(-12deg); }
-/* the bottom 30% of the painting fades into the night below it (as the footer
-   does), under the door so its light and reflection stay bright */
+/* the bottom 30% of the painting fades into the night below it, under the door so its light and reflection stay bright */
 .dusk-fade { left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(transparent, #1B1F32); }
 
 /* The door: the opening is 100 x 200 units (see the anchors above), so x in
@@ -515,6 +510,67 @@ html.calm.at-door .door-hint { opacity: 1; }
   background: linear-gradient(to right, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0)); transform-origin: 0 50%; transform: scaleX(var(--trail)); }
 html.calm .pan-hint, html:not(.at-door) .pan-hint { display: none; }
 
+/* ── four things on the sand to tap ── */
+/* Each .beach-spot is a point of the painting (--x, --y, fractions; --ly is
+   the y placeItems() lifts it to, clear of the caption, on shorter screens)
+   and moves with the pan. On it: the item (a real button, at least 48 px),
+   its label above it, and its card. .beach-item-art is the placeholder
+   shape, to be swapped for painted art; the button's ::before is its glow. */
+.beach-spot { --s: clamp(48px, calc(var(--art-w, 1600px) * .03), 80px); left: calc(var(--x) * 100%); top: calc(var(--ly, var(--y)) * 100%); width: 0; height: 0;
+  transition: opacity 600ms var(--ease-out); }
+html.intro .beach-spot { opacity: 0; visibility: hidden; }
+.beach-spot.open { z-index: 4; }
+.beach-item { position: absolute; left: calc(var(--s) / -2); top: calc(var(--s) / -2); width: var(--s); height: var(--s); padding: 0; border: 0; border-radius: 50%;
+  background: none; color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.beach-item:focus-visible { outline: 3px solid #FFD58A; outline-offset: 2px; }
+.beach-item::before { content: ''; position: absolute; inset: -30%; border-radius: 50%; pointer-events: none; opacity: .55; transition: opacity 250ms;
+  background: radial-gradient(closest-side, rgba(255, 228, 168, .6), rgba(255, 214, 140, .18) 60%, rgba(255, 214, 140, 0)); }
+.beach-item-art { position: absolute; inset: 22%; transition: translate 250ms var(--ease-out), scale 150ms var(--ease-out); }
+/* hover, focus or a press: a brighter glow and a tiny lift */
+.beach-item:hover::before, .beach-item:focus-visible::before, .beach-item:active::before, .beach-spot.open .beach-item::before, .beach-spot.visited .beach-item::before { opacity: 1; animation: none; }
+.beach-item:hover .beach-item-art, .beach-item:focus-visible .beach-item-art, .beach-spot.open .beach-item-art { translate: 0 -3px; }
+.beach-item:active .beach-item-art { translate: 0 -2px; scale: .95; }
+/* at rest each one glows softly, breathing, out of step with the others */
+html:not(.intro):not(.inside) .dusk.live .beach-item::before { animation: item-glow 3.6s var(--ease-loop) var(--gd, 0s) infinite; }
+.beach-spot[data-item="shell"] { --gd: -.9s; } .beach-spot[data-item="sand"] { --gd: -1.8s; } .beach-spot[data-item="octopus"] { --gd: -2.7s; }
+@keyframes item-glow { 50% { opacity: .9; } }
+/* the placeholders: a half-buried bottle, a conch, words in the sand with a
+   stick, an octopus peeking out of a pool */
+.beach-spot[data-item="bottle"] .beach-item-art { inset: 34% 14% 30%; border-radius: 45% 30% 30% 45% / 50%; rotate: -24deg;
+  background: linear-gradient(100deg, #d9f3e6, #7fb9a4 55%, #4f8a78); box-shadow: 0 0 10px rgba(205, 255, 232, .55); }
+.beach-spot[data-item="shell"] .beach-item-art { inset: 26%; border-radius: 55% 55% 55% 12%; rotate: 40deg;
+  background: radial-gradient(circle at 38% 38%, #fff6ec, #f4c3aa 60%, #d68f78); box-shadow: 0 0 10px rgba(255, 220, 200, .55); }
+.beach-spot[data-item="sand"] .beach-item-art { inset: 40% 8% 30%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 242, 214, .95), rgba(255, 232, 190, .25)); box-shadow: 0 0 12px rgba(255, 236, 200, .45); }
+.beach-spot[data-item="sand"] .beach-item-art::after { content: ''; position: absolute; right: -2%; bottom: 30%; width: 3px; height: 190%; border-radius: 2px; rotate: 10deg; background: #d9b98a; }
+.beach-spot[data-item="octopus"] .beach-item-art { inset: 30% 24% 26%; border-radius: 50% 50% 38% 38% / 62% 62% 38% 38%;
+  background: radial-gradient(circle at 40% 35%, #ffcdb5, #e47c62 70%, #b9533f); box-shadow: 0 0 10px rgba(255, 190, 160, .55); }
+/* the label: short, glowing, above its item */
+.beach-tag { position: absolute; left: 50%; bottom: calc(100% + 2px); translate: -50% 0; white-space: nowrap; padding: 4px 9px 5px; border-radius: 999px;
+  font: 600 13px/1 var(--sans); letter-spacing: .01em; color: #FBF3E2; background: rgba(24, 26, 44, .42);
+  text-shadow: 0 0 8px rgba(255, 214, 150, .75), 0 1px 2px rgba(15, 18, 32, .85); box-shadow: 0 0 14px rgba(255, 214, 150, .2); }
+/* the card: a small paper note, in the kitchen card's style, placed by app.js */
+.beach-card { position: absolute; left: var(--cx, 0px); top: var(--cy, 0px); width: min(270px, calc(100vw - 32px)); display: grid; gap: 8px; padding: 16px 44px 16px 18px;
+  background: var(--paper-grain), linear-gradient(#FFFBF1, #F6EDDA); color: var(--ink); border-radius: 3px; rotate: -1deg; cursor: auto; text-align: left;
+  font: 400 15px/1.45 var(--sans); box-shadow: 0 2px 0 rgba(90, 58, 32, .15), 0 16px 28px -14px rgba(5, 8, 20, .7); animation: card-in 220ms var(--ease-out); }
+.beach-card[hidden] { display: none; }
+.beach-card:focus { outline: none; }
+.beach-card a { color: var(--cliff); text-underline-offset: 3px; }
+.beach-letter { font: 400 17px/1.4 var(--serif); }
+.beach-sig { display: block; margin-top: 6px; font: 400 18px/1 var(--serif); color: var(--cliff); rotate: -2deg; transform-origin: 0 50%; }
+.beach-card-x { position: absolute; right: 0; top: 0; background: none; color: var(--ink-2); font-size: 22px; }
+@keyframes card-in { from { opacity: 0; transform: translateY(6px) scale(.97); } }
+/* the firefly that visits them (app.js moves it) */
+.beach-fly { left: 0; top: 0; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; opacity: 0; pointer-events: none;
+  background: radial-gradient(circle, #fff8c8 0, rgba(255, 228, 120, .9) 40%, rgba(255, 220, 110, 0) 70%); box-shadow: 0 0 7px 2px rgba(255, 226, 130, .5); }
+html.calm .beach-fly, html.low-end .beach-fly { display: none; }
+
+/* © and Privacy · Terms: a faint line along the bottom edge, fixed to the
+   screen like the caption (each link's tap area is 44 px tall) */
+.dusk-legal { position: absolute; left: 0; right: 0; bottom: max(6px, env(safe-area-inset-bottom)); width: max-content; margin: 0 auto; white-space: nowrap;
+  font: 400 12px/16px var(--sans); color: rgba(227, 216, 196, .66); text-shadow: 0 1px 2px rgba(15, 18, 32, .8); }
+.dusk-legal a { display: inline-block; padding: 14px 4px; margin: -14px 0; color: inherit; text-underline-offset: 2px; }
+
 /* the name and the pickup line, quiet, at the foot of the screen (clear of
    the kitchen paper's torn edge, which overlaps the last 24 px) */
 .dusk-caption { position: absolute; left: var(--gutter); right: var(--gutter); bottom: calc(24px + max(14px, env(safe-area-inset-bottom)));
@@ -526,6 +582,10 @@ html.calm .pan-hint, html:not(.at-door) .pan-hint { display: none; }
 /* on wide screens it sits bottom right, away from the door and its hint */
 .dusk:not(.band) .dusk-caption { left: auto; max-width: max(50vw, 20rem); justify-items: end; text-align: right; }
 @media (min-width: 900px) { .dusk h1 { font-size: 22px; } }
+/* a short screen has no sand clear of the caption on the right, so the
+   caption goes up under the bar, over the sky (placeItems() in app.js) */
+.dusk.low .dusk-caption { bottom: auto; top: calc(var(--bar) + 14px); text-shadow: 0 1px 3px rgba(15, 18, 32, .9), 0 0 16px rgba(15, 18, 32, .6); }
+html:has(#previewStrip:not([hidden])) .dusk.low .dusk-caption { top: calc(var(--bar) + 44px); }
 
 /* idle life, only while the beach is on screen after the intro (a hidden
    beach, inside, counts as off screen): the sign sways, the light breathes,
@@ -555,31 +615,7 @@ html.entering .door-light, html.entering .door-hint, html.leaving .door-light, h
 /* the tray waits inside: no tray bar on the beach */
 html.at-door .traybar { display: none !important; }
 
-/* ── footer: the beach at dusk ──────────────────────────── */
-.foot { position: relative; background: #1B1F32; color: var(--sand); padding: 0 0 calc(40px + env(safe-area-inset-bottom)); }
-/* the dusk beach, with Byaringan just off the tip of the headland */
-.foot-scene { position: relative; aspect-ratio: 1584 / 672; overflow: hidden; }
-.foot-scene::after { content: ''; position: absolute; inset: auto 0 0; height: 30%; background: linear-gradient(transparent, #1B1F32); }
-.foot-beach { width: 100%; height: 100%; object-fit: cover; }
-.foot-isle { position: absolute; left: 50.5%; width: 19%; top: 41.4%; filter: brightness(.55) saturate(.75) sepia(.15) hue-rotate(-12deg); }
-/* the bangka pulled up on the sand, in the same dusk light as the island */
-.foot-boat { position: absolute; left: 63%; width: 22%; top: 69.6%; clip-path: inset(0 0 22% 0); filter: brightness(.6) saturate(.7) sepia(.2) hue-rotate(-12deg); }
-.foot-lamp { position: absolute; left: calc(50.5% + 19% * .78); top: 42.1%; width: 2.2%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
-  background: radial-gradient(circle, #fff6d8 0, rgba(255, 210, 140, .8) 30%, rgba(255, 200, 120, 0) 70%); animation: lamp-breathe 5s var(--ease-loop) infinite; }
-.foot-inner { padding-left: var(--gutter); padding-right: var(--gutter); }
-.foot-inner { max-width: 1000px; margin: 0 auto; padding-top: 8px; display: grid; gap: 14px; }
-.foot-name { font: 30px/1 var(--serif); }
-.foot-name em { color: var(--sun); }
-.foot-line { color: #d9ccb4; }
-.foot-cols { display: grid; gap: 18px; margin-top: 10px; }
-.foot h3 { font: 600 14px/1.3 var(--sans); color: var(--sun); margin-bottom: 4px; }
-.foot p { color: #e3d8c4; font-size: 15px; }
-.foot a { color: var(--sand); }
 .todo { opacity: .55; }
-.foot-legal { margin-top: 16px; font-size: 14px !important; opacity: .75; }
-/* Leny's other kitchen */
-.foot-takoshi { margin-top: 14px; color: #d9ccb4; }
-.foot-takoshi a { color: var(--sun); text-underline-offset: 3px; }
 
 /* ── order sheet ─────────────────────────────────────────── */
 .sheet { border: 0; padding: 0; width: 100%; max-width: 560px; max-height: 92vh; margin: auto auto 0; border-radius: 12px 12px 0 0; background: var(--sand); color: var(--ink); }
@@ -634,7 +670,6 @@ html.at-door .traybar { display: none !important; }
   .traybar { display: none !important; }
   /* two rows of boards, each row hung from its own rope */
           .notes { grid-template-columns: repeat(3, 1fr); }
-  .foot-cols { grid-template-columns: repeat(3, 1fr); }
   .sheet { margin: auto; border-radius: 12px; }
 }
 
@@ -671,23 +706,10 @@ h2 { letter-spacing: 0; line-height: 1.05; }
 @keyframes steam-puff { 0% { stroke-dashoffset: 1; opacity: 0; transform: translateY(8px) skewX(0); } 30% { opacity: .8; } 100% { stroke-dashoffset: 0; opacity: 0; transform: translateY(-14px) skewX(3deg); } }
 
 
-/* the night bookend: the same beach and DOOR {x .41, y .82, w .05}, now shut.
-   door-closed-night.svg: top-left at opening (-30,-14), 160u x 304u, u = .05% of the scene width
-   (left 41% - 80u, top 82% of the height - 214u). The glow is the light spilling onto the sand and breathes. */
-.foot-door { position: absolute; left: 37%; top: calc(82% - 25.22%); width: 8%; height: auto; }
-.foot-glow { position: absolute; left: 37.1%; top: 82%; width: 7.8%; aspect-ratio: 156 / 76; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(closest-side, rgba(255, 213, 138, .55), rgba(255, 183, 102, .2) 55%, rgba(255, 176, 96, 0)); }
-.foot.live .foot-glow { animation: door-breathe 2.6s var(--ease-loop) infinite; }
-.foot.live .foot-glow.dim { animation: foot-dim 1.2s ease-in-out, door-breathe 2.6s var(--ease-loop) 1.2s infinite; }
-@keyframes foot-dim { 50% { opacity: .55; } }
-
-/* the dusk footer: a real lighthouse rhythm, and fireflies by the palms */
-.foot-lamp { animation: lamp-flash 6s linear infinite !important; }
 @keyframes lamp-flash { 0%, 86%, 100% { opacity: .45; scale: .8; } 88% { opacity: 1; scale: 1.3; } 90% { opacity: .5; scale: .85; } 93% { opacity: 1; scale: 1.25; } 95% { opacity: .5; scale: .85; } }
 .fireflies { position: absolute; left: 0; top: 30%; width: 34%; height: 55%; pointer-events: none; }
 .fireflies i { position: absolute; width: 4px; height: 4px; border-radius: 50%; opacity: 0;
   background: radial-gradient(circle, #fff8c8 0, rgba(255, 228, 120, .9) 40%, rgba(255, 220, 110, 0) 70%); box-shadow: 0 0 6px 2px rgba(255, 226, 130, .45); }
-:where(.foot.live) .fireflies i { animation: firefly 8s var(--ease-loop) infinite; }
 .fireflies i:nth-child(1) { left: 12%; top: 30%; animation-delay: 0s; animation-duration: 7s; }
 .fireflies i:nth-child(2) { left: 30%; top: 60%; animation-delay: 1.4s; }
 .fireflies i:nth-child(3) { left: 48%; top: 22%; animation-delay: 2.6s; animation-duration: 9s; }
@@ -820,14 +842,6 @@ html.calm .k-layer { transition: none; }
 /* the first pot's lid lifts once to show it can be opened; on hover too */
 .k-layer.peek { opacity: 1; transform: translateY(-3px); transition: opacity 300ms, transform 500ms var(--ease-hang); }
 @media (hover: hover) { .k-spot:hover::after { opacity: .5; } }
-/* dusk: the paper melts into the evening sky, and the lighthouse comes on */
-.foot { background: #1B1F32; }
-.foot-scene { -webkit-mask-image: linear-gradient(transparent 0, #000 22%); mask-image: linear-gradient(transparent 0, #000 22%); }
-.foot::before { content: ''; display: block; height: 90px; margin-bottom: -90px; position: relative; z-index: 0;
-  background: linear-gradient(#F4ECDD, #F2C7A5 45%, #A68AA6); }
-.foot-scene { position: relative; z-index: 1; }
-.foot-lamp { opacity: 0; transition: opacity 1.2s ease; }
-.foot.live .foot-lamp { opacity: 1; }
 .sheet .stamp { color: #A3462A; }
 
 /* signed by Leny */

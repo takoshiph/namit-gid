@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=92">
+<link rel="stylesheet" href="assets/css/site.css?v=93">
 <script>
   /* Decide the intro before first paint so nothing flashes. The intro plays
      once per device (localStorage 'ng-seen-intro'); after that, and with
@@ -173,6 +173,25 @@
       <img class="dusk-boat" src="assets/img/bangka-painted.webp" width="1000" height="356" alt="" aria-hidden="true">
       <i class="dusk-fade" aria-hidden="true"></i>
       <div class="fireflies" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <!-- Four things on the sand to tap, in fractions of the painting (--x, --y:
+           each item's centre; placeItems() in app.js may lift one clear of the
+           caption). The glowing shape in .beach-item-art is a placeholder for
+           painted art. The sand opens the review form; the others, a card. -->
+      <div class="beach-spot" data-item="bottle" style="--x:.16;--y:.84">
+        <button class="beach-item" type="button" data-item="bottle" aria-expanded="false" aria-controls="card-bottle"><i class="beach-item-art" aria-hidden="true"></i><span class="beach-tag" id="tag-bottle">A note from Leny</span></button>
+        <div class="beach-card" data-item="bottle" id="card-bottle" role="group" aria-labelledby="tag-bottle" tabindex="-1" hidden>
+          <button class="x beach-card-x" type="button" aria-label="Close">×</button>
+          <p class="beach-letter"><em>Namit gid</em> means “Ang sarap!” (really delicious) and I cook so every home I feed says it too. <span class="beach-sig">~Leny</span></p>
+        </div>
+      </div>
+      <div class="beach-spot" data-item="shell" style="--x:.29;--y:.76">
+        <button class="beach-item" type="button" data-item="shell" aria-expanded="false" aria-controls="card-shell"><i class="beach-item-art" aria-hidden="true"></i><span class="beach-tag" id="tag-shell">Say hi</span></button>
+        <div class="beach-card" data-item="shell" id="card-shell" role="group" aria-labelledby="tag-shell" tabindex="-1" hidden>
+          <button class="x beach-card-x" type="button" aria-label="Close">×</button>
+          <p><a href="mailto:orders@takoshi.ca">orders@takoshi.ca</a></p>
+          <p class="todo">Facebook · Messenger · Instagram</p>
+        </div>
+      </div>
       <!-- The door: an opening of 100 x 200 units (1 unit = door width / 100),
            every layer placed in those units (see the anchors further down
            site.css). Back to front: reflection, light, Leny, frame, leaf, sign. -->
@@ -185,6 +204,18 @@
         <img class="door-sign" id="doorSign" src="assets/img/dusk/sign.svg?v=2" alt="" aria-hidden="true">
         <button class="door" id="door" type="button" aria-label="Come inside"></button>
       </div>
+      <div class="beach-spot" data-item="sand" style="--x:.555;--y:.89">
+        <button class="beach-item" type="button" data-item="sand" aria-haspopup="dialog"><i class="beach-item-art" aria-hidden="true"></i><span class="beach-tag" id="tag-sand">Leave a review</span></button>
+      </div>
+      <div class="beach-spot" data-item="octopus" style="--x:.91;--y:.80">
+        <button class="beach-item" type="button" data-item="octopus" aria-expanded="false" aria-controls="card-octopus"><i class="beach-item-art" aria-hidden="true"></i><span class="beach-tag" id="tag-octopus">Takoshi</span></button>
+        <div class="beach-card" data-item="octopus" id="card-octopus" role="group" aria-labelledby="tag-octopus" tabindex="-1" hidden>
+          <button class="x beach-card-x" type="button" aria-label="Close">×</button>
+          <p>Craving takoyaki? <a href="https://takoshi.ca">I make that too, at Takoshi →</a></p>
+        </div>
+      </div>
+      <!-- now and then a firefly drifts over to one of them (app.js) -->
+      <i class="beach-fly" id="beachFly" aria-hidden="true"></i>
     </div>
     <p class="door-hint" id="doorHint" aria-hidden="true">Tap the door</p>
     <div class="dusk-caption">
@@ -192,6 +223,7 @@
       <p class="meta">Pickup near Fairview Mall · Thursday to Sunday</p>
       <p class="next-pickup" id="nextPickup" hidden></p>
     </div>
+    <p class="dusk-legal">© 2026 Namit Gid · <a href="https://takoshi.ca/privacy.html">Privacy</a> · <a href="https://takoshi.ca/terms.html">Terms</a></p>
     </div>
     </div>
     <!-- the gesture hint: a fingertip that shows the beach pans (app.js) -->
@@ -274,28 +306,6 @@
 
 </main>
 
-<footer class="foot" id="foot">
-  <div class="foot-scene" aria-hidden="true">
-    <img class="foot-beach" src="assets/img/dusk/beach-night-2400.webp" alt="" width="2400" height="1018" loading="lazy">
-    <img class="foot-isle" src="assets/img/byaringan-painted-840.webp" alt="" width="840" height="288" loading="lazy">
-    <img class="foot-boat" src="assets/img/bangka-painted.webp" alt="" width="1000" height="356" loading="lazy">
-    <i class="foot-lamp"></i>
-    <i class="foot-glow"></i>
-    <img class="foot-door" src="assets/img/dusk/door-closed-night.svg" alt="" width="160" height="304" loading="lazy">
-    <div class="fireflies"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-  </div>
-  <div class="foot-inner">
-    <p class="foot-name">Namit <em>gid</em></p>
-    <p class="foot-line"><em>Namit gid</em> means “Ang sarap!” (really delicious) and I cook so every home I feed says it too.</p>
-    <div class="foot-cols">
-      <div><h3>Say hi</h3><p><a href="mailto:orders@takoshi.ca">orders@takoshi.ca</a></p><p class="todo">Facebook · Messenger · Instagram</p></div>
-      <div><h3>Tried my cooking?</h3><p><a href="?review=1" id="footReview">Leave a review</a></p></div>
-    </div>
-    <p class="foot-takoshi">Craving takoyaki? <a href="https://takoshi.ca">I make that too, at Takoshi →</a></p>
-    <p class="foot-legal">© 2026 Namit Gid · <a href="https://takoshi.ca/privacy.html">Privacy</a> · <a href="https://takoshi.ca/terms.html">Terms</a></p>
-  </div>
-</footer>
-
 <div class="traybar" id="traybar" hidden>
   <button class="bilao" id="bilao" type="button" aria-label="Open your tray">
     <img class="bilao-art" src="assets/img/bilao.webp" width="168" height="168" alt="">
@@ -323,6 +333,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=80" defer></script>
+<script src="assets/js/app.js?v=81" defer></script>
 </body>
 </html>

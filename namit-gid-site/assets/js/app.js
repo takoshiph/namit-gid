@@ -614,7 +614,6 @@
     const q = new URLSearchParams(location.search);
     if (q.get('order') && q.get('t')) setTimeout(() => loadOrderPage(q.get('order'), q.get('t')), 300);
     else if (q.get('review')) setTimeout(() => openReview(), 300);
-    $('footReview').addEventListener('click', e => { e.preventDefault(); openReview(); });
     loadReviews();
   }
 
@@ -964,8 +963,8 @@
       break;
     }
   }
-  // Footer socials, only those that exist.
-  { const c = S.contacts || {}, todo = document.querySelector('.foot .todo');
+  // Socials on the shell's card, only those that exist.
+  { const c = S.contacts || {}, todo = document.querySelector('.beach-card .todo');
     const links = [['WhatsApp', c.whatsapp && 'https://wa.me/' + c.whatsapp], ['Facebook', c.facebook], ['Messenger', c.messenger], ['Instagram', c.instagram]].filter(x => x[1]);
     if (todo) { if (links.length) todo.replaceChildren(...links.flatMap(([t, u], i) => [i ? ' · ' : '', make('a', { href: u, target: '_blank', rel: 'noopener', text: t })])); else todo.remove(); } }
 
@@ -987,8 +986,7 @@
 
   // ── Little life, after the intro ───────────────────────────────────────
   // Steam curls off a warm dish every few seconds while it's on screen;
-  // notes flutter as they come into view; the
-  // footer's lighthouse and fireflies only run while the footer is visible.
+  // notes flutter as they come into view.
   const lowEndDevice = (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
   if (!calm && 'IntersectionObserver' in window) {
     const warm = new Set();
@@ -1007,12 +1005,6 @@
       e.target.classList.add('flutter'); setTimeout(() => e.target.classList.remove('flutter'), 700); noteIO.unobserve(e.target);
     }), { threshold: .6 });
     document.querySelectorAll('.note').forEach(n => noteIO.observe(n));
-    if (!lowEndDevice) {
-      new IntersectionObserver(es => $('foot').classList.toggle('live', es[0].isIntersecting), { threshold: .25 }).observe($('foot'));
-      // the first time the footer is half in view, the light under the door dims once, as if someone walked past inside
-      const dimIO = new IntersectionObserver(es => { if (!es[0].isIntersecting) return; $('foot').querySelector('.foot-glow').classList.add('dim'); dimIO.disconnect(); }, { threshold: .5 });
-      dimIO.observe($('foot'));
-    }
   }
 
   // ── Scroll entrances ────────────────────────────────────────────────────
@@ -1060,7 +1052,7 @@
     // through a resize or a turn of the phone, as far as the new range
     // allows. The first placing is on the door view.
     const mid = pan === null || !geo.w ? null : (geo.W / 2 - pan) / geo.w;
-    geo = { x, w, W };
+    geo = { x, w, W, y, h };
     dusk.classList.toggle('band', band);
     const st = dusk.style;
     st.setProperty('--art-x0', px(x)); st.setProperty('--art-y', px(y));
@@ -1069,8 +1061,9 @@
     st.setProperty('--door-w', px(DOOR.w * w));
     const { min, max } = panRange(), on = max - min >= PAN_MIN;
     dusk.classList.toggle('pans', on);
-    stopPan();
+    stopPan(); closeCard();
     writePan(mid === null || !on ? x : clamp(W / 2 - mid * w, min, max));
+    placeItems();
   }
 
   // ── Walking along the beach ─────────────────────────────────────────────
@@ -1080,7 +1073,7 @@
   // moves by translate, so a pan is a transform), and --art-x and --door-x
   // include it. Less than PAN_MIN to see and there is no pan at all.
   const PAN_MIN = 24;
-  let pan = null, geo = { x: 0, w: 0, W: 0 };
+  let pan = null, geo = { x: 0, w: 0, W: 0, y: 0, h: 0 };
   const panRange = () => ({ min: Math.min(0, geo.W - geo.w), max: 0 });
   const doorPan = () => geo.x;
   const canPan = () => { const r = panRange(); return r.max - r.min >= PAN_MIN; };
@@ -1109,11 +1102,13 @@
   // The painting in motion after a release: it glides on and slows down
   // (friction), or, past an end, a spring brings it back without a bounce.
   // One loop on GSAP's ticker; any new touch, wheel or key stops it.
-  let glide = null, panEase = null;
+  let glide = null, panEase = null, panGoal = null;
+  let aim = null, wheelRaw = null, wheelIdle = 0;
   const FRICTION = 325, SPRING = .014; // ms; per ms
   function stopPan() {
     if (glide) { gsap.ticker.remove(glide); glide = null; }
     if (panEase) { panEase.kill(); panEase = null; }
+    clearTimeout(wheelIdle); wheelIdle = 0; wheelRaw = null;
     dusk.classList.remove('panning');
   }
   function momentum(v) {
@@ -1141,10 +1136,150 @@
     const { min, max } = panRange(), to = clamp(x, min, max);
     if (instant || calmNow() || !window.gsap) return writePan(to);
     const s = { p: pan };
-    dusk.classList.add('panning');
+    dusk.classList.add('panning'); panGoal = to;
     panEase = gsap.to(s, { p: to, duration: .55, ease: 'power3.out', onUpdate: () => writePan(s.p), onComplete: () => { panEase = null; dusk.classList.remove('panning'); } });
   }
   Object.assign(window, { panRange, doorPan, panTo });
+
+  // ── Four things on the sand ─────────────────────────────────────────────
+  // Each .beach-spot is a point of the painting (--x, --y) with its item, a
+  // label above it and, but for the sand, a card. They move with the pan; the
+  // caption and the © line don't, so an item that would pass under either at
+  // some pan is lifted (--ly) just clear of them, never above ITEM_FLOOR (the
+  // wet sand by the water). On a screen too short for that, the caption goes
+  // up under the bar instead (.dusk.low). Measured in the beach's own layout
+  // (offsets, not screen rects), so it holds during the intro's moves too.
+  const spots = [...document.querySelectorAll('.beach-spot')];
+  const capEl = document.querySelector('.dusk-caption'), legalEl = document.querySelector('.dusk-legal');
+  const ITEM_FLOOR = .73, CLEAR = 8;
+  const partsOf = sp => ({ btn: sp.querySelector('.beach-item'), tag: sp.querySelector('.beach-tag'), card: sp.querySelector('.beach-card') });
+  function placeItems() {
+    if (!geo.h || !spots.length) return;
+    const { min, max } = panRange(), [p0, p1] = canPan() ? [min, max] : [pan, pan];
+    const box = el => ({ l: el.offsetLeft, t: el.offsetTop, r: el.offsetLeft + el.offsetWidth, b: el.offsetTop + el.offsetHeight });
+    const lift = () => {
+      const obst = [box(capEl), box(legalEl)];
+      let low = false;
+      spots.forEach(sp => {
+        const { btn, tag } = partsOf(sp), fy0 = parseFloat(sp.style.getPropertyValue('--y'));
+        const half = Math.max(btn.offsetWidth, tag.offsetWidth) / 2, up = btn.offsetHeight / 2 + 2 + tag.offsetHeight, down = btn.offsetHeight / 2;
+        const l = p0 + sp.offsetLeft - half, r = p1 + sp.offsetLeft + half;
+        let fy = fy0;
+        for (let k = 0; k < 2; k++) obst.forEach(o => {
+          const ay = geo.y + fy * geo.h;
+          if (r > o.l - CLEAR && l < o.r + CLEAR && ay + down > o.t - CLEAR && ay - up < o.b + CLEAR) fy = (o.t - CLEAR - down - geo.y) / geo.h;
+        });
+        if (fy < ITEM_FLOOR) low = true;
+        if (fy < fy0) sp.style.setProperty('--ly', fy.toFixed(4)); else sp.style.removeProperty('--ly');
+      });
+      return low;
+    };
+    dusk.classList.remove('low');
+    if (lift()) { dusk.classList.add('low'); lift(); }
+  }
+  // The pan that shows a spot's item and label whole (the one it is at, or
+  // heading to, if they already are).
+  function spotPan(sp) {
+    const cur = panEase ? panGoal : pan, { min, max } = panRange(), { btn, tag } = partsOf(sp);
+    const half = Math.max(btn.offsetWidth, tag.offsetWidth) / 2 + 16, a = cur + sp.offsetLeft;
+    const to = a - half < 0 ? cur - (a - half) : a + half > geo.W ? cur - (a + half - geo.W) : cur;
+    return clamp(to, min, max);
+  }
+
+  // A card opens beside its item: above the label if there is room under the
+  // bar, else to the side with more room, and always on the screen at the pan
+  // the beach is going to. One at a time; ×, Escape, a tap or focus anywhere
+  // else, or panning closes it.
+  let beachOpen = null;
+  function placeCard(sp, card, goal) {
+    const { btn, tag } = partsOf(sp), W = geo.W, H = dusk.clientHeight;
+    card.style.setProperty('--cx', '0px'); card.style.setProperty('--cy', '0px');
+    const cw = card.offsetWidth, ch = card.offsetHeight, s = btn.offsetHeight;
+    const ax = goal + sp.offsetLeft, ay = geo.y + sp.offsetTop;
+    const strip = $('previewStrip'), topLimit = $('bar').offsetHeight + (strip && !strip.hidden ? strip.offsetHeight : 0) + 8;
+    let left = clamp(ax - cw / 2, 12, W - cw - 12), top = ay - s / 2 - 2 - tag.offsetHeight - 10 - ch;
+    if (top < topLimit) {
+      const roomR = W - (ax + s / 2) - 12, roomL = ax - s / 2 - 12;
+      left = clamp(roomR >= cw + 10 || roomR >= roomL ? ax + s / 2 + 10 : ax - s / 2 - 10 - cw, 12, W - cw - 12);
+      top = clamp(ay - ch / 2, topLimit, H - ch - 8);
+    }
+    card.style.setProperty('--cx', (left - ax).toFixed(1) + 'px');
+    card.style.setProperty('--cy', (top - ay).toFixed(1) + 'px');
+  }
+  function openCard(sp) {
+    if (beachOpen === sp) return closeCard(true);
+    closeCard();
+    const { btn, card } = partsOf(sp);
+    const goal = panReady() ? spotPan(sp) : pan;
+    card.hidden = false; placeCard(sp, card, goal);
+    sp.classList.add('open'); btn.setAttribute('aria-expanded', 'true');
+    beachOpen = sp;
+    if (Math.abs(goal - (panEase ? panGoal : pan)) > .5) panTo(goal);
+    card.focus({ preventScroll: true });
+  }
+  function closeCard(refocus = false) {
+    if (!beachOpen) return;
+    const sp = beachOpen, { btn, card } = partsOf(sp);
+    beachOpen = null;
+    sp.classList.remove('open'); card.hidden = true; btn.setAttribute('aria-expanded', 'false');
+    if (refocus) btn.focus({ preventScroll: true });
+  }
+  // A tap opens an item; a press that moves 8 px or lasts 300 ms doesn't
+  // (one that moves is a walk along the beach). Keyboard clicks have no press.
+  let press = null;
+  document.addEventListener('pointerdown', e => {
+    const btn = e.target.closest && e.target.closest('.beach-item');
+    press = btn && e.isPrimary ? { btn, id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp, ok: false } : null;
+    if (beachOpen && !beachOpen.contains(e.target)) closeCard();
+  }, true);
+  document.addEventListener('pointerup', e => {
+    if (press && e.pointerId === press.id) press.ok = Math.hypot(e.clientX - press.x, e.clientY - press.y) < TAP_SLOP && e.timeStamp - press.t < 300;
+  }, true);
+  dusk.addEventListener('click', e => {
+    const x = e.target.closest('.beach-card-x');
+    if (x) return closeCard(true);
+    const btn = e.target.closest('.beach-item');
+    if (!btn) return;
+    const tapped = !e.detail || (press && press.btn === btn && press.ok);
+    press = null;
+    if (!tapped || !root.classList.contains('at-door') || ['hold', 'entering', 'leaving'].some(c => root.classList.contains(c))) return;
+    hintOff(false);
+    if (btn.dataset.item === 'sand') { closeCard(); openReview(); return; }
+    openCard(btn.closest('.beach-spot'));
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && beachOpen) { e.preventDefault(); closeCard(true); }
+  });
+  document.addEventListener('focusin', e => { if (beachOpen && !beachOpen.contains(e.target)) closeCard(); });
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver(() => placeItems());
+    [capEl, legalEl, ...spots.map(sp => partsOf(sp).tag)].forEach(n => ro.observe(n));
+  }
+
+  // Now and then a firefly drifts over to an item on the screen, lingers,
+  // and wanders off: a quiet hint that something is there.
+  const flyEl = $('beachFly');
+  let flyTl = null;
+  function flyOff() { if (flyTl) { flyTl.kill(); flyTl = null; gsap.set(flyEl, { opacity: 0 }); spots.forEach(sp => sp.classList.remove('visited')); } }
+  function flyVisit() {
+    setTimeout(flyVisit, 9000 + Math.random() * 7000);
+    if (!flyEl || !window.gsap || flyTl || calmNow() || lowEndDevice || document.hidden || beachOpen || !dusk.classList.contains('live')) return;
+    if (!root.classList.contains('at-door') || ['hold', 'entering', 'leaving'].some(c => root.classList.contains(c))) return;
+    const seen = spots.filter(sp => { const a = pan + sp.offsetLeft; return a > 20 && a < geo.W - 20; });
+    if (!seen.length) return;
+    const sp = seen[Math.floor(Math.random() * seen.length)], side = Math.random() < .5 ? -1 : 1;
+    const tx = sp.offsetLeft, ty = sp.offsetTop - partsOf(sp).btn.offsetHeight * .3;
+    flyTl = gsap.timeline({ onComplete: () => { flyTl = null; } })
+      .set(flyEl, { x: tx + side * (60 + Math.random() * 60), y: ty - 50 - Math.random() * 40, opacity: 0 })
+      .to(flyEl, { opacity: .95, duration: .8, ease: 'sine.out' }, 0)
+      .to(flyEl, { x: tx + side * 10, y: ty - 8, duration: 2.4, ease: 'sine.inOut' }, 0)
+      .call(() => sp.classList.add('visited'), null, 2)
+      .to(flyEl, { x: tx - side * 6, y: ty - 16, duration: 1.2, ease: 'sine.inOut' }, 2.4)
+      .call(() => sp.classList.remove('visited'), null, 3.4)
+      .to(flyEl, { x: tx - side * (70 + Math.random() * 50), y: ty - 90, duration: 2.6, ease: 'sine.in' }, 3.6)
+      .to(flyEl, { opacity: 0, duration: 1.2, ease: 'sine.in' }, 5);
+  }
+  if (!calm) setTimeout(flyVisit, 6000);
 
   placeDusk();
   // ResizeObserver also catches the page's scrollbar coming or going
@@ -1175,10 +1310,11 @@
   });
   dusk.addEventListener('pointermove', e => {
     if (!walk || e.pointerId !== walk.id) return;
+    if (!root.classList.contains('at-door')) { walk = null; return; } // the place changed under the finger
     if (e.pointerType === 'mouse' && !e.buttons) return endDrag(e); // let go outside the window
     const dx = e.clientX - walk.x0;
     if (!walk.moved && Math.abs(dx) >= TAP_SLOP) {
-      walk.moved = true; hintOff();
+      walk.moved = true; hintOff(); closeCard();
       dusk.classList.add('panning');
       // only now, so a tap still lands on the door
       try { dusk.setPointerCapture(e.pointerId); } catch (err) { /* a synthetic pointer */ }
@@ -1208,18 +1344,17 @@
   // big notch with no sideways part) glides the painting along, down being
   // further along the beach. A trackpad's up and down does nothing here:
   // only the door and Order go in.
-  let aim = null, wheelRaw = null, wheelIdle = 0;
   dusk.addEventListener('wheel', e => {
     if (!panReady()) return;
     const { deltaX: dx, deltaY: dy, deltaMode: m } = e, { min, max } = panRange();
     const unit = m === 1 ? 40 : m === 2 ? geo.W * .8 : 1;
     if (m !== 0 || (Math.abs(dy) >= 50 && !dx)) {
-      e.preventDefault(); hintOff(); wheelRaw = null;
+      e.preventDefault(); hintOff(); closeCard(); wheelRaw = null;
       aim = clamp((panEase && aim !== null ? aim : pan) - (Math.abs(dx) > Math.abs(dy) ? dx : dy) * unit, min, max);
       return panTo(aim);
     }
     if (!dx || Math.abs(dx) < Math.abs(dy)) return;
-    e.preventDefault(); hintOff(); aim = null; // (and no swipe back through history)
+    e.preventDefault(); hintOff(); closeCard(); aim = null; // (and no swipe back through history)
     if (wheelRaw === null || glide || panEase) { stopPan(); wheelRaw = unrubber(pan); }
     wheelRaw -= dx;
     writePan(rubber(wheelRaw));
@@ -1231,16 +1366,19 @@
   addEventListener('keydown', e => {
     if ((e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
     if (!panReady() || (e.target.closest && e.target.closest('input, textarea, select, dialog, [contenteditable]'))) return;
-    e.preventDefault(); hintOff();
+    e.preventDefault(); hintOff(); closeCard();
     const { min, max } = panRange();
     aim = clamp((panEase && aim !== null ? aim : pan) + (e.key === 'ArrowLeft' ? 1 : -1) * geo.W / 4, min, max);
     panTo(aim);
   });
-  // Tabbing to something off the screen walks to it. The browser may also
-  // have scrolled the beach's boxes to show it; they never scroll.
+  // Tabbing to something off the screen walks to it (an item with its
+  // label, into full view). The browser may also have scrolled the beach's
+  // boxes to show it; they never scroll.
   dusk.addEventListener('focusin', e => {
     [dusk, $('duskWipe'), $('duskStill')].forEach(n => { n.scrollLeft = 0; n.scrollTop = 0; });
     if (!panReady()) return;
+    const spot = e.target.closest('.beach-spot');
+    if (spot) { const to = spotPan(spot); if (Math.abs(to - (panEase ? panGoal : pan)) > .5) panTo(to); return; }
     const r = e.target.getBoundingClientRect();
     if (r.left < 0 || r.right > geo.W) panTo(pan + geo.W / 2 - (r.left + r.width / 2));
   });
@@ -1324,6 +1462,7 @@
   let pushedIn = false;
   function setPlace(place, { push = false } = {}) {
     const inside = place === 'kitchen';
+    closeCard();
     root.classList.toggle('inside', inside); root.classList.toggle('at-door', !inside);
     if (push) { history.pushState({ place: 'kitchen' }, '', '#menu'); pushedIn = true; }
     $(inside ? 'menuH' : 'door').focus({ preventScroll: true });
@@ -1409,14 +1548,15 @@
   function enterKitchen() {
     if (entering) return entering;
     if (leaving) return (entering = leaving.then(() => { entering = null; return enterKitchen(); }));
-    // the beach stops where it is, and the camera finds the door there
-    stopPan(); hintOff(false);
+    // the beach stops where it is (a finger still down no longer walks it),
+    // and the camera finds the door there
+    stopPan(); hintOff(false); closeCard(); flyOff(); walk = null;
     if (!window.gsap) { setPlace('kitchen', { push: true }); return Promise.resolve(); }
     const quiet = calmNow();
     window.preloadKitchen();
     const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
     const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
-    const hint = $('doorHint'), caption = document.querySelector('.dusk-caption'), crop = $('duskCrop');
+    const hint = $('doorHint'), caption = [...document.querySelectorAll('.dusk-caption, .dusk-legal')], crop = $('duskCrop');
     const lines = greet.querySelectorAll('.line > span'), after = document.querySelectorAll('#menu .translation, #menu .sig');
     let swapped = false, over = false, tl;
 
@@ -1425,7 +1565,7 @@
     // focus and the step in history).
     const swap = () => {
       if (swapped) return; swapped = true;
-      gsap.set([still, leaf, leny, light, hint, caption], { clearProps: 'all' });
+      gsap.set([still, leaf, leny, light, hint, ...caption], { clearProps: 'all' });
       if (crop) crop.hidden = true;
       root.classList.remove('entering');
       setPlace('kitchen', { push: true });
@@ -1484,7 +1624,7 @@
         // anticipation: a hand on the door, it gives a little
         .to(leaf, { scale: .98, duration: .15, ease: 'power2.out' }, 0)
         .to(leaf, { scale: 1, duration: .5, ease: 'power2.out' }, .15)
-        .to([hint, caption], { opacity: 0, duration: .35, ease: 'sine.out' }, 0)
+        .to([hint, ...caption], { opacity: 0, duration: .35, ease: 'sine.out' }, 0)
         .to(cam, { p: 1, duration: PEAK - PUSH, ease: pushEase, onUpdate: setCam }, PUSH)
         .to(cam, { q: 1, duration: 1.2, ease: 'power2.inOut', onUpdate: setCam }, PUSH)
         // the door swings open into the house, and Leny is there in the light
@@ -1525,12 +1665,12 @@
     if (leaving) return leaving;
     if (entering) return (leaving = entering.then(() => { leaving = null; return leaveKitchen(); }));
     if (!root.classList.contains('inside')) return Promise.resolve();
-    if (!window.gsap) { setPlace('beach'); return Promise.resolve(); }
+    if (!window.gsap) { setPlace('beach'); placeDusk(); panTo(doorPan(), { instant: true }); return Promise.resolve(); }
     const quiet = calmNow();
     window.preloadKitchen(); // (also fetches the finer crop of the door, after a load on #menu)
     const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
     const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
-    const caption = document.querySelector('.dusk-caption'), crop = $('duskCrop');
+    const caption = [...document.querySelectorAll('.dusk-caption, .dusk-legal')], crop = $('duskCrop');
     const cam = { p: 1, q: 1 };
     let swapped = false, over = false, setCam = () => {};
 
@@ -1554,7 +1694,7 @@
       const finish = () => {
         if (over) return; over = true;
         swap();
-        gsap.set([bloom, glow, still, leaf, leny, light, caption], { clearProps: 'all' });
+        gsap.set([bloom, glow, still, leaf, leny, light, ...caption], { clearProps: 'all' });
         if (crop) crop.hidden = true;
         root.classList.remove('leaving');
         leaving = null; resolve();
