@@ -206,11 +206,35 @@ html.intro main > section:not(.dusk), html.intro .foot { visibility: hidden; }
 
 .meta { font-size: 15px; color: var(--ink-2); }
 html.intro, html.intro body { overflow: hidden; } /* on html too: its overflow-x: clip stops body passing overflow to the page */
-/* no scrollbar on the beach: one appearing as the intro ends (or on a return
-   visit) would narrow the page under the painting */
-html.intro, html.at-door:not(.inside) { scrollbar-width: none; }
-/* the rest of a scroll that ended the intro is held at the door */
-html.hold, html.hold body { overflow: hidden; }
+
+/* ── two places ── */
+/* After the intro you are in one of two places: the beach (html.at-door) or
+   the kitchen (html.inside). Each fills the screen and the page itself never
+   scrolls, so nothing slides you from one to the other. The footer's things
+   are moving to the beach; meanwhile it is not shown. */
+html.at-door, html.at-door body, html.inside, html.inside body { overflow: hidden; }
+html.at-door .menu, html.at-door .foot, html.inside .dusk, html.inside .foot { display: none; }
+/* The kitchen is a room under the bar, sized to fit one screen: the wall
+   takes the height the greeting leaves (--above: the greeting, the gaps and
+   the room's padding; --strip: the preview strip, when it shows). If a short
+   screen still can't fit it, or the tray bar covers its foot, the room
+   scrolls within itself only. */
+html.inside .menu { --strip: 0px; --above: 192px; position: fixed; inset: var(--bar) 0 0; padding: calc(16px + var(--strip)) 0 16px;
+  overflow: hidden auto; overscroll-behavior: contain; }
+html.inside:has(#previewStrip:not([hidden])) .menu { --strip: 30px; }
+html.inside .menu .sec-head { gap: 6px; }
+@media (max-width: 599px) { html.inside .menu .sec-sub { font-size: 15px; } } /* one line on a 360 px phone */
+html.inside .kitchen { --kh: max(280px, min(820px, 160vw, calc(100svh - var(--bar) - var(--strip) - var(--above)))); margin-top: 12px; }
+html.inside:has(#traybar:not([hidden])) .menu { padding-bottom: 96px; }
+@media (min-width: 900px) {
+  html.inside .menu { --above: 250px; padding-top: calc(20px + var(--strip)); }
+  html.inside .kitchen { margin-top: 16px; }
+}
+/* a short laptop screen: a smaller greeting leaves the wall more room */
+@media (min-width: 900px) and (max-height: 820px) {
+  html.inside #menuH { font-size: 44px; }
+  html.inside .menu { --above: 232px; }
+}
 
 
 /* ── sections ────────────────────────────────────────────── */

@@ -782,7 +782,9 @@
     if (room) { const f = scroller.clientWidth / scroller.scrollWidth; meter.style.width = (f * 100) + '%'; meter.style.left = (scroller.scrollLeft / scroller.scrollWidth * 100) + '%'; }
   };
   scroller.addEventListener('scroll', () => requestAnimationFrame(where), { passive: true });
-  addEventListener('resize', where);
+  // (the scroller's own size also changes as the kitchen is shown on going in)
+  if ('ResizeObserver' in window) new ResizeObserver(where).observe(scroller);
+  else addEventListener('resize', where);
   world.querySelector('.k-wall').addEventListener('load', where);
   where();
   let drag = null, dragged = false;
@@ -1037,6 +1039,7 @@
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   function placeDusk() {
     const W = dusk.clientWidth, H = dusk.clientHeight, aspect = W / H;
+    if (!W || !H) return; // inside, the beach isn't shown: placed again on the way out
     let w, x, y;
     const band = aspect < CROP_TALL.below;
     if (band) {
@@ -1086,9 +1089,6 @@
       gsap.set(settling ? '#duskWipe' : ['#duskWipe', '#duskStill'], { clearProps: 'transform,willChange' });
     }
     root.classList.remove('intro');
-    // The intro held the page at the top (playIntro); from here a reload or
-    // Back restores where the visitor was, the kitchen included (syncDoor).
-    if ('scrollRestoration' in history) history.scrollRestoration = 'auto';
     const st = $('stage'); if (st) st.remove();
     const sk = $('introSkip'); if (sk) sk.remove();
     return true;
@@ -1112,9 +1112,17 @@
     try { localStorage.setItem('ng-seen-intro', '1'); } catch (e) { /* private mode: the intro plays again */ }
     window.preloadKitchen();
   }
-  // Leaving the door without going through it (Order, #menu links). From
-  // then on the page keeps its scrollbar, even back up at the door.
-  const leaveDoor = () => { root.classList.remove('at-door'); root.classList.add('inside'); };
+  // The two places: the beach (html.at-door) and the kitchen (html.inside).
+  // You are always in exactly one, and the focus goes with you: to Leny's
+  // greeting inside, to the door outside. push adds the step into the
+  // kitchen to the browser's history, so #menu is in the URL and Back has
+  // something to undo.
+  function setPlace(place, { push = false } = {}) {
+    const inside = place === 'kitchen';
+    root.classList.toggle('inside', inside); root.classList.toggle('at-door', !inside);
+    if (push) history.pushState({ place: 'kitchen' }, '', '#menu');
+    $(inside ? 'menuH' : 'door').focus({ preventScroll: true });
+  }
 
   // ── Going in ──────────────────────────────────────────────────────────
   // The kitchen painting, decoded, so the page can swap to it under the
@@ -1126,8 +1134,9 @@
       const img = document.querySelector('.k-wall');
       kitchenP = (img && img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => { kitchenReady = true; });
       // the rest of the kitchen's pictures, decoded ahead too, so its first
-      // paint after the jump is quick
-      document.querySelectorAll('#kWorld img').forEach(i => { if (i !== img && i.decode) i.decode().catch(() => {}); });
+      // paint after the swap is quick (the lazy ones wouldn't start loading
+      // while the kitchen is hidden)
+      document.querySelectorAll('#kWorld img').forEach(i => { if (i !== img && i.decode) { i.loading = 'eager'; i.decode().catch(() => {}); } });
       const crop = $('duskCrop');
       if (crop && !crop.getAttribute('src')) crop.src = 'assets/img/dusk/beach-door-crop.webp';
     }
@@ -1159,13 +1168,13 @@
   // Through the door into the kitchen. One timeline (__ngEnter): the door
   // gives a little, the camera pushes in while the door swings open on Leny
   // in the light, a beat on her, then on through the doorway into a warm
-  // bloom; under the full bloom the page moves to the kitchen, and the bloom
+  // bloom; under the full bloom the page swaps to the kitchen, and the bloom
   // lifts on it with her greeting. A second call while it runs gets the same
   // promise. Calm: the bloom just crossfades, no camera.
   let entering = null, finishEntering = null;
   function enterKitchen() {
     if (entering) return entering;
-    if (!window.gsap) { leaveDoor(); $('menu').scrollIntoView(); return Promise.resolve(); }
+    if (!window.gsap) { setPlace('kitchen', { push: true }); return Promise.resolve(); }
     window.preloadKitchen();
     const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
     const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
@@ -1173,20 +1182,15 @@
     const lines = greet.querySelectorAll('.line > span'), after = document.querySelectorAll('#menu .translation, #menu .sig');
     let swapped = false, over = false, tl;
 
-    // Under the full bloom: put the door back as it was (out of sight above,
-    // for a visit back up), move to the kitchen and give it the focus. The
-    // scrollbar comes back here too, where it can't be seen.
+    // Under the full bloom: put the beach back as it was, out of sight, for
+    // stepping outside later, and swap to the kitchen (setPlace gives it the
+    // focus and the step in history).
     const swap = () => {
       if (swapped) return; swapped = true;
-      // (the caption stays faded: it would show through the bar above the
-      // kitchen; it comes back with the door, at the top)
-      gsap.set([still, leaf, leny, light, hint], { clearProps: 'all' });
+      gsap.set([still, leaf, leny, light, hint, caption], { clearProps: 'all' });
       if (crop) crop.hidden = true;
-      root.classList.remove('at-door', 'entering'); root.classList.add('inside');
-      let top = 0; // the menu's place in the page, whatever its settle transform is doing
-      for (let n = menu; n; n = n.offsetParent) top += n.offsetTop;
-      scrollTo({ top: top - bar.offsetHeight, behavior: 'instant' });
-      greet.focus({ preventScroll: true });
+      root.classList.remove('entering');
+      setPlace('kitchen', { push: true });
       // the greeting waits, out of sight, to rise as the light lifts
       if (!calm) { gsap.set(lines, { yPercent: 105 }); gsap.set(after, { opacity: 0, y: 8 }); }
     };
@@ -1636,86 +1640,51 @@
 
   // A scroll, swipe or key during the intro is the same as Skip: it lands at
   // the door and stops there. The rest of that gesture (a trackpad keeps
-  // sending wheel events for a second or more) is held, so it doesn't carry
-  // on into the kitchen. At the door, scrolling on goes in through the door,
-  // and the page itself doesn't scroll (nor while going in). Pinch zoom and
-  // scrolling back up are left alone.
+  // sending wheel events for a second or more) is held (html.hold), so it
+  // doesn't carry on into anything at the door. After the intro a scroll
+  // never changes place: only the door, Order and #menu links go in.
   const SCROLL_KEYS = ['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar'];
   // The intro ends on a key that scrolls, either way. Others (Tab, Shift…)
   // leave it playing, so the keyboard can reach Skip and Order.
   const NAV_KEYS = [...SCROLL_KEYS, 'ArrowUp', 'PageUp', 'Home'];
-  let holdT = 0, touchY = null;
+  let holdT = 0;
   const hold = () => {
     root.classList.add('hold'); clearTimeout(holdT);
     holdT = setTimeout(() => root.classList.remove('hold'), 450);
   };
-  addEventListener('touchstart', e => { touchY = e.touches.length === 1 ? e.touches[0].clientY : null; }, { passive: true });
   const onScrollIntent = e => {
     if (e.type === 'keydown' && (!NAV_KEYS.includes(e.key) || e.altKey || e.ctrlKey || e.metaKey)) return;
     if (!done) { toDoor(); hold(); return; }
-    if (root.classList.contains('hold')) { hold(); return; }
-    if (e.type === 'keydown' && !SCROLL_KEYS.includes(e.key)) return;
-    // Space is a scroll key only on the page itself or on the door
-    if (e.type === 'keydown' && (e.key === ' ' || e.key === 'Spacebar') && !(e.target === document.body || e.target === root || e.target.id === 'door')) return;
-    if (e.type === 'wheel' && e.ctrlKey) return;
-    if (e.type === 'touchmove' && e.touches.length !== 1) return;
-    if (entering) { if (e.cancelable) e.preventDefault(); return; }
-    if (!root.classList.contains('at-door')) return;
-    // Once inside (by the door, Order or a #menu link), back at the door a
-    // scroll is just a scroll; the door itself still opens on a tap.
-    if (root.classList.contains('inside')) return;
-    // An upward or sideways wheel and a finger moving down the screen (pull
-    // to refresh, overscroll) are left alone.
-    if (e.type === 'wheel' && e.deltaY <= 0) return;
-    if (e.type === 'touchmove' && e.touches[0].clientY > touchY) return;
-    if (e.cancelable) e.preventDefault();
-    const down = e.type === 'wheel' ? e.deltaY > 0 : e.type === 'touchmove' ? touchY !== null && e.touches[0].clientY < touchY - 6 : true;
-    if (down) enterKitchen();
+    if (root.classList.contains('hold')) hold();
   };
-  ['wheel', 'touchmove', 'keydown'].forEach(ev => addEventListener(ev, onScrollIntent, { passive: false }));
-  // Back up at the top after going in (or after Order), the door is there
-  // again as it was, ajar, ready to tap. It doesn't replay anything.
-  // Down the page means in the kitchen. A real scroll that still happens at
-  // the door (gestures there are held) means the visitor left by another
-  // route: Tab, find in page, a screen reader, a restored scroll position.
-  // Then the door lets go, so the tray bar and the scrollbar are back and
-  // scrolling is plain scrolling.
-  const syncDoor = () => {
-    if (!done || entering || scrollY <= 0 || !root.classList.contains('at-door')) return;
-    if (root.classList.contains('inside')) root.classList.remove('at-door');
-    else leaveDoor();
-  };
-  let lastY = scrollY;
-  addEventListener('scroll', () => {
-    const y = scrollY;
-    if (done && !entering && y <= 0 && lastY > 0) {
-      root.classList.add('at-door');
-      if (window.gsap) gsap.to('.dusk-caption', { opacity: 1, duration: .6, ease: 'sine.out', clearProps: 'opacity' });
-    } else if (y > 0) syncDoor(); // scrolling on from the door
-    lastY = y;
-  }, { passive: true });
-  // Focus moving into the page below the door (Tab, find in page, a screen
-  // reader) leaves the door too.
-  addEventListener('focusin', e => {
-    if (done && !entering && root.classList.contains('at-door') && !root.classList.contains('inside')
-      && e.target.closest && e.target.closest('main > section:not(.dusk), #foot')) leaveDoor();
-  });
+  ['wheel', 'touchmove', 'keydown'].forEach(ev => addEventListener(ev, onScrollIntent, { passive: true }));
   // Skip ends the intro on the beach, at the door.
   $('introSkip').addEventListener('click', toDoor);
-  // Order and "Skip to the menu" always go straight to the kitchen.
-  const toKitchen = () => { if (!done) toDoor(); if (finishEntering) finishEntering(); leaveDoor(); };
-  document.querySelectorAll('a[href="#menu"]').forEach(a => a.addEventListener('click', toKitchen));
+  // Order, at the beach, plays the same entrance as the door. "Skip to the
+  // menu" and any other link to #menu go straight in, with no animation.
+  // Either one while going in just finishes the entrance, and inside they
+  // only bring the focus back to Leny's greeting.
+  const goIn = ({ animate = false, push = true } = {}) => {
+    if (!done) toDoor();
+    if (finishEntering) finishEntering();
+    else if (!root.classList.contains('at-door')) setPlace('kitchen');
+    else if (animate) enterKitchen();
+    else setPlace('kitchen', { push });
+  };
+  document.querySelectorAll('a[href="#menu"]').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault(); // the link itself would add a second step to history
+    goIn({ animate: a.classList.contains('bar-order') });
+  }));
+  // A change of URL to #menu ("Start a new order" sets it) goes in too. The
+  // URL already has its step in history, so nothing more is pushed.
+  addEventListener('hashchange', () => { if (location.hash === '#menu') goIn({ push: false }); });
   // The door: a click, Enter or Space goes in.
   $('door').addEventListener('click', () => enterKitchen());
 
   if (root.classList.contains('intro')) playIntro();
   else if (root.classList.contains('at-door')) toDoor();
-  else { endIntro(); leaveDoor(); $('menu').scrollIntoView(); } // opened on a link to #menu: straight into the kitchen
-  // A reload or Back that puts a returning visitor back down the page (the
-  // browser restores the scroll position, now or once the page has loaded)
-  // leaves them in the kitchen, not at a door they can't see. From the
-  // back/forward cache the page comes back as it was; it is checked again.
-  syncDoor();
-  addEventListener('load', () => { syncDoor(); lastY = scrollY; });
-  addEventListener('pageshow', e => { if (e.persisted) { root.classList.remove('hold'); syncDoor(); lastY = scrollY; } });
+  else { endIntro(); setPlace('kitchen'); } // opened on a link to #menu: straight into the kitchen
+  // From the back/forward cache the page comes back as it was; a gesture
+  // held as it left is let go.
+  addEventListener('pageshow', e => { if (e.persisted) root.classList.remove('hold'); });
 })();
