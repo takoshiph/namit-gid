@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=94">
+<link rel="stylesheet" href="assets/css/site.css?v=95">
 <script>
   /* Decide the intro before first paint so nothing flashes. The intro plays
      once per device (localStorage 'ng-seen-intro'); after that, and with
@@ -175,17 +175,17 @@
       <div class="fireflies" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <!-- Four things on the sand to tap, in fractions of the painting (--x, --y:
            each item's centre; placeItems() in app.js may lift one clear of the
-           caption). The glowing shape in .beach-item-art is a placeholder for
-           painted art. The sand opens the review form; the others, a card. -->
+           caption). Each item's painted art is an <img> with alt="" (the
+           button's label names it). The sand opens the review form; the others, a card. -->
       <div class="beach-spot" data-item="bottle" style="--x:.16;--y:.84">
-        <button class="beach-item" type="button" data-item="bottle" aria-expanded="false" aria-controls="card-bottle"><i class="beach-item-art" aria-hidden="true"></i><span class="beach-tag" id="tag-bottle">A note from Leny</span></button>
+        <button class="beach-item" type="button" data-item="bottle" aria-expanded="false" aria-controls="card-bottle"><img class="beach-item-art" src="assets/img/dusk/item-bottle.webp" width="480" height="205" alt="" decoding="async"><span class="beach-tag" id="tag-bottle">A note from Leny</span></button>
         <div class="beach-card" data-item="bottle" id="card-bottle" role="group" aria-labelledby="tag-bottle" tabindex="-1" hidden>
           <button class="x beach-card-x" type="button" aria-label="Close">×</button>
           <p class="beach-letter"><em>Namit gid</em> means “Ang sarap!” (really delicious) and I cook so every home I feed says it too. <span class="beach-sig">~Leny</span></p>
         </div>
       </div>
       <div class="beach-spot" data-item="shell" style="--x:.29;--y:.76">
-        <button class="beach-item" type="button" data-item="shell" aria-expanded="false" aria-controls="card-shell"><i class="beach-item-art" aria-hidden="true"></i><span class="beach-tag" id="tag-shell">Say hi</span></button>
+        <button class="beach-item" type="button" data-item="shell" aria-expanded="false" aria-controls="card-shell"><img class="beach-item-art" src="assets/img/dusk/item-shell.webp" width="480" height="363" alt="" decoding="async"><span class="beach-tag" id="tag-shell">Say hi</span></button>
         <div class="beach-card" data-item="shell" id="card-shell" role="group" aria-labelledby="tag-shell" tabindex="-1" hidden>
           <button class="x beach-card-x" type="button" aria-label="Close">×</button>
           <p><a href="mailto:orders@takoshi.ca">orders@takoshi.ca</a></p>
@@ -205,10 +205,10 @@
         <button class="door" id="door" type="button" aria-label="Come inside"></button>
       </div>
       <div class="beach-spot" data-item="sand" style="--x:.555;--y:.89">
-        <button class="beach-item" type="button" data-item="sand" aria-haspopup="dialog"><i class="beach-item-art" aria-hidden="true"></i><span class="beach-tag" id="tag-sand">Leave a review</span></button>
+        <button class="beach-item" type="button" data-item="sand" aria-haspopup="dialog"><img class="beach-item-art" src="assets/img/dusk/item-sand.webp" width="640" height="230" alt="" decoding="async"><span class="beach-tag" id="tag-sand">Leave a review</span></button>
       </div>
       <div class="beach-spot" data-item="octopus" style="--x:.91;--y:.80">
-        <button class="beach-item" type="button" data-item="octopus" aria-expanded="false" aria-controls="card-octopus"><i class="beach-item-art" aria-hidden="true"></i><span class="beach-tag" id="tag-octopus">Takoshi</span></button>
+        <button class="beach-item" type="button" data-item="octopus" aria-expanded="false" aria-controls="card-octopus"><img class="beach-item-art" src="assets/img/dusk/item-octopus.webp" width="480" height="333" alt="" decoding="async"><span class="beach-tag" id="tag-octopus">Takoshi</span></button>
         <div class="beach-card" data-item="octopus" id="card-octopus" role="group" aria-labelledby="tag-octopus" tabindex="-1" hidden>
           <button class="x beach-card-x" type="button" aria-label="Close">×</button>
           <p>Craving takoyaki? <a href="https://takoshi.ca">I make that too, at Takoshi →</a></p>

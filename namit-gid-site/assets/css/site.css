@@ -514,8 +514,11 @@ html.calm .pan-hint, html:not(.at-door) .pan-hint { display: none; }
 /* Each .beach-spot is a point of the painting (--x, --y, fractions; --ly is
    the y placeItems() lifts it to, clear of the caption, on shorter screens)
    and moves with the pan. On it: the item (a real button, at least 48 px),
-   its label above it, and its card. .beach-item-art is the placeholder
-   shape, to be swapped for painted art; the button's ::before is its glow. */
+   its label above it, and its card. .beach-item-art is the painted item, a
+   box of --aw x --ah items (the art's own aspect) centred on the spot, and
+   may reach past the button; the button's ::before is its glow: a warm copy
+   of the same art behind it, haloed by drop-shadows, so the glow follows the
+   item's shape. Only its opacity moves. */
 .beach-spot { --s: clamp(48px, calc(var(--art-w, 1600px) * .03), 80px); left: calc(var(--x) * 100%); top: calc(var(--ly, var(--y)) * 100%); width: 0; height: 0;
   transition: opacity 600ms var(--ease-out); }
 html.intro .beach-spot { opacity: 0; visibility: hidden; }
@@ -523,28 +526,26 @@ html.intro .beach-spot { opacity: 0; visibility: hidden; }
 .beach-item { position: absolute; left: calc(var(--s) / -2); top: calc(var(--s) / -2); width: var(--s); height: var(--s); padding: 0; border: 0; border-radius: 50%;
   background: none; color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .beach-item:focus-visible { outline: 3px solid #FFD58A; outline-offset: 2px; }
-.beach-item::before { content: ''; position: absolute; inset: -30%; border-radius: 50%; pointer-events: none; opacity: .55; transition: opacity 250ms;
-  background: radial-gradient(closest-side, rgba(255, 228, 168, .6), rgba(255, 214, 140, .18) 60%, rgba(255, 214, 140, 0)); }
-.beach-item-art { position: absolute; inset: 22%; transition: translate 250ms var(--ease-out), scale 150ms var(--ease-out); }
+.beach-item::before, .beach-item-art { position: absolute; left: 50%; top: 50%; width: calc(var(--s) * var(--aw)); height: calc(var(--s) * var(--ah));
+  margin: calc(var(--s) * var(--ah) / -2) 0 0 calc(var(--s) * var(--aw) / -2); pointer-events: none; transition: translate 250ms var(--ease-out), scale 150ms var(--ease-out); }
+.beach-item-art { display: block; max-width: none; }
+.beach-item::before { content: ''; opacity: .55; transition: opacity 250ms, translate 250ms var(--ease-out), scale 150ms var(--ease-out);
+  background: var(--art) center / 100% 100% no-repeat;
+  filter: brightness(0) invert(88%) sepia(60%) saturate(300%) hue-rotate(-14deg) blur(1.5px) drop-shadow(0 0 4px rgba(255, 220, 160, .9)) drop-shadow(0 0 10px rgba(255, 206, 140, .55)); }
 /* hover, focus or a press: a brighter glow and a tiny lift */
 .beach-item:hover::before, .beach-item:focus-visible::before, .beach-item:active::before, .beach-spot.open .beach-item::before, .beach-spot.visited .beach-item::before { opacity: 1; animation: none; }
-.beach-item:hover .beach-item-art, .beach-item:focus-visible .beach-item-art, .beach-spot.open .beach-item-art { translate: 0 -3px; }
-.beach-item:active .beach-item-art { translate: 0 -2px; scale: .95; }
+.beach-item:hover .beach-item-art, .beach-item:focus-visible .beach-item-art, .beach-spot.open .beach-item-art,
+.beach-item:hover::before, .beach-item:focus-visible::before, .beach-spot.open .beach-item::before { translate: 0 -3px; }
+.beach-item:active .beach-item-art, .beach-item:active::before { translate: 0 -2px; scale: .95; }
 /* at rest each one glows softly, breathing, out of step with the others */
 html:not(.intro):not(.inside) .dusk.live .beach-item::before { animation: item-glow 3.6s var(--ease-loop) var(--gd, 0s) infinite; }
 .beach-spot[data-item="shell"] { --gd: -.9s; } .beach-spot[data-item="sand"] { --gd: -1.8s; } .beach-spot[data-item="octopus"] { --gd: -2.7s; }
 @keyframes item-glow { 50% { opacity: .9; } }
-/* the placeholders: a half-buried bottle, a conch, words in the sand with a
-   stick, an octopus peeking out of a pool */
-.beach-spot[data-item="bottle"] .beach-item-art { inset: 34% 14% 30%; border-radius: 45% 30% 30% 45% / 50%; rotate: -24deg;
-  background: linear-gradient(100deg, #d9f3e6, #7fb9a4 55%, #4f8a78); box-shadow: 0 0 10px rgba(205, 255, 232, .55); }
-.beach-spot[data-item="shell"] .beach-item-art { inset: 26%; border-radius: 55% 55% 55% 12%; rotate: 40deg;
-  background: radial-gradient(circle at 38% 38%, #fff6ec, #f4c3aa 60%, #d68f78); box-shadow: 0 0 10px rgba(255, 220, 200, .55); }
-.beach-spot[data-item="sand"] .beach-item-art { inset: 40% 8% 30%; border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(255, 242, 214, .95), rgba(255, 232, 190, .25)); box-shadow: 0 0 12px rgba(255, 236, 200, .45); }
-.beach-spot[data-item="sand"] .beach-item-art::after { content: ''; position: absolute; right: -2%; bottom: 30%; width: 3px; height: 190%; border-radius: 2px; rotate: 10deg; background: #d9b98a; }
-.beach-spot[data-item="octopus"] .beach-item-art { inset: 30% 24% 26%; border-radius: 50% 50% 38% 38% / 62% 62% 38% 38%;
-  background: radial-gradient(circle at 40% 35%, #ffcdb5, #e47c62 70%, #b9533f); box-shadow: 0 0 10px rgba(255, 190, 160, .55); }
+/* the art: its file (for the glow) and its box, in --s (the art's own aspect) */
+.beach-spot[data-item="bottle"] { --art: url(../img/dusk/item-bottle.webp); --aw: 1.5; --ah: .641; }
+.beach-spot[data-item="shell"] { --art: url(../img/dusk/item-shell.webp); --aw: 1.2; --ah: .908; }
+.beach-spot[data-item="sand"] { --art: url(../img/dusk/item-sand.webp); --aw: 2.6; --ah: .934; }
+.beach-spot[data-item="octopus"] { --art: url(../img/dusk/item-octopus.webp); --aw: 1.5; --ah: 1.041; }
 /* the label: short, glowing, above its item */
 .beach-tag { position: absolute; left: 50%; bottom: calc(100% + 2px); translate: -50% 0; white-space: nowrap; padding: 4px 9px 5px; border-radius: 999px;
   font: 600 13px/1 var(--sans); letter-spacing: .01em; color: #FBF3E2; background: rgba(24, 26, 44, .42);
