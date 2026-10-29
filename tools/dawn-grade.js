@@ -8,6 +8,10 @@ const { execFileSync } = require('child_process');
 const path = require('path');
 const FF = 'C:/Users/elvin/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-9.0.2-full_build/bin/';
 const [, , src, outDir] = process.argv, W = 2400, H = 1018;
+if (!src || !outDir || !require('fs').existsSync(src) || !require('fs').existsSync(outDir)) {
+  console.error('usage: node tools/dawn-grade.js <beach-2400.webp> <output dir>');
+  process.exit(1);
+}
 const HORIZON = .558, SHORE = .74, POOL = { x0: .2, x1: .8, y0: .74, y1: .85 }; // fractions of the painting (as in playIntro)
 const px = new Uint8Array(execFileSync(FF + 'ffmpeg', ['-loglevel', 'error', '-i', src, '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { maxBuffer: 1 << 29 }));
 // The dawn has no palms: paint over their trunks (left, from the horizon to below the

@@ -1838,6 +1838,15 @@
     const poolBox = { left: art.left + art.width * .2 + 'px', top: art.height * (.74 - shore) + 'px', width: art.width * .6 + 'px', height: art.height * .11 + 'px' };
     Object.assign(pool.style, poolBox);
     sand.prepend(sandArt, pool);
+    // On a slow connection the texture must not pop in after the sand has
+    // slid up: each layer stays hidden until its image has decoded (and stays
+    // hidden, over the plain sand and sea, if it never does). Nothing waits.
+    const reveal = (img, els) => {
+      gsap.set(els, { opacity: 0 });
+      img.decode().then(() => gsap.to(els, { opacity: 1, duration: .5, ease: 'sine.out' }), () => {});
+    };
+    const waveImg = new Image(); waveImg.src = 'assets/img/dusk/dawn-waves.webp?v=1';
+    reveal(waveImg, waves); reveal(sandArt, sandArt); reveal(pool, pool);
     if (!lowEnd) {
       // the swash's shimmer: light streaks in the pool as each wave runs in
       const shine = document.createElement('i');
@@ -2069,17 +2078,23 @@
     // The swells roll in: phase p 0..1 through a band's period. Each copy
     // grows from 1 - k to 1 + k about the horizon while sinking by its y,
     // and fades in and out as sin²(πp), so the two copies, half a period
-    // apart, always add up to one. At p = .5 a copy is exactly the painting's.
+    // apart, always add up to one. Only the first copy is the painting's
+    // strokes (the second is mirrored), and it matches them exactly at
+    // p = .5, which each band's phase puts at PULL_END. Before nightfall
+    // reaches the sea, settle (on the main timeline, so seeking holds)
+    // eases every band to rest on that copy at full weight, so the dusk
+    // comes down on the painting's own waves.
+    const settle = { v: 0 };
     bands.forEach((b, i) => {
       const set = b.copies.map(el => ({ s: gsap.quickSetter(el, 'scaleY'), sx: gsap.quickSetter(el, 'scaleX'), y: gsap.quickSetter(el, 'y', 'px'), o: gsap.quickSetter(el, 'opacity') }));
-      const ph = (i * .37) % 1, roll = { p: ph };
+      const ph = ((.5 - PULL_END / b.period) % 1 + 1) % 1, roll = { p: ph };
       amb.fromTo(roll, { p: ph }, { p: ph + 1, duration: b.period, ease: 'none', repeat: -1, onUpdate: () => set.forEach((q, c) => {
         if (lowEnd) { // one copy: a gentle swell in place, no fade
-          const w = Math.sin(roll.p * Math.PI * 2);
+          const w = Math.sin(roll.p * Math.PI * 2) * (1 - settle.v);
           q.s(1 + b.k * .6 * w); q.sx(1 + b.k * .6 * w); q.y(b.y * .6 * w); return;
         }
-        const p = (roll.p + c * .5) % 1, u = p * 2 - 1, sc = 1 + b.k * u;
-        q.s(sc); q.sx(c ? -sc : sc); q.y(b.y * u); q.o(Math.sin(Math.PI * p) ** 2);
+        const p = (roll.p + c * .5) % 1, s = settle.v, u = (p * 2 - 1) * (1 - s), sc = 1 + b.k * u, o = Math.sin(Math.PI * p) ** 2;
+        q.s(sc); q.sx(c ? -sc : sc); q.y(b.y * u); q.o(c ? o * (1 - s) : o + (1 - o) * s);
       }) }, 0);
     });
     // The shore: a broken foam edge runs up the sand and draws back, about
@@ -2134,6 +2149,8 @@
     // first, then the sea, then the sand. .dusk-wipe moves down while
     // .dusk-still moves up by as much, so the painting holds still.
     const SET_AT = PULL_END - .5, FALL_AT = PULL_END - .3, FALL_T = 2.1, FALL_END = FALL_AT + FALL_T;
+    // the waves come to rest on the painting's strokes before the dusk reaches the sea
+    tl.fromTo(settle, { v: 0 }, { v: 1, duration: .8, ease: 'sine.inOut' }, SET_AT - .3);
     tl.addLabel('pullEnd', PULL_END)
       .call(() => window.preloadKitchen?.(), null, FALL_AT)
       .to('#stSun', { yPercent: 22, opacity: 0, duration: 1.6, ease: 'sine.in' }, SET_AT)
