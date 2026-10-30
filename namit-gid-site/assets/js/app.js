@@ -1022,7 +1022,10 @@
   // All in fractions of the painting (1584 x 672). DOOR is the bottom-centre
   // of the door on the wet sand and its width. Wide screens crop the painting
   // like object-fit: cover around CROP_WIDE; tall ones show a band of its full
-  // height, CROP_TALL's window across the screen, the door base at 70% down.
+  // height, CROP_TALL's window across the screen, the door base at 70% down
+  // and the door in the middle of the screen. The dawn intro is framed from
+  // CROP_TALL.left (the island and its lighthouse in view) and walks along
+  // the beach to the door once night has fallen (introPan()).
   const PAINT = 1584 / 672;
   const DOOR = { x: .41, y: .82, w: .05 };
   const CROP_WIDE = { cx: .47, keep: [.365, .715], cy: .66 };
@@ -1035,7 +1038,7 @@
     let w, x, y;
     const band = aspect < CROP_TALL.below;
     if (band) {
-      w = W / CROP_TALL.win; x = -CROP_TALL.left * w;
+      w = W / CROP_TALL.win; x = clamp(W / 2 - DOOR.x * w, W - w, 0);
       y = CROP_TALL.base * H - DOOR.y * (w / PAINT);
     } else if (aspect <= PAINT) {
       // cover: the window shows win of the width; keep the door and island in it
@@ -1062,6 +1065,7 @@
     const { min, max } = panRange(), on = max - min >= PAN_MIN;
     dusk.classList.toggle('pans', on);
     stopPan(); closeCard();
+    markUnseen(on);
     writePan(mid === null || !on ? x : clamp(W / 2 - mid * w, min, max));
     placeItems();
   }
@@ -1076,6 +1080,9 @@
   let pan = null, geo = { x: 0, w: 0, W: 0, y: 0, h: 0 };
   const panRange = () => ({ min: Math.min(0, geo.W - geo.w), max: 0 });
   const doorPan = () => geo.x;
+  // where the intro is framed: a tall phone's old window, with the lighthouse
+  // in it; anywhere else, the door view
+  const introPan = () => dusk.classList.contains('band') ? clamp(-CROP_TALL.left * geo.w, geo.W - geo.w, 0) : geo.x;
   const canPan = () => { const r = panRange(); return r.max - r.min >= PAN_MIN; };
   function writePan(p) {
     pan = p;
@@ -1083,6 +1090,7 @@
     st.setProperty('--pan', px(Math.round((p - geo.x) * 100) / 100 + 0)); // (+ 0: never "-0.00px")
     st.setProperty('--art-x', px(p));
     st.setProperty('--door-x', px(p + DOOR.x * geo.w));
+    if (revealOn) revealInView(p);
   }
   // Past either end the painting gives less and less (a rubber band); rubber()
   // maps how far the finger has gone past the end to how far the painting
@@ -1155,14 +1163,21 @@
   // caption and the © line don't. Wherever the painting fills the screen the
   // caption is up in the sky (.dusk.sky), so only the © line is in the
   // sand's way; on a tall phone the caption sits in the night under the
-  // painting. An item that would pass under either at some pan is lifted
-  // (--ly) just clear of them, never above its --top (default ITEM_TOP, the
-  // wet sand by the water; the sand writing's is just under the bangka). If
-  // that is not enough on a tall phone, its caption goes up to the sky too.
+  // painting, and the pickup lines are written on the sand at the foot of
+  // the painting. An item that would pass under any of them at some pan is
+  // lifted (--ly) just clear of them, never above its --top (default
+  // ITEM_TOP, the wet sand by the water; the sand writing's is just under
+  // the bangka). If that is not enough on a tall phone, or the name would
+  // meet the pickup lines, the name goes up to the sky. On a tall phone an
+  // item may sit elsewhere (--bx, --by, --btop), as the sand writing does.
   // Measured in the beach's own layout (offsets, not screen rects), so it
   // holds during the intro's moves too.
   const spots = [...document.querySelectorAll('.beach-spot')];
-  const capEl = document.querySelector('.dusk-caption'), legalEl = document.querySelector('.dusk-legal');
+  const legalEl = document.querySelector('.dusk-legal'), nameEl = $('duskH'), pickEl = $('duskPickup');
+  const spotVar = (sp, k) => {
+    const b = dusk.classList.contains('band') && sp.style.getPropertyValue('--b' + k);
+    return parseFloat(b || sp.style.getPropertyValue('--' + k));
+  };
   const ITEM_TOP = .73, CLEAR = 8;
   const partsOf = sp => ({ btn: sp.querySelector('.beach-item'), tag: sp.querySelector('.beach-tag'), card: sp.querySelector('.beach-card'), art: sp.querySelector('.beach-item-art') });
   // How far an item and its label reach either side of the spot and above
@@ -1179,12 +1194,13 @@
     const box = el => ({ l: el.offsetLeft, t: el.offsetTop, r: el.offsetLeft + el.offsetWidth, b: el.offsetTop + el.offsetHeight });
     // lifts every item clear of the © line (and the caption, when it is down
     // in the night); true if one would have to rise above its --top
+    const band = dusk.classList.contains('band');
     const lift = () => {
-      const obst = dusk.classList.contains('sky') ? [box(legalEl)] : [box(capEl), box(legalEl)];
+      const obst = !band ? [box(legalEl)] : dusk.classList.contains('sky') ? [box(pickEl), box(legalEl)] : [box(nameEl), box(pickEl), box(legalEl)];
       let short = false;
       spots.forEach(sp => {
-        const { btn } = partsOf(sp), fy0 = parseFloat(sp.style.getPropertyValue('--y'));
-        const top = parseFloat(sp.style.getPropertyValue('--top')) || ITEM_TOP;
+        const { btn } = partsOf(sp), fy0 = spotVar(sp, 'y');
+        const top = spotVar(sp, 'top') || ITEM_TOP;
         const { half, up } = reach(sp), down = btn.offsetHeight / 2;
         const l = p0 + sp.offsetLeft - half, r = p1 + sp.offsetLeft + half;
         let fy = fy0;
@@ -1197,8 +1213,33 @@
       });
       return short;
     };
-    dusk.classList.toggle('sky', !dusk.classList.contains('band'));
-    if (lift() && !dusk.classList.contains('sky')) { dusk.classList.add('sky'); lift(); }
+    dusk.classList.toggle('sky', !band);
+    const meet = (a, b) => a.l < b.r && b.l < a.r && a.t < b.b + CLEAR && b.t < a.b + CLEAR;
+    if ((lift() || (band && meet(box(nameEl), box(pickEl)))) && !dusk.classList.contains('sky')) { dusk.classList.add('sky'); lift(); }
+  }
+
+  // Where the beach pans, each item stays out of sight until it first comes
+  // into view, walked to or already there when the visitor lands; then it
+  // fades up into the light and stays for the visit. Those in view on
+  // landing appear one after another once the door has been painted in (at
+  // once after Skip, or when calm). Where the beach doesn't pan, or when
+  // calm, they are all there with the door, as before. Reads no layout, so
+  // it can run on every frame of a walk.
+  const seenSpots = new Set();
+  let revealOn = false;
+  function revealSpot(sp) { seenSpots.add(sp); sp.classList.remove('unseen'); }
+  function markUnseen(pans) {
+    spots.forEach(sp => { if (!pans || calm || root.classList.contains('calm')) revealSpot(sp); else if (!seenSpots.has(sp)) sp.classList.add('unseen'); });
+  }
+  const inView = (sp, p) => { const a = p + spotVar(sp, 'x') * geo.w, r = geo.w * .03; return a + r > 0 && a - r < geo.W; };
+  function revealInView(p) { spots.forEach(sp => { if (!seenSpots.has(sp) && inView(sp, p)) revealSpot(sp); }); }
+  // on landing: those in view, left to right, .35 s apart (staggered), or at once
+  function startReveal(staggered) {
+    if (revealOn) return; revealOn = true;
+    const now = spots.filter(sp => !seenSpots.has(sp) && inView(sp, pan));
+    if (!staggered || calm || root.classList.contains('calm')) return revealInView(pan);
+    now.forEach(sp => seenSpots.add(sp)); // (a walk meanwhile shows the rest)
+    now.sort((a, b) => spotVar(a, 'x') - spotVar(b, 'x')).forEach((sp, i) => setTimeout(() => sp.classList.remove('unseen'), 250 + i * 350));
   }
   // The pan that shows a spot's item and label whole (the one it is at, or
   // heading to, if they already are).
@@ -1278,7 +1319,7 @@
   document.addEventListener('focusin', e => { if (beachOpen && !beachOpen.contains(e.target)) closeCard(); });
   if ('ResizeObserver' in window) {
     const ro = new ResizeObserver(() => placeItems());
-    [capEl, legalEl, ...spots.map(sp => partsOf(sp).tag).filter(Boolean)].forEach(n => ro.observe(n));
+    [nameEl, pickEl, legalEl, ...spots.map(sp => partsOf(sp).tag).filter(Boolean)].forEach(n => ro.observe(n));
   }
 
   // Now and then a firefly drifts over to an item on the screen, lingers,
@@ -1290,7 +1331,7 @@
     setTimeout(flyVisit, 9000 + Math.random() * 7000);
     if (!flyEl || !window.gsap || flyTl || calmNow() || lowEndDevice || document.hidden || beachOpen || !dusk.classList.contains('live')) return;
     if (!settledAtDoor()) return;
-    const seen = spots.filter(sp => { const a = pan + sp.offsetLeft; return a > 20 && a < geo.W - 20; });
+    const seen = spots.filter(sp => { const a = pan + sp.offsetLeft; return seenSpots.has(sp) && !sp.classList.contains('unseen') && a > 20 && a < geo.W - 20; });
     if (!seen.length) return;
     const sp = seen[Math.floor(Math.random() * seen.length)], side = Math.random() < .5 ? -1 : 1;
     const tx = sp.offsetLeft, ty = sp.offsetTop - partsOf(sp).btn.offsetHeight * .3;
@@ -1400,8 +1441,9 @@
   // boxes to show it; they never scroll.
   dusk.addEventListener('focusin', e => {
     [dusk, $('duskWipe'), $('duskStill')].forEach(n => { n.scrollLeft = 0; n.scrollTop = 0; });
-    if (!panReady()) return;
     const spot = e.target.closest('.beach-spot');
+    if (spot) revealSpot(spot);
+    if (!panReady()) return;
     if (spot) { const to = spotPan(spot); if (Math.abs(to - (panEase ? panGoal : pan)) > .5) panTo(to); return; }
     const r = e.target.getBoundingClientRect();
     if (r.left < 0 || r.right > geo.W) panTo(pan + geo.W / 2 - (r.left + r.width / 2));
@@ -1480,8 +1522,12 @@
         gsap.set('#doorSign', { clearProps: 'transform,transformOrigin,opacity,filter' });
       }
     }
+    // on the door view (the intro's walk to the door may have been cut short)
+    if (Math.abs(pan - doorPan()) > .5) writePan(doorPan());
     // (never both places: a door tap during the intro may have gone in already)
     if (!root.classList.contains('inside')) root.classList.add('at-door');
+    // the items in view come into the light, one by one after the intro
+    startReveal(settling);
     try { localStorage.setItem('ng-seen-intro', '1'); } catch (e) { /* private mode: the intro plays again */ }
     window.preloadKitchen();
     // the hint, 1.2 s after the door appeared (at the end of the intro, that
@@ -1598,7 +1644,8 @@
     window.preloadKitchen(true);
     const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
     const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
-    const seam = $('doorSeam'), caption = [...document.querySelectorAll('.dusk-caption, .dusk-legal')], crop = $('duskCrop');
+    const seam = $('doorSeam'), caption = [...document.querySelectorAll('#duskH, #duskPickup, .dusk-legal')], crop = $('duskCrop');
+    const boat = document.querySelector('.dusk-boat'), boatAside = dusk.classList.contains('band');
     const lines = greet.querySelectorAll('.line > span'), after = document.querySelectorAll('#menu .translation, #menu .sig');
     let swapped = false, over = false, tl;
 
@@ -1607,7 +1654,7 @@
     // focus and the step in history).
     const swap = () => {
       if (swapped) return; swapped = true;
-      gsap.set([still, leaf, leny, light, seam, ...caption], { clearProps: 'all' });
+      gsap.set([still, leaf, leny, light, seam, boat, ...caption], { clearProps: 'all' });
       if (crop) crop.hidden = true;
       root.classList.remove('entering');
       setPlace('kitchen', { push: true });
@@ -1680,6 +1727,9 @@
         .to(glow, { scale: 6, duration: .5, ease: 'power2.in' }, PEAK - .5)
         .to(bloom, { autoAlpha: 1, duration: .45, ease: 'power2.in' }, PEAK - .45)
         .addLabel('bloomPeak', PEAK).call(atPeak, null, 'bloomPeak');
+      // the bangka in front of the door (a tall phone) slides out of the way
+      // as the camera nears it, so it never covers the doorway
+      if (boatAside) tl.to(boat, { xPercent: 45, opacity: 0, duration: .75, ease: 'power2.in' }, PUSH);
       // The kitchen, under the lifting bloom, settles and Leny says hello.
       // The light holds a moment first: the kitchen's first paint after the
       // jump can take a frame or a few, and it happens here, unseen.
@@ -1714,7 +1764,8 @@
     window.preloadKitchen(); // (also fetches the finer crop of the door, after a load on #menu)
     const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
     const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
-    const caption = [...document.querySelectorAll('.dusk-caption, .dusk-legal')], crop = $('duskCrop'), seam = $('doorSeam');
+    const caption = [...document.querySelectorAll('#duskH, #duskPickup, .dusk-legal')], crop = $('duskCrop'), seam = $('doorSeam');
+    const boat = document.querySelector('.dusk-boat');
     const cam = { p: 1, q: 1 };
     let swapped = false, over = false, setCam = () => {};
 
@@ -1738,7 +1789,7 @@
       const finish = () => {
         if (over) return; over = true;
         swap();
-        gsap.set([bloom, glow, still, leaf, leny, light, seam, ...caption], { clearProps: 'all' });
+        gsap.set([bloom, glow, still, leaf, leny, light, seam, boat, ...caption], { clearProps: 'all' });
         if (crop) crop.hidden = true;
         root.classList.remove('leaving');
         leaving = null; resolve();
@@ -1793,6 +1844,12 @@
         .addLabel('closed', PEAK + .95)
         .to(caption, { opacity: 1, duration: .4, ease: 'sine.out' }, SETTLED - .4)
         .addLabel('settled', SETTLED);
+      // the bangka in front of the door (a tall phone) waits out of the way
+      // and slides back in as the camera leaves the doorway
+      if (dusk.classList.contains('band')) {
+        gsap.set(boat, { xPercent: 45, opacity: 0 });
+        tl.to(boat, { xPercent: 0, opacity: 1, duration: .8, ease: 'power2.out' }, PEAK + .3);
+      }
     });
     return leaving;
   }
@@ -1959,6 +2016,10 @@
     if (done) return;
 
     const vw = innerWidth, vh = innerHeight, dpr = devicePixelRatio || 1;
+    // A tall phone's dawn is framed with the lighthouse in view; the walk to
+    // the door comes after nightfall (below). Before anything is measured.
+    const startPan = introPan(), walkTo = doorPan();
+    writePan(startPan);
     const lowEnd = (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
     if (lowEnd) root.classList.add('low-end');
     const stage = $('stage'), isle = $('stIsle'), word = $('stWord');
@@ -2204,7 +2265,15 @@
     // warm line of light at the door's seams and under it glows on, with the
     // soft light behind it. The door can be tapped once the wash is past its
     // middle.
-    const DOOR_AT = FALL_END + 1, WASH_T = 1.1, WASH_END = DOOR_AT + WASH_T, SIGN_AT = DOOR_AT + .8, GLOW_AT = WASH_END - .15;
+    // On a tall phone, once night has fallen, the camera walks along the
+    // beach to the door, so it stands in the middle of the screen, and the
+    // door is painted in a second after the walk ends.
+    const WALK_T = Math.abs(walkTo - startPan) > .5 ? 1.3 : 0;
+    if (WALK_T) {
+      const w = { p: startPan };
+      tl.to(w, { p: walkTo, duration: WALK_T, ease: 'sine.inOut', onUpdate: () => writePan(w.p) }, FALL_END - .1);
+    }
+    const DOOR_AT = FALL_END + 1 + (WALK_T ? WALK_T - .4 : 0), WASH_T = 1.1, WASH_END = DOOR_AT + WASH_T, SIGN_AT = DOOR_AT + .8, GLOW_AT = WASH_END - .15;
     const paint = $('doorPaint'), seam = $('doorSeam'), doorBtn = $('door');
     gsap.set([seam, light], { opacity: 0 });
     tl.addLabel('doorAt', DOOR_AT)

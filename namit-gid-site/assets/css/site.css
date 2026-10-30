@@ -489,6 +489,13 @@ html.at-door .dusk.pans { touch-action: pan-y pinch-zoom; -webkit-user-select: n
 .dusk-lamp { left: calc(50.5% + 19% * .78); top: 42.1%; width: 2.2%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; opacity: .45; scale: .8;
   background: radial-gradient(circle, #fff6d8 0, rgba(255, 210, 140, .8) 30%, rgba(255, 200, 120, 0) 70%); }
 .dusk-boat { left: 63%; width: 22%; top: 69.6%; clip-path: inset(0 0 22% 0); filter: brightness(.6) saturate(.7) sepia(.2) hue-rotate(-12deg); }
+/* On a tall phone the bangka is drawn up on the sand just in front of the
+   door, a little nearer (so a little bigger and lower), its bow over the
+   right edge of the door's frame below the handle: depth. It is in front of
+   the door and the night's fade, so it takes the fade's shade in its own
+   filter. It takes no taps, so a tap on the bow still opens the door. */
+.dusk.band .dusk-boat { left: 41.7%; width: 24%; top: 71%; z-index: 1; filter: brightness(.5) saturate(.65) sepia(.2) hue-rotate(-12deg); }
+.dusk-boat { pointer-events: none; }
 /* the bottom 30% of the painting fades into the night below it, under the door so its light and reflection stay bright */
 .dusk-fade { left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(transparent, #1B1F32); }
 
@@ -563,9 +570,16 @@ html.calm .pan-hint, html:not(.at-door) .pan-hint { display: none; }
    don't. The button's ::before is its glow: a warm copy
    of the same art behind it, haloed by drop-shadows, so the glow follows the
    item's shape. Only its opacity moves. */
-.beach-spot { --s: clamp(48px, calc(var(--art-w, 1600px) * .03), 80px); left: calc(var(--x) * 100%); top: calc(var(--ly, var(--y)) * 100%); width: 0; height: 0;
-  transition: opacity 600ms var(--ease-out); }
+.beach-spot { --s: clamp(48px, calc(var(--art-w, 1600px) * .03), 80px); left: calc(var(--x) * 100%); top: calc(var(--ly, var(--y)) * 100%); width: 0; height: 0; }
 html.intro .beach-spot { opacity: 0; visibility: hidden; }
+/* on a tall phone an item may sit elsewhere (--bx, --by; app.js) */
+.dusk.band .beach-spot { left: calc(var(--bx, var(--x)) * 100%); top: calc(var(--ly, var(--by, var(--y))) * 100%); }
+/* where the beach pans, an item not yet walked to is out of sight (app.js);
+   it then fades up into the light with a slight rise */
+.beach-spot { translate: 0 0; transition: opacity 650ms var(--ease-out), translate 650ms var(--ease-out); }
+.beach-spot.unseen { opacity: 0; translate: 0 10px; }
+.beach-spot.unseen, .beach-spot.unseen .beach-item, .beach-spot.unseen .beach-item::after { pointer-events: none; }
+html.calm .beach-spot { transition: none; }
 .beach-spot.open { z-index: 4; }
 .beach-item { position: absolute; left: calc(var(--s) / -2); top: calc(var(--s) / -2); width: var(--s); height: var(--s); padding: 0; border: 0; border-radius: 50%;
   background: none; color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -575,7 +589,7 @@ html.intro .beach-spot { opacity: 0; visibility: hidden; }
 .beach-item-art { display: block; max-width: none; }
 .beach-item::after { content: ''; clip-path: var(--hit); pointer-events: auto; }
 .beach-item::before { content: ''; opacity: .55; transition: opacity 250ms, translate 250ms var(--ease-out), scale 150ms var(--ease-out);
-  background: var(--art) center / 100% 100% no-repeat;
+  background: var(--glow, var(--art)) center / 100% 100% no-repeat;
   filter: brightness(0) invert(88%) sepia(60%) saturate(300%) hue-rotate(-14deg) blur(1.5px) drop-shadow(0 0 4px rgba(255, 220, 160, .9)) drop-shadow(0 0 10px rgba(255, 206, 140, .55)); }
 /* hover, focus or a press: a brighter glow and a tiny lift */
 .beach-item:hover::before, .beach-item:focus-visible::before, .beach-item:active::before, .beach-spot.open .beach-item::before, .beach-spot.visited .beach-item::before { opacity: 1; animation: none; }
@@ -596,7 +610,10 @@ html:not(.intro):not(.inside) .dusk.live .beach-item::before { animation: item-g
    height to put the writing, not the air beside the stick, on the spot and
    the button; --hit hugs the writing and the stick separately. */
 .beach-spot[data-item="sand"] { --art: url(../img/dusk/item-sand.webp?v=2); --hit: polygon(-3% 102%, -3% 93%, 4% 69%, 66% 64%, 75.5% 66%, 90.5% -1.5%, 99.5% 1.5%, 95.5% 42%, 91% 76%, 96% 88%, 96.5% 95%, 2% 104%); --aw: 2.767; --ah: 1.641; --oy: .34; }
-.beach-spot[data-item="octopus"] { --art: url(../img/dusk/item-octopus.webp); --hit: polygon(16.2% 16.2%, 21.2% 12.5%, 80.8% 3.7%, 92.1% 23.8%, 101.2% 49.9%, 95.5% 70.6%, 86.7% 88.4%, 62.9% 99.8%, 43.4% 99.3%, 14.8% 87.9%, 7% 76.3%, 1.5% 57.1%); --aw: 1.5; --ah: 1.041; }
+/* the octopus peeks out of the sea; its ripples fade into the painting's
+   water. Its glow is the octopus alone (--glow), so it never hazes the sea */
+.beach-spot[data-item="octopus"] { --art: url(../img/dusk/item-octopus.webp?v=2); --glow: url(../img/dusk/item-octopus-glow.webp?v=1); --hit: polygon(19.3% 47.3%, 30.6% 25.4%, 48.3% 0.5%, 60.3% -3.5%, 81.3% 15.8%, 87.3% 25.3%, 85.4% 58.7%, 74.2% 80.8%, 58.9% 89.5%, 44.6% 89.1%, 32.4% 82.8%, 22.2% 70.7%); --aw: 2.2; --ah: .917; }
+.beach-spot[data-item="octopus"] .beach-item-art { filter: brightness(.9) saturate(.85); }
 /* the label: short, glowing, above its item */
 .beach-tag { position: absolute; left: 50%; bottom: calc(100% + 2px); translate: -50% 0; white-space: nowrap; padding: 4px 9px 5px; border-radius: 999px;
   font: 600 13px/1 var(--sans); letter-spacing: .01em; color: #FBF3E2; background: rgba(24, 26, 44, .42);
@@ -633,6 +650,19 @@ html.calm .beach-fly, html.low-end .beach-fly { display: none; }
 .dusk .meta { font-size: 14px; color: #E3D8C4; }
 .dusk .next-pickup { font-size: 14px; color: #E3D8C4; }
 .dusk .next-pickup strong { color: #FBF3E2; }
+.dusk-pickup { display: grid; gap: 4px; justify-items: inherit; }
+/* A tall phone: the name stays in the night under the painting (or up in
+   the sky, .sky), and the pickup lines are written on the sand at the foot
+   of the painting, below the door's reflection and the bangka, fixed to the
+   screen like the name, so they never need a walk to find */
+.dusk.band .dusk-caption { display: contents; }
+.dusk.band #duskH { position: absolute; left: var(--gutter); right: var(--gutter); text-align: center; text-shadow: 0 1px 3px rgba(15, 18, 32, .75);
+  bottom: calc(24px + max(14px, env(safe-area-inset-bottom)) + 46px); }
+.dusk.band .dusk-pickup { position: absolute; left: var(--gutter); right: var(--gutter); top: calc(var(--art-y, 0px) + var(--art-h, 0px) * .93); gap: 2px; justify-items: center; text-align: center;
+  text-shadow: 0 1px 2px rgba(15, 18, 32, .95), 0 0 8px rgba(15, 18, 32, .8), 0 0 18px rgba(15, 18, 32, .5); }
+.dusk.band .dusk-pickup p { line-height: 1.35; }
+.dusk.band.sky #duskH { bottom: auto; top: calc(var(--bar) + 14px); text-shadow: 0 1px 3px rgba(15, 18, 32, .9), 0 0 6px rgba(15, 18, 32, .75), 0 0 18px rgba(15, 18, 32, .6); }
+html:has(#previewStrip:not([hidden])) .dusk.band.sky #duskH { top: calc(var(--bar) + 44px); }
 /* on wide screens it is right-aligned, under Open the Door, away from the
    door, the island and the hint */
 .dusk:not(.band) .dusk-caption { left: auto; max-width: max(50vw, 20rem); justify-items: end; text-align: right; }
