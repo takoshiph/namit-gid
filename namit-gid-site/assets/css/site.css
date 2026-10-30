@@ -549,7 +549,8 @@ html.calm .pan-hint, html:not(.at-door) .pan-hint { display: none; }
 
 /* ── four things on the sand to tap ── */
 /* Each .beach-spot is a point of the painting (--x, --y, fractions; --ly is
-   the y placeItems() lifts it to, clear of the caption, on shorter screens)
+   the y placeItems() lifts it to, clear of the © line or a tall phone's
+   caption, never above its --top)
    and moves with the pan. On it: the item (a real button, at least 48 px),
    its label above it, and its card. .beach-item-art is the painted item, a
    box of --aw x --ah items (the art's own aspect) centred on the spot, and
@@ -589,7 +590,7 @@ html:not(.intro):not(.inside) .dusk.live .beach-item::before { animation: item-g
    in --s (the art's own aspect) */
 .beach-spot[data-item="bottle"] { --art: url(../img/dusk/item-bottle.webp); --hit: polygon(-1.6% 44.9%, 18.6% 16.7%, 28.7% 8.2%, 56.1% -6%, 94% -3.7%, 96.1% 2.6%, 104.1% 60.8%, 91.3% 90%, 90.4% 90.5%, 35.7% 91.9%, 34.5% 91.4%, -1.6% 53%); --aw: 1.5; --ah: .641; }
 .beach-spot[data-item="shell"] { --art: url(../img/dusk/item-shell.webp); --hit: polygon(-5.6% 66.9%, 13.5% 9.8%, 51.4% -5.4%, 55.6% -5.4%, 68.6% 7.8%, 76.5% 17.9%, 104.8% 73.6%, 104.6% 79.3%, 98.9% 89.6%, 82% 97.7%, 5.7% 92.1%, -2.3% 77.8%); --aw: 1.2; --ah: .908; }
-/* the sand: "Leave a review" written in the wet sand with the stick that
+/* the sand: "Leave a review" written in the sand with the stick that
    wrote it planted at its end, and no label (the words are painted). The
    writing is the art's lower third, so --oy lifts the art box by .34 of its
    height to put the writing, not the air beside the stick, on the spot and
@@ -622,21 +623,31 @@ html.calm .beach-fly, html.low-end .beach-fly { display: none; }
   font: 400 12px/16px var(--sans); color: rgba(227, 216, 196, .66); text-shadow: 0 1px 2px rgba(15, 18, 32, .8); }
 .dusk-legal a { display: inline-block; padding: 14px 12px; margin: -14px -8px; color: inherit; text-underline-offset: 2px; }
 
-/* the name and the pickup line, quiet, at the foot of the screen (clear of
-   the kitchen paper's torn edge, which overlaps the last 24 px) */
+/* the name and the pickup line, quiet. On a tall phone (.band) it sits in
+   the night under the painting, at the foot of the screen (clear of the
+   kitchen paper's torn edge, which overlaps the last 24 px); wherever the
+   painting fills the screen it is up in the sky (.sky, below) */
 .dusk-caption { position: absolute; left: var(--gutter); right: var(--gutter); bottom: calc(24px + max(14px, env(safe-area-inset-bottom)));
   display: grid; gap: 4px; justify-items: center; text-align: center; text-shadow: 0 1px 3px rgba(15, 18, 32, .75); }
 .dusk h1 { font: 400 19px/1.2 var(--serif); color: #FBF3E2; text-wrap: balance; }
 .dusk .meta { font-size: 14px; color: #E3D8C4; }
 .dusk .next-pickup { font-size: 14px; color: #E3D8C4; }
 .dusk .next-pickup strong { color: #FBF3E2; }
-/* on wide screens it sits bottom right, away from the door and its hint */
+/* on wide screens it is right-aligned, under Open the Door, away from the
+   door, the island and the hint */
 .dusk:not(.band) .dusk-caption { left: auto; max-width: max(50vw, 20rem); justify-items: end; text-align: right; }
 @media (min-width: 900px) { .dusk h1 { font-size: 22px; } }
-/* a short screen has no sand clear of the caption on the right, so the
-   caption goes up under the bar, over the sky (placeItems() in app.js) */
-.dusk.low .dusk-caption { bottom: auto; top: calc(var(--bar) + 14px); text-shadow: 0 1px 3px rgba(15, 18, 32, .9), 0 0 16px rgba(15, 18, 32, .6); }
-html:has(#previewStrip:not([hidden])) .dusk.low .dusk-caption { top: calc(var(--bar) + 44px); }
+/* .sky (placeItems() in app.js): up under the bar, in the empty sky, with a
+   deeper shadow to read over the clouds. Always where the painting fills the
+   screen; on a tall phone only if the night below is too short for it. */
+.dusk.sky .dusk-caption { bottom: auto; top: calc(var(--bar) + 14px); text-shadow: 0 1px 3px rgba(15, 18, 32, .9), 0 0 6px rgba(15, 18, 32, .75), 0 0 18px rgba(15, 18, 32, .6); }
+html:has(#previewStrip:not([hidden])) .dusk.sky .dusk-caption { top: calc(var(--bar) + 44px); }
+/* a short landscape screen: tighter, so it ends above the island's lighthouse */
+@media (max-height: 480px) {
+  .dusk.sky .dusk-caption { top: calc(var(--bar) + 8px); gap: 2px; }
+  .dusk.sky .meta, .dusk.sky .next-pickup { line-height: 1.3; }
+  html:has(#previewStrip:not([hidden])) .dusk.sky .dusk-caption { top: calc(var(--bar) + 38px); }
+}
 
 /* idle life, only while the beach is on screen after the intro (a hidden
    beach, inside, counts as off screen): the sign sways, the light breathes,

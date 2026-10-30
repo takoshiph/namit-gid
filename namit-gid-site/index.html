@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=99">
+<link rel="stylesheet" href="assets/css/site.css?v=100">
 <script>
   /* Decide the intro before first paint so nothing flashes. For review, the
      intro plays on every visit and every refresh. With reduced motion or data
@@ -175,7 +175,7 @@
       <div class="fireflies" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <!-- Four things on the sand to tap, in fractions of the painting (--x, --y:
            each item's centre; placeItems() in app.js may lift one clear of the
-           caption). Each item's painted art is an <img> with alt="" (the
+           © line or a tall phone's caption, never above its --top, default .73). Each item's painted art is an <img> with alt="" (the
            button's label names it). The sand opens the review form; the others, a card. -->
       <div class="beach-spot" data-item="bottle" style="--x:.16;--y:.84">
         <button class="beach-item" type="button" data-item="bottle" aria-expanded="false" aria-controls="card-bottle"><img class="beach-item-art" src="assets/img/dusk/item-bottle.webp" width="480" height="205" alt="" decoding="async"><span class="beach-tag" id="tag-bottle">A note from Leny</span></button>
@@ -210,11 +210,13 @@
         </div></div>
         <button class="door" id="door" type="button" aria-label="Come inside"></button>
       </div>
-      <div class="beach-spot" data-item="sand" style="--x:.535;--y:.83">
-        <!-- the words are painted in the sand, so no label: the button's own name says it -->
+      <div class="beach-spot" data-item="sand" style="--x:.82;--y:.935;--top:.89">
+        <!-- written in the dry sand below the bangka, its stick standing just past
+             the bow; never lifted above --top, so the writing stays clear of the
+             hull. The words are painted, so no label: the button's own name says it -->
         <button class="beach-item" type="button" data-item="sand" aria-haspopup="dialog" aria-label="Leave a review"><img class="beach-item-art" src="assets/img/dusk/item-sand.webp?v=2" width="681" height="404" alt="" decoding="async"></button>
       </div>
-      <div class="beach-spot" data-item="octopus" style="--x:.91;--y:.80">
+      <div class="beach-spot" data-item="octopus" style="--x:.94;--y:.79">
         <button class="beach-item" type="button" data-item="octopus" aria-expanded="false" aria-controls="card-octopus"><img class="beach-item-art" src="assets/img/dusk/item-octopus.webp" width="480" height="333" alt="" decoding="async"><span class="beach-tag" id="tag-octopus">Takoshi</span></button>
         <div class="beach-card" data-item="octopus" id="card-octopus" role="group" aria-labelledby="tag-octopus" tabindex="-1" hidden>
           <button class="x beach-card-x" type="button" aria-label="Close">×</button>
@@ -339,6 +341,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=87" defer></script>
+<script src="assets/js/app.js?v=88" defer></script>
 </body>
 </html>

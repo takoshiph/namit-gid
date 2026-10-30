@@ -1152,14 +1152,18 @@
   // ── Four things on the sand ─────────────────────────────────────────────
   // Each .beach-spot is a point of the painting (--x, --y) with its item, a
   // label above it and, but for the sand, a card. They move with the pan; the
-  // caption and the © line don't, so an item that would pass under either at
-  // some pan is lifted (--ly) just clear of them, never above ITEM_FLOOR (the
-  // wet sand by the water). On a screen too short for that, the caption goes
-  // up under the bar instead (.dusk.low). Measured in the beach's own layout
-  // (offsets, not screen rects), so it holds during the intro's moves too.
+  // caption and the © line don't. Wherever the painting fills the screen the
+  // caption is up in the sky (.dusk.sky), so only the © line is in the
+  // sand's way; on a tall phone the caption sits in the night under the
+  // painting. An item that would pass under either at some pan is lifted
+  // (--ly) just clear of them, never above its --top (default ITEM_TOP, the
+  // wet sand by the water; the sand writing's is just under the bangka). If
+  // that is not enough on a tall phone, its caption goes up to the sky too.
+  // Measured in the beach's own layout (offsets, not screen rects), so it
+  // holds during the intro's moves too.
   const spots = [...document.querySelectorAll('.beach-spot')];
   const capEl = document.querySelector('.dusk-caption'), legalEl = document.querySelector('.dusk-legal');
-  const ITEM_FLOOR = .73, CLEAR = 8;
+  const ITEM_TOP = .73, CLEAR = 8;
   const partsOf = sp => ({ btn: sp.querySelector('.beach-item'), tag: sp.querySelector('.beach-tag'), card: sp.querySelector('.beach-card'), art: sp.querySelector('.beach-item-art') });
   // How far an item and its label reach either side of the spot and above
   // it. The sand has no label (its words are painted), so its painted art
@@ -1173,25 +1177,28 @@
     if (!geo.h || !spots.length) return;
     const { min, max } = panRange(), [p0, p1] = canPan() ? [min, max] : [pan, pan];
     const box = el => ({ l: el.offsetLeft, t: el.offsetTop, r: el.offsetLeft + el.offsetWidth, b: el.offsetTop + el.offsetHeight });
+    // lifts every item clear of the © line (and the caption, when it is down
+    // in the night); true if one would have to rise above its --top
     const lift = () => {
-      const obst = [box(capEl), box(legalEl)];
-      let low = false;
+      const obst = dusk.classList.contains('sky') ? [box(legalEl)] : [box(capEl), box(legalEl)];
+      let short = false;
       spots.forEach(sp => {
         const { btn } = partsOf(sp), fy0 = parseFloat(sp.style.getPropertyValue('--y'));
+        const top = parseFloat(sp.style.getPropertyValue('--top')) || ITEM_TOP;
         const { half, up } = reach(sp), down = btn.offsetHeight / 2;
         const l = p0 + sp.offsetLeft - half, r = p1 + sp.offsetLeft + half;
         let fy = fy0;
-        for (let k = 0; k < 2; k++) obst.forEach(o => {
+        for (let k = 0; k < obst.length; k++) obst.forEach(o => {
           const ay = geo.y + fy * geo.h;
           if (r > o.l - CLEAR && l < o.r + CLEAR && ay + down > o.t - CLEAR && ay - up < o.b + CLEAR) fy = (o.t - CLEAR - down - geo.y) / geo.h;
         });
-        if (fy < ITEM_FLOOR) low = true;
+        if (fy < top) { short = true; fy = top; }
         if (fy < fy0) sp.style.setProperty('--ly', fy.toFixed(4)); else sp.style.removeProperty('--ly');
       });
-      return low;
+      return short;
     };
-    dusk.classList.remove('low');
-    if (lift()) { dusk.classList.add('low'); lift(); }
+    dusk.classList.toggle('sky', !dusk.classList.contains('band'));
+    if (lift() && !dusk.classList.contains('sky')) { dusk.classList.add('sky'); lift(); }
   }
   // The pan that shows a spot's item and label whole (the one it is at, or
   // heading to, if they already are).
