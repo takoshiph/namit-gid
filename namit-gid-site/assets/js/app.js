@@ -1114,17 +1114,19 @@
   function momentum(v) {
     stopPan();
     if (!window.gsap) return writePan(clamp(pan, panRange().min, panRange().max));
-    let p = pan;
+    // p glides in the finger's (unrubbered) space; past an end the painting
+    // shows it through the same rubber band as a drag
+    let p = unrubber(pan);
     dusk.classList.add('panning');
     glide = (time, dt) => {
-      dt = Math.min(dt || 16, 40);
+      dt = Math.min(dt || 16, 25);
       const { min, max } = panRange(), o = p > max ? p - max : p < min ? p - min : 0;
       if (o) v += (-SPRING * SPRING * o - 2 * SPRING * v) * dt;
       else v *= Math.exp(-dt / FRICTION);
       p += v * dt;
       const o2 = p > max ? p - max : p < min ? p - min : 0;
       if (Math.abs(v) < .02 && Math.abs(o2) < .3) { writePan(clamp(p, min, max)); stopPan(); return; }
-      writePan(p);
+      writePan(rubber(p));
     };
     gsap.ticker.add(glide);
   }
@@ -1455,7 +1457,8 @@
         gsap.set(['#doorSign', '#doorLight'], { clearProps: 'transform,transformOrigin' });
       }
     }
-    root.classList.add('at-door');
+    // (never both places: a door tap during the intro may have gone in already)
+    if (!root.classList.contains('inside')) root.classList.add('at-door');
     try { localStorage.setItem('ng-seen-intro', '1'); } catch (e) { /* private mode: the intro plays again */ }
     window.preloadKitchen();
     landed();
@@ -1482,18 +1485,22 @@
   // The kitchen painting, decoded, so the page can swap to it under the
   // bloom. Starts with nightfall, or on landing at the door. Also fetches the
   // finer crop of the door's surroundings for the push in.
-  let kitchenP = null, kitchenReady = false;
-  window.preloadKitchen = function preloadKitchen() {
-    if (!kitchenP) {
-      const img = document.querySelector('.k-wall');
-      kitchenP = (img && img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => { kitchenReady = true; });
-      // the rest of the kitchen's pictures, decoded ahead too, so its first
-      // paint after the swap is quick (the lazy ones wouldn't start loading
-      // while the kitchen is hidden)
+  // Under data saver, the rest of the kitchen waits until the visitor goes
+  // in (going = true), and calm never fetches the crop (its entrance is a
+  // crossfade, with no camera).
+  let kitchenP = null, kitchenReady = false, kitchenAll = false;
+  window.preloadKitchen = function preloadKitchen(going) {
+    const img = document.querySelector('.k-wall');
+    if (!kitchenP) kitchenP = (img && img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => { kitchenReady = true; });
+    // the rest of the kitchen's pictures, decoded ahead too, so its first
+    // paint after the swap is quick (the lazy ones wouldn't start loading
+    // while the kitchen is hidden)
+    if (!kitchenAll && (going === true || !navigator.connection?.saveData)) {
+      kitchenAll = true;
       document.querySelectorAll('#kWorld img').forEach(i => { if (i !== img && i.decode) { i.loading = 'eager'; i.decode().catch(() => {}); } });
-      const crop = $('duskCrop');
-      if (crop && !crop.getAttribute('src')) crop.src = 'assets/img/dusk/beach-door-crop.webp';
     }
+    const crop = $('duskCrop');
+    if (crop && !calmNow() && !crop.getAttribute('src')) crop.src = 'assets/img/dusk/beach-door-crop.webp';
     return kitchenP;
   };
 
@@ -1556,11 +1563,14 @@
     if (entering) return entering;
     if (leaving) return (entering = leaving.then(() => { entering = null; return enterKitchen(); }));
     // the beach stops where it is (a finger still down no longer walks it),
-    // and the camera finds the door there
+    // and the camera finds the door there. A door tap or Enter during the
+    // intro ends it first (as Skip does), so the entrance starts from the
+    // settled beach and the intro's own landing can't follow it in.
+    if (!done) toDoor();
     stopPan(); hintOff(false); closeCard(); flyOff(); walk = null;
     if (!window.gsap) { setPlace('kitchen', { push: true }); return Promise.resolve(); }
     const quiet = calmNow();
-    window.preloadKitchen();
+    window.preloadKitchen(true);
     const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
     const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
     const hint = $('doorHint'), caption = [...document.querySelectorAll('.dusk-caption, .dusk-legal')], crop = $('duskCrop');
