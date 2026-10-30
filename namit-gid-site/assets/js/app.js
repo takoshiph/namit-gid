@@ -1167,8 +1167,7 @@
   // the painting. An item that would pass under any of them at some pan is
   // lifted (--ly) just clear of them, never above its --top (default
   // ITEM_TOP, the wet sand by the water; the sand writing's is just under
-  // the bangka). If that is not enough on a tall phone, or the name would
-  // meet the pickup lines, the name goes up to the sky. On a tall phone an
+  // the bangka). The name is always up in the sky. On a tall phone an
   // item may sit elsewhere (--bx, --by, --btop), as the sand writing does.
   // Measured in the beach's own layout (offsets, not screen rects), so it
   // holds during the intro's moves too.
@@ -1213,9 +1212,10 @@
       });
       return short;
     };
-    dusk.classList.toggle('sky', !band);
-    const meet = (a, b) => a.l < b.r && b.l < a.r && a.t < b.b + CLEAR && b.t < a.b + CLEAR;
-    if ((lift() || (band && meet(box(nameEl), box(pickEl)))) && !dusk.classList.contains('sky')) { dusk.classList.add('sky'); lift(); }
+    // the name is always up in the sky, above everything (on a tall phone
+    // too, so it reads first, above the pickup lines on the sand)
+    dusk.classList.add('sky');
+    lift();
   }
 
   // Where the beach pans, each item stays out of sight until it first comes

@@ -651,13 +651,12 @@ html.calm .beach-fly, html.low-end .beach-fly { display: none; }
 .dusk .next-pickup { font-size: 14px; color: #E3D8C4; }
 .dusk .next-pickup strong { color: #FBF3E2; }
 .dusk-pickup { display: grid; gap: 4px; justify-items: inherit; }
-/* A tall phone: the name stays in the night under the painting (or up in
-   the sky, .sky), and the pickup lines are written on the sand at the foot
+/* A tall phone: the name is up in the sky at the top of the screen (.sky,
+   always), centred, and the pickup lines are written on the sand at the foot
    of the painting, below the door's reflection and the bangka, fixed to the
    screen like the name, so they never need a walk to find */
 .dusk.band .dusk-caption { display: contents; }
-.dusk.band #duskH { position: absolute; left: var(--gutter); right: var(--gutter); text-align: center; text-shadow: 0 1px 3px rgba(15, 18, 32, .75);
-  bottom: calc(24px + max(14px, env(safe-area-inset-bottom)) + 46px); }
+.dusk.band #duskH { position: absolute; left: var(--gutter); right: var(--gutter); text-align: center; }
 .dusk.band .dusk-pickup { position: absolute; left: var(--gutter); right: var(--gutter); top: calc(var(--art-y, 0px) + var(--art-h, 0px) * .93); gap: 2px; justify-items: center; text-align: center;
   text-shadow: 0 1px 2px rgba(15, 18, 32, .95), 0 0 8px rgba(15, 18, 32, .8), 0 0 18px rgba(15, 18, 32, .5); }
 .dusk.band .dusk-pickup p { line-height: 1.35; }
