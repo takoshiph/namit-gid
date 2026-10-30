@@ -16,17 +16,15 @@
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
 <link rel="stylesheet" href="assets/css/site.css?v=98">
 <script>
-  /* Decide the intro before first paint so nothing flashes. The intro plays
-     once per device (localStorage 'ng-seen-intro'); after that, and with
-     reduced motion or data saver, the page opens at the door (html.at-door).
-     A link to #menu opens in the kitchen (html.inside). On the redesign
-     preview, or with ?intro in the URL, it plays on every visit for review. */
+  /* Decide the intro before first paint so nothing flashes. For review, the
+     intro plays on every visit and every refresh. With reduced motion or data
+     saver the page opens at the door (html.at-door); a link to #menu opens in
+     the kitchen (html.inside). To go back to once per device, read
+     localStorage 'ng-seen-intro' into `seen` here. */
   (function () {
     var d = document.documentElement, rm = matchMedia('(prefers-reduced-motion: reduce)').matches,
         sd = navigator.connection && navigator.connection.saveData, seen = false,
         menu = location.hash === '#menu';
-    try { seen = localStorage.getItem('ng-seen-intro') === '1'; } catch (e) {}
-    if (/^redesign-preview\./.test(location.hostname) || /[?&]intro\b/.test(location.search)) seen = false;
     if (rm || sd) d.classList.add('calm');
     else if (!seen && !menu) { d.classList.add('intro'); return; }
     d.classList.add(menu ? 'inside' : 'at-door');
