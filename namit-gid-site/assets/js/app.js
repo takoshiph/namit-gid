@@ -1160,7 +1160,15 @@
   const spots = [...document.querySelectorAll('.beach-spot')];
   const capEl = document.querySelector('.dusk-caption'), legalEl = document.querySelector('.dusk-legal');
   const ITEM_FLOOR = .73, CLEAR = 8;
-  const partsOf = sp => ({ btn: sp.querySelector('.beach-item'), tag: sp.querySelector('.beach-tag'), card: sp.querySelector('.beach-card') });
+  const partsOf = sp => ({ btn: sp.querySelector('.beach-item'), tag: sp.querySelector('.beach-tag'), card: sp.querySelector('.beach-card'), art: sp.querySelector('.beach-item-art') });
+  // How far an item and its label reach either side of the spot and above
+  // it. The sand has no label (its words are painted), so its painted art
+  // (the writing and the stick) counts instead.
+  const reach = sp => {
+    const { btn, tag, art } = partsOf(sp);
+    if (tag) return { half: Math.max(btn.offsetWidth, tag.offsetWidth) / 2, up: btn.offsetHeight / 2 + 2 + tag.offsetHeight };
+    return { half: Math.max(btn.offsetWidth, art ? art.offsetWidth : 0) / 2, up: Math.max(btn.offsetHeight / 2, art ? btn.offsetHeight / 2 - art.offsetTop : 0) };
+  };
   function placeItems() {
     if (!geo.h || !spots.length) return;
     const { min, max } = panRange(), [p0, p1] = canPan() ? [min, max] : [pan, pan];
@@ -1169,8 +1177,8 @@
       const obst = [box(capEl), box(legalEl)];
       let low = false;
       spots.forEach(sp => {
-        const { btn, tag } = partsOf(sp), fy0 = parseFloat(sp.style.getPropertyValue('--y'));
-        const half = Math.max(btn.offsetWidth, tag.offsetWidth) / 2, up = btn.offsetHeight / 2 + 2 + tag.offsetHeight, down = btn.offsetHeight / 2;
+        const { btn } = partsOf(sp), fy0 = parseFloat(sp.style.getPropertyValue('--y'));
+        const { half, up } = reach(sp), down = btn.offsetHeight / 2;
         const l = p0 + sp.offsetLeft - half, r = p1 + sp.offsetLeft + half;
         let fy = fy0;
         for (let k = 0; k < 2; k++) obst.forEach(o => {
@@ -1188,8 +1196,8 @@
   // The pan that shows a spot's item and label whole (the one it is at, or
   // heading to, if they already are).
   function spotPan(sp) {
-    const cur = panEase ? panGoal : pan, { min, max } = panRange(), { btn, tag } = partsOf(sp);
-    const half = Math.max(btn.offsetWidth, tag.offsetWidth) / 2 + 16, a = cur + sp.offsetLeft;
+    const cur = panEase ? panGoal : pan, { min, max } = panRange();
+    const half = reach(sp).half + 16, a = cur + sp.offsetLeft;
     const to = a - half < 0 ? cur - (a - half) : a + half > geo.W ? cur - (a + half - geo.W) : cur;
     return clamp(to, min, max);
   }
@@ -1205,7 +1213,7 @@
     const cw = card.offsetWidth, ch = card.offsetHeight, s = btn.offsetHeight;
     const ax = goal + sp.offsetLeft, ay = geo.y + sp.offsetTop;
     const strip = $('previewStrip'), topLimit = $('bar').offsetHeight + (strip && !strip.hidden ? strip.offsetHeight : 0) + 8;
-    let left = clamp(ax - cw / 2, 12, W - cw - 12), top = ay - s / 2 - 2 - tag.offsetHeight - 10 - ch;
+    let left = clamp(ax - cw / 2, 12, W - cw - 12), top = ay - s / 2 - 2 - (tag ? tag.offsetHeight : 0) - 10 - ch;
     if (top < topLimit) {
       const roomR = W - (ax + s / 2) - 12, roomL = ax - s / 2 - 12;
       left = clamp(roomR >= cw + 10 || roomR >= roomL ? ax + s / 2 + 10 : ax - s / 2 - 10 - cw, 12, W - cw - 12);
@@ -1253,7 +1261,7 @@
     const tapped = !e.detail || !press || press.btn !== btn || press.ok;
     press = null;
     if (!tapped || !settledAtDoor()) return;
-    hintOff(false);
+    hintOff();
     if (btn.dataset.item === 'sand') { closeCard(); openReview(); return; }
     openCard(btn.closest('.beach-spot'));
   });
@@ -1263,7 +1271,7 @@
   document.addEventListener('focusin', e => { if (beachOpen && !beachOpen.contains(e.target)) closeCard(); });
   if ('ResizeObserver' in window) {
     const ro = new ResizeObserver(() => placeItems());
-    [capEl, legalEl, ...spots.map(sp => partsOf(sp).tag)].forEach(n => ro.observe(n));
+    [capEl, legalEl, ...spots.map(sp => partsOf(sp).tag).filter(Boolean)].forEach(n => ro.observe(n));
   }
 
   // Now and then a firefly drifts over to an item on the screen, lingers,
@@ -1392,33 +1400,41 @@
     if (r.left < 0 || r.right > geo.W) panTo(pan + geo.W / 2 - (r.left + r.width / 2));
   });
 
-  // The gesture hint: the first time panning is possible on this device, a
-  // soft fingertip glides sideways once with a fading trail, 3.5 s after
-  // landing at the door, then never again. Any walk, or a tap on the door,
-  // is as good as having seen it. Never when calm.
+  // The gesture hint: on landing at the beach where it pans, a soft
+  // fingertip glides one way and back, twice, with a fading trail, starting
+  // 1.2 s after the door has appeared, then fades. It stops for good, for
+  // this visit, as soon as the visitor walks along the beach or taps
+  // something (the door, an item, Open the Door). Never when calm.
+  // For review it shows on every landing, the way the intro replays. To go
+  // back to once per device: in landed(), also return when
+  // localStorage.getItem('ng-seen-pan') === '1'; and in hintOff(), when seen,
+  // also localStorage.setItem('ng-seen-pan', '1') (in a try, for private mode).
   const panHint = $('panHint');
   let hintT = 0, hintTl = null, panSeen = false;
-  const seenPan = () => { try { return localStorage.getItem('ng-seen-pan') === '1'; } catch (e) { return false; } };
   function hintOff(seen = true) {
     clearTimeout(hintT); hintT = 0;
     if (hintTl) { hintTl.kill(); hintTl = null; gsap.to(panHint, { opacity: 0, '--trail': 0, duration: .2, ease: 'sine.out' }); }
-    if (seen && !panSeen) { panSeen = true; try { localStorage.setItem('ng-seen-pan', '1'); } catch (e) { /* private mode */ } }
+    if (seen) panSeen = true;
   }
-  function landed() {
+  function landed(delay = 1200) {
     clearTimeout(hintT); hintT = 0;
-    if (!panHint || hintTl || panSeen || !window.gsap || calmNow() || seenPan()) return;
+    if (!panHint || hintTl || panSeen || !window.gsap || calmNow()) return;
     hintT = setTimeout(() => {
       hintT = 0;
-      if (!panReady() || calmNow() || seenPan()) return; // gone in: again on the way out
-      gsap.set(panHint, { x: 0, opacity: 0, '--trail': 0 });
-      hintTl = gsap.timeline({ onComplete: () => { hintTl = null; hintOff(); } })
-        .to(panHint, { opacity: .85, duration: .35, ease: 'sine.out' }, 0)
-        .to(panHint, { x: -.22 * innerWidth, duration: 1.1, ease: 'power2.inOut' }, .25)
-        .to(panHint, { '--trail': 1, duration: .55, ease: 'sine.out' }, .25)
-        .to(panHint, { '--trail': 0, duration: .55, ease: 'sine.in' }, .8)
-        .to(panHint, { opacity: 0, duration: .45, ease: 'sine.in' }, 1.2);
+      if (!panReady() || calmNow() || panSeen) return; // gone in: again on the way out
+      const D = Math.round(Math.min(160, Math.max(70, innerWidth * .17)));
+      gsap.set(panHint, { x: 0, opacity: 0, '--trail': 0, '--reach': D + 'px' });
+      // one glide: from x0 to x1, the trail stretching out behind and drawing in as it slows
+      const glide = (t, x1, side) => hintTl
+        .to(panHint, { x: x1, duration: 1, ease: 'power2.inOut' }, t)
+        .to(panHint, { '--trail': side, duration: .45, ease: 'sine.out' }, t + .05)
+        .to(panHint, { '--trail': 0, duration: .5, ease: 'sine.in' }, t + .5);
+      hintTl = gsap.timeline({ onComplete: () => { hintTl = null; } })
+        .to(panHint, { opacity: .95, duration: .35, ease: 'sine.out' }, 0);
+      glide(.2, -D, 1); glide(1.3, D * .35, -1); glide(2.4, -D * .65, 1); glide(3.5, 0, -1);
+      hintTl.to(panHint, { opacity: 0, duration: .5, ease: 'sine.in' }, 4.3);
       window.__ngHint = hintTl; // for checks
-    }, 3500);
+    }, delay);
   }
 
   // ── Intro: a camera pulls back from the lighthouse at dawn, a bird and a
@@ -1452,16 +1468,18 @@
     if (tl && !settling) {
       tl.kill();
       if (window.gsap) {
-        // the door as nightfall left it, back to the stylesheet
-        gsap.set(['#doorSign', '#doorLight', '#doorLeaf', '#duskDoor .door-frame', '#duskDoor .door-reflect'], { clearProps: 'opacity,filter' });
-        gsap.set(['#doorSign', '#doorLight'], { clearProps: 'transform,transformOrigin' });
+        // the door back to the stylesheet: there at once, shut, with no wash
+        gsap.set(['#doorPaint', '#door', '#doorSeam', '#doorLight'], { clearProps: 'all' });
+        gsap.set('#doorSign', { clearProps: 'transform,transformOrigin,opacity,filter' });
       }
     }
     // (never both places: a door tap during the intro may have gone in already)
     if (!root.classList.contains('inside')) root.classList.add('at-door');
     try { localStorage.setItem('ng-seen-intro', '1'); } catch (e) { /* private mode: the intro plays again */ }
     window.preloadKitchen();
-    landed();
+    // the hint, 1.2 s after the door appeared (at the end of the intro, that
+    // was WASH_END, .6 s before duskEnd; otherwise it appears now)
+    landed(settling ? 600 : 1200);
   }
   // The two places: the beach (html.at-door) and the kitchen (html.inside).
   // You are always in exactly one, and the focus goes with you: to Leny's
@@ -1567,13 +1585,13 @@
     // intro ends it first (as Skip does), so the entrance starts from the
     // settled beach and the intro's own landing can't follow it in.
     if (!done) toDoor();
-    stopPan(); hintOff(false); closeCard(); flyOff(); walk = null;
+    stopPan(); hintOff(); closeCard(); flyOff(); walk = null;
     if (!window.gsap) { setPlace('kitchen', { push: true }); return Promise.resolve(); }
     const quiet = calmNow();
     window.preloadKitchen(true);
     const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
     const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
-    const hint = $('doorHint'), caption = [...document.querySelectorAll('.dusk-caption, .dusk-legal')], crop = $('duskCrop');
+    const seam = $('doorSeam'), caption = [...document.querySelectorAll('.dusk-caption, .dusk-legal')], crop = $('duskCrop');
     const lines = greet.querySelectorAll('.line > span'), after = document.querySelectorAll('#menu .translation, #menu .sig');
     let swapped = false, over = false, tl;
 
@@ -1582,7 +1600,7 @@
     // focus and the step in history).
     const swap = () => {
       if (swapped) return; swapped = true;
-      gsap.set([still, leaf, leny, light, hint, ...caption], { clearProps: 'all' });
+      gsap.set([still, leaf, leny, light, seam, ...caption], { clearProps: 'all' });
       if (crop) crop.hidden = true;
       root.classList.remove('entering');
       setPlace('kitchen', { push: true });
@@ -1624,8 +1642,8 @@
         return;
       }
 
-      // The idle light and hint hand their opacity to GSAP as they are now.
-      gsap.set([light, hint], { opacity: (i, el) => getComputedStyle(el).opacity });
+      // The idle light hands its opacity to GSAP as it is now.
+      gsap.set(light, { opacity: getComputedStyle(light).opacity });
       root.classList.add('entering');
       // The finer painting of the door's surroundings, once it has decoded.
       if (crop && crop.getAttribute('src')) crop.decode().then(() => { if (!swapped) crop.hidden = false; }).catch(() => {});
@@ -1634,18 +1652,20 @@
       // the beat on Leny, so the camera goes straight on through it.
       const { cam, setCam } = doorCamera(), vh = innerHeight;
       setCam(); gsap.set(glow, { scale: .3 });
-      gsap.set(leaf, { rotationY: 14, transformOrigin: '0% 50%' });
+      gsap.set(leaf, { rotationY: 0, transformOrigin: '0% 50%' });
 
       const PUSH = .1, PEAK = 1.65;
       tl.addLabel('push', PUSH)
         // anticipation: a hand on the door, it gives a little
         .to(leaf, { scale: .98, duration: .15, ease: 'power2.out' }, 0)
         .to(leaf, { scale: 1, duration: .5, ease: 'power2.out' }, .15)
-        .to([hint, ...caption], { opacity: 0, duration: .35, ease: 'sine.out' }, 0)
+        .to(caption, { opacity: 0, duration: .35, ease: 'sine.out' }, 0)
         .to(cam, { p: 1, duration: PEAK - PUSH, ease: pushEase, onUpdate: setCam }, PUSH)
         .to(cam, { q: 1, duration: 1.2, ease: 'power2.inOut', onUpdate: setCam }, PUSH)
-        // the door swings open into the house, and Leny is there in the light
+        // the door swings open into the house, from shut, and Leny is there
+        // in the light (the thin line at its seams gives way to the room)
         .to(leaf, { rotationY: 75, duration: .9, ease: 'power2.out' }, PUSH + .1)
+        .to(seam, { opacity: 0, duration: .3, ease: 'sine.out' }, PUSH + .1)
         .to(light, { opacity: 1, duration: .6, ease: 'sine.out' }, PUSH + .1)
         .fromTo(leny, { opacity: 0 }, { opacity: 1, duration: .5, ease: 'sine.out' }, PUSH + .2)
         // then she steps aside to let you in, and the light fills the screen
@@ -1672,7 +1692,7 @@
   // The entrance played backwards, as one timeline (__ngLeave): the warm
   // light rises over the kitchen; under it the page swaps back to the beach
   // and the camera starts where the push in ended, in the doorway with Leny
-  // stepped aside. She steps back into the doorway, the door swings to rest
+  // stepped aside. She steps back into the doorway, the door swings shut
   // in front of her, and the camera pulls out onto the beach, centred on the
   // door: quick out of the doorway, slow past Leny, easing to a stop. A
   // second call while it runs gets the same promise; called while going in,
@@ -1687,7 +1707,7 @@
     window.preloadKitchen(); // (also fetches the finer crop of the door, after a load on #menu)
     const bar = $('bar'), menu = $('menu'), bloom = $('bloom'), glow = $('bloomLight');
     const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
-    const caption = [...document.querySelectorAll('.dusk-caption, .dusk-legal')], crop = $('duskCrop');
+    const caption = [...document.querySelectorAll('.dusk-caption, .dusk-legal')], crop = $('duskCrop'), seam = $('doorSeam');
     const cam = { p: 1, q: 1 };
     let swapped = false, over = false, setCam = () => {};
 
@@ -1711,7 +1731,7 @@
       const finish = () => {
         if (over) return; over = true;
         swap();
-        gsap.set([bloom, glow, still, leaf, leny, light, ...caption], { clearProps: 'all' });
+        gsap.set([bloom, glow, still, leaf, leny, light, seam, ...caption], { clearProps: 'all' });
         if (crop) crop.hidden = true;
         root.classList.remove('leaving');
         leaving = null; resolve();
@@ -1742,6 +1762,7 @@
       gsap.set(leny, { opacity: 1, xPercent: -42 });
       gsap.set(light, { opacity: 1 });
       gsap.set(caption, { opacity: 0 });
+      gsap.set(seam, { opacity: 0 });
       gsap.set(glow, { xPercent: -50, yPercent: -50, x: innerWidth / 2, y: innerHeight / 2, scale: 6 });
       gsap.set(menu, { transformOrigin: `50% ${(innerHeight - bar.offsetHeight) / 2}px`, willChange: 'transform' });
 
@@ -1755,9 +1776,11 @@
         .to(glow, { scale: .3, duration: .6, ease: 'power2.out' }, PEAK)
         .to(cam, { p: 0, duration: CAM, ease: pullEase, onUpdate: moveCam }, PEAK)
         .to(cam, { q: 0, duration: .9, ease: 'power2.inOut', onUpdate: moveCam }, SETTLED - .9)
-        // Leny steps back into the doorway, and the door swings to in front of her
+        // Leny steps back into the doorway, and the door swings shut in front
+        // of her; the light is a thin line at its seams again
         .to(leny, { xPercent: 0, duration: .5, ease: 'power2.inOut' }, PEAK + .05)
-        .to(leaf, { rotationY: 14, duration: .6, ease: 'power2.inOut' }, PEAK + .35)
+        .to(leaf, { rotationY: 0, duration: .6, ease: 'power2.inOut' }, PEAK + .35)
+        .to(seam, { opacity: 1, duration: .35, ease: 'sine.out' }, PEAK + .85)
         .to(leny, { opacity: 0, duration: .35, ease: 'sine.in' }, PEAK + .55)
         .to(light, { opacity: restLight, duration: .5, ease: 'sine.inOut' }, PEAK + .45)
         .addLabel('closed', PEAK + .95)
@@ -2166,28 +2189,27 @@
       .fromTo(still, { y: FALL }, { y: 0, duration: FALL_T, ease: 'sine.inOut' }, FALL_AT)
       // The light-written name fades with the daylight: it lives on the sign now.
       .to(word, { opacity: 0, duration: .9, ease: 'sine.in' }, FALL_AT);
-    // When it is nearly dark, a light comes on by the shore, like a lamp lit
-    // at dusk: a flicker, then it grows into the light spilling round a door
-    // ajar, the door takes shape around it, and the sign gives one swing as
-    // it takes the name, with a brief glow, and settles.
-    const LAMP_AT = FALL_AT + 1.35, FORM_AT = LAMP_AT + .45, SIGN_AT = FORM_AT + .35;
-    const doorParts = ['#duskDoor .door-reflect', '#duskDoor .door-frame', '#doorLeaf'];
-    gsap.set([...doorParts, sign], { opacity: 0 });
-    gsap.set(light, { opacity: 0, scale: .12, transformOrigin: '50% 75%' });
-    tl.to(light, { keyframes: [{ opacity: .55, duration: .08 }, { opacity: .15, duration: .07 }, { opacity: .8, duration: .1 }, { opacity: .5, duration: .2 }], ease: 'none' }, LAMP_AT)
-      .to(light, { scale: 1, opacity: 1, duration: .9, ease: 'power2.out' }, FORM_AT)
-      .to(doorParts, { opacity: 1, duration: .7, ease: 'sine.out', stagger: .06 }, FORM_AT + .1)
-      .to(sign, { opacity: 1, duration: .4, ease: 'sine.out' }, SIGN_AT)
-      .fromTo(sign, { rotation: 7 }, { rotation: 0, duration: 1.2, ease: 'elastic.out(1, .4)', immediateRender: false }, SIGN_AT)
-      .fromTo(sign, { filter: 'brightness(1) drop-shadow(0 0 0px rgba(245, 195, 94, 0))' },
-        { filter: 'brightness(1.3) drop-shadow(0 0 7px rgba(245, 195, 94, .95))', duration: .25, ease: 'sine.out', immediateRender: false }, SIGN_AT + .1)
-      .to(sign, { filter: 'brightness(1) drop-shadow(0 0 0px rgba(245, 195, 94, 0))', duration: .9, ease: 'sine.inOut', clearProps: 'filter' }, SIGN_AT + .35)
+    // A second after nightfall has finished the painting, the door is
+    // painted in: a watercolour wash bleeds up from the sand to the top of
+    // its frame, with a soft, uneven, grainy wet edge (a mask slid by
+    // --wash: .door-paint in the stylesheet). It comes in shut. As the wash
+    // reaches the sign, the sign settles with one small swing, and the thin
+    // warm line of light at the door's seams and under it glows on, with the
+    // soft light behind it. The door can be tapped once the wash is past its
+    // middle.
+    const DOOR_AT = FALL_END + 1, WASH_T = 1.1, WASH_END = DOOR_AT + WASH_T, SIGN_AT = DOOR_AT + .8, GLOW_AT = WASH_END - .15;
+    const paint = $('doorPaint'), seam = $('doorSeam'), doorBtn = $('door');
+    gsap.set([seam, light], { opacity: 0 });
+    tl.addLabel('doorAt', DOOR_AT)
+      .fromTo(paint, { '--wash': '16%' }, { '--wash': '100%', duration: WASH_T, ease: 'power1.inOut', immediateRender: false }, DOOR_AT)
+      .set(doorBtn, { visibility: 'visible', pointerEvents: 'auto' }, DOOR_AT + WASH_T * .5)
+      .fromTo(sign, { rotation: 5 }, { rotation: 0, duration: 1.3, ease: 'elastic.out(1, .4)', immediateRender: false }, SIGN_AT)
+      .addLabel('doorPainted', WASH_END)
+      .to(seam, { opacity: 1, duration: .5, ease: 'sine.out' }, GLOW_AT)
+      .to(light, { opacity: .5, duration: .7, ease: 'sine.inOut' }, GLOW_AT)
       // hand the door back to the stylesheet (the sign keeps its swing)
-      .set(light, { clearProps: 'opacity,transform,transformOrigin' }, FORM_AT + 1)
-      .set([...doorParts, sign], { clearProps: 'opacity' }, FORM_AT + 1);
-    const DOOR_END = Math.max(FALL_END, FORM_AT + 1);
-    // The painting's transform is cleared only once the intro's styles have
-    // gone (toDoor), or they would send it back off screen.
+      .set([seam, light, doorBtn], { clearProps: 'opacity,visibility,pointerEvents' }, GLOW_AT + .75);
+    const DOOR_END = GLOW_AT + .75;
     tl.addLabel('duskEnd', DOOR_END)
       .call(toDoor, [true], 'duskEnd')
       .set(still, { clearProps: 'transform,willChange' }, Math.max(DOOR_END, DRIFT_END));

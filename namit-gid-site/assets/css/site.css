@@ -93,9 +93,17 @@ html.intro .bar-status, html.at-door .bar-status { color: #FBF3E2; }
 @keyframes lamp-glow { 50% { opacity: .6; transform: scale(.82); } }
 @keyframes lamp-breathe { 50% { opacity: .3; transform: scale(.85); } }
 .bar-order {
-  min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: 4px;
+  min-height: 40px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: 4px; white-space: nowrap; flex: none;
   background: var(--sea); color: var(--sand); font-weight: 600; text-decoration: none; font-size: 15px;
 }
+/* At the beach (and during the intro) it opens the door: "Open the Door".
+   Anywhere else it would read Order. Only one of the two words is shown,
+   so the link's name is the one you see. */
+.bar-order-door { display: none; }
+html.intro .bar-order-door, html.at-door .bar-order-door { display: inline; }
+html.intro .bar-order-word, html.at-door .bar-order-word { display: none; }
+/* a narrow phone: a little less padding, so the brand and the longer words fit on one line */
+@media (max-width: 380px) { .bar-order { padding: 0 12px; } .bar { gap: 8px; } }
 /* Inside, Order's slot steps back out: "Outside", with a small doorway, its
    door ajar on the warm light. Order is only at the beach. */
 .bar-out {
@@ -469,7 +477,7 @@ html.intro .dusk-still { width: 100%; bottom: auto; height: calc(100% - var(--fa
 html.at-door .dusk.pans { touch-action: pan-y pinch-zoom; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .dusk.pans img { -webkit-user-drag: none; }
 .dusk.panning .dusk-art { will-change: translate; }
-.dusk-art > *, .dusk-door > * { position: absolute; }
+.dusk-art > *, .dusk-door > *, .door-paint-in > * { position: absolute; }
 .dusk-art img { max-width: none; }
 .dusk-beach { inset: 0; width: 100%; height: 100%; }
 /* DOOR_CROP {x .335, y .52, w .15, h .42}: the door's surroundings, painted
@@ -486,38 +494,57 @@ html.at-door .dusk.pans { touch-action: pan-y pinch-zoom; -webkit-user-select: n
 
 /* The door: the opening is 100 x 200 units (see the anchors above), so x in
    units is x% of its width and y is y/2 % of its height. */
-.dusk-door { left: 38.5%; width: 5%; bottom: 18%; aspect-ratio: 1 / 2; perspective: calc(var(--door-w, 80px) * 4); }
+.dusk-door { left: 38.5%; width: 5%; bottom: 18%; aspect-ratio: 1 / 2; }
+/* .door-paint is the room the door's painting takes up, in opening units
+   x -65..165 and y -40..320 (its light, sign and reflection included);
+   .door-paint-in puts the opening (0..100 x 0..200) back inside it, so every
+   layer below is placed as before. */
+.door-paint { left: -65%; top: -20%; width: 230%; height: 180%; pointer-events: none; }
+.door-paint-in { position: absolute; left: 28.2609%; top: 11.1111%; width: 43.4783%; height: 55.5556%; perspective: calc(var(--door-w, 80px) * 4); }
+/* Painted in (the intro only): the door goes onto the paper like a
+   watercolour wash, bleeding up from the sand to the top of the frame. The
+   mask (door-wash.png) is three boxes tall: clear above a soft, uneven, grainy
+   wet edge and paint below. playIntro() slides it by --wash, from 0% (all
+   clear) to 100% (all paint); once the intro is over there is no mask. */
+html.intro .door-paint { --wash: 0%;
+  -webkit-mask: url(../img/dusk/door-wash.png) 0 var(--wash) / 100% 300% no-repeat;
+  mask: url(../img/dusk/door-wash.png) 0 var(--wash) / 100% 300% no-repeat; }
+/* and the door can't be tapped while it isn't there (playIntro() lets it be
+   once the wash is past it) */
+html.intro .door { visibility: hidden; pointer-events: none; }
 .door-reflect { left: -14%; top: 100%; width: 128%; height: 45%; }
-.door-light { left: -60%; top: -10%; width: 220%; height: 165%; }
+.door-light { left: -60%; top: -10%; width: 220%; height: 165%; opacity: .5; }
 .door-way { inset: 0; overflow: hidden; }
 .door-way .door-leny { position: absolute; left: 16.5%; top: 15%; width: 67%; height: 84%; opacity: 0; }  /* Task 6 brings her in */
 .door-frame { left: -14%; top: -7%; width: 128%; height: 114%; }
-/* ajar: the leaf turns a little on its hinge (the left edge), into the house,
-   so the warm light shows in the gap */
-.door-leaf { inset: 0; width: 100%; height: 100%; transform-origin: 0 50%; transform: rotateY(14deg); }
+/* shut: the leaf fills the opening, hinged on its left edge; it only swings
+   open when the door is tapped (enterKitchen()) */
+.door-leaf { inset: 0; width: 100%; height: 100%; transform-origin: 0 50%; }
+/* The light of the lived-in house behind the shut door: a thin warm line at
+   the seams round the leaf and a brighter one under it, spilling a little
+   onto the sand. Leny and the room stay hidden until it opens. */
+.door-seam { inset: 0; pointer-events: none; }
+.door-seam::before, .door-seam::after { content: ''; position: absolute; }
+.door-seam::before { inset: -.6% -1.2%; border-radius: 1px;
+  box-shadow: inset 0 0 0 1px rgba(255, 214, 140, .75), 0 0 3px rgba(255, 200, 120, .55); }
+.door-seam::after { left: 3%; right: 3%; bottom: -1.2%; height: 2.6%; border-radius: 50%;
+  background: linear-gradient(to right, rgba(255, 216, 145, 0), #FFE2A8 22%, #FFF0CC 50%, #FFE2A8 78%, rgba(255, 216, 145, 0));
+  box-shadow: 0 1px 6px 1px rgba(255, 196, 110, .7); }
 .door-sign { left: 10%; top: -4%; width: 80%; height: 19%; transform-origin: 50% 0; }
 .door { inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 2px; }
 .door:focus-visible { outline-color: #FFD58A; outline-offset: 4px; }
 
-/* "Tap the door", under the reflection, if nothing happens for 3 s. It
-   keeps 60 px clear of the screen's edges while the door is near one, and
-   walks off with the door when the beach pans it away (continuously: past
-   that, it rides 40 px inside the door). */
-.door-hint { position: absolute; left: min(max(var(--door-x, 50%), min(60px, var(--door-x, 50%) + 40px)), max(calc(100% - 60px), var(--door-x, 50%) - 40px)); top: calc(var(--art-y, 0px) + var(--art-h, 100svh) * .905); translate: -50% 0;
-  font: 600 14px/1 var(--sans); letter-spacing: .02em; color: #FBF3E2; text-shadow: 0 1px 3px rgba(15, 18, 32, .8); white-space: nowrap;
-  opacity: 0; pointer-events: none; }
-html.at-door .door-hint { animation: hint-in 800ms var(--ease-out) 3s both; }
-html.calm.at-door .door-hint { opacity: 1; }
-@keyframes hint-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-
-/* The gesture hint (app.js plays it once per device): a soft white fingertip
-   that glides sideways with a fading trail behind it, never an arrow. GSAP
-   moves it (x, opacity) and stretches the trail (--trail, a scale). */
-.pan-hint { position: absolute; left: 66%; top: 46%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; z-index: 2;
-  background: radial-gradient(circle, rgba(255, 255, 255, .95) 0, rgba(255, 255, 255, .7) 45%, rgba(255, 255, 255, 0) 72%);
-  box-shadow: 0 0 18px rgba(255, 246, 225, .5); opacity: 0; pointer-events: none; --trail: 0; }
-.pan-hint::after { content: ""; position: absolute; left: 50%; top: 50%; width: 22vw; height: 14px; margin-top: -7px; border-radius: 7px;
-  background: linear-gradient(to right, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0)); transform-origin: 0 50%; transform: scaleX(var(--trail)); }
+/* The gesture hint (app.js plays it on every landing where the beach pans,
+   for review): a soft white fingertip that glides one way and back with a
+   fading trail behind it, never an arrow or a word. GSAP moves it (x,
+   opacity) and stretches the trail (--trail, a scale: + trails to the
+   right, as it glides left; - to the left). --reach is the glide (app.js). */
+.pan-hint { position: absolute; left: 62%; top: calc(var(--art-y, 0px) + var(--art-h, 100svh) * .68); width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; z-index: 2;
+  background: radial-gradient(circle, rgba(255, 255, 255, .98) 0, rgba(255, 255, 255, .85) 38%, rgba(255, 255, 255, .35) 58%, rgba(255, 255, 255, 0) 72%);
+  box-shadow: 0 0 22px 4px rgba(255, 246, 225, .45); opacity: 0; pointer-events: none; --trail: 0; --reach: 120px; }
+.pan-hint::after { content: ""; position: absolute; left: 50%; top: 50%; width: calc(var(--reach) * .9); height: 20px; margin-top: -10px; border-radius: 10px;
+  background: linear-gradient(to right, rgba(255, 255, 255, .8), rgba(255, 255, 255, .38) 55%, rgba(255, 255, 255, 0));
+  transform-origin: 0 50%; transform: scaleX(var(--trail)); }
 html.calm .pan-hint, html:not(.at-door) .pan-hint { display: none; }
 
 /* ── four things on the sand to tap ── */
@@ -543,7 +570,7 @@ html.intro .beach-spot { opacity: 0; visibility: hidden; }
   background: none; color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .beach-item:focus-visible { outline: 3px solid #FFD58A; outline-offset: 2px; }
 .beach-item::before, .beach-item::after, .beach-item-art { position: absolute; left: 50%; top: 50%; width: calc(var(--s) * var(--aw)); height: calc(var(--s) * var(--ah));
-  margin: calc(var(--s) * var(--ah) / -2) 0 0 calc(var(--s) * var(--aw) / -2); pointer-events: none; transition: translate 250ms var(--ease-out), scale 150ms var(--ease-out); }
+  margin: calc(var(--s) * var(--ah) * (-.5 - var(--oy, 0))) 0 0 calc(var(--s) * var(--aw) / -2); pointer-events: none; transition: translate 250ms var(--ease-out), scale 150ms var(--ease-out); }
 .beach-item-art { display: block; max-width: none; }
 .beach-item::after { content: ''; clip-path: var(--hit); pointer-events: auto; }
 .beach-item::before { content: ''; opacity: .55; transition: opacity 250ms, translate 250ms var(--ease-out), scale 150ms var(--ease-out);
@@ -562,7 +589,12 @@ html:not(.intro):not(.inside) .dusk.live .beach-item::before { animation: item-g
    in --s (the art's own aspect) */
 .beach-spot[data-item="bottle"] { --art: url(../img/dusk/item-bottle.webp); --hit: polygon(-1.6% 44.9%, 18.6% 16.7%, 28.7% 8.2%, 56.1% -6%, 94% -3.7%, 96.1% 2.6%, 104.1% 60.8%, 91.3% 90%, 90.4% 90.5%, 35.7% 91.9%, 34.5% 91.4%, -1.6% 53%); --aw: 1.5; --ah: .641; }
 .beach-spot[data-item="shell"] { --art: url(../img/dusk/item-shell.webp); --hit: polygon(-5.6% 66.9%, 13.5% 9.8%, 51.4% -5.4%, 55.6% -5.4%, 68.6% 7.8%, 76.5% 17.9%, 104.8% 73.6%, 104.6% 79.3%, 98.9% 89.6%, 82% 97.7%, 5.7% 92.1%, -2.3% 77.8%); --aw: 1.2; --ah: .908; }
-.beach-spot[data-item="sand"] { --art: url(../img/dusk/item-sand.webp); --hit: polygon(-4.7% 96.3%, -0.2% 61.4%, 0.7% 55.5%, 1.6% 52%, 98.2% -4.4%, 99.2% -3.9%, 100% -2.1%, 105.2% 87.9%, 104.7% 89.8%, 103.3% 90.3%, -3.3% 103.3%, -4.6% 102.8%); --aw: 2.6; --ah: .934; }
+/* the sand: "Leave a review" written in the wet sand with the stick that
+   wrote it planted at its end, and no label (the words are painted). The
+   writing is the art's lower third, so --oy lifts the art box by .34 of its
+   height to put the writing, not the air beside the stick, on the spot and
+   the button; --hit hugs the writing and the stick separately. */
+.beach-spot[data-item="sand"] { --art: url(../img/dusk/item-sand.webp?v=2); --hit: polygon(-3% 102%, -3% 93%, 4% 69%, 66% 64%, 75.5% 66%, 90.5% -1.5%, 99.5% 1.5%, 95.5% 42%, 91% 76%, 96% 88%, 96.5% 95%, 2% 104%); --aw: 2.767; --ah: 1.641; --oy: .34; }
 .beach-spot[data-item="octopus"] { --art: url(../img/dusk/item-octopus.webp); --hit: polygon(16.2% 16.2%, 21.2% 12.5%, 80.8% 3.7%, 92.1% 23.8%, 101.2% 49.9%, 95.5% 70.6%, 86.7% 88.4%, 62.9% 99.8%, 43.4% 99.3%, 14.8% 87.9%, 7% 76.3%, 1.5% 57.1%); --aw: 1.5; --ah: 1.041; }
 /* the label: short, glowing, above its item */
 .beach-tag { position: absolute; left: 50%; bottom: calc(100% + 2px); translate: -50% 0; white-space: nowrap; padding: 4px 9px 5px; border-radius: 999px;
@@ -617,14 +649,14 @@ html:not(.intro):not(.inside) .dusk.live .dusk-lamp { animation: lamp-flash 6s l
 /* rotate, not transform: it adds to the wipe's swing (a GSAP transform), and
    starts from 0 so the swing settles straight into the sway */
 @keyframes sign-sway { 0%, 100% { rotate: 0deg; } 25% { rotate: 2deg; } 75% { rotate: -2deg; } }
-@keyframes door-breathe { 50% { opacity: .75; } }
+@keyframes door-breathe { 50% { opacity: .36; } }
 /* the fireflies sit by the palms, off the side of the band on a phone */
 .dusk.band .fireflies { display: none; }
 
 /* ── going in and stepping outside (enterKitchen(), leaveKitchen() in app.js) ── */
-/* The page holds still under the move; the idle breathing of the light and
-   the hint step aside so GSAP can fade them (an animation beats inline styles). */
-html.entering .door-light, html.entering .door-hint, html.leaving .door-light, html.leaving .door-hint { animation: none !important; }
+/* The page holds still under the move; the idle breathing of the light
+   steps aside so GSAP can fade it (an animation beats inline styles). */
+html.entering .door-light, html.leaving .door-light { animation: none !important; }
 /* The warm light from the doorway: a soft disc of #FFF4DC centred on the
    door, scaled up until it fills the screen. #bloom carries the opacity. */
 .bloom { position: fixed; inset: 0; z-index: 65; pointer-events: none; overflow: hidden; opacity: 0; visibility: hidden; }

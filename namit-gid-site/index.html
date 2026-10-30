@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=98">
+<link rel="stylesheet" href="assets/css/site.css?v=99">
 <script>
   /* Decide the intro before first paint so nothing flashes. For review, the
      intro plays on every visit and every refresh. With reduced motion or data
@@ -137,7 +137,9 @@
     </svg></span>
     <span class="bar-words"><span class="bar-name">Namit <em>gid</em></span><span class="bar-status" id="barStatus"></span></span>
   </a>
-  <a class="bar-order" href="#menu">Order</a>
+  <!-- at the beach (and during the intro) it reads "Open the Door" and plays
+       the door's entrance; anywhere else it is plain Order -->
+  <a class="bar-order" href="#menu"><span class="bar-order-door">Open the Door</span><span class="bar-order-word">Order</span></a>
   <!-- inside, the same slot steps back out: a small doorway, its door ajar -->
   <button class="bar-out" id="barOut" type="button">
     <svg viewBox="0 0 20 24" aria-hidden="true"><path class="bar-out-light" d="M3.5 2.5h13v20h-13z"/><path class="bar-out-frame" d="M3.5 22.5V2.5h13v20M1.5 22.5h17"/><path class="bar-out-leaf" d="M3.5 2.5 10 4.6v17.9H3.5z"/><circle cx="8.4" cy="13" r=".9"/></svg>
@@ -194,16 +196,23 @@
            every layer placed in those units (see the anchors further down
            site.css). Back to front: reflection, light, Leny, frame, leaf, sign. -->
       <div class="dusk-door" id="duskDoor">
-        <img class="door-reflect" src="assets/img/dusk/door-reflect.svg" alt="" aria-hidden="true">
-        <img class="door-light" id="doorLight" src="assets/img/dusk/door-light.svg" alt="" aria-hidden="true">
-        <div class="door-way" aria-hidden="true"><img class="door-leny" id="doorLeny" src="assets/img/dusk/leny-door.webp" width="597" height="1500" alt="" loading="lazy"></div>
-        <img class="door-frame" src="assets/img/dusk/door-frame.svg" alt="" aria-hidden="true">
-        <img class="door-leaf" id="doorLeaf" src="assets/img/dusk/door-leaf.svg" alt="" aria-hidden="true">
-        <img class="door-sign" id="doorSign" src="assets/img/dusk/sign.svg?v=2" alt="" aria-hidden="true">
+        <!-- .door-paint is the room the door's painting takes up (its light,
+             reflection and sign included), for the intro's painted-in wash;
+             .door-paint-in is the opening itself again -->
+        <div class="door-paint" id="doorPaint" aria-hidden="true"><div class="door-paint-in">
+          <img class="door-reflect" src="assets/img/dusk/door-reflect.svg" alt="">
+          <img class="door-light" id="doorLight" src="assets/img/dusk/door-light.svg" alt="">
+          <div class="door-way"><img class="door-leny" id="doorLeny" src="assets/img/dusk/leny-door.webp" width="597" height="1500" alt="" loading="lazy"></div>
+          <img class="door-frame" src="assets/img/dusk/door-frame.svg" alt="">
+          <img class="door-leaf" id="doorLeaf" src="assets/img/dusk/door-leaf.svg" alt="">
+          <i class="door-seam" id="doorSeam"></i>
+          <img class="door-sign" id="doorSign" src="assets/img/dusk/sign.svg?v=2" alt="">
+        </div></div>
         <button class="door" id="door" type="button" aria-label="Come inside"></button>
       </div>
-      <div class="beach-spot" data-item="sand" style="--x:.555;--y:.89">
-        <button class="beach-item" type="button" data-item="sand" aria-haspopup="dialog"><img class="beach-item-art" src="assets/img/dusk/item-sand.webp" width="640" height="230" alt="" decoding="async"><span class="beach-tag" id="tag-sand">Leave a review</span></button>
+      <div class="beach-spot" data-item="sand" style="--x:.535;--y:.83">
+        <!-- the words are painted in the sand, so no label: the button's own name says it -->
+        <button class="beach-item" type="button" data-item="sand" aria-haspopup="dialog" aria-label="Leave a review"><img class="beach-item-art" src="assets/img/dusk/item-sand.webp?v=2" width="681" height="404" alt="" decoding="async"></button>
       </div>
       <div class="beach-spot" data-item="octopus" style="--x:.91;--y:.80">
         <button class="beach-item" type="button" data-item="octopus" aria-expanded="false" aria-controls="card-octopus"><img class="beach-item-art" src="assets/img/dusk/item-octopus.webp" width="480" height="333" alt="" decoding="async"><span class="beach-tag" id="tag-octopus">Takoshi</span></button>
@@ -215,7 +224,6 @@
       <!-- now and then a firefly drifts over to one of them (app.js) -->
       <i class="beach-fly" id="beachFly" aria-hidden="true"></i>
     </div>
-    <p class="door-hint" id="doorHint" aria-hidden="true">Tap the door</p>
     <div class="dusk-caption">
       <h1 id="duskH">Namit Gid · Filipino food in North York</h1>
       <p class="meta">Pickup near Fairview Mall · Thursday to Sunday</p>
@@ -331,6 +339,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=86" defer></script>
+<script src="assets/js/app.js?v=87" defer></script>
 </body>
 </html>
