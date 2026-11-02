@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=107">
+<link rel="stylesheet" href="assets/css/site.css?v=108">
 <script>
   /* Decide the intro before first paint so nothing flashes. For review, the
      intro plays on every visit and every refresh. With reduced motion or data
@@ -142,9 +142,10 @@
   <!-- at the beach (and during the intro) it reads "Open the Door" and plays
        the door's entrance; anywhere else it is plain Order -->
   <a class="bar-order" href="#menu"><span class="bar-order-door">Open the Door</span><span class="bar-order-word">Order</span></a>
-  <!-- inside, the same slot steps back out: a small doorway, its door ajar -->
+  <!-- inside, the same slot steps back out: the beach door in small, wooden
+       planks in its frame with the warm light at its seams; it opens a little on hover -->
   <button class="bar-out" id="barOut" type="button">
-    <svg viewBox="0 0 20 24" aria-hidden="true"><path class="bar-out-light" d="M3.5 2.5h13v20h-13z"/><path class="bar-out-frame" d="M3.5 22.5V2.5h13v20M1.5 22.5h17"/><path class="bar-out-leaf" d="M3.5 2.5 10 4.6v17.9H3.5z"/><circle cx="8.4" cy="13" r=".9"/></svg>
+    <svg viewBox="0 0 22 28" aria-hidden="true"><defs><linearGradient id="barOutWood" x1="0" x2="1"><stop offset="0" stop-color="#9A7352"/><stop offset=".6" stop-color="#7A5B45"/><stop offset="1" stop-color="#65495A"/></linearGradient></defs><ellipse class="bar-out-spill" cx="11" cy="26.6" rx="8" ry="1.3"/><path class="bar-out-frame" d="M1.5 27V2.2h19V27h-2.4V4.6H3.9V27z"/><rect class="bar-out-light" x="3.9" y="4.6" width="14.2" height="22"/><g class="bar-out-leaf"><rect x="3.9" y="4.6" width="14.2" height="22" fill="url(#barOutWood)"/><path d="M7.4 4.6v22M11 4.6v22M14.6 4.6v22" stroke="#3D2B2E" stroke-width=".35" opacity=".7"/><path d="M3.9 7.6h14.2M3.9 15.3h14.2M3.9 22.6h14.2" stroke="#6A4E3C" stroke-width="1.2"/><circle cx="16" cy="15.8" r=".8" fill="#E9C27A"/></g><path class="bar-out-sign" d="M6.6 1.6h8.8v3.2H6.6z"/></svg>
     <span>Outside</span>
   </button>
 </header>
@@ -288,13 +289,7 @@
           <div class="k-behind k-behind-counter" aria-hidden="true"><img class="k-friend k-cat" src="assets/img/kitchen/cat.webp" width="243" height="360" alt="" loading="lazy"></div>
           <img class="k-friend k-fuzz-wave" src="assets/img/kitchen/fuzz-wave.webp" width="120" height="131" alt="" aria-hidden="true" loading="lazy">
           <img class="k-friend k-fuzz-jump" src="assets/img/kitchen/fuzz-jump.webp" width="140" height="129" alt="" aria-hidden="true" loading="lazy">
-          <!-- a little kitchen magic: empty plates that rest unseen on the dish
-               shelves (left, top), lift off when something is opened, float
-               out in front of the wall (data-fx, data-fy) for a few seconds and
-               go back; and warm motes of light drifting through the room -->
-          <img class="k-plate" src="assets/img/kitchen/plate-1.webp" width="461" height="260" style="left:61%;top:17%;width:8%;--t:5.6s;--d:0s" data-fx="56.5" data-fy="29" alt="" aria-hidden="true" loading="lazy">
-          <img class="k-plate" src="assets/img/kitchen/plate-3.webp" width="320" height="260" style="left:79%;top:4%;width:5%;--t:4.8s;--d:-1.7s" data-fx="46" data-fy="24.5" alt="" aria-hidden="true" loading="lazy">
-          <img class="k-plate" src="assets/img/kitchen/plate-2.webp" width="424" height="260" style="left:90%;top:17%;width:7.2%;--t:6.4s;--d:-3.1s" data-fx="85" data-fy="29" alt="" aria-hidden="true" loading="lazy">
+          <!-- warm motes of light drifting through the room -->
           <div class="k-motes" aria-hidden="true"><i style="left:8%;top:30%"></i><i style="left:24%;top:52%;--d:-2s"></i><i style="left:41%;top:24%;--d:-4.5s"></i><i style="left:58%;top:58%;--d:-1s"></i><i style="left:76%;top:34%;--d:-3.3s"></i><i style="left:92%;top:55%;--d:-5.6s"></i><i style="left:33%;top:78%;--d:-6.2s"></i></div>
           <button class="k-card" type="button" id="kCard" aria-haspopup="dialog">
             <i class="k-tack" aria-hidden="true"></i>
@@ -369,6 +364,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=97" defer></script>
+<script src="assets/js/app.js?v=98" defer></script>
 </body>
 </html>

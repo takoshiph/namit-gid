@@ -112,11 +112,15 @@ html.intro .bar-order-word, html.at-door .bar-order-word { display: none; }
   font: inherit; font-weight: 600; font-size: 15px; cursor: pointer;
 }
 .bar-out:hover { background: rgba(30, 90, 99, .07); }
-.bar-out svg { width: 18px; height: 22px; flex: none; }
-.bar-out-light { fill: #F5C35E; }
-.bar-out-frame { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.bar-out-leaf { fill: currentColor; }
-.bar-out circle { fill: #F5C35E; }
+/* the beach door in small: frame, planked leaf, its sign, the warm light
+   at the seams and spilling under it; the leaf swings open a little on hover */
+.bar-out svg { width: 20px; height: 26px; flex: none; overflow: visible; }
+.bar-out-frame { fill: #6E5240; }
+.bar-out-light { fill: #FFD488; }
+.bar-out-spill { fill: rgba(245, 195, 94, .55); }
+.bar-out-sign { fill: #EBD7AE; stroke: #6E5240; stroke-width: .5; }
+.bar-out-leaf { transform-box: fill-box; transform-origin: 0 50%; transition: transform 300ms var(--ease-out); filter: drop-shadow(0 0 .6px #FFD488); }
+.bar-out:hover .bar-out-leaf, .bar-out:focus-visible .bar-out-leaf { transform: perspective(40px) rotateY(32deg); }
 html.inside .bar-out { display: inline-flex; }
 html.inside .bar-order { display: none; }
 .intro-skip {
@@ -1217,12 +1221,6 @@ html.calm .sheet.notebook .line-item { animation: none; }
    puff of light, one by one as things in the kitchen are opened. */
 .k-world .k-friend { transition: opacity 400ms var(--ease-out), transform 650ms cubic-bezier(.34, 1.56, .64, 1); }
 .k-world .k-friend.away { opacity: 0; transform: translateY(18%) scale(.55); }
-/* empty plates, unseen on the dish shelves until something is opened; then
-   they float out (app.js), each on its own slow bob, with a warm glow under
-   it, and go back */
-.k-world > img.k-plate { right: auto; bottom: auto; height: auto; pointer-events: none; opacity: 0; filter: drop-shadow(0 8px 10px rgba(255, 196, 110, .45));
-  animation: plate-float var(--t, 5s) ease-in-out infinite; animation-delay: var(--d, 0s); }
-@keyframes plate-float { 0%, 100% { translate: 0 0; rotate: -5deg; } 50% { translate: 0 -14%; rotate: 4deg; } }
 /* motes of warm light drifting up through the room */
 .k-motes { position: absolute; inset: 0; pointer-events: none; }
 .k-motes i { position: absolute; width: .7%; aspect-ratio: 1; border-radius: 50%; opacity: 0;
@@ -1235,10 +1233,13 @@ html.calm .sheet.notebook .line-item { animation: none; }
 /* (no screen blend: on the cream wall it would vanish) */
 .k-spark { width: 9px; height: 9px; border-radius: 50%;
   background: radial-gradient(circle, #FFFDF0 0 25%, #FFD45E 55%, #F2A93B); box-shadow: 0 0 6px 2px rgba(255, 196, 70, .75), 0 0 14px 4px rgba(255, 214, 120, .35); }
+/* a firefly: a spark that drifts slowly; a sampaguita petal */
+.k-fly { width: 7px; height: 7px; }
+.k-petal { width: 13px; height: 8px; border-radius: 50%; background: radial-gradient(circle at 40% 40%, #FFFFFF, #EFE3C8); box-shadow: 0 0 0 .6px rgba(150, 118, 70, .55), 0 2px 3px rgba(110, 80, 40, .45); }
 .k-leaf { width: 16px; height: 9px; border-radius: 0 100% 0 100%; background: linear-gradient(135deg, #8DB35A, #4F7A34); box-shadow: inset 0 0 0 .5px rgba(40, 60, 20, .4); }
 .k-ring { position: absolute; z-index: 5; pointer-events: none; translate: -50% -50%; border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 246, 210, .75), rgba(255, 204, 100, .32) 40%, rgba(255, 204, 100, 0) 70%); }
-@media (prefers-reduced-motion: reduce) { .k-world > img.k-plate, .k-motes i { animation: none; } .k-motes { display: none; } }
+@media (prefers-reduced-motion: reduce) { .k-motes { display: none; } }
 html.calm .k-motes { display: none; }
 
 /* a size can say how many it feeds, under its name and price */
