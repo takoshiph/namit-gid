@@ -75,8 +75,9 @@
      Everything here moves by transform or opacity only. -->
 <div class="stage" id="stage" aria-hidden="true">
   <!-- Planes back to front. data-depth is how much each one moves with the
-       camera: the island is 1, the far range barely moves, the foreground
-       moves most. -->
+       camera: the island is 1, and so is all that meets the horizon (sky,
+       range, sea), so the horizon holds together while zooming; the sky's
+       clouds and sun move less, the foreground moves most. -->
   <div class="st-sky" data-depth="1"></div>
   <div class="st-day" id="stDay" data-depth="1"></div>
   <div class="st-stars" id="stStars" data-depth=".25"></div>
