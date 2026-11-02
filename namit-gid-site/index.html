@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=104">
+<link rel="stylesheet" href="assets/css/site.css?v=105">
 <script>
   /* Decide the intro before first paint so nothing flashes. For review, the
      intro plays on every visit and every refresh. With reduced motion or data
@@ -166,7 +166,7 @@
     <div class="dusk-still" id="duskStill">
     <div class="dusk-sky" aria-hidden="true"></div>
     <div class="dusk-art" id="duskArt">
-      <img class="dusk-beach" id="duskBeach" src="assets/img/dusk/beach-2400.webp" srcset="assets/img/dusk/beach-2400.webp 2400w, assets/img/dusk/beach-4096.webp 4096w" sizes="(max-aspect-ratio: 33/40) 286vw, max(100vw, 236vh)" width="2400" height="1018" alt="" aria-hidden="true" fetchpriority="high">
+      <img class="dusk-beach" id="duskBeach" src="assets/img/dusk/beach-2400.webp" srcset="assets/img/dusk/beach-2400.webp 2400w, assets/img/dusk/beach-4096.webp 4096w" sizes="(max-aspect-ratio: 33/40) 257vw, max(100vw, 236vh)" width="2400" height="1018" alt="" aria-hidden="true" fetchpriority="high">
       <!-- a sharper painting of the door's surroundings (DOOR_CROP), laid over
            the beach for the push in through the door -->
       <img class="dusk-crop" id="duskCrop" width="950" height="1129" alt="" aria-hidden="true" hidden>
@@ -217,16 +217,14 @@
         </div></div>
         <button class="door" id="door" type="button" aria-label="Come inside"></button>
       </div>
-      <div class="beach-spot" data-item="sand" style="--x:.82;--y:.935;--top:.89;--bx:.8;--by:.85;--btop:.8">
-        <!-- written in the dry sand below the bangka, its stick standing just past
-             the bow; never lifted above --top, so the writing stays clear of the
-             hull. On a tall phone the bangka is up by the door, so the writing sits
-             higher, where the boat was (--bx, --by, --btop). The words are painted,
-             so no label: the button's own name says it -->
+      <div class="beach-spot" data-item="sand" style="--x:.315;--y:.93;--top:.88;--bx:.325;--by:.915;--btop:.88">
+        <!-- written in the dry sand below "Say hi" and the door, between the two,
+             never lifted above --top. The words are painted, so no label: the
+             button's own name says it -->
         <button class="beach-item" type="button" data-item="sand" aria-haspopup="dialog" aria-label="Leave a review"><img class="beach-item-art" src="assets/img/dusk/item-sand.webp?v=2" width="681" height="404" alt="" decoding="async"></button>
       </div>
-      <!-- peeking out of the sea, right of the bangka and clear of the island -->
-      <div class="beach-spot" data-item="octopus" style="--x:.94;--y:.69;--top:.6">
+      <!-- peeking out of the sea, between the door and the island, near the others -->
+      <div class="beach-spot" data-item="octopus" style="--x:.535;--y:.635;--top:.6">
         <button class="beach-item" type="button" data-item="octopus" aria-expanded="false" aria-controls="card-octopus"><img class="beach-item-art" src="assets/img/dusk/item-octopus.webp?v=2" width="720" height="300" alt="" decoding="async"><span class="beach-tag" id="tag-octopus">Takoshi</span></button>
         <div class="beach-card" data-item="octopus" id="card-octopus" role="group" aria-labelledby="tag-octopus" tabindex="-1" hidden>
           <button class="x beach-card-x" type="button" aria-label="Close">×</button>
@@ -287,6 +285,12 @@
           <img class="k-friend k-cat" src="assets/img/kitchen/cat.webp" width="243" height="360" alt="" aria-hidden="true" loading="lazy">
           <img class="k-friend k-fuzz-wave" src="assets/img/kitchen/fuzz-wave.webp" width="120" height="131" alt="" aria-hidden="true" loading="lazy">
           <img class="k-friend k-fuzz-jump" src="assets/img/kitchen/fuzz-jump.webp" width="140" height="129" alt="" aria-hidden="true" loading="lazy">
+          <!-- a little kitchen magic: empty plates lifted off the dish shelves,
+               floating, and warm motes of light drifting through the room -->
+          <img class="k-plate" src="assets/img/kitchen/plate-1.webp" width="461" height="260" style="left:56.5%;top:29%;width:8%;--t:5.6s;--d:0s" alt="" aria-hidden="true" loading="lazy">
+          <img class="k-plate" src="assets/img/kitchen/plate-3.webp" width="320" height="260" style="left:46%;top:24.5%;width:5%;--t:4.8s;--d:-1.7s" alt="" aria-hidden="true" loading="lazy">
+          <img class="k-plate" src="assets/img/kitchen/plate-2.webp" width="424" height="260" style="left:85%;top:29%;width:7.2%;--t:6.4s;--d:-3.1s" alt="" aria-hidden="true" loading="lazy">
+          <div class="k-motes" aria-hidden="true"><i style="left:8%;top:30%"></i><i style="left:24%;top:52%;--d:-2s"></i><i style="left:41%;top:24%;--d:-4.5s"></i><i style="left:58%;top:58%;--d:-1s"></i><i style="left:76%;top:34%;--d:-3.3s"></i><i style="left:92%;top:55%;--d:-5.6s"></i><i style="left:33%;top:78%;--d:-6.2s"></i></div>
           <button class="k-card" type="button" id="kCard" aria-haspopup="dialog">
             <i class="k-tack" aria-hidden="true"></i>
             <span class="k-card-title">How to order</span>
@@ -360,6 +364,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=94" defer></script>
+<script src="assets/js/app.js?v=95" defer></script>
 </body>
 </html>

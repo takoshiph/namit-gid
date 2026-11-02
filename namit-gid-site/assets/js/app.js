@@ -830,6 +830,52 @@
     }, { threshold: .6 });
     nudge.observe(kitchen);
   }
+  // A little magic when something is opened: a warm flash, sparks of light
+  // and a couple of leaves fly up from it, the plates over the shelves
+  // twirl, and the kitchen's friends (out of sight at first) pop out one at
+  // a time, the nearest first, in a puff of light; those already out give a
+  // hop. Calm: none of it, and the friends are all there from the start.
+  const friends = [...world.querySelectorAll('.k-friend:not(.k-fire)')], plates = [...world.querySelectorAll('.k-plate')];
+  if (!calm) friends.forEach(f => f.classList.add('away'));
+  const centre = el => { const r = el.getBoundingClientRect(), w = world.getBoundingClientRect(); return { x: r.left - w.left + r.width / 2, y: r.top - w.top + r.height / 2 }; };
+  const fling = (cls, x, y, frames, ms, style = {}) => {
+    const n = make('i', { class: cls, 'aria-hidden': 'true' });
+    Object.assign(n.style, { left: x + 'px', top: y + 'px' }, style);
+    world.append(n);
+    n.animate(frames, { duration: ms, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'forwards' }).onfinish = () => n.remove();
+  };
+  function magic(from) {
+    if (calm || !from.animate) return;
+    const { x, y } = centre(from), s = Math.max(.7, Math.min(1.4, world.offsetHeight / 700));
+    fling('k-ring', x, y, [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, offset: .3 }, { opacity: 0, transform: 'scale(1.6)' }], 900, { width: 160 * s + 'px', height: 160 * s + 'px' });
+    for (let i = 0; i < 12; i++) {
+      const a = -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.3, d = (40 + Math.random() * 70) * s, z = .5 + Math.random() * .9;
+      fling('k-spark', x, y, [{ opacity: 0, transform: 'translate(0, 0) scale(.3)' }, { opacity: 1, offset: .15 },
+        { opacity: 0, transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d - 20 * s}px) scale(${z})` }], 900 + Math.random() * 600);
+    }
+    for (let i = 0; i < 3; i++) {
+      const dx = (Math.random() - .5) * 120 * s, up = (50 + Math.random() * 40) * s, r = (Math.random() < .5 ? -1 : 1) * (200 + Math.random() * 260);
+      fling('k-leaf', x, y, [{ opacity: 0, transform: 'translate(0, 0) rotate(0deg)' }, { opacity: 1, transform: `translate(${dx * .5}px, ${-up}px) rotate(${r * .4}deg)`, offset: .35 },
+        { opacity: 0, transform: `translate(${dx}px, ${-up * .2 + 30 * s}px) rotate(${r}deg)` }], 1700 + Math.random() * 500);
+    }
+    const puff = from.dataset && world.querySelector(`.k-wisp[data-for="${from.dataset.spot}"]`);
+    if (puff) { puff.classList.remove('puff'); void puff.offsetWidth; puff.classList.add('puff'); setTimeout(() => puff.classList.remove('puff'), 1400); }
+    plates.forEach((p, i) => setTimeout(() => p.animate([{ transform: 'none' }, { transform: 'translateY(-18%) rotate(180deg)', offset: .5 }, { transform: 'rotate(360deg)' }], { duration: 1100, easing: 'ease-in-out' }), 120 * i));
+    // the friends: those out hop, and the nearest still away comes out
+    friends.filter(f => !f.classList.contains('away')).forEach((f, i) => setTimeout(() => f.animate([{ transform: 'none' }, { transform: 'translateY(-12%)', offset: .4 }, { transform: 'translateY(2%)', offset: .75 }, { transform: 'none' }], { duration: 520, easing: 'ease-out' }), 90 * i));
+    const away = friends.filter(f => f.classList.contains('away'));
+    if (away.length) {
+      const near = away.map(f => ({ f, c: centre(f) })).sort((a, b) => Math.hypot(a.c.x - x, a.c.y - y) - Math.hypot(b.c.x - x, b.c.y - y))[0];
+      setTimeout(() => {
+        near.f.classList.remove('away');
+        for (let i = 0; i < 8; i++) {
+          const a = Math.random() * Math.PI * 2, d = (25 + Math.random() * 35) * s;
+          fling('k-spark', near.c.x, near.c.y, [{ opacity: 0, transform: 'scale(.4)' }, { opacity: 1, offset: .2 }, { opacity: 0, transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d}px) scale(.6)` }], 800 + Math.random() * 400);
+        }
+      }, 250);
+    }
+  }
+  world.addEventListener('click', e => { const t = e.target.closest('.k-spot, .k-card'); if (t) magic(t); });
   const dishSheet = $('dishSheet'), dishBody = $('dishSheetBody');
   const layerOf = name => kitchen.querySelector('[data-layer="' + name + '"]');
   let openSpot = null, borrowed = [];
@@ -867,7 +913,7 @@
     const r = btn.getBoundingClientRect(), sr = scroller.getBoundingClientRect();
     scroller.scrollBy({ left: (r.left + r.width / 2) - (sr.left + sr.width / 2), behavior: calm ? 'auto' : 'smooth' });
     $('menu').scrollBy({ top: r.top - innerHeight * .12, behavior: calm ? 'auto' : 'smooth' }); // the room, on a screen too short for it
-    // the sheet starts rising while the lid is still lifting (it fades in over 450 ms)
+    // the sheet rises once the lid is up and the sparks are flying (it fades in over 450 ms)
     setTimeout(() => {
       if (spot === 'register') { openSheet(0); return; }
       if (spot === 'phone') {
@@ -886,7 +932,7 @@
       if (dish === 'desserts') openDishes(S.menu.desserts.map(d => d.id), titles.desserts);
       else if (dish === 'holiday') openDishes(HOLIDAY.map(d => d.id), titles.holiday);
       else openDishes([dish], 'From the stove');
-    }, calm ? 0 : 200);
+    }, calm ? 0 : 650); // (after the lid lifts and the magic has had its moment)
   }));
   // The recipe card on the wall: how ordering works.
   $('kCard').addEventListener('click', () => {
@@ -1048,7 +1094,7 @@
   const PAINT = 1584 / 672;
   const DOOR = { x: .41, y: .82, w: .05 };
   const CROP_WIDE = { cx: .47, keep: [.365, .715], cy: .66 };
-  const CROP_TALL = { win: .35, left: .365, base: .70, below: .825 };
+  const CROP_TALL = { win: .39, left: .365, base: .70, below: .825 };
   const dusk = $('dusk');
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   function placeDusk() {
