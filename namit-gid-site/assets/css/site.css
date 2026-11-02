@@ -521,7 +521,7 @@ html.at-door .dusk.pans { touch-action: pan-y pinch-zoom; -webkit-user-select: n
 /* DOOR_CROP {x .335, y .52, w .15, h .42}: the door's surroundings, painted
    finer, laid exactly over the beach while the camera pushes in */
 .dusk-crop { left: 33.5%; top: 52%; width: 15%; height: 42%; }
-.dusk-crop[hidden] { display: none; }
+.dusk-crop[hidden], .dusk-parol[hidden] { display: none; }
 /* the island, the lamp and the bangka, placed on the painting */
 .dusk-isle { left: 50.5%; width: 19%; top: 41.4%; filter: brightness(.55) saturate(.75) sepia(.15) hue-rotate(-12deg); }
 .dusk-lamp { left: calc(50.5% + 19% * .78); top: 42.1%; width: 2.6%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; opacity: .85; scale: 1;
@@ -543,6 +543,36 @@ html.at-door .dusk.pans { touch-action: pan-y pinch-zoom; -webkit-user-select: n
 .dusk-boat { pointer-events: none; }
 /* the bottom 30% of the painting fades into the night below it, under the door so its light and reflection stay bright */
 .dusk-fade { left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(transparent, #1B1F32); }
+/* the taller painting: 822 rows of sky above the painting's 2688 and 1562 of
+   sand below (of 5072); only on a tall phone, where the band leaves room.
+   Its foot fades to the night at the very bottom instead. */
+.dusk-tall { display: none; left: 0; width: 100%; top: -30.58%; height: 188.69%; }
+.dusk.band .dusk-tall { display: block; }
+/* the sea washing up the wet sand and back along the shore, a thin foam edge
+   (two washes out of step); still when calm or on reduced motion */
+.dusk-swash { left: 6%; width: 88%; top: 73.6%; height: 2.6%; pointer-events: none; opacity: 0; overflow: visible;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.dusk-swash.b { left: 14%; width: 80%; }
+:where(html:not(.intro):not(.inside):not(.calm) .dusk.live) .dusk-swash { animation: swash 8s ease-in-out infinite; }
+:where(html:not(.intro):not(.inside):not(.calm) .dusk.live) .dusk-swash.b { animation-delay: -4s; animation-duration: 9s; }
+@keyframes swash { 0% { opacity: 0; transform: translateY(-40%); } 35% { opacity: .85; transform: translateY(45%); } 60% { opacity: .55; transform: translateY(38%); } 100% { opacity: 0; transform: translateY(-20%); } }
+@media (prefers-reduced-motion: reduce) { .dusk-swash { display: none; } }
+.dusk.band .dusk-fade { bottom: -58.11%; height: 34%; }
+/* the parol: hung by its string from the right palm's frond, swaying a
+   little and glowing warm; still when calm */
+.dusk-parol { left: 28.3%; top: 19.5%; width: 3.4%; height: auto; transform-origin: 50% 0; z-index: 1;
+  filter: drop-shadow(0 0 6px rgba(255, 196, 120, .55)) drop-shadow(0 0 16px rgba(255, 170, 90, .3)); }
+:where(html:not(.intro):not(.calm) .dusk.live) .dusk-parol { animation: parol-sway 4.5s ease-in-out infinite alternate; }
+@keyframes parol-sway { from { rotate: -3deg; } to { rotate: 3deg; } }
+@media (prefers-reduced-motion: reduce) { .dusk-parol { animation: none !important; } }
+/* Leny's signature in the corner of the beach, as on a painting */
+.dusk-sig { position: absolute; right: var(--gutter); bottom: max(34px, calc(env(safe-area-inset-bottom) + 28px)); margin: 0; z-index: 2; pointer-events: none;
+  font: 400 22px/1 var(--hand); color: rgba(251, 243, 226, .6); rotate: -4deg; text-shadow: 0 1px 3px rgba(15, 18, 32, .7); }
+html.intro .dusk-sig { opacity: 0; }
+.dusk-sig { transition: opacity 1.2s var(--ease-out) .6s; }
+/* birds crossing the evening sky (app.js), soft as if painted into it */
+.dusk-birds { position: absolute; left: 0; width: clamp(130px, 17vw, 230px); z-index: 1; pointer-events: none; overflow: visible;
+  fill: #2B2440; stroke: #2B2440; stroke-width: 1.4; stroke-linejoin: round; opacity: .72; filter: blur(.3px); }
 
 /* The door: the opening is 100 x 200 units (see the anchors above), so x in
    units is x% of its width and y is y/2 % of its height. */
@@ -746,8 +776,9 @@ html:not(.intro):not(.inside) .dusk.live :is(.dusk-halo, .dusk-lampref, .dusk-la
    starts from 0 so the swing settles straight into the sway */
 @keyframes sign-sway { 0%, 100% { rotate: 0deg; } 25% { rotate: 2deg; } 75% { rotate: -2deg; } }
 @keyframes door-breathe { 50% { opacity: .36; } }
-/* the fireflies sit by the palms, off the side of the band on a phone */
-.dusk.band .fireflies { display: none; }
+/* by the palms, off the side of the band on a phone: there they drift over
+   the sand around the door instead */
+.dusk.band .fireflies { left: 18%; top: 56%; width: 38%; height: 30%; }
 
 /* ── going in and stepping outside (enterKitchen(), leaveKitchen() in app.js) ── */
 /* The page holds still under the move; the idle breathing of the light
@@ -1329,6 +1360,22 @@ html.intro .bar-order, html.at-door .bar-order { color: var(--sand); text-shadow
 .bar > .k-note.read { position: absolute; left: calc(var(--gutter) + 36px); top: 0; grid-template-columns: auto; width: min(calc(100vw - 2 * var(--gutter) - 40px), 320px); padding: 10px 14px 9px; }
 @media (max-width: 699px) { .bar > .k-note.read { top: calc(var(--bar) - 10px); } }
 .bar > .k-note.read .sig { margin-top: 3px; text-align: right; }
+
+/* the sound switch: a speaker, crossed out until it's on */
+.bar-sound { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; flex: none; padding: 0; border: 0; border-radius: 50%;
+  background: transparent; color: var(--ink-2); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.bar-sound:hover { background: rgba(30, 90, 99, .07); }
+.bar-sound:focus-visible { outline: 3px solid #F6C97A; outline-offset: 1px; }
+.bar-sound svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.bar-sound .spk { fill: currentColor; }
+.bar-sound[aria-pressed="true"] .off, .bar-sound[aria-pressed="false"] .on { display: none; }
+html.intro .bar-sound, html.at-door .bar-sound { color: #FBF3E2; }
+html.intro .bar-sound { visibility: hidden; }
+/* a phone in the kitchen: the note takes the room, so Outside is its door alone (still named) */
+@media (max-width: 419px) {
+  html.inside .bar-out span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  html.inside .bar-out { padding-inline: 10px; }
+}
 
 /* Taps stay taps: no double-tap zoom anywhere; pinch to zoom still works. */
 html { touch-action: manipulation; }

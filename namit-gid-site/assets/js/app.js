@@ -1370,6 +1370,20 @@
       const s = tako.querySelector('.beach-item').offsetWidth;
       [0, 150, 280, 450, 600, 760, 1250, 1500, 1800].forEach(t => setTimeout(() => bubble(s), t));
       setTimeout(() => tako.classList.remove('diving'), 1050);
+      setTimeout(wander, 25000 + Math.random() * 15000);
+    };
+    // Now and then it dives, swims a little way along the water and comes
+    // up again: never while its card is open, or it is pointed at or focused.
+    const SPOTS = [.505, .535, .565];
+    const wander = () => {
+      const busy = document.hidden || !shown() || root.classList.contains('calm') || tako.classList.contains('open') || tako.matches(':hover, :focus-within');
+      if (busy) return setTimeout(wander, 8000);
+      tako.classList.add('diving');
+      setTimeout(() => {
+        const now = parseFloat(tako.style.getPropertyValue('--x')), next = SPOTS.filter(x => Math.abs(x - now) > .01);
+        tako.style.setProperty('--x', next[Math.floor(Math.random() * next.length)]);
+        surface();
+      }, 900);
     };
     const watch = new MutationObserver(() => { if (shown()) surface(); });
     watch.observe(root, { attributes: true, attributeFilter: ['class'] });
@@ -2193,6 +2207,101 @@
   function flyBirds(time) {
     FLOCK.forEach(b => { const el = $(b.el); if (el) el.setAttribute('d', birdPath(b.cx, b.cy, b.s, time, b)); });
   }
+
+  // Sound, only if asked for: the sea rolling in on the beach and a pan
+  // sizzling in the kitchen, both made here from noise (no files to fetch).
+  // Off at first; the choice is remembered, and a remembered "on" starts at
+  // the first tap (a browser plays nothing before one). Silent while hidden.
+  (() => {
+    const btn = $('barSound'), AC = window.AudioContext || window.webkitAudioContext;
+    if (!btn) return;
+    if (!AC) { btn.hidden = true; return; }
+    let ctx = null, sea, sizzle, on = false;
+    const noise = brown => {
+      const n = ctx.sampleRate * 4, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < n; i++) { const w = Math.random() * 2 - 1; d[i] = brown ? (last = (last + .02 * w) / 1.02) * 3.5 : w; }
+      const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; src.start(); return src;
+    };
+    const lfo = (hz, amount, target) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = hz; g.gain.value = amount; o.connect(g).connect(target); o.start(); };
+    function build() {
+      ctx = new AC();
+      // the sea: deep noise through a low filter, swelling as each wave comes in
+      const lp = ctx.createBiquadFilter(), swell = ctx.createGain();
+      lp.type = 'lowpass'; lp.frequency.value = 650; swell.gain.value = .55; lfo(1 / 7.5, .4, swell.gain);
+      sea = ctx.createGain(); sea.gain.value = 0;
+      noise(true).connect(lp).connect(swell).connect(sea).connect(ctx.destination);
+      // the pan: a thin high hiss that flutters
+      const bp = ctx.createBiquadFilter(), crackle = ctx.createGain();
+      bp.type = 'bandpass'; bp.frequency.value = 5200; bp.Q.value = .8; crackle.gain.value = .6; lfo(9, .3, crackle.gain);
+      sizzle = ctx.createGain(); sizzle.gain.value = 0;
+      noise(false).connect(bp).connect(crackle).connect(sizzle).connect(ctx.destination);
+    }
+    const mix = () => {
+      if (!ctx) return;
+      const t = ctx.currentTime, inside = root.classList.contains('inside');
+      const quiet = !on || document.hidden || root.classList.contains('intro');
+      sea.gain.setTargetAtTime(quiet || inside ? 0 : .22, t, .8);
+      sizzle.gain.setTargetAtTime(quiet || !inside ? 0 : .035, t, .8);
+    };
+    const set = v => {
+      on = v; btn.setAttribute('aria-pressed', String(v));
+      try { localStorage.setItem('ng-sound', v ? '1' : '0'); } catch {}
+      if (v && !ctx) build();
+      if (v && ctx.state === 'suspended') ctx.resume();
+      mix();
+    };
+    btn.addEventListener('click', () => set(!on));
+    new MutationObserver(mix).observe(root, { attributes: true, attributeFilter: ['class'] });
+    document.addEventListener('visibilitychange', mix);
+    let want = false;
+    try { want = localStorage.getItem('ng-sound') === '1'; } catch {}
+    if (want) {
+      btn.setAttribute('aria-pressed', 'true');
+      addEventListener('pointerdown', e => { if (!on && !btn.contains(e.target)) set(true); }, { once: true, capture: true });
+    }
+  })();
+
+  // The parol on the palm, from the first of December to Three Kings
+  // (6 January); ?parol=1 shows it any time, for a look.
+  { const d = new Date(), m = d.getMonth();
+    if (m === 11 || (m === 0 && d.getDate() <= 6) || /[?&]parol=1\b/.test(location.search)) $('duskParol').hidden = false; }
+  // Birds over the beach at dusk: now and then two or three cross the
+  // evening sky, small and dark, each flapping and gliding in its own rhythm
+  // (birdPath). Only while the beach is in view; calm: none.
+  (() => {
+    if (calm) return;
+    const NS = 'http://www.w3.org/2000/svg', still = $('duskStill');
+    let flying = false;
+    const away = () => document.hidden || ['intro', 'inside', 'calm'].some(c => root.classList.contains(c)) || !still;
+    function crossing() {
+      if (flying || away()) return;
+      flying = true;
+      const svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('class', 'dusk-birds'); svg.setAttribute('viewBox', '0 0 100 40'); svg.setAttribute('aria-hidden', 'true');
+      const g = document.createElementNS(NS, 'g'); svg.append(g);
+      const n = 2 + Math.floor(Math.random() * 2), dir = Math.random() < .5 ? 1 : -1;
+      const flock = Array.from({ length: n }, (_, i) => {
+        const p = document.createElementNS(NS, 'path'); g.append(p);
+        return { p, cx: 50 + (i - (n - 1) / 2) * 13 + Math.random() * 4, cy: 16 + (i % 2) * 7 + Math.random() * 4, s: .17 + Math.random() * .06,
+          beats: 2 + (i % 3), beat: .36 + Math.random() * .1, glide: .7 + Math.random() * .7, offset: Math.random() * 2 };
+      });
+      // high in the painting's sky (above it too, on a tall phone), never under the bar
+      const f = dusk.classList.contains('band') ? -.12 + Math.random() * .3 : .04 + Math.random() * .16;
+      svg.style.top = `max(calc(var(--bar) + 64px), calc(var(--art-y, 0px) + var(--art-h, 100%) * ${f.toFixed(3)}))`;
+      if (dir < 0) g.setAttribute('transform', 'matrix(-1 0 0 1 100 0)'); // facing the way they fly
+      still.append(svg);
+      const W = still.clientWidth, w = svg.getBoundingClientRect().width, rise = (Math.random() - .5) * 60;
+      const from = dir > 0 ? -w : W, to = dir > 0 ? W : -w;
+      let raf = 0;
+      const flap = t => { flock.forEach(b => b.p.setAttribute('d', birdPath(b.cx, b.cy, b.s, t / 1000, b))); raf = requestAnimationFrame(flap); };
+      raf = requestAnimationFrame(flap);
+      svg.animate([{ transform: `translate(${from}px, 0)` }, { transform: `translate(${to}px, ${rise}px)` }],
+        { duration: (W + w) / (38 + Math.random() * 18) * 1000, easing: 'linear' })
+        .onfinish = () => { cancelAnimationFrame(raf); svg.remove(); flying = false; };
+    }
+    setTimeout(function next() { if (Math.random() < .55) crossing(); setTimeout(next, 7000 + Math.random() * 9000); }, 4000);
+  })();
 
   async function playIntro() {
     if (!window.gsap) return toDoor();

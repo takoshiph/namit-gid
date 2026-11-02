@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=111">
+<link rel="stylesheet" href="assets/css/site.css?v=112">
 <script>
   /* Decide the intro before first paint so nothing flashes. For review, the
      intro plays on every visit and every refresh. With reduced motion or data
@@ -142,6 +142,8 @@
   </a>
   <!-- at the beach (and during the intro) it reads "Open the Door" and plays
        the door's entrance; anywhere else it is plain Order -->
+  <!-- sound, only if asked for: the sea outside, the pan sizzling inside (app.js) -->
+  <button class="bar-sound" id="barSound" type="button" aria-pressed="false" aria-label="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z"/><path class="on" d="M15.2 9.2a4 4 0 0 1 0 5.6M17.8 6.7a7.6 7.6 0 0 1 0 10.6"/><path class="off" d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></svg></button>
   <a class="bar-order" href="#menu"><span class="bar-order-door">Open the Door</span><span class="bar-order-word">Order</span></a>
   <!-- inside, the same slot steps back out: the beach door in small, wooden
        planks in its frame with the warm light at its seams; it opens a little on hover -->
@@ -168,7 +170,13 @@
     <div class="dusk-still" id="duskStill">
     <div class="dusk-sky" aria-hidden="true"></div>
     <div class="dusk-art" id="duskArt">
+      <!-- on a tall phone, the same painting with more sky above and more sand
+           below (the middle is the painting itself, pixel for pixel), so the
+           screen is painted top to bottom -->
+      <img class="dusk-tall" src="assets/img/dusk/beach-tall-2400.webp" width="2400" height="1921" alt="" aria-hidden="true" loading="lazy" decoding="async">
       <img class="dusk-beach" id="duskBeach" src="assets/img/dusk/beach-2400.webp" srcset="assets/img/dusk/beach-2400.webp 2400w, assets/img/dusk/beach-4096.webp 4096w" sizes="(max-aspect-ratio: 33/40) 257vw, max(100vw, 236vh)" width="2400" height="1018" alt="" aria-hidden="true" fetchpriority="high">
+      <!-- a parol hung from the palm's frond, from December to Three Kings (app.js) -->
+      <img class="dusk-parol" id="duskParol" src="assets/img/dusk/parol.webp" width="295" height="520" alt="" aria-hidden="true" loading="lazy" decoding="async" hidden>
       <!-- a sharper painting of the door's surroundings (DOOR_CROP), laid over
            the beach for the push in through the door -->
       <img class="dusk-crop" id="duskCrop" width="950" height="1129" alt="" aria-hidden="true" hidden>
@@ -178,6 +186,10 @@
       <i class="dusk-halo" aria-hidden="true"></i>
       <div class="dusk-lampref" id="duskLampRef" aria-hidden="true"></div>
       <i class="dusk-lamp" aria-hidden="true"></i>
+      <!-- the sea washing up the wet sand and back (two washes, out of step) -->
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="duskSwashG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EADBE6" stop-opacity="0"/><stop offset=".55" stop-color="#EADBE6" stop-opacity=".3"/><stop offset=".82" stop-color="#FFF2EC" stop-opacity=".75"/><stop offset="1" stop-color="#FFF2EC" stop-opacity="0"/></linearGradient></defs></svg>
+      <svg class="dusk-swash" viewBox="0 0 400 20" preserveAspectRatio="none" aria-hidden="true"><path fill="url(#duskSwashG)" d="M0 0H400V12C370 15 350 11 320 14C290 17 270 12 240 15C210 18 190 13 160 16C130 18 110 13 80 15C50 17 30 12 0 14Z"/></svg>
+      <svg class="dusk-swash b" viewBox="0 0 400 20" preserveAspectRatio="none" aria-hidden="true"><path fill="url(#duskSwashG)" d="M0 0H400V12C370 15 350 11 320 14C290 17 270 12 240 15C210 18 190 13 160 16C130 18 110 13 80 15C50 17 30 12 0 14Z"/></svg>
       <img class="dusk-boat" src="assets/img/bangka-painted.webp" width="1000" height="356" alt="" aria-hidden="true">
       <i class="dusk-fade" aria-hidden="true"></i>
       <i class="dusk-lampwet" aria-hidden="true"></i>
@@ -246,6 +258,8 @@
         <p class="next-pickup" id="nextPickup" hidden></p>
       </div>
     </div>
+    <!-- signed in the corner, like the painting it is -->
+    <p class="dusk-sig" aria-hidden="true">Leny · 2026</p>
     <p class="dusk-legal">© 2026 Namit Gid · <a href="https://takoshi.ca/privacy.html">Privacy</a> · <a href="https://takoshi.ca/terms.html">Terms</a></p>
     </div>
     </div>
@@ -365,6 +379,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=101" defer></script>
+<script src="assets/js/app.js?v=102" defer></script>
 </body>
 </html>
