@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=102">
+<link rel="stylesheet" href="assets/css/site.css?v=104">
 <script>
   /* Decide the intro before first paint so nothing flashes. For review, the
      intro plays on every visit and every refresh. With reduced motion or data
@@ -86,7 +86,7 @@
   <div class="st-skyclouds" id="stSkyClouds" data-depth=".7"></div>
   <div class="st-sea" id="stSea" data-depth=".85">
     <div class="st-path" id="stPath"></div>
-    <div class="st-lampref" id="stLampRef"></div>
+    <div class="st-lampref" id="stLampRef"></div><!-- the lamp's light on the water, painted strokes (app.js) -->
     <div class="st-waves" id="stWaves"></div>
     <div class="st-glitter" id="stGlitter"></div>
   </div>
@@ -95,6 +95,7 @@
     <i class="st-rim" id="stRim"></i>
     <img class="st-island" id="stIsland" src="assets/img/byaringan-painted-1680.webp" alt="">
     <i class="st-tint" id="stTint"></i>
+    <i class="st-halo" id="stHalo"></i>
     <i class="st-glow" id="stGlow"></i>
   </div>
   <div class="st-haze" id="stHaze" data-depth="1.1"></div>
@@ -105,6 +106,7 @@
   <div class="st-flare" id="stFlare"></div>
   <p class="st-word" id="stWord">Namit <span>gid</span></p>
   <div class="st-sand" id="stSand">
+    <i class="st-lampwet" id="stLampWet"></i>
     <svg class="st-foam" viewBox="0 0 400 40" preserveAspectRatio="none"><defs><linearGradient id="stWashG" x1="0" y1="0" x2="0" y2="1"><stop offset=".1" stop-color="#F6E3D2" stop-opacity="0"/><stop offset=".45" stop-color="#F6E3D2" stop-opacity=".42"/></linearGradient><linearGradient id="stWetG" x1="0" y1="0" x2="0" y2="1"><stop offset=".15" stop-color="#6E5048" stop-opacity="0"/><stop offset="1" stop-color="#6E5048" stop-opacity=".5"/></linearGradient></defs><path class="wet" id="stWet" d="M0 6 V18 C30 15 55 21 90 17 S150 14 190 19 S260 21 300 16 S370 15 400 18 V6Z"/><path class="wash" id="stWash" d="M400 0 H0 V18 C30 15 55 21 90 17 S150 14 190 19 S260 21 300 16 S370 15 400 18Z"/><g id="stLip"><path class="lip" d="M0 18 C30 15 55 21 90 17 S150 14 190 19 S260 21 300 16 S370 15 400 18"/><path class="lip lip2" d="M0 16.6 C40 14 70 19.5 110 16 S170 13.5 205 17.5 S275 19.5 310 15 S375 14 400 16.6"/></g></svg>
   </div>
   <!-- The near plane, painted: a bangka on the sand (it rides with the sand, not the camera) and a palm frond overhead. -->
@@ -169,9 +171,14 @@
            the beach for the push in through the door -->
       <img class="dusk-crop" id="duskCrop" width="950" height="1129" alt="" aria-hidden="true" hidden>
       <img class="dusk-isle" id="duskIsle" src="assets/img/byaringan-painted-840.webp" width="840" height="288" alt="" aria-hidden="true">
+      <!-- the lamp's light, as at dawn: a halo, its reflection painted down the
+           sea to the shore, and a glint on the wet sand (strokes: app.js) -->
+      <i class="dusk-halo" aria-hidden="true"></i>
+      <div class="dusk-lampref" id="duskLampRef" aria-hidden="true"></div>
       <i class="dusk-lamp" aria-hidden="true"></i>
       <img class="dusk-boat" src="assets/img/bangka-painted.webp" width="1000" height="356" alt="" aria-hidden="true">
       <i class="dusk-fade" aria-hidden="true"></i>
+      <i class="dusk-lampwet" aria-hidden="true"></i>
       <div class="fireflies" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <!-- Four things on the sand to tap, in fractions of the painting (--x, --y:
            each item's centre; placeItems() in app.js may lift one clear of the
@@ -247,16 +254,20 @@
   </section>
 
   <section class="menu" id="menu" aria-labelledby="menuH">
-    <header class="sec-head">
-      <h2 id="menuH" lang="tl">Kumain ka na? Tara, nagluto ako.</h2>
-      <p class="translation">Have you eaten? Come, I cooked.</p>
-      <p class="sig">~Leny</p>
-      <p class="sec-sub">Follow your nose. Lift a lid to see what’s inside.</p>
-    </header>
-
     <!-- Leny's kitchen: the menu, painted. Each pot, the oven and the register
          is a button; its open state is a layer cut from the same painting. -->
     <div class="kitchen" id="kitchen">
+      <!-- Leny's greeting, a note pinned to the wall. Going in, she says it
+           big in the doorway's light, then it folds into the note (app.js).
+           The note shows its first line; a tap opens the rest. -->
+      <div class="k-note" id="kNote">
+        <h2 id="menuH" lang="tl">Kumain ka na? Tara, nagluto ako.</h2>
+        <p class="translation">Have you eaten? Come, I cooked.</p>
+        <p class="sig">~Leny</p>
+        <p class="k-note-ps">P.S. Lift a lid.</p>
+        <p class="sr-only">Follow your nose. Lift a lid to see what’s inside.</p>
+        <button class="k-note-tap" id="kNoteTap" type="button" aria-expanded="false" aria-controls="kNote"><span class="sr-only">Read Leny’s note</span></button>
+      </div>
       <!-- One wide painting of Leny's kitchen wall. On a phone you see part of
            it at full height and drag sideways to walk along it. Each lid, the
            cake dome, the phone and the register is a button; its open state is
@@ -349,6 +360,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=91" defer></script>
+<script src="assets/js/app.js?v=94" defer></script>
 </body>
 </html>

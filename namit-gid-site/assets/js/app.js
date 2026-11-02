@@ -766,7 +766,7 @@
     const d = seat[b.pot];
     // on the live site an empty burner is just part of the painting
     world.insertBefore(make('img', { class: 'k-layer', 'data-layer': b.pot, src: 'assets/img/kitchen/lid-' + b.pot + '.webp?v=2', alt: '', 'aria-hidden': 'true' }), glow);
-    if (d) world.insertBefore(make('i', { class: 'k-wisp', 'aria-hidden': 'true', style: `--x:${b.l + b.w / 2}%;--d:${(k * 1.9) % 8}s` }), glow);
+    if (d) world.insertBefore(make('i', { class: 'k-wisp', 'data-for': b.pot, 'aria-hidden': 'true', style: `--x:${b.l + b.w / 2}%;--d:${(k * 1.9) % 8}s` }), glow);
     world.append(make('button', { class: 'k-spot', type: 'button', 'data-spot': b.pot, 'data-dish': d ? d.id : 'sample',
       style: `left:${b.l}%;top:${b.t}%;width:${b.w}%;height:${b.h}%` },
       [make('span', { class: 'k-tag' + (d ? '' : ' sample'), text: d ? (d.short || d.name) : 'Soon' })]));
@@ -797,18 +797,36 @@
   addEventListener('pointerup', () => { drag = null; scroller.classList.remove('dragging'); });
   // a drag that moved should not also count as a tap on a pot
   scroller.addEventListener('click', e => { if (dragged) { e.stopPropagation(); e.preventDefault(); dragged = false; } }, true);
-  const peekLid = () => {
-    const first = world.querySelector('.k-layer[data-layer="palayok"]');
-    if (!first || calm) return;
-    first.classList.add('peek'); setTimeout(() => first.classList.remove('peek'), 1300);
+  // Leny's note: a tap opens the rest of it (and a tap anywhere else, or
+  // Escape, folds it again). Its P.S. goes once a lid has been lifted.
+  const note = $('kNote'), noteTap = $('kNoteTap');
+  const readNote = on => { note.classList.toggle('read', on); noteTap.setAttribute('aria-expanded', String(on)); };
+  noteTap.addEventListener('click', () => readNote(!note.classList.contains('read')));
+  document.addEventListener('click', e => { if (note.classList.contains('read') && !note.contains(e.target)) readNote(false); });
+  note.addEventListener('keydown', e => { if (e.key === 'Escape') readNote(false); });
+  // While she says it big, going in, the kitchen's hints wait for the fold.
+  const settled = fn => note.classList.contains('big') ? setTimeout(() => settled(fn), 400) : fn();
+  // The first pot's lid lifts with a puff of steam, a few times, until a
+  // lid (or anything in the kitchen) has been opened.
+  let lifted = false, peeking = false;
+  const peekLid = (n = 3, again = false) => {
+    if (peeking && !again) return; // (one run of peeks at a time)
+    peeking = true; settled(() => peekOnce(n));
+  };
+  const peekOnce = n => {
+    const first = world.querySelector('.k-layer[data-layer="palayok"]'), puff = world.querySelector('.k-wisp[data-for="palayok"]');
+    if (!first || calm || lifted || !root.classList.contains('inside')) { peeking = false; return; }
+    first.classList.add('peek'); if (puff) puff.classList.add('puff');
+    setTimeout(() => { first.classList.remove('peek'); if (puff) puff.classList.remove('puff'); }, 1300);
+    if (n > 1) setTimeout(() => peekLid(n - 1, true), 4500); else peeking = false;
   };
   if (!calm && 'IntersectionObserver' in window) {
-    const lidHint = new IntersectionObserver(es => { if (es[0].isIntersecting) { lidHint.disconnect(); setTimeout(peekLid, 500); } }, { threshold: .5 });
+    const lidHint = new IntersectionObserver(es => { if (es[0].isIntersecting) { lidHint.disconnect(); setTimeout(peekLid, 600); } }, { threshold: .5 });
     lidHint.observe(kitchen);
     const nudge = new IntersectionObserver(es => {
       if (!es[0].isIntersecting || scroller.scrollWidth - scroller.clientWidth < 4) return;
       nudge.disconnect();
-      setTimeout(() => { scroller.scrollBy({ left: 70, behavior: 'smooth' }); setTimeout(() => scroller.scrollBy({ left: -70, behavior: 'smooth' }), 700); }, 900);
+      settled(() => setTimeout(() => { scroller.scrollBy({ left: 70, behavior: 'smooth' }); setTimeout(() => scroller.scrollBy({ left: -70, behavior: 'smooth' }), 700); }, 2600));
     }, { threshold: .6 });
     nudge.observe(kitchen);
   }
@@ -839,6 +857,7 @@
   }
   kitchen.querySelectorAll('.k-spot').forEach(btn => btn.addEventListener('click', () => {
     const spot = btn.dataset.spot, dish = btn.dataset.dish;
+    lifted = true; note.classList.add('done');
     closeSpot();
     openSpot = spot;
     const nl = layerOf(spot); if (nl) nl.classList.add('open');
@@ -1646,7 +1665,7 @@
     const still = $('duskStill'), leaf = $('doorLeaf'), leny = $('doorLeny'), light = $('doorLight');
     const seam = $('doorSeam'), caption = [...document.querySelectorAll('#duskH, #duskPickup, .dusk-legal')], crop = $('duskCrop');
     const boat = document.querySelector('.dusk-boat'), boatAside = dusk.classList.contains('band');
-    const lines = greet.querySelectorAll('.line > span'), after = document.querySelectorAll('#menu .translation, #menu .sig');
+    const lines = greet.querySelectorAll('.line > span'), after = note.querySelectorAll('.translation, .sig');
     let swapped = false, over = false, tl;
 
     // Under the full bloom: put the beach back as it was, out of sight, for
@@ -1658,8 +1677,8 @@
       if (crop) crop.hidden = true;
       root.classList.remove('entering');
       setPlace('kitchen', { push: true });
-      // the greeting waits, out of sight, to rise as the light lifts
-      if (!quiet) { gsap.set(lines, { yPercent: 105 }); gsap.set(after, { opacity: 0, y: 8 }); }
+      // the greeting waits, big and out of sight, to rise as the light lifts
+      if (!quiet) { readNote(false); note.classList.add('big'); gsap.set(lines, { yPercent: 105 }); gsap.set(after, { opacity: 0, y: 8 }); }
     };
     // A slow kitchen holds the bloom at its peak until the painting is in,
     // or for 4 s at most.
@@ -1674,7 +1693,8 @@
       const finish = () => {
         if (over) return; over = true;
         swap();
-        gsap.set([bloom, glow, menu, ...lines, ...after], { clearProps: 'all' });
+        note.classList.remove('big');
+        gsap.set([bloom, glow, menu, note, note.querySelector('.k-note-ps'), ...lines, ...after], { clearProps: 'all' });
         entering = finishEntering = null; resolve();
       };
       // Order (or a #menu link) while going in: stop here, in the kitchen,
@@ -1738,8 +1758,24 @@
       tl.to(bloom, { autoAlpha: 0, duration: .45, ease: 'power2.out' }, LIFT)
         .fromTo(menu, { scale: 1.03 }, { scale: 1, duration: .5, ease: 'power3.out', immediateRender: false }, LIFT - .1)
         .fromTo(lines, { yPercent: 105 }, { yPercent: 0, duration: .4, ease: 'expo.out', stagger: .06, immediateRender: false }, LIFT)
-        .fromTo(after, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .3, ease: 'power2.out', stagger: .05, immediateRender: false }, LIFT + .1)
-        .addLabel('settled', tl.duration());
+        .fromTo(after, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .3, ease: 'power2.out', stagger: .05, immediateRender: false }, LIFT + .1);
+      // She lets it sit a moment, then it folds into her note on the wall:
+      // the second line and the English go, and the note flies from where
+      // the greeting was to its corner, so the kitchen has the whole screen.
+      const FOLD = LIFT + 2.3, rest = [lines[1], after[0]].filter(Boolean), ps = note.querySelector('.k-note-ps');
+      const fold = () => {
+        const f = note.getBoundingClientRect();
+        note.classList.remove('big');
+        const l = note.getBoundingClientRect();
+        gsap.set(note, { x: f.left - l.left, y: f.top - l.top, scale: f.width / l.width });
+      };
+      tl.to(rest, { opacity: 0, duration: .25, ease: 'sine.in' }, FOLD - .25)
+        .call(fold, null, FOLD)
+        .to(note, { x: 0, y: 0, scale: 1, duration: .7, ease: 'power3.inOut' }, FOLD + .001)
+        // and once it is pinned, her P.S.
+        .fromTo(ps, { opacity: 0 }, { opacity: 1, duration: .35, ease: 'sine.out', immediateRender: false }, FOLD + .6)
+        .addLabel('settled', tl.duration())
+        .call(() => setTimeout(() => peekLid(), 500), null, 'settled');
     });
     return entering;
   }
@@ -1854,6 +1890,30 @@
     return leaving;
   }
   window.leaveKitchen = leaveKitchen;
+
+  // The lamp's light on the water, painted: broken horizontal strokes from
+  // under the island down to the shore, narrow far off and wider as they
+  // near, their edges roughened like a brush's. The same strokes (same seed)
+  // at dawn and at dusk, so the light carries through nightfall. The SVG is
+  // stretched to its box (app.js and the stylesheet size the box).
+  function lampStrokes(host, color, seed) {
+    let s = seed;
+    const rnd = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+    const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg'), id = 'brush' + seed + color.slice(1);
+    svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('aria-hidden', 'true');
+    let d = `<defs><filter id="${id}" x="-10%" y="-40%" width="120%" height="180%"><feTurbulence type="fractalNoise" baseFrequency=".12 .9" numOctaves="2" seed="${seed}"/><feDisplacementMap in="SourceGraphic" scale="4"/><feGaussianBlur stdDeviation=".45"/></filter></defs><g filter="url(#${id})" fill="${color}">`;
+    const N = 26;
+    for (let i = 0; i < N; i++) {
+      const u = i / (N - 1), y = 1 + u * 96 + (rnd() - .5) * 1.5, h = .7 + u * 1.5, w = (16 + 84 * u ** .8) * (.35 + .65 * rnd()), cx = 50 + (rnd() - .5) * 14 * (1 - u * .4);
+      // a row is one stroke, or two with a gap where a swell breaks it
+      const parts = rnd() < .45 ? [[cx - w / 2, w * (.35 + .2 * rnd())], [0, 0]] : [[cx - w / 2, w]];
+      if (parts.length > 1) { const gap = w * (.08 + .08 * rnd()); parts[1] = [parts[0][0] + parts[0][1] + gap, w - parts[0][1] - gap]; }
+      parts.forEach(([x, pw]) => { d += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${pw.toFixed(2)}" height="${h.toFixed(2)}" rx="${(h / 2).toFixed(2)}" opacity="${(.3 + .6 * rnd()).toFixed(2)}"/>`; });
+    }
+    svg.innerHTML = d + '</g>';
+    host.replaceChildren(svg);
+  }
+  if ($('duskLampRef')) lampStrokes($('duskLampRef'), '#FFD38C', 7);
 
   // A cumulus, painted once onto a canvas: soft puffs (a low row along the
   // base, a taller crown), then one gradient laid across the whole shape, lit
@@ -2092,7 +2152,11 @@
     // Letter angles from the lamp, computed from the split before any transform.
     const letterRects = chars.map(c => c.getBoundingClientRect());
     gsap.set('#stBeam', { rotation: 185 });
-    gsap.set('#stLampRef', { left: L.x + vw * .2 - vw * .0175 });
+    // the lamp's light: its reflection from under the island to the shore
+    // (the sea starts 20% of the screen to the left), and a glint on the sand
+    lampStrokes($('stLampRef'), '#FFF3D6', 7);
+    gsap.set('#stLampRef', { left: L.x + vw * .2, height: art.height * (SHORE - HORIZON) + 2 });
+    gsap.set('#stLampWet', { left: L.x - art.width * .03 });
 
     // A new size or orientation mid-intro would break the match cut: go to the door.
     addEventListener('resize', () => { if (!done && (innerWidth !== w0 || Math.abs(innerHeight - h0) > 150)) toDoor(); });
@@ -2161,9 +2225,13 @@
       .to('#stPath', { opacity: 1, duration: 2.4, ease: 'sine.inOut' }, 1.2)
       .to('#stTint', { opacity: .3, duration: 3, ease: 'sine.inOut' }, .8)
       .to('#stRim', { opacity: .95, duration: 2.2, ease: 'sine.inOut' }, 1.6)
-      .to('#stLampRef', { opacity: .25, duration: 2, ease: 'sine.inOut' }, 2.2)
+      .to('#stLampRef', { opacity: 1, duration: 2, ease: 'sine.inOut' }, 2.2)
       .fromTo('#stGlow', { scale: .7, opacity: 1 }, { scale: 1.15, duration: .9, ease: 'sine.inOut', repeat: 3, yoyo: true }, 0)
-      .to('#stGlow', { opacity: .35, scale: .8, duration: .8 }, 3.2)
+      .to('#stGlow', { opacity: .85, scale: 1, duration: .8 }, 3.2)
+      // the lamp stays bright as the day comes: a wide halo, and its light
+      // reaches across the water to the wet sand at your feet
+      .fromTo('#stHalo', { opacity: 0 }, { opacity: .7, duration: 2.4, ease: 'sine.inOut' }, .6)
+      .to('#stLampWet', { opacity: .85, duration: 1.8, ease: 'sine.inOut' }, 4.2)
       .fromTo('#stSand', { yPercent: 35 }, { yPercent: 0, duration: 2.6, ease: 'power2.out' }, 1.2)
       // the bangka is drawn up on that sand, so it rises with it
       .fromTo('#stBangka', { y: sandRise }, { y: 0, duration: 2.6, ease: 'power2.out' }, 1.2);
@@ -2255,7 +2323,7 @@
     tl.addLabel('pullEnd', PULL_END)
       .call(() => window.preloadKitchen?.(), null, FALL_AT)
       .to('#stSun', { yPercent: 22, opacity: 0, duration: 1.6, ease: 'sine.in' }, SET_AT)
-      .to(['#stRays', '#stPath', '#stLampRef'], { opacity: 0, duration: 1.2, ease: 'sine.inOut' }, SET_AT + .2)
+      .to(['#stRays', '#stPath'], { opacity: 0, duration: 1.2, ease: 'sine.inOut' }, SET_AT + .2)
       .fromTo(wipe, { y: -FALL }, { y: 0, duration: FALL_T, ease: 'sine.inOut' }, FALL_AT)
       .fromTo(still, { y: FALL }, { y: 0, duration: FALL_T, ease: 'sine.inOut' }, FALL_AT)
       // The light-written name fades with the daylight: it lives on the sign now.
