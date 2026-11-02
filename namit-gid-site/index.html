@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=105">
+<link rel="stylesheet" href="assets/css/site.css?v=107">
 <script>
   /* Decide the intro before first paint so nothing flashes. For review, the
      intro plays on every visit and every refresh. With reduced motion or data
@@ -281,15 +281,20 @@
                counter, two fuzzballs near the steamer and rice cooker -->
           <img class="k-friend k-fire" src="assets/img/kitchen/fire.webp" width="160" height="186" alt="" aria-hidden="true" loading="lazy">
           <img class="k-friend k-calico" src="assets/img/kitchen/calico.webp" width="254" height="300" alt="" aria-hidden="true" loading="lazy">
-          <img class="k-friend k-chef" src="assets/img/kitchen/chef.webp" width="254" height="380" alt="" aria-hidden="true" loading="lazy">
-          <img class="k-friend k-cat" src="assets/img/kitchen/cat.webp" width="243" height="360" alt="" aria-hidden="true" loading="lazy">
+          <!-- for depth: the chef stands half behind the register, and the cat
+               peeks up from behind the counter (each in a room-sized box
+               clipped to that edge of the painting, so a hop rises from it) -->
+          <div class="k-behind k-behind-register" aria-hidden="true"><img class="k-friend k-chef" src="assets/img/kitchen/chef.webp" width="254" height="380" alt="" loading="lazy"></div>
+          <div class="k-behind k-behind-counter" aria-hidden="true"><img class="k-friend k-cat" src="assets/img/kitchen/cat.webp" width="243" height="360" alt="" loading="lazy"></div>
           <img class="k-friend k-fuzz-wave" src="assets/img/kitchen/fuzz-wave.webp" width="120" height="131" alt="" aria-hidden="true" loading="lazy">
           <img class="k-friend k-fuzz-jump" src="assets/img/kitchen/fuzz-jump.webp" width="140" height="129" alt="" aria-hidden="true" loading="lazy">
-          <!-- a little kitchen magic: empty plates lifted off the dish shelves,
-               floating, and warm motes of light drifting through the room -->
-          <img class="k-plate" src="assets/img/kitchen/plate-1.webp" width="461" height="260" style="left:56.5%;top:29%;width:8%;--t:5.6s;--d:0s" alt="" aria-hidden="true" loading="lazy">
-          <img class="k-plate" src="assets/img/kitchen/plate-3.webp" width="320" height="260" style="left:46%;top:24.5%;width:5%;--t:4.8s;--d:-1.7s" alt="" aria-hidden="true" loading="lazy">
-          <img class="k-plate" src="assets/img/kitchen/plate-2.webp" width="424" height="260" style="left:85%;top:29%;width:7.2%;--t:6.4s;--d:-3.1s" alt="" aria-hidden="true" loading="lazy">
+          <!-- a little kitchen magic: empty plates that rest unseen on the dish
+               shelves (left, top), lift off when something is opened, float
+               out in front of the wall (data-fx, data-fy) for a few seconds and
+               go back; and warm motes of light drifting through the room -->
+          <img class="k-plate" src="assets/img/kitchen/plate-1.webp" width="461" height="260" style="left:61%;top:17%;width:8%;--t:5.6s;--d:0s" data-fx="56.5" data-fy="29" alt="" aria-hidden="true" loading="lazy">
+          <img class="k-plate" src="assets/img/kitchen/plate-3.webp" width="320" height="260" style="left:79%;top:4%;width:5%;--t:4.8s;--d:-1.7s" data-fx="46" data-fy="24.5" alt="" aria-hidden="true" loading="lazy">
+          <img class="k-plate" src="assets/img/kitchen/plate-2.webp" width="424" height="260" style="left:90%;top:17%;width:7.2%;--t:6.4s;--d:-3.1s" data-fx="85" data-fy="29" alt="" aria-hidden="true" loading="lazy">
           <div class="k-motes" aria-hidden="true"><i style="left:8%;top:30%"></i><i style="left:24%;top:52%;--d:-2s"></i><i style="left:41%;top:24%;--d:-4.5s"></i><i style="left:58%;top:58%;--d:-1s"></i><i style="left:76%;top:34%;--d:-3.3s"></i><i style="left:92%;top:55%;--d:-5.6s"></i><i style="left:33%;top:78%;--d:-6.2s"></i></div>
           <button class="k-card" type="button" id="kCard" aria-haspopup="dialog">
             <i class="k-tack" aria-hidden="true"></i>
@@ -364,6 +369,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=95" defer></script>
+<script src="assets/js/app.js?v=97" defer></script>
 </body>
 </html>

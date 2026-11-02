@@ -1193,8 +1193,14 @@ html.calm .sheet.notebook .line-item { animation: none; }
 .line-item.plain { grid-template-columns: 1fr; }
 
 /* ── Kitchen friends ─────────────────────────────────────────────────────── */
-.k-world > img.k-friend { right: auto; bottom: auto; height: auto; pointer-events: none; }
-.k-world > .k-cat { left: 49.5%; top: 70.1%; width: 12%; transform-origin: 50% 100%; animation: cat-breathe 4.5s ease-in-out infinite; }
+.k-world img.k-friend { right: auto; bottom: auto; height: auto; pointer-events: none; }
+/* a room-sized box that hides what is behind an edge of the painting:
+   the counter's back edge, and the register's left side and drawer */
+.k-behind { position: absolute; inset: 0; pointer-events: none; }
+.k-behind > img { position: absolute; }
+.k-behind-counter { clip-path: inset(0 0 13.8% 0); }
+.k-behind-register { clip-path: polygon(0 0, 100% 0, 100% 67.8%, 85.8% 67.8%, 82.1% 74.8%, 82.1% 83.8%, 78% 83.8%, 78% 100%, 0 100%); }
+.k-world .k-cat { left: 38%; top: 74%; width: 12%; transform-origin: 50% 100%; animation: cat-breathe 4.5s ease-in-out infinite; }
 .k-world > .k-fuzz-wave { left: 67.9%; top: 39%; width: 5%; transform-origin: 50% 100%; animation: fuzz-sway 2.6s ease-in-out infinite; }
 .k-world > .k-fuzz-jump { left: 89%; top: 32.5%; width: 5.5%; animation: fuzz-hop 3.2s ease-in-out infinite; }
 @keyframes cat-breathe { 0%, 100% { scale: 1 1; } 50% { scale: 1.01 1.02; } }
@@ -1202,18 +1208,19 @@ html.calm .sheet.notebook .line-item { animation: none; }
 @keyframes fuzz-hop { 0%, 60%, 100% { translate: 0 0; } 75% { translate: 0 -22%; } 85% { translate: 0 4%; } }
 .k-world > .k-fire { left: 47.2%; top: 43.2%; width: 6.5%; mix-blend-mode: screen; transform-origin: 50% 80%; animation: fire-flicker 1.8s ease-in-out infinite; }
 .k-world > .k-calico { left: 42.7%; top: 8%; width: 9%; animation: calico-peek 7s ease-in-out infinite; }
-.k-world > .k-chef { left: 63.5%; top: 68%; width: 13.2%; transform-origin: 50% 100%; animation: chef-sway 5s ease-in-out infinite; }
+.k-world .k-chef { left: 71%; top: 68%; width: 13.2%; transform-origin: 50% 100%; animation: chef-sway 5s ease-in-out infinite; }
 @keyframes fire-flicker { 0%, 100% { scale: 1 1; } 30% { scale: 1.04 .97; } 60% { scale: .97 1.05; } }
 @keyframes calico-peek { 0%, 100% { translate: 0 0; } 45%, 60% { translate: 6% 0; } }
 @keyframes chef-sway { 0%, 100% { rotate: -1.5deg; } 50% { rotate: 1.5deg; } }
-@media (prefers-reduced-motion: reduce) { .k-world > .k-friend { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .k-world .k-friend { animation: none; } }
 /* The friends start out of sight (.away, set by app.js) and pop out, in a
    puff of light, one by one as things in the kitchen are opened. */
-.k-world > .k-friend { transition: opacity 400ms var(--ease-out), transform 650ms cubic-bezier(.34, 1.56, .64, 1); }
-.k-world > .k-friend.away { opacity: 0; transform: translateY(18%) scale(.55); }
-/* empty plates, floating in front of the dish shelves, each on its own slow
-   bob, with a warm glow under it */
-.k-world > img.k-plate { right: auto; bottom: auto; height: auto; pointer-events: none; filter: drop-shadow(0 8px 10px rgba(255, 196, 110, .45));
+.k-world .k-friend { transition: opacity 400ms var(--ease-out), transform 650ms cubic-bezier(.34, 1.56, .64, 1); }
+.k-world .k-friend.away { opacity: 0; transform: translateY(18%) scale(.55); }
+/* empty plates, unseen on the dish shelves until something is opened; then
+   they float out (app.js), each on its own slow bob, with a warm glow under
+   it, and go back */
+.k-world > img.k-plate { right: auto; bottom: auto; height: auto; pointer-events: none; opacity: 0; filter: drop-shadow(0 8px 10px rgba(255, 196, 110, .45));
   animation: plate-float var(--t, 5s) ease-in-out infinite; animation-delay: var(--d, 0s); }
 @keyframes plate-float { 0%, 100% { translate: 0 0; rotate: -5deg; } 50% { translate: 0 -14%; rotate: 4deg; } }
 /* motes of warm light drifting up through the room */

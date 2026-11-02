@@ -860,7 +860,21 @@
     }
     const puff = from.dataset && world.querySelector(`.k-wisp[data-for="${from.dataset.spot}"]`);
     if (puff) { puff.classList.remove('puff'); void puff.offsetWidth; puff.classList.add('puff'); setTimeout(() => puff.classList.remove('puff'), 1400); }
-    plates.forEach((p, i) => setTimeout(() => p.animate([{ transform: 'none' }, { transform: 'translateY(-18%) rotate(180deg)', offset: .5 }, { transform: 'rotate(360deg)' }], { duration: 1100, easing: 'ease-in-out' }), 120 * i));
+    // the plates lift off their shelves, float out for a few seconds and go
+    // back (a new burst while they are out sends them round again)
+    const W = world.offsetWidth, Hh = world.offsetHeight;
+    plates.forEach((p, i) => {
+      const dx = (p.dataset.fx - parseFloat(p.style.left)) / 100 * W, dy = (p.dataset.fy - parseFloat(p.style.top)) / 100 * Hh, at = `translate(${dx}px, ${dy}px)`;
+      if (p.flight) p.flight.cancel();
+      p.flight = p.animate([
+        { opacity: 0, transform: 'translateY(4%) scale(.85)' },
+        { opacity: 1, transform: 'translateY(-14%) scale(.95)', offset: .08 },
+        { opacity: 1, transform: `${at} rotate(360deg)`, offset: .22 },
+        { opacity: 1, transform: `${at} rotate(360deg)`, offset: .8 },
+        { opacity: 1, transform: 'translateY(-10%) rotate(360deg) scale(.95)', offset: .93 },
+        { opacity: 0, transform: 'rotate(360deg) scale(.85)' }], { duration: 6000, delay: 120 * i, easing: 'ease-in-out' });
+      p.flight.onfinish = () => { p.flight = null; };
+    });
     // the friends: those out hop, and the nearest still away comes out
     friends.filter(f => !f.classList.contains('away')).forEach((f, i) => setTimeout(() => f.animate([{ transform: 'none' }, { transform: 'translateY(-12%)', offset: .4 }, { transform: 'translateY(2%)', offset: .75 }, { transform: 'none' }], { duration: 520, easing: 'ease-out' }), 90 * i));
     const away = friends.filter(f => f.classList.contains('away'));
@@ -925,10 +939,8 @@
           make('p', {}, [make('a', { href: 'mailto:' + S.deposit.email, text: S.deposit.email })])]));
         $('dishSheetH').textContent = 'Say hi'; dishSheet.showModal(); return;
       }
-      if (dish === 'sample') {
-        dishBody.replaceChildren(make('p', { text: 'Something new is coming to this pot. Check back soon!' }));
-        $('dishSheetH').textContent = 'Coming soon'; dishSheet.showModal(); return;
-      }
+      // an empty pot: no sheet over the magic, the lid just drops back
+      if (dish === 'sample') { setTimeout(() => { if (openSpot === spot) closeSpot(); }, 1400); return; }
       if (dish === 'desserts') openDishes(S.menu.desserts.map(d => d.id), titles.desserts);
       else if (dish === 'holiday') openDishes(HOLIDAY.map(d => d.id), titles.holiday);
       else openDishes([dish], 'From the stove');
