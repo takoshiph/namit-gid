@@ -961,11 +961,12 @@
       if (spot === 'register') { openSheet(0); return; }
       if (spot === 'phone') {
         const c = S.contacts || {};
-        const links = [c.whatsapp && ['Message me on WhatsApp', 'https://wa.me/' + c.whatsapp], c.messenger && ['Message me on Messenger', c.messenger], c.facebook && ['Facebook', c.facebook], c.instagram && ['Instagram', c.instagram]].filter(Boolean);
+        const links = [c.whatsapp && ['WhatsApp', 'https://wa.me/' + c.whatsapp], c.messenger && ['Messenger', c.messenger], c.facebook && ['Facebook', c.facebook], c.instagram && ['Instagram', c.instagram]].filter(Boolean);
+        // the ways to reach me side by side, and the email as a wide button under them
         dishBody.replaceChildren(make('div', { class: 'phone-card' }, [
-          make('p', { text: 'Party tray? Allergy question? Or just kumusta? Message me.' }),
-          ...links.map(([t, u]) => make('p', {}, [make('a', { class: 'btn btn-sea', href: u, target: '_blank', rel: 'noopener', text: t })])),
-          make('p', {}, [make('a', { href: 'mailto:' + S.deposit.email, text: S.deposit.email })])]));
+          make('p', { class: 'phone-lede', text: 'Party tray? Allergy question? Or just kumusta? Message me.' }),
+          make('div', { class: 'phone-links' }, links.map(([t, u]) => make('a', { class: 'btn btn-sea', href: u, target: '_blank', rel: 'noopener', text: t }))),
+          make('a', { class: 'btn btn-sea phone-mail', href: 'mailto:' + S.deposit.email }, [make('span', { text: 'Email' }), make('span', { class: 'phone-mail-addr', text: S.deposit.email })])]));
         $('dishSheetH').textContent = 'Say hi'; dishSheet.showModal(); return;
       }
       // an empty pot: no sheet over the magic, the lid just drops back

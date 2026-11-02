@@ -1296,5 +1296,14 @@ html.intro .bar-order, html.at-door .bar-order { color: var(--sand); text-shadow
 .sheet.notebook .field select { background: transparent; border: 1.5px solid rgba(46, 61, 99, .3); border-radius: 4px; padding: 8px; font: 18px/1.3 var(--sans); color: var(--ink); }
 .sheet.notebook .field select:focus { outline: none; border-color: var(--pencil-red); }
 
+/* Say hi: a short line, then the ways to reach me as even wooden buttons, two
+   to a row, and the email as one wide button under them */
+.phone-card { display: grid; gap: 14px; padding: 4px 0 18px; }
+.phone-card .phone-lede { margin: 0; }
+.phone-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.phone-card .btn { width: 100%; min-height: 48px; justify-content: center; text-align: center; margin: 0; }
+.phone-mail { display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 2px 8px; padding: 8px 16px; }
+.phone-mail-addr { font-weight: 400; opacity: .85; overflow-wrap: anywhere; }
+
 /* Taps stay taps: no double-tap zoom anywhere; pinch to zoom still works. */
 html { touch-action: manipulation; }
