@@ -2262,43 +2262,66 @@
     }
   })();
 
-  // The parol on the palm, from the first of December to Three Kings
-  // (6 January); ?parol=1 shows it any time, for a look.
+  // Christmas, the Filipino way: from the first of the -ber months
+  // (September) to Three Kings (6 January): the parol on the palm, and the
+  // kitchen's lights and lantern (html.pasko). ?pasko=1 shows it any time.
   { const d = new Date(), m = d.getMonth();
-    if (m === 11 || (m === 0 && d.getDate() <= 6) || /[?&]parol=1\b/.test(location.search)) $('duskParol').hidden = false; }
-  // Birds over the beach at dusk: now and then two or three cross the
-  // evening sky, small and dark, each flapping and gliding in its own rhythm
-  // (birdPath). Only while the beach is in view; calm: none.
+    if (m >= 8 || (m === 0 && d.getDate() <= 6) || /[?&]pasko=1\b/.test(location.search)) { $('duskParol').hidden = false; root.classList.add('pasko'); } }
+  // Birds over the beach at dusk: now and then a few cross the evening
+  // sky, as birds do, not on a rail: the flock follows a slow weaving route,
+  // rising and dipping, now quicker, now slower; each bird keeps a loose
+  // place in it that drifts, climbs a little on its wingbeats and sinks a
+  // little on its glides (birdPath's rhythm), and tilts with its own path.
+  // Only while the beach is in view; calm: none.
   (() => {
     if (calm) return;
     const NS = 'http://www.w3.org/2000/svg', still = $('duskStill');
     let flying = false;
     const away = () => document.hidden || ['intro', 'inside', 'calm'].some(c => root.classList.contains(c)) || !still;
+    const rnd = (lo, hi) => lo + Math.random() * (hi - lo);
     function crossing() {
       if (flying || away()) return;
       flying = true;
-      const svg = document.createElementNS(NS, 'svg');
-      svg.setAttribute('class', 'dusk-birds'); svg.setAttribute('viewBox', '0 0 100 40'); svg.setAttribute('aria-hidden', 'true');
-      const g = document.createElementNS(NS, 'g'); svg.append(g);
-      const n = 2 + Math.floor(Math.random() * 2), dir = Math.random() < .5 ? 1 : -1;
+      const W = still.clientWidth, cs = getComputedStyle(dusk);
+      const artY = parseFloat(cs.getPropertyValue('--art-y')) || 0, artH = parseFloat(cs.getPropertyValue('--art-h')) || still.clientHeight;
+      const barH = $('bar') ? $('bar').offsetHeight : 52;
+      const f = dusk.classList.contains('band') ? rnd(-.1, .16) : rnd(.05, .2);
+      const y0 = Math.max(barH + 70, artY + artH * f), dir = Math.random() < .5 ? 1 : -1;
+      const size = Math.max(26, Math.min(44, W * .032));
+      const route = { v: rnd(42, 62) * Math.max(.8, Math.min(1.3, W / 1000)), amp: rnd(14, 38), om: rnd(.28, .5), ph: rnd(0, 6.3), climb: rnd(-6, 4), vp: rnd(0, 6.3) };
+      const n = Math.random() < .2 ? 1 : 2 + Math.floor(Math.random() * 3);
       const flock = Array.from({ length: n }, (_, i) => {
-        const p = document.createElementNS(NS, 'path'); g.append(p);
-        return { p, cx: 50 + (i - (n - 1) / 2) * 13 + Math.random() * 4, cy: 16 + (i % 2) * 7 + Math.random() * 4, s: .17 + Math.random() * .06,
-          beats: 2 + (i % 3), beat: .36 + Math.random() * .1, glide: .7 + Math.random() * .7, offset: Math.random() * 2 };
+        const svg = document.createElementNS(NS, 'svg'), p = document.createElementNS(NS, 'path');
+        svg.setAttribute('class', 'dusk-birds'); svg.setAttribute('viewBox', '0 0 100 50'); svg.setAttribute('aria-hidden', 'true');
+        svg.append(p); still.append(svg);
+        const sc = rnd(.8, 1.1);
+        svg.style.width = (size * sc).toFixed(1) + 'px';
+        return { svg, p, back: i * rnd(26, 40) + (i ? rnd(-8, 8) : 0), side: i ? rnd(-26, 26) : 0, wob: rnd(.2, .45), wp: rnd(0, 6.3), lift: 0,
+          beats: 2 + Math.floor(Math.random() * 3), beat: rnd(.32, .46), glide: rnd(.6, 1.4), offset: rnd(0, 2), x: 0, y: 0, rot: 0 };
       });
-      // high in the painting's sky (above it too, on a tall phone), never under the bar
-      const f = dusk.classList.contains('band') ? -.12 + Math.random() * .3 : .04 + Math.random() * .16;
-      svg.style.top = `max(calc(var(--bar) + 64px), calc(var(--art-y, 0px) + var(--art-h, 100%) * ${f.toFixed(3)}))`;
-      if (dir < 0) g.setAttribute('transform', 'matrix(-1 0 0 1 100 0)'); // facing the way they fly
-      still.append(svg);
-      const W = still.clientWidth, w = svg.getBoundingClientRect().width, rise = (Math.random() - .5) * 60;
-      const from = dir > 0 ? -w : W, to = dir > 0 ? W : -w;
-      let raf = 0;
-      const flap = t => { flock.forEach(b => b.p.setAttribute('d', birdPath(b.cx, b.cy, b.s, t / 1000, b))); raf = requestAnimationFrame(flap); };
-      raf = requestAnimationFrame(flap);
-      svg.animate([{ transform: `translate(${from}px, 0)` }, { transform: `translate(${to}px, ${rise}px)` }],
-        { duration: (W + w) / (38 + Math.random() * 18) * 1000, easing: 'linear' })
-        .onfinish = () => { cancelAnimationFrame(raf); svg.remove(); flying = false; };
+      let lx = dir > 0 ? -size * 2 : W + size * 2, t = 0, last = 0, raf = 0;
+      const step = now => {
+        const dt = last ? Math.min(.05, (now - last) / 1000) : 0; last = now; t += dt;
+        // the route: weaving, now quicker, now slower
+        lx += dir * route.v * (1 + .22 * Math.sin(t * .45 + route.vp)) * dt;
+        const ly = y0 + route.amp * Math.sin(t * route.om + route.ph) + route.climb * t;
+        let out = true;
+        flock.forEach(bd => {
+          const cycle = bd.beats * bd.beat + bd.glide, local = (t + bd.offset) % cycle, gliding = local > bd.beats * bd.beat;
+          bd.lift = Math.max(-14, Math.min(14, bd.lift + (gliding ? 9 : -6) * dt));
+          const x = lx - dir * (bd.back + 10 * Math.sin(t * bd.wob + bd.wp)), y = ly + bd.side + 8 * Math.sin(t * bd.wob * 1.3 + bd.wp) + bd.lift;
+          const vx = (x - bd.x) || dir * .001, vy = y - bd.y;
+          const tilt = bd.x ? Math.max(-14, Math.min(14, Math.atan2(vy, Math.abs(vx)) * 57 * .7)) * dir : 0;
+          bd.rot += (tilt - bd.rot) * Math.min(1, dt * 4);
+          bd.x = x; bd.y = y;
+          bd.svg.style.transform = `translate(${(x - size / 2).toFixed(1)}px, ${(y - size / 4).toFixed(1)}px) rotate(${bd.rot.toFixed(2)}deg)`;
+          bd.p.setAttribute('d', birdPath(50, 25, .95, t, bd));
+          if (dir > 0 ? x < W + size * 2 : x > -size * 2) out = false;
+        });
+        if (out || away()) { flock.forEach(bd => bd.svg.remove()); flying = false; return; }
+        raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
     }
     setTimeout(function next() { if (Math.random() < .55) crossing(); setTimeout(next, 7000 + Math.random() * 9000); }, 4000);
   })();

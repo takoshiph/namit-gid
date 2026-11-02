@@ -571,8 +571,8 @@ html.at-door .dusk.pans { touch-action: pan-y pinch-zoom; -webkit-user-select: n
 html.intro .dusk-sig { opacity: 0; }
 .dusk-sig { transition: opacity 1.2s var(--ease-out) .6s; }
 /* birds crossing the evening sky (app.js), soft as if painted into it */
-.dusk-birds { position: absolute; left: 0; width: clamp(130px, 17vw, 230px); z-index: 1; pointer-events: none; overflow: visible;
-  fill: #2B2440; stroke: #2B2440; stroke-width: 1.4; stroke-linejoin: round; opacity: .72; filter: blur(.3px); }
+.dusk-birds { position: absolute; left: 0; top: 0; height: auto; z-index: 1; pointer-events: none; overflow: visible; will-change: transform;
+  fill: #2B2440; stroke: #2B2440; stroke-width: 1.6; stroke-linejoin: round; opacity: .72; filter: blur(.3px); }
 
 /* The door: the opening is 100 x 200 units (see the anchors above), so x in
    units is x% of its width and y is y/2 % of its height. */
@@ -1262,6 +1262,19 @@ html.calm .sheet.notebook .line-item { animation: none; }
 .k-world .k-friend.away { opacity: 0; transform: translateY(18%) scale(.55); }
 /* motes of warm light drifting up through the room */
 .k-motes { position: absolute; inset: 0; pointer-events: none; }
+/* Christmas in the kitchen (html.pasko): old-fashioned coloured lights
+   twinkling, each at its own pace, and a parol swaying on its string */
+html:not(.pasko) .k-xmas { display: none; }
+.k-world > .k-lights { position: absolute; left: 51.5%; top: 26.6%; width: 48%; height: auto; overflow: visible; pointer-events: none; }
+.k-world > .k-lights-shelf { left: 8.6%; top: 19.2%; width: 36%; } /* under the spice shelf, in view first on a phone */
+.k-lights .kw { fill: none; stroke: #3A3026; stroke-width: 1.3; }
+.k-lights .kb { fill: var(--c); filter: drop-shadow(0 0 3px var(--c)) drop-shadow(0 0 7px var(--c)); }
+:where(html.inside:not(.calm)) .k-lights .kb { animation: bulb var(--t) ease-in-out var(--o) infinite alternate; }
+@keyframes bulb { from { opacity: 1; } to { opacity: .35; } }
+.k-world > img.k-parol { left: 59%; top: 26.9%; right: auto; bottom: auto; width: 5%; height: auto; transform-origin: 50% 0; pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(255, 196, 120, .6)) drop-shadow(0 0 22px rgba(255, 170, 90, .35)); }
+:where(html.inside:not(.calm)) .k-world > img.k-parol { animation: parol-sway 4.5s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .k-lights .kb, .k-world > img.k-parol { animation: none !important; } }
 .k-motes i { position: absolute; width: .7%; aspect-ratio: 1; border-radius: 50%; opacity: 0;
   background: radial-gradient(circle, #FFFBE8 0 30%, #FFCF5A 70%); box-shadow: 0 0 6px 2px rgba(255, 200, 80, .6);
   animation: mote 8s ease-in-out infinite; animation-delay: var(--d, 0s); }
