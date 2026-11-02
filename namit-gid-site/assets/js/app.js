@@ -1648,9 +1648,17 @@
   // something to undo. pushedIn remembers that this page load added that
   // step, so stepping outside can be Back rather than a step of its own.
   let pushedIn = false;
+  // Inside, Leny's note hangs on the bar beside the lighthouse, in place of
+  // the name (not needed while browsing the menu), so it covers none of the
+  // painting. Outside, or while she says it big, it is back in the kitchen.
+  const kNote = $('kNote'), noteHome = kNote.parentNode, noteNext = kNote.nextSibling;
+  const pinNote = on => {
+    if (on) { if (kNote.parentNode === noteHome) document.querySelector('.bar-brand').after(kNote); }
+    else if (kNote.parentNode !== noteHome) noteHome.insertBefore(kNote, noteNext);
+  };
   function setPlace(place, { push = false } = {}) {
     const inside = place === 'kitchen';
-    closeCard();
+    closeCard(); pinNote(inside);
     root.classList.toggle('inside', inside); root.classList.toggle('at-door', !inside);
     if (push) { history.pushState({ place: 'kitchen' }, '', '#menu'); pushedIn = true; }
     $(inside ? 'menuH' : 'door').focus({ preventScroll: true });
@@ -1766,7 +1774,7 @@
       root.classList.remove('entering');
       setPlace('kitchen', { push: true });
       // the greeting waits, big and out of sight, to rise as the light lifts
-      if (!quiet) { readNote(false); note.classList.add('big'); gsap.set(lines, { yPercent: 105 }); gsap.set(after, { opacity: 0, y: 8 }); }
+      if (!quiet) { readNote(false); pinNote(false); note.classList.add('big'); gsap.set(lines, { yPercent: 105 }); gsap.set(after, { opacity: 0, y: 8 }); }
     };
     // A slow kitchen holds the bloom at its peak until the painting is in,
     // or for 4 s at most.
@@ -1781,7 +1789,7 @@
       const finish = () => {
         if (over) return; over = true;
         swap();
-        note.classList.remove('big');
+        note.classList.remove('big'); pinNote(root.classList.contains('inside'));
         gsap.set([bloom, glow, menu, note, note.querySelector('.k-note-ps'), ...lines, ...after], { clearProps: 'all' });
         entering = finishEntering = null; resolve();
       };
@@ -1853,7 +1861,7 @@
       const FOLD = LIFT + 2.3, rest = [lines[1], after[0]].filter(Boolean), ps = note.querySelector('.k-note-ps');
       const fold = () => {
         const f = note.getBoundingClientRect();
-        note.classList.remove('big');
+        note.classList.remove('big'); pinNote(true);
         const l = note.getBoundingClientRect();
         gsap.set(note, { x: f.left - l.left, y: f.top - l.top, scale: f.width / l.width });
       };

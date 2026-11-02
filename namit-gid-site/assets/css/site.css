@@ -1305,5 +1305,22 @@ html.intro .bar-order, html.at-door .bar-order { color: var(--sand); text-shadow
 .phone-mail { display: flex; flex-wrap: wrap; align-items: center; align-content: center; gap: 2px 8px; padding: 8px 16px; }
 .phone-mail-addr { font-weight: 400; opacity: .85; overflow-wrap: anywhere; }
 
+/* Inside, Leny's note hangs on the bar beside the lighthouse, in place of the
+   name: her first line and name, the P.S. under them; a tap drops the rest
+   down over the page. */
+.bar:has(> .k-note) .bar-words { display: none; }
+.bar:has(> .k-note) .bar-brand { margin-right: 0; }
+.bar > .k-note { position: relative; left: auto; top: auto; align-self: flex-start; margin: 5px auto 0 0; z-index: 1; rotate: -1.5deg;
+  display: grid; grid-template-columns: auto auto; justify-content: start; align-items: baseline; column-gap: 8px; flex-shrink: 0; max-width: none; padding: 5px 11px 5px; }
+.bar > .k-note::before { top: -4px; width: 40px; height: 10px; }
+.bar > .k-note #menuH { font-size: 17px; }
+.bar > .k-note .sig { margin: 0; font-size: 15px; }
+.bar > .k-note .k-note-ps { grid-column: 1 / -1; margin: 1px 0 0; font-size: 12px; }
+/* (open, it lies over the page, right of the lighthouse, and the bar keeps its door) */
+.bar:has(> .k-note.read) .bar-out { margin-left: auto; }
+.bar > .k-note.read { position: absolute; left: calc(var(--gutter) + 36px); top: 0; grid-template-columns: auto; width: min(calc(100vw - 2 * var(--gutter) - 40px), 320px); padding: 10px 14px 9px; }
+@media (max-width: 699px) { .bar > .k-note.read { top: calc(var(--bar) - 10px); } }
+.bar > .k-note.read .sig { margin-top: 3px; text-align: right; }
+
 /* Taps stay taps: no double-tap zoom anywhere; pinch to zoom still works. */
 html { touch-action: manipulation; }
