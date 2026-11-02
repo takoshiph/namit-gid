@@ -1348,6 +1348,34 @@
     now.forEach(sp => seenSpots.add(sp)); // (a walk meanwhile shows the rest)
     now.sort((a, b) => spotVar(a, 'x') - spotVar(b, 'x')).forEach((sp, i) => setTimeout(() => sp.classList.remove('unseen'), 250 + i * 350));
   }
+  // Takoshi comes up from the sea: the first time its spot shows, a few
+  // bubbles rise and pop where it will be, then it surfaces. Calm: it is
+  // just there.
+  const tako = spots.find(sp => sp.dataset.item === 'octopus');
+  if (tako && !calm && tako.animate) {
+    tako.classList.add('diving');
+    const shown = () => !['intro', 'inside'].some(c => root.classList.contains(c)) && !tako.classList.contains('unseen');
+    const bubble = s => {
+      const b = make('i', { class: 'tk-bubble', 'aria-hidden': 'true' }), d = s * (.09 + Math.random() * .11);
+      const x = (Math.random() - .5) * s * .6, up = s * (.3 + Math.random() * .35), w = s * .05 * (Math.random() < .5 ? -1 : 1);
+      Object.assign(b.style, { width: d + 'px', height: d + 'px', left: x - d / 2 + 'px', top: s * .2 + 'px' });
+      tako.append(b);
+      b.animate([{ opacity: 0, transform: 'translate(0, 0) scale(.3)' }, { opacity: 1, transform: `translate(${w}px, ${-up * .35}px) scale(1)`, offset: .3 },
+        { opacity: .9, transform: `translate(${-w}px, ${-up * .85}px) scale(1.05)`, offset: .82 }, { opacity: 0, transform: `translate(0, ${-up}px) scale(1.7)` }],
+        { duration: 800 + Math.random() * 500, easing: 'ease-out' }).onfinish = () => b.remove();
+    };
+    const surface = () => {
+      watch.disconnect();
+      if (root.classList.contains('calm')) { tako.classList.remove('diving'); return; }
+      const s = tako.querySelector('.beach-item').offsetWidth;
+      [0, 150, 280, 450, 600, 760, 1250, 1500, 1800].forEach(t => setTimeout(() => bubble(s), t));
+      setTimeout(() => tako.classList.remove('diving'), 1050);
+    };
+    const watch = new MutationObserver(() => { if (shown()) surface(); });
+    watch.observe(root, { attributes: true, attributeFilter: ['class'] });
+    watch.observe(tako, { attributes: true, attributeFilter: ['class'] });
+    if (shown()) surface();
+  }
   // The pan that shows a spot's item and label whole (the one it is at, or
   // heading to, if they already are).
   function spotPan(sp) {

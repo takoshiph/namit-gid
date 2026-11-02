@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=110">
+<link rel="stylesheet" href="assets/css/site.css?v=111">
 <script>
   /* Decide the intro before first paint so nothing flashes. For review, the
      intro plays on every visit and every refresh. With reduced motion or data
@@ -77,14 +77,14 @@
   <!-- Planes back to front. data-depth is how much each one moves with the
        camera: the island is 1, the far range barely moves, the foreground
        moves most. -->
-  <div class="st-sky"></div>
-  <div class="st-day" id="stDay"></div>
+  <div class="st-sky" data-depth="1"></div>
+  <div class="st-day" id="stDay" data-depth="1"></div>
   <div class="st-stars" id="stStars" data-depth=".25"></div>
   <div class="st-rays" id="stRays" data-depth=".5"></div>
   <div class="st-sun" id="stSun" data-depth=".5"></div>
-  <svg class="st-range" id="stRange" data-depth=".55" viewBox="0 0 1000 40" preserveAspectRatio="none"><path d="M0 40 L0 30 C40 22 70 26 110 18 C150 12 190 24 240 22 C290 20 310 32 360 38 L360 40Z M600 40 C640 39 660 35 700 30 C730 26 750 20 780 14 C800 11 830 16 860 22 C900 30 950 26 1000 22 L1000 40Z"/></svg>
+  <svg class="st-range" id="stRange" data-depth="1" viewBox="0 0 1000 40" preserveAspectRatio="none"><path d="M0 40 L0 30 C40 22 70 26 110 18 C150 12 190 24 240 22 C290 20 320 34 380 40Z M600 40 C640 39 660 35 700 30 C730 26 750 20 780 14 C800 11 830 16 860 22 C890 28 940 34 1000 40Z"/></svg>
   <div class="st-skyclouds" id="stSkyClouds" data-depth=".7"></div>
-  <div class="st-sea" id="stSea" data-depth=".85">
+  <div class="st-sea" id="stSea" data-depth="1">
     <div class="st-path" id="stPath"></div>
     <div class="st-lampref" id="stLampRef"></div><!-- the lamp's light on the water, painted strokes (app.js) -->
     <div class="st-waves" id="stWaves"></div>
@@ -98,7 +98,7 @@
     <i class="st-halo" id="stHalo"></i>
     <i class="st-glow" id="stGlow"></i>
   </div>
-  <div class="st-haze" id="stHaze" data-depth="1.1"></div>
+  <div class="st-haze" id="stHaze" data-depth="1"></div>
   <svg class="st-far" id="stFar" data-depth=".9" viewBox="0 0 100 40"><path id="farA"/><path id="farB"/></svg>
   <svg class="st-bird" id="stBird" viewBox="0 0 100 44"><path id="stWing" d="M2 22 Q24 2 50 20 Q76 2 98 22 Q76 12 50 26 Q24 12 2 22Z"/></svg>
   <div class="st-near" id="stNear"></div>
@@ -364,6 +364,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=100" defer></script>
+<script src="assets/js/app.js?v=101" defer></script>
 </body>
 </html>
