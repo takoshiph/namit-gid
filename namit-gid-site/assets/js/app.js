@@ -1727,9 +1727,9 @@
         .to(glow, { scale: 6, duration: .5, ease: 'power2.in' }, PEAK - .5)
         .to(bloom, { autoAlpha: 1, duration: .45, ease: 'power2.in' }, PEAK - .45)
         .addLabel('bloomPeak', PEAK).call(atPeak, null, 'bloomPeak');
-      // the bangka in front of the door (a tall phone) slides out of the way
-      // as the camera nears it, so it never covers the doorway
-      if (boatAside) tl.to(boat, { xPercent: 45, opacity: 0, duration: .75, ease: 'power2.in' }, PUSH);
+      // the bangka in front of the door (a tall phone) fades where it lies,
+      // on the sand, as the camera nears it, so it never covers the doorway
+      if (boatAside) tl.to(boat, { opacity: 0, duration: .6, ease: 'sine.in' }, PUSH);
       // The kitchen, under the lifting bloom, settles and Leny says hello.
       // The light holds a moment first: the kitchen's first paint after the
       // jump can take a frame or a few, and it happens here, unseen.
@@ -1844,11 +1844,11 @@
         .addLabel('closed', PEAK + .95)
         .to(caption, { opacity: 1, duration: .4, ease: 'sine.out' }, SETTLED - .4)
         .addLabel('settled', SETTLED);
-      // the bangka in front of the door (a tall phone) waits out of the way
-      // and slides back in as the camera leaves the doorway
+      // the bangka in front of the door (a tall phone) is hidden while the
+      // camera is in the doorway and fades back in where it lies, on the sand
       if (dusk.classList.contains('band')) {
-        gsap.set(boat, { xPercent: 45, opacity: 0 });
-        tl.to(boat, { xPercent: 0, opacity: 1, duration: .8, ease: 'power2.out' }, PEAK + .3);
+        gsap.set(boat, { opacity: 0 });
+        tl.to(boat, { opacity: 1, duration: .7, ease: 'sine.out' }, PEAK + .4);
       }
     });
     return leaving;
@@ -2081,6 +2081,7 @@
     const ir = isle.getBoundingClientRect();
     const wW = word.offsetWidth, wH = word.offsetHeight;
     const FALL = wipe.offsetHeight; // the nightfall's travel: the screen plus its fade
+    const sandRise = $('stSand').offsetHeight * .35; // the sand's rise (yPercent 35), in px
     const w0 = innerWidth, h0 = innerHeight;
 
     // ── writes ──
@@ -2163,7 +2164,9 @@
       .to('#stLampRef', { opacity: .25, duration: 2, ease: 'sine.inOut' }, 2.2)
       .fromTo('#stGlow', { scale: .7, opacity: 1 }, { scale: 1.15, duration: .9, ease: 'sine.inOut', repeat: 3, yoyo: true }, 0)
       .to('#stGlow', { opacity: .35, scale: .8, duration: .8 }, 3.2)
-      .fromTo('#stSand', { yPercent: 35 }, { yPercent: 0, duration: 2.6, ease: 'power2.out' }, 1.2);
+      .fromTo('#stSand', { yPercent: 35 }, { yPercent: 0, duration: 2.6, ease: 'power2.out' }, 1.2)
+      // the bangka is drawn up on that sand, so it rises with it
+      .fromTo('#stBangka', { y: sandRise }, { y: 0, duration: 2.6, ease: 'power2.out' }, 1.2);
 
     // Ambient motion runs on its own clock so it doesn't stretch the intro.
     amb = gsap.timeline();
