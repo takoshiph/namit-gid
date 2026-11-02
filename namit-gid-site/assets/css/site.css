@@ -521,7 +521,7 @@ html.at-door .dusk.pans { touch-action: pan-y pinch-zoom; -webkit-user-select: n
 /* DOOR_CROP {x .335, y .52, w .15, h .42}: the door's surroundings, painted
    finer, laid exactly over the beach while the camera pushes in */
 .dusk-crop { left: 33.5%; top: 52%; width: 15%; height: 42%; }
-.dusk-crop[hidden], .dusk-parol[hidden] { display: none; }
+.dusk-crop[hidden] { display: none; }
 /* the island, the lamp and the bangka, placed on the painting */
 .dusk-isle { left: 50.5%; width: 19%; top: 41.4%; filter: brightness(.55) saturate(.75) sepia(.15) hue-rotate(-12deg); }
 .dusk-lamp { left: calc(50.5% + 19% * .78); top: 42.1%; width: 2.6%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; opacity: .85; scale: 1;
@@ -558,13 +558,7 @@ html.at-door .dusk.pans { touch-action: pan-y pinch-zoom; -webkit-user-select: n
 @keyframes swash { 0% { opacity: 0; transform: translateY(-40%); } 35% { opacity: .85; transform: translateY(45%); } 60% { opacity: .55; transform: translateY(38%); } 100% { opacity: 0; transform: translateY(-20%); } }
 @media (prefers-reduced-motion: reduce) { .dusk-swash { display: none; } }
 .dusk.band .dusk-fade { bottom: -58.11%; height: 34%; }
-/* the parol: hung by its string from the right palm's frond, swaying a
-   little and glowing warm; still when calm */
-.dusk-parol { left: 28.3%; top: 19.5%; width: 3.4%; height: auto; transform-origin: 50% 0; z-index: 1;
-  filter: drop-shadow(0 0 6px rgba(255, 196, 120, .55)) drop-shadow(0 0 16px rgba(255, 170, 90, .3)); }
-:where(html:not(.intro):not(.calm) .dusk.live) .dusk-parol { animation: parol-sway 4.5s ease-in-out infinite alternate; }
 @keyframes parol-sway { from { rotate: -3deg; } to { rotate: 3deg; } }
-@media (prefers-reduced-motion: reduce) { .dusk-parol { animation: none !important; } }
 /* Leny's signature in the corner of the beach, as on a painting */
 .dusk-sig { position: absolute; right: var(--gutter); bottom: max(34px, calc(env(safe-area-inset-bottom) + 28px)); margin: 0; z-index: 2; pointer-events: none;
   font: 400 22px/1 var(--hand); color: rgba(251, 243, 226, .6); rotate: -4deg; text-shadow: 0 1px 3px rgba(15, 18, 32, .7); }
@@ -602,6 +596,15 @@ html.intro .door { visibility: hidden; pointer-events: none; }
 /* shut: the leaf fills the opening, hinged on its left edge; it only swings
    open when the door is tapped (enterKitchen()) */
 .door-leaf { inset: 0; width: 100%; height: 100%; transform-origin: 0 50%; }
+.door-leaf > img { position: absolute; }
+.door-leaf-art { inset: 0; width: 100%; height: 100%; }
+/* at Christmas, a parol on the door like a wreath, below the sign, glowing
+   warm and swaying a little on its nail */
+.door-parol { left: 28%; top: 17%; width: 44%; height: auto; transform-origin: 50% 0;
+  filter: drop-shadow(0 0 4px rgba(255, 196, 120, .6)) drop-shadow(0 0 12px rgba(255, 170, 90, .35)); }
+html:not(.pasko) .door-parol { display: none; }
+:where(html:not(.intro):not(.calm) .dusk.live) .door-parol { animation: parol-sway 4.5s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .door-parol { animation: none !important; } }
 /* The light of the lived-in house behind the shut door: a thin warm line at
    the seams round the leaf and a brighter one under it, spilling a little
    onto the sand. Leny and the room stay hidden until it opens. */

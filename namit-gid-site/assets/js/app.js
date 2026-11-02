@@ -2263,10 +2263,10 @@
   })();
 
   // Christmas, the Filipino way: from the first of the -ber months
-  // (September) to Three Kings (6 January): the parol on the palm, and the
+  // (September) to Three Kings (6 January): a parol on the door, and the
   // kitchen's lights and lantern (html.pasko). ?pasko=1 shows it any time.
   { const d = new Date(), m = d.getMonth();
-    if (m >= 8 || (m === 0 && d.getDate() <= 6) || /[?&]pasko=1\b/.test(location.search)) { $('duskParol').hidden = false; root.classList.add('pasko'); } }
+    if (m >= 8 || (m === 0 && d.getDate() <= 6) || /[?&]pasko=1\b/.test(location.search)) root.classList.add('pasko'); }
   // Birds over the beach at dusk: now and then a few cross the evening
   // sky, as birds do, not on a rail: the flock follows a slow weaving route,
   // rising and dipping, now quicker, now slower; each bird keeps a loose

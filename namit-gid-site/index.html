@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Young+Serif&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
-<link rel="stylesheet" href="assets/css/site.css?v=113">
+<link rel="stylesheet" href="assets/css/site.css?v=114">
 <script>
   /* Decide the intro before first paint so nothing flashes. For review, the
      intro plays on every visit and every refresh. With reduced motion or data
@@ -175,8 +175,6 @@
            screen is painted top to bottom -->
       <img class="dusk-tall" src="assets/img/dusk/beach-tall-2400.webp" width="2400" height="1921" alt="" aria-hidden="true" loading="lazy" decoding="async">
       <img class="dusk-beach" id="duskBeach" src="assets/img/dusk/beach-2400.webp" srcset="assets/img/dusk/beach-2400.webp 2400w, assets/img/dusk/beach-4096.webp 4096w" sizes="(max-aspect-ratio: 33/40) 257vw, max(100vw, 236vh)" width="2400" height="1018" alt="" aria-hidden="true" fetchpriority="high">
-      <!-- a parol hung from the palm's frond, from December to Three Kings (app.js) -->
-      <img class="dusk-parol" id="duskParol" src="assets/img/dusk/parol.webp" width="295" height="520" alt="" aria-hidden="true" loading="lazy" decoding="async" hidden>
       <!-- a sharper painting of the door's surroundings (DOOR_CROP), laid over
            the beach for the push in through the door -->
       <img class="dusk-crop" id="duskCrop" width="950" height="1129" alt="" aria-hidden="true" hidden>
@@ -225,7 +223,8 @@
           <img class="door-light" id="doorLight" src="assets/img/dusk/door-light.svg" alt="">
           <div class="door-way"><img class="door-leny" id="doorLeny" src="assets/img/dusk/leny-door.webp" width="597" height="1500" alt="" loading="lazy"></div>
           <img class="door-frame" src="assets/img/dusk/door-frame.svg" alt="">
-          <img class="door-leaf" id="doorLeaf" src="assets/img/dusk/door-leaf.svg" alt="">
+          <!-- the leaf, and at Christmas (html.pasko) a parol hung on it, so it swings open with the door -->
+          <div class="door-leaf" id="doorLeaf"><img class="door-leaf-art" src="assets/img/dusk/door-leaf.svg" alt=""><img class="door-parol" src="assets/img/dusk/parol.webp" width="295" height="520" alt="" loading="lazy" decoding="async"></div>
           <i class="door-seam" id="doorSeam"></i>
           <img class="door-sign" id="doorSign" src="assets/img/dusk/sign.svg?v=2" alt="">
         </div></div>
@@ -384,6 +383,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=103" defer></script>
+<script src="assets/js/app.js?v=104" defer></script>
 </body>
 </html>
