@@ -275,6 +275,7 @@
   const sheet = $('sheet');
   let step = 0;
   let viewing = null, shot = null;   // the order page being shown, and a deposit screenshot
+  let shopClosed = null;             // the closed message, while the kitchen isn't taking orders
   const order = { date: null, time: null, name: '', contact: '', email: '', notes: '' };
   try { Object.assign(order, JSON.parse(localStorage.getItem('ng-me') || '{}')); } catch (e) {}
   const STEPS = ['Tray', 'Details', 'Leny’s yes', 'Deposit'], SENT = 2;
@@ -339,7 +340,7 @@
     place();
   }
 
-  function openSheet(at) { viewing = null; reviewing = null; step = at || 0; refreshSheet(); if (!sheet.open) sheet.showModal(); }
+  function openSheet(at) { viewing = null; reviewing = null; step = at || 0; refreshSheet(); if (!sheet.open) sheet.showModal(); checkOpen(); }
   function refreshSheet() {
     if (reviewing) return renderReview();
     if (viewing) return renderOrderPage();
@@ -348,7 +349,10 @@
     $('sheetH').textContent = step < SENT ? TITLES[step] : 'Request sent!';
     const body = [];
     if (step === 0) {
-      body.push(lineList(), sums(), make('button', { type: 'button', class: 'btn btn-sea', text: 'Choose pickup', onclick: () => { step = 1; refreshSheet(); } }));
+      // closed: they can still see the tray, but say so before they fill anything in
+      body.push(lineList(), sums(), shopClosed
+        ? make('div', { class: 'place-error', role: 'status' }, [make('p', { text: shopClosed + ' Your tray will be here when I’m back.' })])
+        : make('button', { type: 'button', class: 'btn btn-sea', text: 'Choose pickup', onclick: () => { step = 1; refreshSheet(); } }));
     } else if (step === 1) {
       // Days and times are Toronto's. A time can be picked 24 hours ahead or
       // later, so Leny can shop after she says yes.
@@ -644,7 +648,7 @@
     });
   }
   // A plain-text copy of the order, for when the system can't take it.
-  const orderText = () => ['Namit Gid order', ...tray.map(l => '• ' + byId[l.id].name + (lineLabel(l) ? ' (' + lineLabel(l) + ')' : '') + ' ×' + l.qty),
+  const orderText = (first = 'Namit Gid order') => [first, ...tray.map(l => '• ' + byId[l.id].name + (lineLabel(l) ? ' (' + lineLabel(l) + ')' : '') + ' ×' + l.qty),
     'Total ' + money(total()), 'Pickup ' + order.date + ' ' + (order.time || ''), order.name + ' · ' + order.contact].join('\n');
   let placed = null, placing = false;
 
@@ -688,7 +692,8 @@
     const btn = [...$('sheetBody').querySelectorAll('button')].find(b => /Send my request/.test(b.textContent));
     if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
     const done = res => { placed = res; step = SENT; tray = []; save(); renderTray(false); repaintDishes(); refreshSheet(); };
-    const fail = (msg, offerCopy) => {
+    // unsure: the request may have reached Leny, so WhatsApp asks rather than orders
+    const fail = (msg, offerCopy, unsure) => {
       if (btn) { btn.disabled = false; btn.textContent = 'Send my request'; }
       $('sheetBody').querySelectorAll('.place-error').forEach(n => n.remove());
       const box = make('div', { class: 'place-error', role: 'alert' }, [make('p', { text: msg })]);
@@ -697,7 +702,7 @@
         cp.addEventListener('click', () => { navigator.clipboard && navigator.clipboard.writeText(orderText()).then(() => { cp.textContent = 'Copied'; }); });
         box.append(cp);
         const c = S.contacts || {};
-        if (c.whatsapp) box.append(make('a', { class: 'btn btn-sea', href: 'https://wa.me/' + c.whatsapp + '?text=' + encodeURIComponent(orderText()), target: '_blank', rel: 'noopener', text: 'Send it on WhatsApp' }));
+        if (c.whatsapp) box.append(make('a', { class: 'btn btn-sea', href: 'https://wa.me/' + c.whatsapp + '?text=' + encodeURIComponent(unsure ? orderText('Did this order reach you?') : orderText()), target: '_blank', rel: 'noopener', text: unsure ? 'Ask on WhatsApp' : 'Send it on WhatsApp' }));
         else if (c.messenger) box.append(make('a', { class: 'btn btn-sea', href: c.messenger, target: '_blank', rel: 'noopener', text: 'Send it on Messenger' }));
         else box.append(make('p', { class: 'small' }, ['Or email it to ', make('a', { href: 'mailto:' + S.deposit.email, text: S.deposit.email }), '.']));
       }
@@ -720,9 +725,22 @@
         const t = total(), dep = Math.ceil(t / 2);
         return done({ orderId: 'demo', token: 'x', total: t, deposit: dep, balanceDue: t - dep, status: 'requested' });
       }
-      const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 15000);
-      const res = await fetch('/api/submit-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: ctl.signal });
-      clearTimeout(timer);
+      const post = async () => {
+        const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 15000);
+        try { return await fetch('/api/submit-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: ctl.signal }); }
+        finally { clearTimeout(timer); }
+      };
+      // No answer doesn't mean no order, so send it once more: the server hands
+      // back the first one if it did arrive. A retry needs a fresh bot check.
+      let res;
+      try { res = await post(); }
+      catch (firstTry) {
+        await startTurnstile(true);
+        payload.token = await turnstileToken(btn);
+        if (S.turnstileSiteKey && !payload.token) throw firstTry;
+        if (btn) btn.textContent = 'Sending…';
+        res = await post();
+      }
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success) return done(data);
       if (res.status === 409 && data.error === 'closed_slot') { step = 1; order.time = null; refreshSheet(); return flag('That time was just taken. Please pick another.'); }
@@ -732,7 +750,7 @@
       if (res.status === 403) { if (btn) { btn.disabled = false; btn.textContent = 'Send my request'; } return flag('The security check didn’t pass. Please try again.'); }
       fail('My order system is napping. Send me your order instead and I’ll sort it out.', true);
     } catch (e) {
-      fail('My order system is napping. Send me your order instead and I’ll sort it out.', true);
+      fail('I can’t tell if that reached me. Tap Send my request again, it won’t make a second order, or ask me on WhatsApp.', true, true);
     } finally {
       placing = false;
       // a token works once
@@ -1082,8 +1100,20 @@
     st.textContent = text; st.classList.toggle('closed', !on); st.classList.add('shown');
     document.querySelector('.bar-brand').setAttribute('aria-label', `Namit gid, ${text.toLowerCase()}`);
   };
-  if (mock) showOpen(true);
-  else fetch('/api/availability').then(r => r.json()).then(a => showOpen(a.available !== false)).catch(() => showOpen(false));
+  // Only a real answer from the kitchen says closed. A network or database
+  // problem shows nothing either way, and the send itself reports it.
+  async function checkOpen() {
+    if (mock) return showOpen(true);
+    try {
+      const r = await fetch('/api/availability'), a = await r.json();
+      if (!r.ok || a.reason === 'backend_unavailable') return;
+      const was = shopClosed;
+      shopClosed = a.available === false ? (a.message || 'We’re currently closed for orders.') : null;
+      showOpen(!shopClosed);
+      if (was !== shopClosed && sheet.open && step === 0 && !viewing && !reviewing) refreshSheet();
+    } catch (e) { /* unknown: leave it as it was */ }
+  }
+  checkOpen();
 
   // Previews and local copies stay out of search results.
   if (!isLive) {
@@ -1677,7 +1707,8 @@
     if (!root.classList.contains('inside')) root.classList.add('at-door');
     // the items in view come into the light, one by one after the intro
     startReveal(settling);
-    try { localStorage.setItem('ng-seen-intro', '1'); } catch (e) { /* private mode: the intro plays again */ }
+    // (only if it actually started: arriving by an order or review link doesn't count)
+    if (tl) try { localStorage.setItem('ng-seen-intro', '1'); } catch (e) { /* private mode: the intro plays again */ }
     window.preloadKitchen();
     // the hint, 1.2 s after the door appeared (at the end of the intro, that
     // was WASH_END, .6 s before duskEnd; otherwise it appears now)

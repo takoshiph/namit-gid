@@ -330,7 +330,18 @@ serve(async (req) => {
       try {
         const myMin = timeToMin(pickupTime)
         const { data: slotRows } = await supabase.from('orders')
-          .select('pickup_time,status').eq('pickup_date', pickupDate)
+          .select('id,token,dish,customer_name,contact,pickup_time,status').eq('pickup_date', pickupDate)
+        // The same person sending the same tray for the same time while Leny
+        // hasn't answered is a retry (their page timed out, or they tapped
+        // again): hand back that request, with no new row and no new email.
+        const same = isRequest && (slotRows || []).find((o: Record<string, string>) =>
+          o.status === 'requested' && o.pickup_time === pickupTime && o.dish === dishLabel && o.customer_name === name && o.contact === contact)
+        if (same) {
+          return new Response(JSON.stringify({
+            success: true, duplicate: true, orderId: same.id, dish: dishLabel, total, balanceDue, deposit,
+            status: 'requested', token: same.token, pickup: { date: pickupDate, time: pickupTime },
+          }), { headers: { 'Content-Type': 'application/json', ...CORS } })
+        }
         const conflict = (slotRows || []).some((o: { pickup_time?: string; status?: string }) => {
           if (!ACTIVE.includes(o.status || 'pending')) return false
           const b = timeToMin(o.pickup_time || '')

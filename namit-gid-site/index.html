@@ -16,17 +16,18 @@
 <link rel="preload" as="image" href="/assets/img/byaringan-painted-1680.webp">
 <link rel="stylesheet" href="assets/css/site.css?v=114">
 <script>
-  /* Decide the intro before first paint so nothing flashes. For review, the
-     intro plays on every visit and every refresh. With reduced motion or data
-     saver the page opens at the door (html.at-door); a link to #menu opens in
-     the kitchen (html.inside). To go back to once per device, read
-     localStorage 'ng-seen-intro' into `seen` here. */
+  /* Decide the intro before first paint so nothing flashes. It plays once per
+     device (localStorage 'ng-seen-intro'; clear it to see it again), and never
+     on an order page or review link, where someone has come to do one thing.
+     With reduced motion or data saver the page opens at the door
+     (html.at-door); a link to #menu opens in the kitchen (html.inside). */
   (function () {
     var d = document.documentElement, rm = matchMedia('(prefers-reduced-motion: reduce)').matches,
         sd = navigator.connection && navigator.connection.saveData, seen = false,
-        menu = location.hash === '#menu';
+        menu = location.hash === '#menu', direct = /[?&](order|review)=/.test(location.search);
+    try { seen = localStorage.getItem('ng-seen-intro') === '1'; } catch (e) { /* private mode: it plays */ }
     if (rm || sd) d.classList.add('calm');
-    else if (!seen && !menu) { d.classList.add('intro'); return; }
+    else if (!seen && !menu && !direct) { d.classList.add('intro'); return; }
     d.classList.add(menu ? 'inside' : 'at-door');
   })();
 </script>
@@ -383,6 +384,6 @@
 
 <div class="sr-only" aria-live="polite" id="live"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" defer></script>
-<script src="assets/js/app.js?v=104" defer></script>
+<script src="assets/js/app.js?v=105" defer></script>
 </body>
 </html>

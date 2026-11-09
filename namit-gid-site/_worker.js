@@ -856,7 +856,7 @@ async function handle(request, env) {
             data?.orderId, 'saved, no confirmation email sent to', body.order.email);
         } else {
           try {
-            if (data.status === 'requested') { await sendRequestReceivedEmail(env.RESEND_API_KEY, body.order, data); confirmation = 'sent'; }
+            if (data.status === 'requested' && !data.duplicate) { await sendRequestReceivedEmail(env.RESEND_API_KEY, body.order, data); confirmation = 'sent'; }
           } catch (e) {
             confirmation = 'failed';
             console.error('[namitgid] confirmation email failed for order', data?.orderId, e);
